@@ -102,6 +102,17 @@ They are NOT part of the unit/E2E suite — they test the real deployed containe
 - Include: project description, setup instructions, Docker usage, env vars, tech stack, architecture overview
 - Update README.md whenever features, setup steps, or architecture changes
 
+## Sprint Completion Checklist
+Before declaring a sprint done:
+1. All tasks checked off in Sprint Log
+2. All tests passing (unit + E2E + smoke)
+3. Staging deployed and verified
+4. Sprint Log updated with Outcomes
+5. GitHub Wiki synced
+6. README.md updated if needed
+7. CHANGELOG.md updated
+8. Git tagged if milestone
+
 ## Reference
 - Original ideator: `/home/dc/work/ideator` (read for feature reference, don't copy)
 - Wiki docs: `docs/wiki/` in this repo
