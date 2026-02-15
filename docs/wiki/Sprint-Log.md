@@ -37,13 +37,15 @@
 - [x] Email magic link auth (send link, verify, create session)
 - [x] JWT session management (HTTP-only cookies) — with CSRF protection + token rotation (fixes #5)
 - [x] Login/register pages
-- [ ] Projects CRUD (create, list, view)
+- [x] Projects CRUD (create, list, view) — server actions implemented
 - [ ] Basic routing structure
 - [x] README.md with setup instructions
-- [ ] Smoke test suite (`npm run test:smoke`)
+- [x] Smoke test suite (`npm run test:smoke`) — staging deployment verification
 
 ### Outcomes (so far)
 - JWT security with CSRF protection and token rotation (closes #5)
 - Login page with magic link flow
 - Auth routes implemented
 - .env.example updated with SMTP and JWT config
+- Projects CRUD with server actions (create, list, view)
+- Smoke test suite for post-deploy verification
