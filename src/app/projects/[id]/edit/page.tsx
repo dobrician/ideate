@@ -6,12 +6,26 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { updateProject } from "../../actions";
+import { toast } from "sonner";
+
+interface ProjectData {
+  id: string;
+  title: string;
+  description: string | null;
+  deadline: string | number;
+  status: string;
+}
 
 /**
- * Edit project page
- * Form to update an existing project
+ * Edit project page with toast feedback
  */
 export default function EditProjectPage() {
   const router = useRouter();
@@ -21,9 +35,8 @@ export default function EditProjectPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState("");
-  const [project, setProject] = useState<any>(null);
+  const [project, setProject] = useState<ProjectData | null>(null);
 
-  // Fetch project data
   useEffect(() => {
     async function fetchProject() {
       try {
@@ -33,9 +46,9 @@ export default function EditProjectPage() {
         }
         const data = await response.json();
         setProject(data);
-      } catch (err) {
-        console.error("Fetch error:", err);
+      } catch {
         setError("Failed to load project");
+        toast.error("Failed to load project");
       } finally {
         setIsLoading(false);
       }
@@ -44,9 +57,6 @@ export default function EditProjectPage() {
     fetchProject();
   }, [projectId]);
 
-  /**
-   * Handle form submission
-   */
   async function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setIsSaving(true);
@@ -58,13 +68,15 @@ export default function EditProjectPage() {
 
       if (result?.error) {
         setError(result.error);
+        toast.error(result.error);
         setIsSaving(false);
       } else if (result?.success) {
+        toast.success("Project updated!");
         router.push(`/projects/${projectId}`);
       }
-    } catch (err) {
-      console.error("Update project error:", err);
+    } catch {
       setError("An error occurred. Please try again.");
+      toast.error("An error occurred. Please try again.");
       setIsSaving(false);
     }
   }
@@ -74,7 +86,9 @@ export default function EditProjectPage() {
       <div className="container mx-auto max-w-2xl px-4 py-8">
         <Card>
           <CardContent className="py-8">
-            <p className="text-center text-muted-foreground">Loading project...</p>
+            <p className="text-center text-muted-foreground">
+              Loading project...
+            </p>
           </CardContent>
         </Card>
       </div>
@@ -101,9 +115,7 @@ export default function EditProjectPage() {
       <Card>
         <CardHeader>
           <CardTitle>Edit Project</CardTitle>
-          <CardDescription>
-            Update your project details
-          </CardDescription>
+          <CardDescription>Update your project details</CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-6">
@@ -167,7 +179,9 @@ export default function EditProjectPage() {
 
             {error && (
               <div className="rounded-md bg-red-50 p-3 dark:bg-red-950">
-                <p className="text-sm text-red-800 dark:text-red-200">{error}</p>
+                <p className="text-sm text-red-800 dark:text-red-200">
+                  {error}
+                </p>
               </div>
             )}
 

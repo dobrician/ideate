@@ -5,7 +5,9 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 import { db } from "@/db";
 import { projects } from "@/db/schema";
-import { requireAuth, getCsrfToken } from "@/lib/auth";
+import { requireAuth } from "@/lib/auth";
+import { hasPermission, canManageResource } from "@/lib/rbac";
+import type { Role } from "@/lib/rbac";
 import { eq } from "drizzle-orm";
 import { randomUUID } from "crypto";
 
@@ -13,7 +15,10 @@ import { randomUUID } from "crypto";
  * Project validation schema
  */
 const projectSchema = z.object({
-  title: z.string().min(3, "Title must be at least 3 characters").max(200, "Title too long"),
+  title: z
+    .string()
+    .min(3, "Title must be at least 3 characters")
+    .max(200, "Title too long"),
   description: z.string().max(5000, "Description too long").optional(),
   deadline: z.string().refine((date) => {
     const parsed = new Date(date);
@@ -27,10 +32,12 @@ const projectSchema = z.object({
  */
 export async function createProject(formData: FormData) {
   try {
-    // Require authentication
     const user = await requireAuth();
 
-    // Parse and validate form data
+    if (!hasPermission(user.role as Role, "project:create")) {
+      return { error: "You don't have permission to create projects" };
+    }
+
     const data = {
       title: formData.get("title") as string,
       description: formData.get("description") as string,
@@ -41,14 +48,11 @@ export async function createProject(formData: FormData) {
     const result = projectSchema.safeParse(data);
 
     if (!result.success) {
-      return {
-        error: result.error.issues[0].message,
-      };
+      return { error: result.error.issues[0].message };
     }
 
     const { title, description, deadline, status } = result.data;
 
-    // Create project
     const projectId = randomUUID();
     await db.insert(projects).values({
       id: projectId,
@@ -62,20 +66,13 @@ export async function createProject(formData: FormData) {
     revalidatePath("/projects");
     redirect(`/projects/${projectId}`);
   } catch (error) {
-    console.error("Create project error:", error);
-
     if (error instanceof Error && error.message === "Unauthorized") {
       redirect("/auth/login");
     }
-
-    // Don't catch redirect errors
     if (error instanceof Error && error.message.includes("NEXT_REDIRECT")) {
       throw error;
     }
-
-    return {
-      error: "Failed to create project. Please try again.",
-    };
+    return { error: "Failed to create project. Please try again." };
   }
 }
 
@@ -84,10 +81,12 @@ export async function createProject(formData: FormData) {
  */
 export async function updateProject(projectId: string, formData: FormData) {
   try {
-    // Require authentication
     const user = await requireAuth();
 
-    // Parse and validate form data
+    if (!hasPermission(user.role as Role, "project:update")) {
+      return { error: "You don't have permission to update projects" };
+    }
+
     const data = {
       title: formData.get("title") as string,
       description: formData.get("description") as string,
@@ -98,14 +97,11 @@ export async function updateProject(projectId: string, formData: FormData) {
     const result = projectSchema.safeParse(data);
 
     if (!result.success) {
-      return {
-        error: result.error.issues[0].message,
-      };
+      return { error: result.error.issues[0].message };
     }
 
     const { title, description, deadline, status } = result.data;
 
-    // Verify project exists and user owns it
     const existingProject = await db
       .select()
       .from(projects)
@@ -113,19 +109,13 @@ export async function updateProject(projectId: string, formData: FormData) {
       .limit(1);
 
     if (existingProject.length === 0) {
-      return {
-        error: "Project not found",
-      };
+      return { error: "Project not found" };
     }
 
-    // Check ownership (only owner can update)
-    if (existingProject[0].userId !== user.id && user.role !== "admin") {
-      return {
-        error: "You don't have permission to update this project",
-      };
+    if (!canManageResource(user.role as Role, existingProject[0].userId, user.id)) {
+      return { error: "You don't have permission to update this project" };
     }
 
-    // Update project
     await db
       .update(projects)
       .set({
@@ -140,19 +130,12 @@ export async function updateProject(projectId: string, formData: FormData) {
     revalidatePath(`/projects/${projectId}`);
     revalidatePath("/projects");
 
-    return {
-      success: true,
-    };
+    return { success: true };
   } catch (error) {
-    console.error("Update project error:", error);
-
     if (error instanceof Error && error.message === "Unauthorized") {
       redirect("/auth/login");
     }
-
-    return {
-      error: "Failed to update project. Please try again.",
-    };
+    return { error: "Failed to update project. Please try again." };
   }
 }
 
@@ -161,10 +144,12 @@ export async function updateProject(projectId: string, formData: FormData) {
  */
 export async function deleteProject(projectId: string) {
   try {
-    // Require authentication
     const user = await requireAuth();
 
-    // Verify project exists and user owns it
+    if (!hasPermission(user.role as Role, "project:delete")) {
+      return { error: "You don't have permission to delete projects" };
+    }
+
     const existingProject = await db
       .select()
       .from(projects)
@@ -172,37 +157,24 @@ export async function deleteProject(projectId: string) {
       .limit(1);
 
     if (existingProject.length === 0) {
-      return {
-        error: "Project not found",
-      };
+      return { error: "Project not found" };
     }
 
-    // Check ownership (only owner or admin can delete)
-    if (existingProject[0].userId !== user.id && user.role !== "admin") {
-      return {
-        error: "You don't have permission to delete this project",
-      };
+    if (!canManageResource(user.role as Role, existingProject[0].userId, user.id)) {
+      return { error: "You don't have permission to delete this project" };
     }
 
-    // Delete project (cascading deletes will handle proposals, votes, comments)
     await db.delete(projects).where(eq(projects.id, projectId));
 
     revalidatePath("/projects");
     redirect("/projects");
   } catch (error) {
-    console.error("Delete project error:", error);
-
     if (error instanceof Error && error.message === "Unauthorized") {
       redirect("/auth/login");
     }
-
-    // Don't catch redirect errors
     if (error instanceof Error && error.message.includes("NEXT_REDIRECT")) {
       throw error;
     }
-
-    return {
-      error: "Failed to delete project. Please try again.",
-    };
+    return { error: "Failed to delete project. Please try again." };
   }
 }

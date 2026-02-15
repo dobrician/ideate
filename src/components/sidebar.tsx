@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Home, FolderOpen, User, LogOut } from "lucide-react";
+import { Home, FolderOpen, User, LogOut, LayoutDashboard } from "lucide-react";
 
 interface SidebarProps {
   open: boolean;
@@ -13,6 +13,7 @@ interface SidebarProps {
 
 const navItems = [
   { href: "/", label: "Home", icon: Home },
+  { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { href: "/projects", label: "Projects", icon: FolderOpen },
   { href: "/profile", label: "Profile", icon: User },
 ];

@@ -2,9 +2,17 @@ import { notFound, redirect } from "next/navigation";
 import { db } from "@/db";
 import { projects, proposals, votes, comments, users } from "@/db/schema";
 import { getCurrentUser } from "@/lib/auth";
+import { hasPermission, canManageResource } from "@/lib/rbac";
+import type { Role } from "@/lib/rbac";
 import { eq, desc, sql } from "drizzle-orm";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import Link from "next/link";
 import { DeleteProjectButton } from "./delete-button";
 import { ProposalForm } from "@/components/proposal-form";
@@ -15,7 +23,8 @@ interface ProjectPageProps {
 }
 
 /**
- * Individual project page with proposals, voting, and discussions
+ * Individual project page with proposals, voting, and discussions.
+ * RBAC-aware: shows controls based on user permissions.
  */
 export default async function ProjectPage({ params }: ProjectPageProps) {
   const user = await getCurrentUser();
@@ -25,8 +34,8 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
   }
 
   const { id } = await params;
+  const role = user.role as Role;
 
-  // Fetch project
   const project = await db
     .select()
     .from(projects)
@@ -38,9 +47,9 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
   }
 
   const projectData = project[0];
-  const isOwner = projectData.userId === user.id;
-  const isAdmin = user.role === "admin";
-  const canEdit = isOwner || isAdmin;
+  const canEdit = canManageResource(role, projectData.userId, user.id);
+  const canCreateProposal = hasPermission(role, "proposal:create");
+  const isAdmin = hasPermission(role, "project:manage_all");
 
   // Fetch proposals with aggregated vote counts
   const proposalRows = await db
@@ -118,7 +127,10 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
   // Build enriched proposal data
   const proposalsWithStats = proposalRows.map((p) => {
     const pComments = commentsByProposal.get(p.id) || [];
-    const authorName = [p.authorFirstName, p.authorLastName].filter(Boolean).join(" ") || p.authorEmail || "Anonymous";
+    const authorName =
+      [p.authorFirstName, p.authorLastName].filter(Boolean).join(" ") ||
+      p.authorEmail ||
+      "Anonymous";
 
     return {
       id: p.id,
@@ -145,14 +157,14 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
   });
 
   return (
-    <div className="container mx-auto max-w-4xl px-4 py-8">
-      <div className="mb-6 flex items-center justify-between">
-        <Button asChild variant="outline">
+    <div className="container mx-auto max-w-4xl px-4 py-6 sm:py-8">
+      <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <Button asChild variant="outline" size="sm">
           <Link href="/projects">&larr; Back to Projects</Link>
         </Button>
         {canEdit && (
           <div className="flex gap-2">
-            <Button asChild variant="outline">
+            <Button asChild variant="outline" size="sm">
               <Link href={`/projects/${id}/edit`}>Edit</Link>
             </Button>
             <DeleteProjectButton projectId={id} />
@@ -162,10 +174,12 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
 
       <Card>
         <CardHeader>
-          <div className="flex items-start justify-between gap-4">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
             <div className="flex-1">
-              <CardTitle className="text-3xl">{projectData.title}</CardTitle>
-              <CardDescription className="mt-2 flex items-center gap-4">
+              <CardTitle className="text-2xl sm:text-3xl">
+                {projectData.title}
+              </CardTitle>
+              <CardDescription className="mt-2 flex flex-wrap items-center gap-2 sm:gap-4">
                 <span
                   className={`rounded-full px-3 py-1 text-xs font-medium ${
                     projectData.status === "active"
@@ -177,14 +191,13 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
                 >
                   {projectData.status}
                 </span>
-                <span>
+                <span className="text-sm">
                   Deadline:{" "}
                   {projectData.deadline
-                    ? new Date(projectData.deadline).toLocaleDateString("en-US", {
-                        year: "numeric",
-                        month: "long",
-                        day: "numeric",
-                      })
+                    ? new Date(projectData.deadline).toLocaleDateString(
+                        "en-US",
+                        { year: "numeric", month: "long", day: "numeric" }
+                      )
                     : "Not set"}
                 </span>
               </CardDescription>
@@ -194,7 +207,9 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
         <CardContent className="space-y-6">
           {projectData.summary && (
             <div className="rounded-md bg-muted/50 p-3">
-              <p className="text-sm italic text-muted-foreground">{projectData.summary}</p>
+              <p className="text-sm italic text-muted-foreground">
+                {projectData.summary}
+              </p>
             </div>
           )}
 
@@ -211,37 +226,39 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
 
           <div className="grid gap-4 sm:grid-cols-2">
             <div>
-              <h3 className="mb-1 text-sm font-medium text-muted-foreground">Created</h3>
+              <h3 className="mb-1 text-sm font-medium text-muted-foreground">
+                Created
+              </h3>
               <p>
                 {projectData.createdAt
-                  ? new Date(projectData.createdAt).toLocaleDateString("en-US", {
-                      year: "numeric",
-                      month: "long",
-                      day: "numeric",
-                    })
+                  ? new Date(projectData.createdAt).toLocaleDateString(
+                      "en-US",
+                      { year: "numeric", month: "long", day: "numeric" }
+                    )
                   : "Unknown"}
               </p>
             </div>
             <div>
-              <h3 className="mb-1 text-sm font-medium text-muted-foreground">Last Updated</h3>
+              <h3 className="mb-1 text-sm font-medium text-muted-foreground">
+                Last Updated
+              </h3>
               <p>
                 {projectData.updatedAt
-                  ? new Date(projectData.updatedAt).toLocaleDateString("en-US", {
-                      year: "numeric",
-                      month: "long",
-                      day: "numeric",
-                    })
+                  ? new Date(projectData.updatedAt).toLocaleDateString(
+                      "en-US",
+                      { year: "numeric", month: "long", day: "numeric" }
+                    )
                   : "Never"}
               </p>
             </div>
           </div>
 
           <div className="border-t pt-6">
-            <div className="mb-4 flex items-center justify-between">
+            <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <h2 className="text-lg font-semibold">
                 Proposals ({proposalsWithStats.length})
               </h2>
-              <ProposalForm projectId={id} />
+              {canCreateProposal && <ProposalForm projectId={id} />}
             </div>
             <ProposalList
               proposals={proposalsWithStats}

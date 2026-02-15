@@ -144,17 +144,64 @@
 ---
 
 ## Sprint 4 — Polish & Enterprise Features (2026-02-16)
-**Status:** 🔄 IN PROGRESS
+**Status:** ✅ COMPLETE
 
 ### Goals
-- [ ] Role-based access control — admin/member roles with permissions (#8)
-- [ ] Real-time voting updates via SSE (#6)
-- [ ] Email deliverability — verify SPF/DKIM setup (#2)
-- [ ] AI rate limiting and cost controls (#4)
-- [ ] Responsive mobile UI polish
-- [ ] Error handling improvements (toast notifications, better error pages)
-- [ ] Dashboard page (overview of user's projects, recent activity)
-- [ ] Pagination for projects and proposals lists
+- [x] Role-based access control — admin/member roles with permissions (#8)
+- [x] Real-time voting updates via SSE (#6)
+- [ ] Email deliverability — verify SPF/DKIM setup (#2) — deferred to Sprint 5
+- [x] AI rate limiting and cost controls (#4)
+- [x] Responsive mobile UI polish
+- [x] Error handling improvements (toast notifications, better error pages)
+- [x] Dashboard page (overview of user's projects, recent activity)
+- [x] Pagination for projects and proposals lists
 
 ### Outcomes
-- TBD (sprint in progress)
+- 1 conventional commit (squashed sprint)
+- All unit tests passing (260 tests total, up from 125)
+- Build clean, zero TypeScript errors
+- RBAC library with 4 roles and 13 permissions (fixes #8)
+  - admin: full access + manage all projects
+  - manager: CRUD + delete proposals, no user management
+  - member: create, vote, comment (cannot delete others' content)
+  - viewer: read-only (cannot vote, comment, or create)
+  - Permission checks enforced in all 8 server actions
+- Real-time voting via SSE (fixes #6)
+  - SSE endpoint `/api/votes/stream?projectId=xxx`
+  - In-process event emitter with per-project subscribers
+  - Client hook `useVoteStream` with auto-reconnect on error
+  - ProposalList receives live vote count updates
+- AI rate limiting with cost tracking (fixes #4)
+  - Configurable hourly limits: requests (60) and tokens (100K)
+  - Per-provider cost tracking (Gemini + OpenAI rates)
+  - `getAiUsageStats()` API for monitoring
+  - Sliding-window hourly reset
+- Dashboard page (`/dashboard`)
+  - 4 platform-wide stat cards (projects, proposals, votes, comments)
+  - User's projects + proposals lists
+  - Recent votes with +1/-1 badges
+  - Activity feed (latest comments)
+  - Loading skeleton + error boundary
+- Toast notifications (Sonner via shadcn/ui)
+  - All mutations show success/error toasts
+  - Integrated in: proposals, projects, profile, voting, comments, delete
+- Pagination on projects list (12 per page)
+  - Page navigation with prev/next + page numbers
+  - Total count display
+- Error handling improvements
+  - Global 404 page with navigation
+  - Global error boundary with retry + home links
+  - Removed `any` type from edit project page
+- Mobile responsive polish
+  - Flex-wrap headers and controls
+  - Responsive grids (320px+ compatible)
+  - Proper touch targets and spacing
+- New tests: RBAC (100), vote-events (18), LLM rate limiting (17)
+- Updated home page with feature cards and CTAs
+- Dashboard added to sidebar navigation
+
+### Notes
+- GitHub issues #4, #6, #8 addressed in this sprint
+- Issue #2 (email deliverability) deferred — requires DNS config, not code
+- 260 total unit tests, all passing
+- Build clean, ready for staging deployment

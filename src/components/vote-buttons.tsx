@@ -4,6 +4,7 @@ import { useTransition } from "react";
 import { Button } from "@/components/ui/button";
 import { castVote, removeVote } from "@/app/projects/[id]/proposals/actions";
 import { ThumbsUp, ThumbsDown } from "lucide-react";
+import { toast } from "sonner";
 
 interface VoteButtonsProps {
   proposalId: string;
@@ -14,7 +15,7 @@ interface VoteButtonsProps {
 }
 
 /**
- * Thumbs up/down vote buttons with active state highlighting
+ * Thumbs up/down vote buttons with active state highlighting and toast feedback
  */
 export function VoteButtons({
   proposalId,
@@ -27,10 +28,12 @@ export function VoteButtons({
 
   function handleVote(value: number) {
     startTransition(async () => {
-      if (userVote === value) {
-        await removeVote(proposalId, projectId);
-      } else {
-        await castVote(proposalId, value, projectId);
+      const result =
+        userVote === value
+          ? await removeVote(proposalId, projectId)
+          : await castVote(proposalId, value, projectId);
+      if (result?.error) {
+        toast.error(result.error);
       }
     });
   }

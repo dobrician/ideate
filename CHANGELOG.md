@@ -7,6 +7,64 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.4.0] - 2026-02-15
+
+### Added
+- Role-based access control (RBAC) library (`src/lib/rbac.ts`) (fixes #8)
+  - Four roles: admin, manager, member, viewer
+  - 13 granular permissions (project/proposal CRUD, vote, comment, user management)
+  - Admin can manage all projects regardless of ownership
+  - Viewer role restricted to read-only access
+  - Permission checks enforced in all server actions
+- Real-time voting updates via Server-Sent Events (SSE) (fixes #6)
+  - SSE endpoint `GET /api/votes/stream?projectId=xxx`
+  - In-process event emitter (`src/lib/vote-events.ts`) for per-project subscribers
+  - Client-side `useVoteStream` hook with auto-reconnect
+  - Vote counts update live in ProposalList without page refresh
+- AI rate limiting with cost tracking (fixes #4)
+  - Configurable per-hour request limit (`AI_MAX_REQUESTS_PER_HOUR`, default 60)
+  - Configurable per-hour token limit (`AI_MAX_TOKENS_PER_HOUR`, default 100K)
+  - Per-provider cost tracking (USD) based on token usage
+  - `getAiUsageStats()` for monitoring current usage window
+  - Sliding-window reset (hourly)
+- Dashboard page (`/dashboard`)
+  - Platform-wide stats (projects, proposals, votes, comments)
+  - User's projects and proposals lists
+  - Recent votes with pro/contra badges
+  - Activity feed showing latest comments across all projects
+  - Loading skeleton and error boundary
+- Pagination for projects list
+  - 12 items per page with page number navigation
+  - Total count display and prev/next controls
+  - Reusable `Pagination` component
+- Toast notifications via Sonner (shadcn/ui)
+  - Success/error toasts on all mutations (create, update, delete, vote, comment)
+  - Rich colors, close button, bottom-right position
+  - Integrated across: proposals, projects, profile, voting, comments
+- Global error pages
+  - Custom 404 page with navigation links
+  - Global error boundary with retry and home links
+  - Error digest display for debugging
+- Improved home page with feature cards and navigation CTAs
+
+### Changed
+- Project detail page now uses RBAC for edit/delete visibility
+- Proposal creation restricted by `proposal:create` permission
+- Voting restricted by `vote:cast` permission (viewers cannot vote)
+- Commenting restricted by `comment:create` permission
+- Delete proposal requires `proposal:delete` (member role cannot delete)
+- Sidebar navigation updated with Dashboard link
+- Fixed TypeScript `any` type in project edit page (now properly typed)
+- Mobile-responsive improvements across all pages
+  - Flex-wrap on project detail header and status badges
+  - Responsive grid layouts (320px+ compatible)
+  - Proper touch targets and spacing on small screens
+
+### Security
+- RBAC enforcement on all server actions (fixes #8)
+- Viewers restricted to read-only operations
+- Admin bypass only via explicit `project:manage_all` permission
+
 ## [0.3.0] - 2026-02-15
 
 ### Added

@@ -3,35 +3,33 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { deleteProject } from "../actions";
+import { toast } from "sonner";
 
 interface DeleteProjectButtonProps {
   projectId: string;
 }
 
 /**
- * Delete project button with confirmation
+ * Delete project button with confirmation and toast feedback
  */
 export function DeleteProjectButton({ projectId }: DeleteProjectButtonProps) {
   const [isDeleting, setIsDeleting] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
-  const [error, setError] = useState("");
 
   async function handleDelete() {
     setIsDeleting(true);
-    setError("");
 
     try {
       const result = await deleteProject(projectId);
 
       if (result?.error) {
-        setError(result.error);
+        toast.error(result.error);
         setIsDeleting(false);
         setShowConfirm(false);
       }
       // If successful, deleteProject redirects automatically
-    } catch (err) {
-      console.error("Delete error:", err);
-      setError("Failed to delete project");
+    } catch {
+      toast.error("Failed to delete project");
       setIsDeleting(false);
       setShowConfirm(false);
     }
@@ -40,9 +38,6 @@ export function DeleteProjectButton({ projectId }: DeleteProjectButtonProps) {
   if (showConfirm) {
     return (
       <div className="flex items-center gap-2">
-        {error && (
-          <span className="text-sm text-destructive">{error}</span>
-        )}
         <Button
           variant="destructive"
           size="sm"
@@ -64,10 +59,7 @@ export function DeleteProjectButton({ projectId }: DeleteProjectButtonProps) {
   }
 
   return (
-    <Button
-      variant="destructive"
-      onClick={() => setShowConfirm(true)}
-    >
+    <Button variant="destructive" onClick={() => setShowConfirm(true)}>
       Delete
     </Button>
   );

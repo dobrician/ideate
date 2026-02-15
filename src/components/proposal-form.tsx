@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useState } from "react";
+import { useActionState, useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -8,22 +8,29 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { createProposal } from "@/app/projects/[id]/proposals/actions";
 import { ThumbsUp, ThumbsDown } from "lucide-react";
+import { toast } from "sonner";
 
 interface ProposalFormProps {
   projectId: string;
 }
 
 /**
- * Form for creating a new proposal with initial vote
+ * Form for creating a new proposal with initial vote and toast feedback
  */
 export function ProposalForm({ projectId }: ProposalFormProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [initialVote, setInitialVote] = useState<"1" | "-1">("1");
   const [state, formAction, isPending] = useActionState(createProposal, null);
 
-  if (state?.success) {
-    setIsOpen(false);
-  }
+  useEffect(() => {
+    if (state?.success) {
+      toast.success("Proposal created successfully");
+      setIsOpen(false);
+    }
+    if (state?.error) {
+      toast.error(state.error);
+    }
+  }, [state]);
 
   if (!isOpen) {
     return (
@@ -57,7 +64,9 @@ export function ProposalForm({ projectId }: ProposalFormProps) {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="proposal-description">Description (optional)</Label>
+            <Label htmlFor="proposal-description">
+              Description (optional)
+            </Label>
             <Textarea
               id="proposal-description"
               name="description"
@@ -76,7 +85,9 @@ export function ProposalForm({ projectId }: ProposalFormProps) {
                 variant={initialVote === "1" ? "default" : "outline"}
                 size="sm"
                 onClick={() => setInitialVote("1")}
-                className={initialVote === "1" ? "bg-green-600 hover:bg-green-700" : ""}
+                className={
+                  initialVote === "1" ? "bg-green-600 hover:bg-green-700" : ""
+                }
               >
                 <ThumbsUp className="mr-1 h-4 w-4" />
                 Pro
@@ -86,7 +97,9 @@ export function ProposalForm({ projectId }: ProposalFormProps) {
                 variant={initialVote === "-1" ? "default" : "outline"}
                 size="sm"
                 onClick={() => setInitialVote("-1")}
-                className={initialVote === "-1" ? "bg-red-600 hover:bg-red-700" : ""}
+                className={
+                  initialVote === "-1" ? "bg-red-600 hover:bg-red-700" : ""
+                }
               >
                 <ThumbsDown className="mr-1 h-4 w-4" />
                 Contra
@@ -96,7 +109,9 @@ export function ProposalForm({ projectId }: ProposalFormProps) {
 
           {state?.error && (
             <div className="rounded-md bg-red-50 p-3 dark:bg-red-950">
-              <p className="text-sm text-red-800 dark:text-red-200">{state.error}</p>
+              <p className="text-sm text-red-800 dark:text-red-200">
+                {state.error}
+              </p>
             </div>
           )}
 

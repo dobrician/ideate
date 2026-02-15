@@ -57,6 +57,11 @@ vi.mock("@/lib/ai", () => ({
   buildProposalSummary: (...args: [string, string | null | undefined]) => mockBuildProposalSummary(...args),
 }));
 
+const mockEmitVoteChange = vi.fn();
+vi.mock("@/lib/vote-events", () => ({
+  emitVoteChange: (...args: unknown[]) => mockEmitVoteChange(...args),
+}));
+
 // Leaf-level recording mocks (only these get cleared between tests)
 const mockInsertValues = vi.fn();
 const mockOnConflictDoUpdate = vi.fn();
@@ -153,6 +158,7 @@ beforeEach(() => {
   mockSelectFrom.mockClear();
   mockSelectWhere.mockClear();
   mockSelectLimit.mockReset();
+  mockEmitVoteChange.mockClear();
 
   // Default: authenticated member user
   mockRequireAuth.mockResolvedValue(makeUser());
@@ -181,6 +187,15 @@ describe("createProposal", () => {
     const result = await createProposal(null, validFormData());
 
     expect(result).toEqual({ error: "You must be logged in to create a proposal" });
+    expect(mockInsertValues).not.toHaveBeenCalled();
+  });
+
+  it("should return error when viewer tries to create proposal", async () => {
+    mockRequireAuth.mockResolvedValue(makeUser({ role: "viewer" }));
+
+    const result = await createProposal(null, validFormData());
+
+    expect(result).toEqual({ error: "You don't have permission to create proposals" });
     expect(mockInsertValues).not.toHaveBeenCalled();
   });
 
@@ -327,7 +342,17 @@ describe("deleteProposal", () => {
     expect(mockDeleteWhere).not.toHaveBeenCalled();
   });
 
+  it("should return error when member tries to delete (no permission)", async () => {
+    mockRequireAuth.mockResolvedValue(makeUser({ role: "member" }));
+
+    const result = await deleteProposal("prop-1", "proj-1");
+
+    expect(result).toEqual({ error: "You don't have permission to delete proposals" });
+    expect(mockDeleteWhere).not.toHaveBeenCalled();
+  });
+
   it("should return error when proposal is not found", async () => {
+    mockRequireAuth.mockResolvedValue(makeUser({ role: "manager" }));
     mockSelectLimit.mockReturnValue(Promise.resolve([]));
 
     const result = await deleteProposal("nonexistent", "proj-1");
@@ -336,7 +361,8 @@ describe("deleteProposal", () => {
     expect(mockDeleteWhere).not.toHaveBeenCalled();
   });
 
-  it("should return error when user is not the owner and not admin", async () => {
+  it("should return error when manager is not the owner", async () => {
+    mockRequireAuth.mockResolvedValue(makeUser({ id: "user-1", role: "manager" }));
     mockSelectLimit.mockReturnValue(
       Promise.resolve([{ id: "prop-1", userId: "other-user" }])
     );
@@ -347,7 +373,8 @@ describe("deleteProposal", () => {
     expect(mockDeleteWhere).not.toHaveBeenCalled();
   });
 
-  it("should delete proposal when user is the owner", async () => {
+  it("should delete proposal when manager is the owner", async () => {
+    mockRequireAuth.mockResolvedValue(makeUser({ id: "user-1", role: "manager" }));
     mockSelectLimit.mockReturnValue(
       Promise.resolve([{ id: "prop-1", userId: "user-1" }])
     );
@@ -382,6 +409,15 @@ describe("castVote", () => {
     const result = await castVote("prop-1", 1, "proj-1");
 
     expect(result).toEqual({ error: "You must be logged in to vote" });
+    expect(mockInsertValues).not.toHaveBeenCalled();
+  });
+
+  it("should return error when viewer tries to vote", async () => {
+    mockRequireAuth.mockResolvedValue(makeUser({ role: "viewer" }));
+
+    const result = await castVote("prop-1", 1, "proj-1");
+
+    expect(result).toEqual({ error: "You don't have permission to vote" });
     expect(mockInsertValues).not.toHaveBeenCalled();
   });
 
@@ -443,6 +479,15 @@ describe("removeVote", () => {
     expect(mockDeleteWhere).not.toHaveBeenCalled();
   });
 
+  it("should return error when viewer tries to remove vote", async () => {
+    mockRequireAuth.mockResolvedValue(makeUser({ role: "viewer" }));
+
+    const result = await removeVote("prop-1", "proj-1");
+
+    expect(result).toEqual({ error: "You don't have permission to vote" });
+    expect(mockDeleteWhere).not.toHaveBeenCalled();
+  });
+
   it("should delete the vote for the authenticated user", async () => {
     const result = await removeVote("prop-1", "proj-1");
 
@@ -478,6 +523,15 @@ describe("addComment", () => {
     const result = await addComment(null, validCommentForm());
 
     expect(result).toEqual({ error: "You must be logged in to comment" });
+    expect(mockInsertValues).not.toHaveBeenCalled();
+  });
+
+  it("should return error when viewer tries to comment", async () => {
+    mockRequireAuth.mockResolvedValue(makeUser({ role: "viewer" }));
+
+    const result = await addComment(null, validCommentForm());
+
+    expect(result).toEqual({ error: "You don't have permission to comment" });
     expect(mockInsertValues).not.toHaveBeenCalled();
   });
 

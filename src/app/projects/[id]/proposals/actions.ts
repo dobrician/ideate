@@ -5,16 +5,45 @@ import { z } from "zod";
 import { db } from "@/db";
 import { proposals, votes, comments } from "@/db/schema";
 import { requireAuth } from "@/lib/auth";
+import { hasPermission, canManageResource } from "@/lib/rbac";
+import type { Role } from "@/lib/rbac";
 import { buildProposalSummary } from "@/lib/ai";
-import { eq, and } from "drizzle-orm";
+import { emitVoteChange } from "@/lib/vote-events";
+import { eq, and, sql } from "drizzle-orm";
 import { randomUUID } from "crypto";
+
+/**
+ * Compute upvotes/downvotes for a proposal and emit SSE event
+ */
+async function emitVoteUpdate(
+  proposalId: string,
+  projectId: string
+): Promise<void> {
+  const result = await db
+    .select({
+      upvotes: sql<number>`COALESCE(SUM(CASE WHEN ${votes.value} = 1 THEN 1 ELSE 0 END), 0)`,
+      downvotes: sql<number>`COALESCE(SUM(CASE WHEN ${votes.value} = -1 THEN 1 ELSE 0 END), 0)`,
+    })
+    .from(votes)
+    .where(eq(votes.proposalId, proposalId));
+
+  emitVoteChange({
+    proposalId,
+    projectId,
+    upvotes: Number(result[0]?.upvotes ?? 0),
+    downvotes: Number(result[0]?.downvotes ?? 0),
+  });
+}
 
 /**
  * Proposal validation schema
  */
 const proposalSchema = z.object({
   projectId: z.string().min(1),
-  title: z.string().min(5, "Title must be at least 5 characters").max(200, "Title too long"),
+  title: z
+    .string()
+    .min(5, "Title must be at least 5 characters")
+    .max(200, "Title too long"),
   description: z.string().max(5000, "Description too long").optional(),
   initialVote: z.enum(["1", "-1"]),
 });
@@ -24,7 +53,10 @@ const proposalSchema = z.object({
  */
 const commentSchema = z.object({
   proposalId: z.string().min(1),
-  content: z.string().min(1, "Comment cannot be empty").max(2000, "Comment too long"),
+  content: z
+    .string()
+    .min(1, "Comment cannot be empty")
+    .max(2000, "Comment too long"),
   parentId: z.string().optional(),
 });
 
@@ -37,6 +69,10 @@ export async function createProposal(
 ): Promise<{ error?: string; success?: boolean }> {
   try {
     const user = await requireAuth();
+
+    if (!hasPermission(user.role as Role, "proposal:create")) {
+      return { error: "You don't have permission to create proposals" };
+    }
 
     const data = {
       projectId: formData.get("projectId") as string,
@@ -52,10 +88,8 @@ export async function createProposal(
 
     const { projectId, title, description, initialVote } = result.data;
 
-    // Generate AI summary (non-blocking — falls back to truncation)
     const summary = await buildProposalSummary(title, description);
 
-    // Insert proposal
     const proposalId = randomUUID();
     await db.insert(proposals).values({
       id: proposalId,
@@ -66,7 +100,6 @@ export async function createProposal(
       userId: user.id,
     });
 
-    // Cast initial vote
     await db.insert(votes).values({
       proposalId,
       userId: user.id,
@@ -79,16 +112,23 @@ export async function createProposal(
     if (error instanceof Error && error.message === "Unauthorized") {
       return { error: "You must be logged in to create a proposal" };
     }
+    if (error instanceof Error && error.message.startsWith("Forbidden:")) {
+      return { error: error.message };
+    }
     return { error: "Failed to create proposal. Please try again." };
   }
 }
 
 /**
- * Delete a proposal (owner or admin only)
+ * Delete a proposal (owner or admin/manager only)
  */
 export async function deleteProposal(proposalId: string, projectId: string) {
   try {
     const user = await requireAuth();
+
+    if (!hasPermission(user.role as Role, "proposal:delete")) {
+      return { error: "You don't have permission to delete proposals" };
+    }
 
     const existing = await db
       .select()
@@ -100,7 +140,7 @@ export async function deleteProposal(proposalId: string, projectId: string) {
       return { error: "Proposal not found" };
     }
 
-    if (existing[0].userId !== user.id && user.role !== "admin") {
+    if (!canManageResource(user.role as Role, existing[0].userId, user.id)) {
       return { error: "You don't have permission to delete this proposal" };
     }
 
@@ -118,9 +158,17 @@ export async function deleteProposal(proposalId: string, projectId: string) {
 /**
  * Cast or update a vote (upsert via onConflictDoUpdate)
  */
-export async function castVote(proposalId: string, value: number, projectId: string) {
+export async function castVote(
+  proposalId: string,
+  value: number,
+  projectId: string
+) {
   try {
     const user = await requireAuth();
+
+    if (!hasPermission(user.role as Role, "vote:cast")) {
+      return { error: "You don't have permission to vote" };
+    }
 
     await db
       .insert(votes)
@@ -134,6 +182,7 @@ export async function castVote(proposalId: string, value: number, projectId: str
         set: { value },
       });
 
+    await emitVoteUpdate(proposalId, projectId);
     revalidatePath(`/projects/${projectId}`);
     return { success: true };
   } catch (error) {
@@ -151,10 +200,17 @@ export async function removeVote(proposalId: string, projectId: string) {
   try {
     const user = await requireAuth();
 
+    if (!hasPermission(user.role as Role, "vote:cast")) {
+      return { error: "You don't have permission to vote" };
+    }
+
     await db
       .delete(votes)
-      .where(and(eq(votes.proposalId, proposalId), eq(votes.userId, user.id)));
+      .where(
+        and(eq(votes.proposalId, proposalId), eq(votes.userId, user.id))
+      );
 
+    await emitVoteUpdate(proposalId, projectId);
     revalidatePath(`/projects/${projectId}`);
     return { success: true };
   } catch (error) {
@@ -174,6 +230,10 @@ export async function addComment(
 ): Promise<{ error?: string; success?: boolean }> {
   try {
     const user = await requireAuth();
+
+    if (!hasPermission(user.role as Role, "comment:create")) {
+      return { error: "You don't have permission to comment" };
+    }
 
     const data = {
       proposalId: formData.get("proposalId") as string,

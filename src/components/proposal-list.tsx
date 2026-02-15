@@ -12,7 +12,9 @@ import { VoteButtons } from "@/components/vote-buttons";
 import { VoteBar } from "@/components/vote-bar";
 import { DiscussionSheet } from "@/components/discussion-sheet";
 import { deleteProposal } from "@/app/projects/[id]/proposals/actions";
+import { useVoteStream } from "@/lib/use-vote-stream";
 import { Trash2 } from "lucide-react";
+import { toast } from "sonner";
 
 interface Comment {
   id: string;
@@ -47,7 +49,7 @@ interface ProposalListProps {
 }
 
 /**
- * Accordion-based proposal list with voting, comments, and vote bars
+ * Accordion-based proposal list with real-time voting via SSE
  */
 export function ProposalList({
   proposals,
@@ -55,6 +57,8 @@ export function ProposalList({
   currentUserId,
   isAdmin,
 }: ProposalListProps) {
+  const voteUpdates = useVoteStream(projectId);
+
   if (proposals.length === 0) {
     return (
       <p className="py-4 text-center text-sm text-muted-foreground">
@@ -65,15 +69,20 @@ export function ProposalList({
 
   return (
     <Accordion type="multiple" className="space-y-2">
-      {proposals.map((proposal) => (
-        <ProposalItem
-          key={proposal.id}
-          proposal={proposal}
-          projectId={projectId}
-          currentUserId={currentUserId}
-          isAdmin={isAdmin}
-        />
-      ))}
+      {proposals.map((proposal) => {
+        const live = voteUpdates.get(proposal.id);
+        return (
+          <ProposalItem
+            key={proposal.id}
+            proposal={proposal}
+            projectId={projectId}
+            currentUserId={currentUserId}
+            isAdmin={isAdmin}
+            liveUpvotes={live?.upvotes}
+            liveDownvotes={live?.downvotes}
+          />
+        );
+      })}
     </Accordion>
   );
 }
@@ -83,18 +92,30 @@ function ProposalItem({
   projectId,
   currentUserId,
   isAdmin,
+  liveUpvotes,
+  liveDownvotes,
 }: {
   proposal: ProposalWithStats;
   projectId: string;
   currentUserId: string;
   isAdmin: boolean;
+  liveUpvotes?: number;
+  liveDownvotes?: number;
 }) {
   const [showFull, setShowFull] = useState(false);
   const canDelete = proposal.userId === currentUserId || isAdmin;
 
+  const upvotes = liveUpvotes ?? proposal.upvotes;
+  const downvotes = liveDownvotes ?? proposal.downvotes;
+
   async function handleDelete() {
     if (!confirm("Delete this proposal? This cannot be undone.")) return;
-    await deleteProposal(proposal.id, projectId);
+    const result = await deleteProposal(proposal.id, projectId);
+    if (result?.error) {
+      toast.error(result.error);
+    } else {
+      toast.success("Proposal deleted");
+    }
   }
 
   const displayText = showFull
@@ -108,18 +129,21 @@ function ProposalItem({
     >
       <AccordionTrigger className="py-3 hover:no-underline">
         <div className="flex w-full items-center justify-between pr-2">
-          <div className="flex-1 text-left">
+          <div className="min-w-0 flex-1 text-left">
             <span className="font-medium">{proposal.title}</span>
             <span className="ml-2 text-xs text-muted-foreground">
               by {proposal.authorName}
             </span>
           </div>
-          <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
+          <div
+            className="flex shrink-0 items-center gap-2"
+            onClick={(e) => e.stopPropagation()}
+          >
             <VoteButtons
               proposalId={proposal.id}
               projectId={projectId}
-              upvotes={proposal.upvotes}
-              downvotes={proposal.downvotes}
+              upvotes={upvotes}
+              downvotes={downvotes}
               userVote={proposal.userVote}
             />
             <DiscussionSheet
@@ -134,27 +158,26 @@ function ProposalItem({
       </AccordionTrigger>
       <AccordionContent>
         <div className="space-y-4 pb-2">
-          <VoteBar
-            upvotes={proposal.upvotes}
-            downvotes={proposal.downvotes}
-          />
+          <VoteBar upvotes={upvotes} downvotes={downvotes} />
 
           {displayText && (
-            <div className="text-sm text-muted-foreground whitespace-pre-wrap">
+            <div className="whitespace-pre-wrap text-sm text-muted-foreground">
               {displayText}
             </div>
           )}
 
-          {proposal.summary && proposal.description && proposal.summary !== proposal.description && (
-            <Button
-              variant="link"
-              size="sm"
-              className="h-auto p-0 text-xs"
-              onClick={() => setShowFull(!showFull)}
-            >
-              {showFull ? "Show summary" : "Show full description"}
-            </Button>
-          )}
+          {proposal.summary &&
+            proposal.description &&
+            proposal.summary !== proposal.description && (
+              <Button
+                variant="link"
+                size="sm"
+                className="h-auto p-0 text-xs"
+                onClick={() => setShowFull(!showFull)}
+              >
+                {showFull ? "Show summary" : "Show full description"}
+              </Button>
+            )}
 
           <div className="flex items-center justify-between text-xs text-muted-foreground">
             <span>

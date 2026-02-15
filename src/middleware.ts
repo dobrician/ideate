@@ -7,6 +7,7 @@ const PUBLIC_PATHS = [
   "/auth/request",
   "/auth/logout",
   "/api/health",
+  "/api/votes/stream",
 ];
 
 /**

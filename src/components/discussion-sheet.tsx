@@ -7,6 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { addComment } from "@/app/projects/[id]/proposals/actions";
 import { MessageSquare, Reply, CornerDownRight } from "lucide-react";
+import { toast } from "sonner";
 
 interface Comment {
   id: string;
@@ -71,7 +72,11 @@ function CommentNode({
   const [state, formAction, isPending] = useActionState(addComment, null);
 
   if (state?.success && replying) {
+    toast.success("Reply posted");
     setReplying(false);
+  }
+  if (state?.error) {
+    toast.error(state.error);
   }
 
   const maxDepth = 3;

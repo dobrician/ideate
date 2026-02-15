@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { createProject } from "../actions";
+import { toast } from "sonner";
 
 /**
  * New project page
@@ -32,12 +33,13 @@ export default function NewProjectPage() {
 
       if (result?.error) {
         setError(result.error);
+        toast.error(result.error);
         setIsLoading(false);
       }
       // If successful, createProject redirects automatically
-    } catch (err) {
-      console.error("Create project error:", err);
+    } catch {
       setError("An error occurred. Please try again.");
+      toast.error("An error occurred. Please try again.");
       setIsLoading(false);
     }
   }

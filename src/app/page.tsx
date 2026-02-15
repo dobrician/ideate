@@ -1,3 +1,4 @@
+import Link from "next/link";
 import {
   Card,
   CardContent,
@@ -5,52 +6,97 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import {
+  FolderOpen,
+  Lightbulb,
+  BarChart3,
+  Users,
+  LayoutDashboard,
+} from "lucide-react";
 
 export default function HomePage() {
   return (
-    <div className="mx-auto max-w-4xl space-y-6">
-      <div>
-        <h2 className="text-3xl font-bold tracking-tight">Welcome to Ideate</h2>
+    <div className="mx-auto max-w-4xl space-y-8 px-4 py-8">
+      <div className="text-center sm:text-left">
+        <h2 className="text-3xl font-bold tracking-tight">
+          Welcome to Ideate
+        </h2>
         <p className="mt-2 text-muted-foreground">
-          Democratic idea prioritization for teams
+          Democratic idea prioritization for teams. Create projects, submit
+          proposals, vote, and discuss.
         </p>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+      <div className="flex flex-col gap-3 sm:flex-row">
+        <Button asChild size="lg">
+          <Link href="/projects">
+            <FolderOpen className="mr-2 h-4 w-4" />
+            View Projects
+          </Link>
+        </Button>
+        <Button asChild size="lg" variant="outline">
+          <Link href="/dashboard">
+            <LayoutDashboard className="mr-2 h-4 w-4" />
+            Dashboard
+          </Link>
+        </Button>
+      </div>
+
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         <Card>
           <CardHeader>
+            <FolderOpen className="mb-2 h-6 w-6 text-muted-foreground" />
             <CardTitle>Projects</CardTitle>
             <CardDescription>
-              Create and manage idea projects with deadlines
+              Create and manage idea prioritization projects with deadlines and
+              status tracking
             </CardDescription>
           </CardHeader>
-          <CardContent>
-            <p className="text-sm text-muted-foreground">Coming soon</p>
-          </CardContent>
         </Card>
 
         <Card>
           <CardHeader>
+            <Lightbulb className="mb-2 h-6 w-6 text-muted-foreground" />
             <CardTitle>Proposals</CardTitle>
             <CardDescription>
-              Submit proposals and vote on team ideas
+              Submit proposals, vote pro or contra, and see AI-generated
+              summaries
             </CardDescription>
           </CardHeader>
-          <CardContent>
-            <p className="text-sm text-muted-foreground">Coming soon</p>
-          </CardContent>
         </Card>
 
         <Card>
           <CardHeader>
-            <CardTitle>Insights</CardTitle>
+            <BarChart3 className="mb-2 h-6 w-6 text-muted-foreground" />
+            <CardTitle>Consensus</CardTitle>
             <CardDescription>
-              AI-powered summaries and consensus views
+              Real-time vote charts show team alignment and help prioritize
+              ideas
             </CardDescription>
           </CardHeader>
-          <CardContent>
-            <p className="text-sm text-muted-foreground">Coming soon</p>
-          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <Users className="mb-2 h-6 w-6 text-muted-foreground" />
+            <CardTitle>Discussions</CardTitle>
+            <CardDescription>
+              Threaded comments on every proposal for structured team
+              conversations
+            </CardDescription>
+          </CardHeader>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <LayoutDashboard className="mb-2 h-6 w-6 text-muted-foreground" />
+            <CardTitle>Dashboard</CardTitle>
+            <CardDescription>
+              Personal overview of your projects, proposals, votes, and recent
+              activity
+            </CardDescription>
+          </CardHeader>
         </Card>
       </div>
     </div>
