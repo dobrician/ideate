@@ -82,3 +82,21 @@
 - All tests passing, zero regressions
 - Ready for staging deployment and smoke test verification
 - Next sprint can focus on proposals, voting, and comments
+
+---
+
+## Sprint 3 — Proposals & Voting (2026-02-15)
+**Status:** 🔄 IN PROGRESS
+
+### Goals
+- [ ] Proposals CRUD (create, list, view per project)
+- [ ] Voting system (pro/contra, +1/-1 per user per proposal)
+- [ ] Vote bar chart visualization (consensus view)
+- [ ] Threaded comments on proposals
+- [ ] AI summarization integration (Gemini/OpenAI pluggable)
+- [ ] Protected routes (auth middleware — redirect to login if not authenticated)
+- [ ] User profile/settings page
+- [ ] Address #1: SQLite WAL mode + concurrent write safety for voting
+
+### Outcomes
+- TBD (sprint in progress)
