@@ -10,7 +10,7 @@
 - Architecture planned and documented
 - Wiki created with full documentation
 - Claude Code started Sprint 1 (Next.js scaffolding, DB schema, Docker)
-- Key decisions: email auth (no WorkOS), smtp2go, idea.surmont.co domain
+- Key decisions: email auth (no WorkOS), configured SMTP provider, idea.surmont.co domain
 
 ### What's next
 - Complete Sprint 1 foundation

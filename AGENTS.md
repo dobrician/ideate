@@ -6,7 +6,7 @@ Enterprise democratic idea prioritization platform. Teams create projects, submi
 ## Tech Stack
 - Next.js 16 (App Router), TypeScript strict mode
 - SQLite + Drizzle ORM (WAL mode enabled)
-- Email magic link auth (JWT + nodemailer via smtp2go)
+- Email magic link auth (JWT + nodemailer via configured SMTP provider)
 - Tailwind CSS 4 + shadcn/ui
 - Playwright E2E + Vitest unit tests
 - Docker multi-stage build
@@ -29,7 +29,7 @@ Enterprise democratic idea prioritization platform. Teams create projects, submi
 - `src/db/schema.ts` — Single source of truth for DB schema
 - `src/db/index.ts` — DB connection singleton
 - `src/lib/auth.ts` — Email magic link + JWT session (no WorkOS)
-- `src/lib/mail.ts` — Nodemailer SMTP (smtp2go)
+- `src/lib/mail.ts` — Nodemailer SMTP (configured SMTP provider)
 - `src/lib/ai.ts` — Pluggable LLM (Gemini/OpenAI)
 - `docker-compose.yml` — Staging (4100) + Dev (4101)
 - `CHANGELOG.md` — Keep a Changelog format
@@ -44,7 +44,7 @@ Enterprise democratic idea prioritization platform. Teams create projects, submi
 ## Auth Flow
 1. User enters email → server generates JWT → sends magic link via SMTP
 2. User clicks link → validates token → creates session cookie (HTTP-only, secure)
-3. SMTP: smtp2go (office@surcod.ro), From: idea@surcod.ro
+3. SMTP: configured SMTP provider (See .env.local), From: idea@surcod.ro
 4. APP_URL: https://idea.surmont.co
 
 ## Testing — MANDATORY

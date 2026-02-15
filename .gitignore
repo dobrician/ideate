@@ -50,3 +50,5 @@ next-env.d.ts
 /blob-report/
 /playwright/.cache/
 .env.local
+database.sqlite
+*.sqlite

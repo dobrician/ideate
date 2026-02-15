@@ -21,5 +21,5 @@
 
 ### Notes
 - Switched from WorkOS to email magic link auth
-- SMTP via smtp2go (office@surcod.ro)
+- SMTP via configured SMTP provider (See .env.local)
 - Domain: idea.surmont.co via nginx proxy

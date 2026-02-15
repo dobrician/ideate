@@ -14,6 +14,6 @@ Enterprise-grade democratic idea prioritization platform.
 
 ## Quick Links
 - **Repo:** https://github.com/dobrician/ideate
-- **Staging:** https://idea.surmont.co (→ 10.57.1.1:4100)
+- **Staging:** https://idea.surmont.co (→ localhost:4100)
 - **Dev:** http://localhost:4101
 - **Original reference:** `/home/dc/work/ideator`

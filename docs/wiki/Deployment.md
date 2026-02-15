@@ -1,10 +1,10 @@
 # Deployment
 
 ## Infrastructure
-- **Host:** 10.57.1.1 (local network)
+- **Host:** localhost (local network)
 - **Reverse Proxy:** Nginx Proxy Manager
 - **Domain:** idea.surmont.co (HTTPS via Let's Encrypt)
-- **Route:** idea.surmont.co → http://10.57.1.1:4100
+- **Route:** idea.surmont.co → http://localhost:4100
 
 ## Docker Containers
 
@@ -23,7 +23,7 @@
 ## Environment Variables
 See `.env.example` for full list. Critical ones:
 - `JWT_SECRET` — generate with `openssl rand -base64 32`
-- `SMTP_*` — smtp2go credentials
+- `SMTP_*` — configured SMTP provider credentials
 - `APP_URL` — `https://idea.surmont.co`
 - `DATABASE_URL` — SQLite path inside container
 

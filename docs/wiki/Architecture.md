@@ -41,7 +41,7 @@ projects ─┤── proposals ── votes
 
 ## Auth Flow
 1. User enters email on login page
-2. Server generates JWT token, sends magic link via SMTP (smtp2go)
+2. Server generates JWT token, sends magic link via SMTP (configured SMTP provider)
 3. User clicks link → server validates token → creates session cookie
 4. Session: HTTP-only secure cookie with JWT
 5. From: idea@surcod.ro
@@ -60,8 +60,8 @@ projects ─┤── proposals ── votes
 ```
 
 ## SMTP Config
-- Host: mail.smtp2go.com:587 (TLS)
-- User: office@surcod.ro
+- Host: See .env.local
+- User: See .env.local
 - From: idea@surcod.ro
 
 ## Directory Structure
