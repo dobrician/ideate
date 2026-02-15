@@ -1,5 +1,7 @@
 import { DarkModeToggle } from "@/components/dark-mode-toggle";
 import { Button } from "@/components/ui/button";
+import Link from "next/link";
+import { User } from "lucide-react";
 
 function MenuIcon({ className }: { className?: string }) {
   return (
@@ -38,10 +40,18 @@ export function Header({ onToggleSidebar }: HeaderProps) {
       </Button>
 
       <div className="flex items-center gap-2">
-        <h1 className="text-lg font-semibold">Ideate</h1>
+        <Link href="/" className="text-lg font-semibold hover:opacity-80">
+          Ideate
+        </Link>
       </div>
 
       <div className="ml-auto flex items-center gap-2">
+        <Button asChild variant="ghost" size="icon">
+          <Link href="/profile">
+            <User className="h-4 w-4" />
+            <span className="sr-only">Profile</span>
+          </Link>
+        </Button>
         <DarkModeToggle />
       </div>
     </header>

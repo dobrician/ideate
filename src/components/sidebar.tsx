@@ -1,17 +1,27 @@
 "use client";
 
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Home, FolderOpen, User, LogOut } from "lucide-react";
 
 interface SidebarProps {
   open: boolean;
   onClose: () => void;
 }
 
+const navItems = [
+  { href: "/", label: "Home", icon: Home },
+  { href: "/projects", label: "Projects", icon: FolderOpen },
+  { href: "/profile", label: "Profile", icon: User },
+];
+
 export function Sidebar({ open, onClose }: SidebarProps) {
+  const pathname = usePathname();
+
   return (
     <>
-      {/* Backdrop on mobile */}
       {open && (
         <div
           className="fixed inset-0 z-40 bg-black/50 lg:hidden"
@@ -30,10 +40,43 @@ export function Sidebar({ open, onClose }: SidebarProps) {
         </div>
         <ScrollArea className="h-[calc(100vh-3.5rem)]">
           <nav className="space-y-1 p-4">
-            <p className="text-sm text-muted-foreground">
-              Projects will appear here
-            </p>
+            {navItems.map((item) => {
+              const isActive =
+                item.href === "/"
+                  ? pathname === "/"
+                  : pathname.startsWith(item.href);
+              const Icon = item.icon;
+
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  onClick={onClose}
+                  className={cn(
+                    "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors",
+                    isActive
+                      ? "bg-accent text-accent-foreground"
+                      : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+                  )}
+                >
+                  <Icon className="h-4 w-4" />
+                  {item.label}
+                </Link>
+              );
+            })}
           </nav>
+
+          <div className="border-t p-4">
+            <form action="/auth/logout" method="POST">
+              <button
+                type="submit"
+                className="flex w-full items-center gap-3 rounded-md px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
+              >
+                <LogOut className="h-4 w-4" />
+                Sign Out
+              </button>
+            </form>
+          </div>
         </ScrollArea>
       </aside>
     </>
