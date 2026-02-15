@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import Database from "better-sqlite3";
-import { resolve } from "path";
+import { resolve, dirname } from "path";
+import { mkdirSync } from "fs";
 
 export const dynamic = "force-dynamic";
 
@@ -9,7 +10,8 @@ export function GET() {
   let dbStatus = "ok";
 
   try {
-    const sqlite = new Database(dbPath, { readonly: true });
+    mkdirSync(dirname(dbPath), { recursive: true });
+    const sqlite = new Database(dbPath);
     sqlite.pragma("quick_check");
     sqlite.close();
   } catch {
