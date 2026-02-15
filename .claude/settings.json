@@ -6,7 +6,8 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash -c 'INPUT=$(cat); CMD=$(echo \"$INPUT\" | jq -r \".tool_input.command // empty\"); if echo \"$CMD\" | grep -q \"git commit\"; then echo \"⚠️ PRE-COMMIT: Ensure CHANGELOG.md updated, Sprint-Log.md reflects progress, conventional commit message\" >&2; fi'"
+            "command": ".claude/hooks/pre-commit-check.sh",
+            "statusMessage": "Checking commit hygiene..."
           }
         ]
       }
@@ -17,7 +18,19 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash -c 'INPUT=$(cat); CMD=$(echo \"$INPUT\" | jq -r \".tool_input.command // empty\"); if echo \"$CMD\" | grep -q \"git push\"; then echo \"📋 POST-PUSH: Sync GitHub Wiki! cd /tmp && ([ -d ideate.wiki ] || git clone https://github.com/dobrician/ideate.wiki.git) && cp /home/dc/work/ideate/docs/wiki/*.md /tmp/ideate.wiki/ && cd /tmp/ideate.wiki && git add -A && git diff --cached --quiet || (git commit -m docs:sync-wiki && git push)\" >&2; fi; if echo \"$CMD\" | grep -q \"docker compose up\"; then echo \"🧪 POST-DEPLOY: Run smoke tests! npm run test:smoke\" >&2; fi'"
+            "command": "bash -c 'INPUT=$(cat); CMD=$(echo \"$INPUT\" | jq -r \".tool_input.command // empty\"); if echo \"$CMD\" | grep -q \"git push\"; then .claude/hooks/sync-wiki.sh; fi; if echo \"$CMD\" | grep -q \"docker compose up\"; then echo \"🧪 POST-DEPLOY: Run smoke tests! npm run test:smoke\" >&2; fi'",
+            "statusMessage": "Post-action checks..."
+          }
+        ]
+      }
+    ],
+    "TaskCompleted": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": ".claude/hooks/sync-wiki.sh",
+            "statusMessage": "Syncing wiki..."
           }
         ]
       }
@@ -27,10 +40,18 @@
         "hooks": [
           {
             "type": "command",
-            "command": "echo '✅ DONE — Verify: 1) CHANGELOG.md updated 2) Sprint-Log.md tasks checked off 3) Wiki synced 4) Tests passing 5) README.md accurate 6) Issues referenced' >&2"
+            "command": ".claude/hooks/sync-wiki.sh",
+            "statusMessage": "Final wiki sync..."
+          },
+          {
+            "type": "command",
+            "command": "echo '✅ Session complete. Verify: CHANGELOG.md | Sprint-Log.md | Tests | README.md | Issues' >&2"
           }
         ]
       }
     ]
+  },
+  "env": {
+    "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1"
   }
 }
