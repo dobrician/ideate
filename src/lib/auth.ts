@@ -13,12 +13,17 @@ const MAGIC_LINK_EXPIRY = "15m"; // 15 minutes
 const SESSION_EXPIRY = "7d"; // 7 days
 const SESSION_ROTATION_THRESHOLD = 60 * 60 * 24 * 3; // Rotate token if less than 3 days remain
 
-if (!JWT_SECRET) {
-  throw new Error("JWT_SECRET environment variable is required");
-}
-
-if (JWT_SECRET.length < 32) {
-  throw new Error("JWT_SECRET must be at least 32 characters for security");
+/**
+ * Validate JWT_SECRET at runtime (not build time)
+ */
+function getJwtSecret(): string {
+  if (!JWT_SECRET) {
+    throw new Error("JWT_SECRET environment variable is required");
+  }
+  if (JWT_SECRET.length < 32) {
+    throw new Error("JWT_SECRET must be at least 32 characters for security");
+  }
+  return JWT_SECRET;
 }
 
 /**
@@ -53,7 +58,7 @@ export function generateMagicLinkToken(email: string): string {
     type: "magic-link",
   };
 
-  return jwt.sign(payload, JWT_SECRET, {
+  return jwt.sign(payload, getJwtSecret(), {
     expiresIn: MAGIC_LINK_EXPIRY,
     issuer: APP_URL,
   });
@@ -66,7 +71,7 @@ export function generateMagicLinkToken(email: string): string {
  */
 export function verifyMagicLinkToken(token: string): string | null {
   try {
-    const payload = jwt.verify(token, JWT_SECRET, {
+    const payload = jwt.verify(token, getJwtSecret(), {
       issuer: APP_URL,
     }) as MagicLinkPayload;
 
@@ -134,7 +139,7 @@ export function createSessionToken(userId: string, email: string): string {
     jti: randomUUID(), // Unique token ID for revocation capability
   };
 
-  return jwt.sign(payload, JWT_SECRET, {
+  return jwt.sign(payload, getJwtSecret(), {
     expiresIn: SESSION_EXPIRY,
     issuer: APP_URL,
     audience: APP_URL,
@@ -151,7 +156,7 @@ export function verifySessionToken(
   token: string
 ): SessionPayload | null {
   try {
-    const payload = jwt.verify(token, JWT_SECRET, {
+    const payload = jwt.verify(token, getJwtSecret(), {
       issuer: APP_URL,
       audience: APP_URL,
       clockTolerance: 30, // Allow 30 seconds clock skew

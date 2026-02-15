@@ -7,10 +7,12 @@ const SMTP_USER = process.env.SMTP_USER || "";
 const SMTP_PASS = process.env.SMTP_PASS || "";
 const SMTP_FROM = process.env.SMTP_FROM || "idea@surcod.ro";
 
-if (!SMTP_HOST || !SMTP_USER || !SMTP_PASS) {
-  throw new Error(
-    "SMTP configuration required: SMTP_HOST, SMTP_USER, SMTP_PASS"
-  );
+function validateSmtpConfig(): void {
+  if (!SMTP_HOST || !SMTP_USER || !SMTP_PASS) {
+    throw new Error(
+      "SMTP configuration required: SMTP_HOST, SMTP_USER, SMTP_PASS"
+    );
+  }
 }
 
 let transporter: Transporter | null = null;
@@ -20,6 +22,7 @@ let transporter: Transporter | null = null;
  * @returns Nodemailer transporter
  */
 function getTransporter(): Transporter {
+  validateSmtpConfig();
   if (!transporter) {
     transporter = nodemailer.createTransport({
       host: SMTP_HOST,
