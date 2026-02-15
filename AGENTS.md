@@ -102,6 +102,19 @@ They are NOT part of the unit/E2E suite — they test the real deployed containe
 - Include: project description, setup instructions, Docker usage, env vars, tech stack, architecture overview
 - Update README.md whenever features, setup steps, or architecture changes
 
+## Sprint Planning — Issues Management
+At the START of every sprint:
+1. Review ALL open GitHub issues (`gh issue list --state open`)
+2. Identify which issues are relevant to this sprint's goals
+3. Assign relevant issues to the sprint (add `sprint` label + comment with sprint name)
+4. Risk issues (#1-5) take priority — address them as soon as the sprint touches related code
+5. Create NEW issues for any problems discovered during development (bugs, tech debt, security)
+6. Close issues with commit references when resolved (`fixes #N` in commit message)
+7. Update issue status with comments as work progresses
+8. At sprint END: review which issues were addressed, which remain, create new ones if needed
+
+**Never forget issues exist.** They are the project's backlog and risk register.
+
 ## Sprint Completion Checklist
 Before declaring a sprint done:
 1. All tasks checked off in Sprint Log
