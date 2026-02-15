@@ -1,23 +1,23 @@
 import { notFound, redirect } from "next/navigation";
 import { db } from "@/db";
-import { projects } from "@/db/schema";
+import { projects, proposals, votes, comments, users } from "@/db/schema";
 import { getCurrentUser } from "@/lib/auth";
-import { eq } from "drizzle-orm";
+import { eq, desc, sql } from "drizzle-orm";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import Link from "next/link";
 import { DeleteProjectButton } from "./delete-button";
+import { ProposalForm } from "@/components/proposal-form";
+import { ProposalList } from "@/components/proposal-list";
 
 interface ProjectPageProps {
   params: Promise<{ id: string }>;
 }
 
 /**
- * Individual project page
- * Shows project details and allows editing/deleting
+ * Individual project page with proposals, voting, and discussions
  */
 export default async function ProjectPage({ params }: ProjectPageProps) {
-  // Require authentication
   const user = await getCurrentUser();
 
   if (!user) {
@@ -42,11 +42,113 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
   const isAdmin = user.role === "admin";
   const canEdit = isOwner || isAdmin;
 
+  // Fetch proposals with aggregated vote counts
+  const proposalRows = await db
+    .select({
+      id: proposals.id,
+      title: proposals.title,
+      description: proposals.description,
+      summary: proposals.summary,
+      userId: proposals.userId,
+      createdAt: proposals.createdAt,
+      authorFirstName: users.firstName,
+      authorLastName: users.lastName,
+      authorEmail: users.email,
+      upvotes: sql<number>`COALESCE(SUM(CASE WHEN ${votes.value} = 1 THEN 1 ELSE 0 END), 0)`,
+      downvotes: sql<number>`COALESCE(SUM(CASE WHEN ${votes.value} = -1 THEN 1 ELSE 0 END), 0)`,
+    })
+    .from(proposals)
+    .leftJoin(votes, eq(proposals.id, votes.proposalId))
+    .leftJoin(users, eq(proposals.userId, users.id))
+    .where(eq(proposals.projectId, id))
+    .groupBy(proposals.id)
+    .orderBy(desc(proposals.createdAt));
+
+  // Fetch current user's votes for highlighting
+  const userVoteRows = await db
+    .select({ proposalId: votes.proposalId, value: votes.value })
+    .from(votes)
+    .where(eq(votes.userId, user.id));
+  const voteMap = new Map(userVoteRows.map((v) => [v.proposalId, v.value]));
+
+  // Fetch all comments for this project's proposals
+  const proposalIds = proposalRows.map((p) => p.id);
+  let allComments: {
+    id: string;
+    proposalId: string;
+    parentId: string | null;
+    content: string;
+    userId: string | null;
+    createdAt: Date | null;
+    userEmail: string | null;
+    userName: string | null;
+  }[] = [];
+
+  if (proposalIds.length > 0) {
+    allComments = await db
+      .select({
+        id: comments.id,
+        proposalId: comments.proposalId,
+        parentId: comments.parentId,
+        content: comments.content,
+        userId: comments.userId,
+        createdAt: comments.createdAt,
+        userEmail: users.email,
+        userName: users.firstName,
+      })
+      .from(comments)
+      .leftJoin(users, eq(comments.userId, users.id))
+      .where(
+        sql`${comments.proposalId} IN (${sql.join(
+          proposalIds.map((pid) => sql`${pid}`),
+          sql`, `
+        )})`
+      )
+      .orderBy(comments.createdAt);
+  }
+
+  // Group comments by proposal
+  const commentsByProposal = new Map<string, typeof allComments>();
+  for (const c of allComments) {
+    const list = commentsByProposal.get(c.proposalId) || [];
+    list.push(c);
+    commentsByProposal.set(c.proposalId, list);
+  }
+
+  // Build enriched proposal data
+  const proposalsWithStats = proposalRows.map((p) => {
+    const pComments = commentsByProposal.get(p.id) || [];
+    const authorName = [p.authorFirstName, p.authorLastName].filter(Boolean).join(" ") || p.authorEmail || "Anonymous";
+
+    return {
+      id: p.id,
+      title: p.title,
+      description: p.description,
+      summary: p.summary,
+      userId: p.userId,
+      createdAt: p.createdAt,
+      upvotes: Number(p.upvotes),
+      downvotes: Number(p.downvotes),
+      userVote: voteMap.get(p.id) ?? null,
+      commentCount: pComments.length,
+      comments: pComments.map((c) => ({
+        id: c.id,
+        content: c.content,
+        parentId: c.parentId,
+        userId: c.userId,
+        userEmail: c.userEmail ?? undefined,
+        userName: c.userName ?? undefined,
+        createdAt: c.createdAt,
+      })),
+      authorName,
+    };
+  });
+
   return (
     <div className="container mx-auto max-w-4xl px-4 py-8">
       <div className="mb-6 flex items-center justify-between">
         <Button asChild variant="outline">
-          <Link href="/projects">← Back to Projects</Link>
+          <Link href="/projects">&larr; Back to Projects</Link>
         </Button>
         {canEdit && (
           <div className="flex gap-2">
@@ -90,6 +192,12 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
           </div>
         </CardHeader>
         <CardContent className="space-y-6">
+          {projectData.summary && (
+            <div className="rounded-md bg-muted/50 p-3">
+              <p className="text-sm italic text-muted-foreground">{projectData.summary}</p>
+            </div>
+          )}
+
           {projectData.description && (
             <div>
               <h2 className="mb-2 text-lg font-semibold">Description</h2>
@@ -129,10 +237,18 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
           </div>
 
           <div className="border-t pt-6">
-            <h2 className="mb-4 text-lg font-semibold">Proposals</h2>
-            <p className="text-muted-foreground">
-              Proposal management coming soon. Users will be able to submit and vote on ideas here.
-            </p>
+            <div className="mb-4 flex items-center justify-between">
+              <h2 className="text-lg font-semibold">
+                Proposals ({proposalsWithStats.length})
+              </h2>
+              <ProposalForm projectId={id} />
+            </div>
+            <ProposalList
+              proposals={proposalsWithStats}
+              projectId={id}
+              currentUserId={user.id}
+              isAdmin={isAdmin}
+            />
           </div>
         </CardContent>
       </Card>

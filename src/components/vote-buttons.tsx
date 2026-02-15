@@ -1,0 +1,70 @@
+"use client";
+
+import { useTransition } from "react";
+import { Button } from "@/components/ui/button";
+import { castVote, removeVote } from "@/app/projects/[id]/proposals/actions";
+import { ThumbsUp, ThumbsDown } from "lucide-react";
+
+interface VoteButtonsProps {
+  proposalId: string;
+  projectId: string;
+  upvotes: number;
+  downvotes: number;
+  userVote: number | null;
+}
+
+/**
+ * Thumbs up/down vote buttons with active state highlighting
+ */
+export function VoteButtons({
+  proposalId,
+  projectId,
+  upvotes,
+  downvotes,
+  userVote,
+}: VoteButtonsProps) {
+  const [isPending, startTransition] = useTransition();
+
+  function handleVote(value: number) {
+    startTransition(async () => {
+      if (userVote === value) {
+        await removeVote(proposalId, projectId);
+      } else {
+        await castVote(proposalId, value, projectId);
+      }
+    });
+  }
+
+  return (
+    <div className="flex items-center gap-1">
+      <Button
+        variant="ghost"
+        size="sm"
+        onClick={() => handleVote(1)}
+        disabled={isPending}
+        className={
+          userVote === 1
+            ? "text-green-600 hover:text-green-700 dark:text-green-400"
+            : "text-muted-foreground hover:text-green-600"
+        }
+      >
+        <ThumbsUp className="mr-1 h-4 w-4" />
+        <span className="text-sm font-medium">{upvotes}</span>
+      </Button>
+      <Button
+        variant="ghost"
+        size="sm"
+        onClick={() => handleVote(-1)}
+        disabled={isPending}
+        className={
+          userVote === -1
+            ? "text-red-600 hover:text-red-700 dark:text-red-400"
+            : "text-muted-foreground hover:text-red-600"
+        }
+      >
+        <ThumbsDown className="mr-1 h-4 w-4" />
+        <span className="text-sm font-medium">{downvotes}</span>
+      </Button>
+    </div>
+  );
+}
