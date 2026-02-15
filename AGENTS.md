@@ -66,7 +66,7 @@ Enterprise democratic idea prioritization platform. Teams create projects, submi
 - Squash merge to main after sprint completion
 - Tag releases: `v0.X.0`
 
-## Don't
+## Don't — CRITICAL RULES
 - Don't use `any` type
 - Don't skip error handling
 - Don't write components over 300 lines
@@ -75,6 +75,7 @@ Enterprise democratic idea prioritization platform. Teams create projects, submi
 - Don't skip test coverage for any new code
 - Don't use console.log in production code
 - Don't hardcode configuration values
+- **NEVER modify a test to make it pass when the code is the problem** — if a test fails, fix the code, not the test. Tests are the source of truth. The only valid reason to change a test is if the test itself has a genuine bug or if requirements changed (and that must be documented in the commit message).
 
 ## Reference
 - Original ideator: `/home/dc/work/ideator` (read for feature reference, don't copy)
