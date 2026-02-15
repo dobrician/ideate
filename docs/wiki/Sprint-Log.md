@@ -140,3 +140,21 @@
 - GitHub issue #4 (AI rate limiting) addressed with throttling
 - CHANGELOG.md updated with v0.3.0
 - All 8 sprint tasks completed
+
+---
+
+## Sprint 4 — Polish & Enterprise Features (2026-02-16)
+**Status:** 🔄 IN PROGRESS
+
+### Goals
+- [ ] Role-based access control — admin/member roles with permissions (#8)
+- [ ] Real-time voting updates via SSE (#6)
+- [ ] Email deliverability — verify SPF/DKIM setup (#2)
+- [ ] AI rate limiting and cost controls (#4)
+- [ ] Responsive mobile UI polish
+- [ ] Error handling improvements (toast notifications, better error pages)
+- [ ] Dashboard page (overview of user's projects, recent activity)
+- [ ] Pagination for projects and proposals lists
+
+### Outcomes
+- TBD (sprint in progress)
