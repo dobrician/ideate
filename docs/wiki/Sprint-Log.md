@@ -34,13 +34,16 @@
 **Status:** 🔄 IN PROGRESS
 
 ### Goals
-- [ ] Email magic link auth (send link, verify, create session)
-- [ ] JWT session management (HTTP-only cookies)
-- [ ] Login/register pages
+- [x] Email magic link auth (send link, verify, create session)
+- [x] JWT session management (HTTP-only cookies) — with CSRF protection + token rotation (fixes #5)
+- [x] Login/register pages
 - [ ] Projects CRUD (create, list, view)
 - [ ] Basic routing structure
-- [ ] README.md with setup instructions
+- [x] README.md with setup instructions
 - [ ] Smoke test suite (`npm run test:smoke`)
 
-### Outcomes
-- TBD (sprint in progress)
+### Outcomes (so far)
+- JWT security with CSRF protection and token rotation (closes #5)
+- Login page with magic link flow
+- Auth routes implemented
+- .env.example updated with SMTP and JWT config
