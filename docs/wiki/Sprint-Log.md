@@ -205,3 +205,21 @@
 - Issue #2 (email deliverability) deferred — requires DNS config, not code
 - 260 total unit tests, all passing
 - Build clean, ready for staging deployment
+
+---
+
+## Sprint 5 — CI/CD & Infrastructure (2026-02-16)
+**Status:** 🔄 IN PROGRESS
+
+### Goals
+- [ ] GitHub Actions CI/CD pipeline — lint, typecheck, test, build on PR (#11)
+- [ ] Full-text search for projects and proposals (#10)
+- [ ] Audit logging — track user actions, votes, changes (#9)
+- [ ] Docker volume backup strategy (#3)
+- [ ] Email deliverability verification — SPF/DKIM headers (#2)
+- [ ] Internationalization setup (EN/RO) — from original ideator
+- [ ] API documentation (OpenAPI/Swagger for API routes)
+- [ ] Performance optimization — lazy loading, code splitting, image optimization
+
+### Outcomes
+- TBD (sprint in progress)
