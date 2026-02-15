@@ -1,0 +1,25 @@
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash(git commit*)",
+        "hook": "echo 'PRE-COMMIT CHECK: Ensure CHANGELOG.md is updated, Sprint-Log.md reflects progress, and commit message follows conventional format (feat:/fix:/docs:/test:/refactor:/chore:/security:)'"
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Bash(git push*)",
+        "hook": "echo 'POST-PUSH: Sync GitHub Wiki now! Run: cd /tmp && ([ -d ideate.wiki ] || git clone https://github.com/dobrician/ideate.wiki.git) && cp /home/dc/work/ideate/docs/wiki/*.md /tmp/ideate.wiki/ && cd /tmp/ideate.wiki && git add -A && git diff --cached --quiet || (git commit -m \"docs: sync wiki\" && git push)'"
+      },
+      {
+        "matcher": "Bash(docker compose up*)",
+        "hook": "echo 'POST-DEPLOY: Run smoke tests! Execute: npm run test:smoke against the deployed container. Deploy is NOT complete until smoke tests pass.'"
+      }
+    ],
+    "Stop": [
+      {
+        "hook": "echo '\\n=== SPRINT TASK COMPLETE ===\\nBefore stopping, verify:\\n1. ✅ CHANGELOG.md updated\\n2. ✅ docs/wiki/Sprint-Log.md task checked off\\n3. ✅ GitHub Wiki synced\\n4. ✅ All tests passing\\n5. ✅ README.md still accurate\\n6. ✅ Any new issues created for discovered problems\\n7. ✅ Commit messages reference issue numbers where applicable (fixes #N)\\n========================'"
+      }
+    ]
+  }
+}
