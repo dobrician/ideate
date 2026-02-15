@@ -2,23 +2,34 @@
   "hooks": {
     "PreToolUse": [
       {
-        "matcher": "Bash(git commit*)",
-        "hook": "echo 'PRE-COMMIT CHECK: Ensure CHANGELOG.md is updated, Sprint-Log.md reflects progress, and commit message follows conventional format (feat:/fix:/docs:/test:/refactor:/chore:/security:)'"
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash -c 'INPUT=$(cat); CMD=$(echo \"$INPUT\" | jq -r \".tool_input.command // empty\"); if echo \"$CMD\" | grep -q \"git commit\"; then echo \"⚠️ PRE-COMMIT: Ensure CHANGELOG.md updated, Sprint-Log.md reflects progress, conventional commit message\" >&2; fi'"
+          }
+        ]
       }
     ],
     "PostToolUse": [
       {
-        "matcher": "Bash(git push*)",
-        "hook": "echo 'POST-PUSH: Sync GitHub Wiki now! Run: cd /tmp && ([ -d ideate.wiki ] || git clone https://github.com/dobrician/ideate.wiki.git) && cp /home/dc/work/ideate/docs/wiki/*.md /tmp/ideate.wiki/ && cd /tmp/ideate.wiki && git add -A && git diff --cached --quiet || (git commit -m \"docs: sync wiki\" && git push)'"
-      },
-      {
-        "matcher": "Bash(docker compose up*)",
-        "hook": "echo 'POST-DEPLOY: Run smoke tests! Execute: npm run test:smoke against the deployed container. Deploy is NOT complete until smoke tests pass.'"
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash -c 'INPUT=$(cat); CMD=$(echo \"$INPUT\" | jq -r \".tool_input.command // empty\"); if echo \"$CMD\" | grep -q \"git push\"; then echo \"📋 POST-PUSH: Sync GitHub Wiki! cd /tmp && ([ -d ideate.wiki ] || git clone https://github.com/dobrician/ideate.wiki.git) && cp /home/dc/work/ideate/docs/wiki/*.md /tmp/ideate.wiki/ && cd /tmp/ideate.wiki && git add -A && git diff --cached --quiet || (git commit -m docs:sync-wiki && git push)\" >&2; fi; if echo \"$CMD\" | grep -q \"docker compose up\"; then echo \"🧪 POST-DEPLOY: Run smoke tests! npm run test:smoke\" >&2; fi'"
+          }
+        ]
       }
     ],
     "Stop": [
       {
-        "hook": "echo '\\n=== SPRINT TASK COMPLETE ===\\nBefore stopping, verify:\\n1. ✅ CHANGELOG.md updated\\n2. ✅ docs/wiki/Sprint-Log.md task checked off\\n3. ✅ GitHub Wiki synced\\n4. ✅ All tests passing\\n5. ✅ README.md still accurate\\n6. ✅ Any new issues created for discovered problems\\n7. ✅ Commit messages reference issue numbers where applicable (fixes #N)\\n========================'"
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo '✅ DONE — Verify: 1) CHANGELOG.md updated 2) Sprint-Log.md tasks checked off 3) Wiki synced 4) Tests passing 5) README.md accurate 6) Issues referenced' >&2"
+          }
+        ]
       }
     ]
   }
