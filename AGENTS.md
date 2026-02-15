@@ -23,7 +23,7 @@ Enterprise democratic idea prioritization platform. Teams create projects, submi
 
 ## Key Files
 - `src/db/schema.ts` — Single source of truth for DB
-- `src/lib/auth.ts` — WorkOS session management
+- `src/lib/auth.ts` — Email magic link + JWT session (no WorkOS)
 - `src/lib/ai.ts` — Pluggable LLM (Gemini/OpenAI)
 - `docker-compose.yml` — Staging (4100) + Dev (4101)
 

@@ -17,7 +17,7 @@ Enterprise-grade democratic idea prioritization platform. Rebuilt from scratch b
 ### Stack
 - **Framework:** Next.js 15+ (App Router) — proven, good DX, enterprise-ready
 - **Database:** SQLite via Drizzle ORM (portable, simple, D1-compatible later)
-- **Auth:** WorkOS (free tier 1M MAU)
+- **Auth:** Email-based magic link (nodemailer + JWT, NO WorkOS)
 - **AI:** Pluggable LLM layer (Gemini default, OpenAI fallback)
 - **Styling:** Tailwind CSS 4 + shadcn/ui
 - **Testing:** Playwright E2E + Vitest unit tests
