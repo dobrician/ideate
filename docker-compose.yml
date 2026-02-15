@@ -1,0 +1,44 @@
+services:
+  staging:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: ideate-staging
+    ports:
+      - "4100:3000"
+    volumes:
+      - ideate-data-staging:/app/data
+    environment:
+      - NODE_ENV=production
+      - DATABASE_URL=/app/data/ideate.db
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:3000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+  dev:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: ideate-dev
+    ports:
+      - "4101:3000"
+    volumes:
+      - ideate-data-dev:/app/data
+    environment:
+      - NODE_ENV=production
+      - DATABASE_URL=/app/data/ideate.db
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:3000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+volumes:
+  ideate-data-staging:
+  ideate-data-dev:

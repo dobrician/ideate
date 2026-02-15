@@ -1,0 +1,10 @@
+node_modules
+.next
+.git
+*.db
+*.db-journal
+data/
+test-results/
+playwright-report/
+.env
+.env.local
