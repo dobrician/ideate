@@ -1,25 +1,46 @@
 # Sprint Log
 
 ## Sprint 1 — Foundation (2026-02-15)
-**Status:** 🔄 IN PROGRESS
+**Status:** ✅ COMPLETE
 
 ### Goals
 - [x] Project scaffolding, repo setup, documentation
 - [x] Next.js 16 with TypeScript strict, Tailwind CSS 4
-- [ ] Drizzle ORM + SQLite schema
-- [ ] Database migrations
-- [ ] Docker multi-stage build (staging :4100, dev :4101)
-- [ ] Basic layout (responsive shell, dark mode, header)
-- [ ] shadcn/ui components
-- [ ] Playwright smoke test
-- [ ] Vitest unit test placeholder
-- [ ] Health check endpoint
-- [ ] .env.example
+- [x] Drizzle ORM + SQLite schema (5 tables)
+- [x] Database migrations
+- [x] Docker multi-stage build (staging :4100, dev :4101)
+- [x] Basic layout (responsive shell, dark mode, header, sidebar)
+- [x] shadcn/ui (11 components)
+- [x] Playwright smoke tests (2 passing)
+- [x] Vitest unit test (1 passing)
+- [x] Health check endpoint (`/api/health`)
+- [x] .env.example
 
 ### Outcomes
-- TBD (sprint in progress)
+- 9 conventional commits
+- Build, unit tests, E2E tests all passing
+- Docker container builds and serves
+- Schema: users (with roles), projects, proposals, votes (composite PK), comments (threaded)
+- Dark mode with light/dark/system toggle
 
 ### Notes
 - Switched from WorkOS to email magic link auth
-- SMTP via configured SMTP provider (See .env.local)
+- SMTP via smtp2go (See .env.local)
 - Domain: idea.surmont.co via nginx proxy
+
+---
+
+## Sprint 2 — Auth & Core Features (2026-02-15)
+**Status:** 🔄 IN PROGRESS
+
+### Goals
+- [ ] Email magic link auth (send link, verify, create session)
+- [ ] JWT session management (HTTP-only cookies)
+- [ ] Login/register pages
+- [ ] Projects CRUD (create, list, view)
+- [ ] Basic routing structure
+- [ ] README.md with setup instructions
+- [ ] Smoke test suite (`npm run test:smoke`)
+
+### Outcomes
+- TBD (sprint in progress)
