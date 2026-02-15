@@ -7,6 +7,46 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-02-15
+
+### Added
+- Proposals CRUD with AI-generated summaries
+  - Create proposal with title, description, and initial vote
+  - AI summary generation via Gemini/OpenAI on creation
+  - Delete proposal (owner/admin only, cascading to votes/comments)
+  - Accordion-based proposal list on project detail page
+- Voting system (+1/-1 per user per proposal)
+  - Composite primary key (proposalId + userId)
+  - Upsert on conflict for vote changes
+  - Toggle vote removal (click same vote to remove)
+  - ThumbsUp/ThumbsDown buttons with active state highlighting
+- Vote bar chart visualization
+  - Horizontal pro/contra bar with percentages (pure CSS/Tailwind)
+  - Green for pro, red for contra, with vote counts
+- Threaded comments on proposals
+  - Discussion sheet (shadcn Sheet) per proposal with comment count
+  - Reply threading via parentId (max depth 3)
+  - Relative time display (e.g., "2h ago")
+- AI summarization library (`src/lib/llm.ts`, `src/lib/ai.ts`)
+  - Pluggable LLM: Gemini primary, OpenAI fallback
+  - Per-provider 15-min throttling on 429 responses (addresses #4)
+  - Direct REST API calls (no SDK dependency)
+  - Project and proposal summary generation
+- Auth middleware for route protection (`src/middleware.ts`)
+  - Redirects unauthenticated users to /auth/login with redirect param
+  - Public routes excluded: /, /auth/*, /api/health, static assets
+- User profile page (`/profile`)
+  - Account info display (email, role, member since)
+  - Edit first/last name form
+  - Lists user's projects and proposals
+  - Loading skeleton and error boundary
+- Navigation updates
+  - Sidebar with real nav links (Home, Projects, Profile, Sign Out)
+  - Header with profile icon and Ideate home link
+
+### Fixed
+- SQLite concurrent write safety: added busy_timeout=5000 pragma (fixes #1)
+
 ## [0.2.0] - 2026-02-15
 
 ### Added

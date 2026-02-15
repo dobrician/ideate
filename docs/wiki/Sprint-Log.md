@@ -86,17 +86,57 @@
 ---
 
 ## Sprint 3 — Proposals & Voting (2026-02-15)
-**Status:** 🔄 IN PROGRESS
+**Status:** ✅ COMPLETE
 
 ### Goals
-- [ ] Proposals CRUD (create, list, view per project)
-- [ ] Voting system (pro/contra, +1/-1 per user per proposal)
-- [ ] Vote bar chart visualization (consensus view)
-- [ ] Threaded comments on proposals
-- [ ] AI summarization integration (Gemini/OpenAI pluggable)
-- [ ] Protected routes (auth middleware — redirect to login if not authenticated)
-- [ ] User profile/settings page
-- [ ] Address #1: SQLite WAL mode + concurrent write safety for voting
+- [x] Proposals CRUD (create, list, view per project)
+- [x] Voting system (pro/contra, +1/-1 per user per proposal)
+- [x] Vote bar chart visualization (consensus view)
+- [x] Threaded comments on proposals
+- [x] AI summarization integration (Gemini/OpenAI pluggable)
+- [x] Protected routes (auth middleware — redirect to login if not authenticated)
+- [x] User profile/settings page
+- [x] Address #1: SQLite WAL mode + concurrent write safety for voting
 
 ### Outcomes
-- TBD (sprint in progress)
+- 6 conventional commits
+- All unit tests passing, build clean
+- Proposals CRUD fully implemented
+  - Create proposal with AI-generated summary (Gemini/OpenAI)
+  - Delete proposal (owner/admin, cascading to votes/comments)
+  - Accordion-based list with vote buttons and discussion sheets
+  - Server actions: createProposal, deleteProposal, castVote, removeVote, addComment
+- Voting system complete
+  - +1/-1 per user per proposal with composite PK
+  - Upsert on conflict for vote changes
+  - Toggle removal (click same vote again)
+  - ThumbsUp/ThumbsDown with green/red active state highlighting
+- Vote bar chart visualization
+  - Horizontal pro/contra bar with percentages (pure CSS/Tailwind)
+  - Green for pro, red for contra, counts and percentages
+- Threaded comments
+  - Discussion sheet (shadcn Sheet) per proposal with comment count
+  - Reply threading via parentId, max depth 3
+  - Relative time display (e.g., "2h ago")
+- AI summarization library
+  - Pluggable LLM: Gemini primary (gemini-2.5-flash-lite), OpenAI fallback (gpt-4o-mini)
+  - Per-provider 15-min throttling on 429 (addresses #4)
+  - Direct REST API calls, no SDK dependency
+  - Project and proposal summary generation with fallback truncation
+- Auth middleware (`src/middleware.ts`)
+  - Route-level protection, redirects to /auth/login with redirect param
+  - Public routes excluded: /, /auth/*, /api/health, static assets
+- User profile page (`/profile`)
+  - Account info, edit name, user's projects and proposals
+  - Loading skeleton and error boundary
+- Navigation updates
+  - Real sidebar nav: Home, Projects, Profile, Sign Out
+  - Header with profile icon link
+- SQLite concurrent writes fixed (fixes #1)
+  - busy_timeout=5000 pragma for write contention
+
+### Notes
+- GitHub issue #1 (SQLite concurrent writes) closed
+- GitHub issue #4 (AI rate limiting) addressed with throttling
+- CHANGELOG.md updated with v0.3.0
+- All 8 sprint tasks completed
