@@ -2,7 +2,7 @@ import { redirect } from "next/navigation";
 import { verifyMagicLinkToken, findOrCreateUser, setSessionCookie } from "@/lib/auth";
 
 interface VerifyPageProps {
-  searchParams: Promise<{ token?: string }>;
+  searchParams: Promise<{ token?: string; redirect?: string }>;
 }
 
 /**
@@ -61,8 +61,9 @@ export default async function VerifyPage({ searchParams }: VerifyPageProps) {
     // Create session
     await setSessionCookie(userId, email);
 
-    // Redirect to home page
-    redirect("/");
+    // Redirect to intended destination or home page
+    const redirectTo = params.redirect && params.redirect.startsWith("/") ? params.redirect : "/";
+    redirect(redirectTo);
   } catch (error) {
     console.error("Verification error:", error);
 
