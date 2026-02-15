@@ -59,6 +59,24 @@ Enterprise democratic idea prioritization platform. Teams create projects, submi
 - Staging: always up on :4100 (idea.surmont.co)
 - Dev: sprint work on :4101
 - Promote: when all tests pass, rebuild staging from main
+- **Post-deploy smoke tests**: After deploying to staging, ALWAYS run `npm run test:smoke` against the live container. Deploy is NOT done until smoke tests pass.
+
+## Smoke Tests — Post-Deploy Verification
+Smoke tests live in `tests/smoke/` and run against the live staging URL (http://idea.surmont.co/).
+They are NOT part of the unit/E2E suite — they test the real deployed container.
+
+**What they verify:**
+- HTTP 200 on `/` with real HTML content (not error page)
+- `/api/health` returns 200 + valid JSON with status "ok"
+- Static assets load (CSS, JS bundles)
+- Auth flow accessible (login page renders)
+- DB connection alive (health endpoint confirms)
+- Environment variables loaded (no "missing config" errors)
+- Docker container is healthy (`docker inspect` health status)
+
+**Script**: `npm run test:smoke` — runs Playwright against `APP_URL` (defaults to http://idea.surmont.co/)
+**When**: After every `docker compose up -d` on staging
+**Failure = rollback**: If smoke tests fail, the deploy is failed — rollback or fix before reporting success
 
 ## Git Workflow
 - Main branch: `main` (always deployable)
@@ -76,6 +94,13 @@ Enterprise democratic idea prioritization platform. Teams create projects, submi
 - Don't use console.log in production code
 - Don't hardcode configuration values
 - **NEVER modify a test to make it pass when the code is the problem** — if a test fails, fix the code, not the test. Tests are the source of truth. The only valid reason to change a test is if the test itself has a genuine bug or if requirements changed (and that must be documented in the commit message).
+
+## Documentation — MANDATORY
+- **README.md** must be maintained and kept up-to-date with every sprint
+- **Sprint Log** (`docs/wiki/Sprint-Log.md`): update after EVERY completed task (check off the goal, add to Outcomes). Mark ✅ COMPLETE when sprint finishes, add next sprint section.
+- **GitHub Wiki sync**: After updating any file in `docs/wiki/`, ALWAYS also push to the GitHub Wiki repo. Run: `cd /tmp && ([ -d ideate.wiki ] || git clone https://github.com/dobrician/ideate.wiki.git) && cp /home/dc/work/ideate/docs/wiki/*.md /tmp/ideate.wiki/ && cd /tmp/ideate.wiki && git add -A && git commit -m "docs: sync wiki" && git push`
+- Include: project description, setup instructions, Docker usage, env vars, tech stack, architecture overview
+- Update README.md whenever features, setup steps, or architecture changes
 
 ## Reference
 - Original ideator: `/home/dc/work/ideator` (read for feature reference, don't copy)
