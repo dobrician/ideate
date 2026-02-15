@@ -42,7 +42,7 @@ export async function createProject(formData: FormData) {
 
     if (!result.success) {
       return {
-        error: result.error.errors[0].message,
+        error: result.error.issues[0].message,
       };
     }
 
@@ -99,7 +99,7 @@ export async function updateProject(projectId: string, formData: FormData) {
 
     if (!result.success) {
       return {
-        error: result.error.errors[0].message,
+        error: result.error.issues[0].message,
       };
     }
 
