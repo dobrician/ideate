@@ -4,6 +4,12 @@ Reverse chronological. Click each sprint for full details.
 
 ---
 
+### ✅ [Sprint 23 — Dashboard Redesign](Sprint-23) *(2026-02-16)*
+**Focus:** Null-safe activity links, user-scoped activity feed, personal stats, Quick Actions bar, deadline badges, project stats cards, compact mobile pills, mobile search toggle, dashboard E2E + unit tests
+**Stats:** 12 commits | 670 unit tests | Issue #44
+
+---
+
 ### ✅ [Sprint 22 — Auth & Security Deep Dive](Sprint-22) *(2026-02-16)*
 **Focus:** CSRF enforcement, JWT middleware validation, Zod error fix, rate limiting, token hashing (SHA-256), audit logging, verify-email UX, password visibility toggle, proposal form modal, E2E auth tests
 **Stats:** 13 commits | 649 unit + 52 E2E = 701 tests | Issues #41, #42, #43

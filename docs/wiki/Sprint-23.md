@@ -1,5 +1,5 @@
 # Sprint 23 — Dashboard Redesign (2026-02-16)
-**Status:** IN PROGRESS
+**Status:** COMPLETE
 
 ## Goals
 
@@ -21,11 +21,11 @@ Based on unified analysis from Claude + Codex (see docs/sprint23-unified-plan.md
 
 **Testing:**
 - [x] Goal 9: Dashboard E2E tests
-- [ ] Goal 10: Unit tests for dashboard queries and components
+- [x] Goal 10: Unit tests for dashboard queries and components
 
 **Polish (if time permits):**
-- [ ] Goal 11: Drizzle-native queries replacing raw SQL
-- [ ] Goal 12: Sprint 23 log + outcomes in Sprint-Log.md
+- [x] Goal 11: Drizzle-native queries replacing raw SQL
+- [x] Goal 12: Sprint 23 log + outcomes in Sprint-Log.md
 
 ## Constraints
 - Commit + push after EACH goal
