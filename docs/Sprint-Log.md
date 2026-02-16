@@ -155,7 +155,7 @@
 - [x] 6. PWA install popup — show once per session
 - [x] 7. Voting UX — highlight selected vote, tooltip to remove
 - [x] 8. Delete confirmation — modal dialog for destructive actions
-- [ ] 9. Search — functional search with results dropdown
+- [x] 9. Search — functional search with results dropdown
 - [ ] 10. Date format — localize to dd.mm.yyyy for RO
 - [ ] 11. Dark mode contrast — WCAG AA compliance
 - [ ] 12. Tooltips — title/tooltip on all icon buttons
