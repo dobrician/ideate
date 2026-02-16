@@ -5,9 +5,9 @@ import { logger } from "@/lib/logger";
 import { z } from "zod";
 
 const resetSchema = z.object({
-  token: z.string().min(1, "Reset token is required"),
-  password: z.string().min(1, "Password is required"),
-  confirmPassword: z.string().min(1, "Please confirm your password"),
+  token: z.string({ error: "Reset token is required" }).min(1, "Reset token is required"),
+  password: z.string({ error: "Password is required" }).min(1, "Password is required"),
+  confirmPassword: z.string({ error: "Please confirm your password" }).min(1, "Please confirm your password"),
 });
 
 /**
@@ -20,7 +20,15 @@ export async function POST(request: NextRequest) {
     const originError = requireOrigin(request);
     if (originError) return originError;
 
-    const body = await request.json();
+    let body: unknown;
+    try {
+      body = await request.json();
+    } catch {
+      return NextResponse.json(
+        { error: "Invalid request body" },
+        { status: 400 }
+      );
+    }
     const result = resetSchema.safeParse(body);
 
     if (!result.success) {
