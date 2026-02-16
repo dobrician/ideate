@@ -1,80 +1,47 @@
 import { test, expect } from "@playwright/test";
-import { execSync } from "child_process";
+import { readFileSync } from "fs";
 
 const APP_URL = process.env.APP_URL || "https://idea.surmont.co";
+const MAIL_LOG_FILE = process.env.MAIL_LOG_FILE || "/tmp/ideate-mail.log";
 const TEST_EMAIL_PREFIX = `smokepass${Date.now()}`;
 const TEST_EMAIL = `${TEST_EMAIL_PREFIX}@surcod.ro`;
 const TEST_PASSWORD = "SmokeTest123";
 
 /**
- * Extract verification/reset token from email via Gmail API.
- * Polls Gmail for up to maxWaitMs looking for a link with the given path.
+ * Extract a URL from the mail log file for the given email and type.
+ * Polls the log file until a matching entry appears or timeout is reached.
  */
-function getTokenFromEmail(
+function getUrlFromMailLog(
   email: string,
-  linkPath: string,
+  type: string,
   maxWaitMs = 30000
 ): string {
   const startTime = Date.now();
-  const pollInterval = 3000;
-  const tokenRegex = new RegExp(
-    `${linkPath.replace(/\//g, "\\/")}\\?token=([a-f0-9]+)`
-  );
-
-  // Snapshot existing tokens so we only return fresh ones
-  const seenTokens = new Set<string>();
-  try {
-    const output = execSync(
-      `source /home/dc/.config/gogcli/gog.env && gog gmail search "from:idea@surcod.ro to:${email} newer_than:5m" --max 3 --json`,
-      { encoding: "utf-8", shell: "/bin/bash", timeout: 10000 }
-    );
-    const parsed = JSON.parse(output);
-    if (parsed.threads) {
-      for (const thread of parsed.threads) {
-        try {
-          const threadOutput = execSync(
-            `source /home/dc/.config/gogcli/gog.env && gog gmail read ${thread.id}`,
-            { encoding: "utf-8", shell: "/bin/bash", timeout: 10000 }
-          );
-          const matches = threadOutput.matchAll(new RegExp(tokenRegex, "g"));
-          for (const m of matches) seenTokens.add(m[1]);
-        } catch { /* ignore */ }
-      }
-    }
-  } catch { /* no existing emails, fine */ }
+  const pollInterval = 500;
 
   while (Date.now() - startTime < maxWaitMs) {
     try {
-      const output = execSync(
-        `source /home/dc/.config/gogcli/gog.env && gog gmail search "from:idea@surcod.ro to:${email} newer_than:5m" --max 3 --json`,
-        { encoding: "utf-8", shell: "/bin/bash", timeout: 10000 }
-      );
-
-      const parsed = JSON.parse(output);
-      if (parsed.threads) {
-        for (const thread of parsed.threads) {
-          try {
-            const threadOutput = execSync(
-              `source /home/dc/.config/gogcli/gog.env && gog gmail read ${thread.id}`,
-              { encoding: "utf-8", shell: "/bin/bash", timeout: 10000 }
-            );
-
-            const match = threadOutput.match(tokenRegex);
-            if (match && !seenTokens.has(match[1])) {
-              return match[1];
-            }
-          } catch { /* ignore read failures */ }
+      const content = readFileSync(MAIL_LOG_FILE, "utf-8");
+      const lines = content.trim().split("\n").reverse();
+      for (const line of lines) {
+        if (!line) continue;
+        const entry = JSON.parse(line);
+        if (entry.to === email && entry.type === type) {
+          return entry.url;
         }
       }
     } catch {
-      // Search failed, retry
+      // File may not exist yet, keep polling
     }
 
-    execSync(`sleep ${pollInterval / 1000}`);
+    const waitUntil = Date.now() + pollInterval;
+    while (Date.now() < waitUntil) {
+      // busy-wait (Playwright tests run sync helper functions)
+    }
   }
 
   throw new Error(
-    `No ${linkPath} email found for ${email} within ${maxWaitMs}ms`
+    `No ${type} mail log entry found for ${email} within ${maxWaitMs}ms`
   );
 }
 
@@ -214,19 +181,14 @@ test.describe("Smoke Tests - Password Auth Flow", () => {
     const preLoginData = await preLoginResponse.json();
     expect(preLoginData.code).toBe("EMAIL_NOT_VERIFIED");
 
-    // Step 3: Get verification token from email
-    const verifyToken = getTokenFromEmail(
-      TEST_EMAIL,
-      "/auth/verify-email",
-      45000
-    );
-    expect(verifyToken).toBeTruthy();
+    // Step 3: Get verification URL from mail log
+    const verifyUrl = getUrlFromMailLog(TEST_EMAIL, "verification", 15000);
+    expect(verifyUrl).toBeTruthy();
 
     // Step 4: Verify email
-    const verifyResponse = await request.get(
-      `${APP_URL}/auth/verify-email?token=${verifyToken}`,
-      { maxRedirects: 0 }
-    );
+    const verifyResponse = await request.get(verifyUrl, {
+      maxRedirects: 0,
+    });
     expect([200, 302, 307, 308]).toContain(verifyResponse.status());
 
     // Step 5: Login with password after verification
