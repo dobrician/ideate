@@ -78,6 +78,15 @@ export function ProposalList({
     });
   }, [proposals, voteUpdates]);
 
+  const maxUpvotes = useMemo(() => {
+    let max = 0;
+    for (const p of proposals) {
+      const live = voteUpdates.get(p.id);
+      max = Math.max(max, live?.upvotes ?? p.upvotes);
+    }
+    return max;
+  }, [proposals, voteUpdates]);
+
   if (proposals.length === 0) {
     return (
       <div className="flex flex-col items-center gap-3 py-8 text-center">
@@ -104,6 +113,7 @@ export function ProposalList({
             isAdmin={isAdmin}
             liveUpvotes={live?.upvotes}
             liveDownvotes={live?.downvotes}
+            maxUpvotes={maxUpvotes}
           />
         );
       })}
@@ -118,6 +128,7 @@ function ProposalItem({
   isAdmin,
   liveUpvotes,
   liveDownvotes,
+  maxUpvotes,
 }: {
   proposal: ProposalWithStats;
   projectId: string;
@@ -125,6 +136,7 @@ function ProposalItem({
   isAdmin: boolean;
   liveUpvotes?: number;
   liveDownvotes?: number;
+  maxUpvotes: number;
 }) {
   const { t, locale } = useLocale();
   const [showFull, setShowFull] = useState(false);
@@ -134,8 +146,7 @@ function ProposalItem({
 
   const upvotes = liveUpvotes ?? proposal.upvotes;
   const downvotes = liveDownvotes ?? proposal.downvotes;
-  const total = upvotes + downvotes;
-  const proPercent = total > 0 ? Math.round((upvotes / total) * 100) : 0;
+  const barWidth = maxUpvotes > 0 ? Math.round((upvotes / maxUpvotes) * 100) : 0;
 
   async function handleDelete() {
     setIsDeleting(true);
@@ -159,10 +170,10 @@ function ProposalItem({
       value={proposal.id}
       className="relative overflow-hidden rounded-lg border bg-card px-4"
     >
-      {total > 0 && (
+      {upvotes > 0 && (
         <div
           className="pointer-events-none absolute inset-y-0 left-0 bg-gradient-to-r from-green-500/20 to-green-500/5 transition-all duration-300"
-          style={{ width: `${proPercent}%` }}
+          style={{ width: `${barWidth}%` }}
           aria-hidden="true"
         />
       )}

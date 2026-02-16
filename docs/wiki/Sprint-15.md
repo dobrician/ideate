@@ -22,7 +22,7 @@
 - [ ] Project-level comments/discussions spike — schema + UI design doc (#19)
 
 **Hot Fix:**
-- [ ] Proposal bar chart backgrounds must scale proportionally to votes, not full width (#31)
+- [x] Proposal bar chart backgrounds must scale proportionally to votes, not full width (#31)
 
 ## Constraints
 - Commit + push after EACH fix
