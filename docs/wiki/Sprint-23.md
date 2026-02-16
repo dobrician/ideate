@@ -16,7 +16,7 @@ Based on unified analysis from Claude + Codex (see docs/sprint23-unified-plan.md
 - [x] Goal 6: Enrich "Your Projects" cards with per-project stats
 
 **Mobile optimization:**
-- [ ] Goal 7: Compact mobile stat display
+- [x] Goal 7: Compact mobile stat display
 - [ ] Goal 8: Improve mobile activity and search access
 
 **Testing:**
