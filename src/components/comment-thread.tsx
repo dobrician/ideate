@@ -1,11 +1,11 @@
 "use client";
 
-import { useActionState, useState } from "react";
+import { useActionState, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { addComment } from "@/app/projects/[id]/proposals/comment-actions";
-import { Reply, CornerDownRight } from "lucide-react";
+import { Reply, CornerDownRight, Send } from "lucide-react";
 import { toast } from "sonner";
 import { useLocale } from "@/lib/use-locale";
 import { getCsrfTokenClient } from "@/lib/csrf-client";
@@ -53,6 +53,64 @@ export function formatTimeAgo(date: Date, t: TranslateFn): string {
   return t("time.justNow");
 }
 
+function ReplyForm({
+  hiddenFields,
+  parentId,
+  formAction,
+  isPending,
+  error,
+  onCancel,
+}: {
+  hiddenFields: Record<string, string>;
+  parentId: string;
+  formAction: (payload: FormData) => void;
+  isPending: boolean;
+  error?: string;
+  onCancel: () => void;
+}) {
+  const { t } = useLocale();
+  const formRef = useRef<HTMLFormElement>(null);
+
+  function handleKeyDown(e: React.KeyboardEvent<HTMLTextAreaElement>) {
+    if (e.key === "Enter" && !e.shiftKey && !e.ctrlKey) {
+      e.preventDefault();
+      formRef.current?.requestSubmit();
+    }
+  }
+
+  return (
+    <form ref={formRef} action={formAction} className="mt-2 space-y-2">
+      {Object.entries(hiddenFields).map(([name, value]) => (
+        <input key={name} type="hidden" name={name} value={value} />
+      ))}
+      <input type="hidden" name="parentId" value={parentId} />
+      <input type="hidden" name="csrfToken" value={getCsrfTokenClient()} />
+      <div className="flex items-end gap-2">
+        <CornerDownRight className="mb-2 h-4 w-4 shrink-0 text-muted-foreground" />
+        <Textarea
+          name="content"
+          placeholder={t("comments.replyPlaceholder")}
+          rows={1}
+          required
+          maxLength={2000}
+          disabled={isPending}
+          onKeyDown={handleKeyDown}
+          className="min-h-[38px] resize-none"
+        />
+        <Button type="submit" size="icon" disabled={isPending} title={t("comments.reply")}>
+          <Send className="h-4 w-4" />
+        </Button>
+      </div>
+      {error && (
+        <p className="text-xs text-red-600 dark:text-red-400">{error}</p>
+      )}
+      <Button type="button" variant="ghost" size="sm" onClick={onCancel}>
+        {t("common.cancel")}
+      </Button>
+    </form>
+  );
+}
+
 function CommentNode({
   comment,
   depth,
@@ -95,36 +153,14 @@ function CommentNode({
           </Button>
         )}
         {replying && (
-          <form action={formAction} className="mt-2 space-y-2">
-            {Object.entries(hiddenFields).map(([name, value]) => (
-              <input key={name} type="hidden" name={name} value={value} />
-            ))}
-            <input type="hidden" name="parentId" value={comment.id} />
-            <input type="hidden" name="csrfToken" value={getCsrfTokenClient()} />
-            <div className="flex items-start gap-2">
-              <CornerDownRight className="mt-2 h-4 w-4 shrink-0 text-muted-foreground" />
-              <Textarea
-                name="content"
-                placeholder={t("comments.replyPlaceholder")}
-                rows={2}
-                required
-                maxLength={2000}
-                disabled={isPending}
-                className="min-h-[60px]"
-              />
-            </div>
-            {state?.error && (
-              <p className="text-xs text-red-600 dark:text-red-400">{state.error}</p>
-            )}
-            <div className="flex gap-2">
-              <Button type="submit" size="sm" disabled={isPending}>
-                {isPending ? t("comments.posting") : t("comments.reply")}
-              </Button>
-              <Button type="button" variant="ghost" size="sm" onClick={() => setReplying(false)}>
-                {t("common.cancel")}
-              </Button>
-            </div>
-          </form>
+          <ReplyForm
+            hiddenFields={hiddenFields}
+            parentId={comment.id}
+            formAction={formAction}
+            isPending={isPending}
+            error={state?.error}
+            onCancel={() => setReplying(false)}
+          />
         )}
       </div>
       {comment.children.map((child) => (
@@ -142,30 +178,42 @@ interface CommentThreadProps {
 export function CommentThread({ comments, hiddenFields }: CommentThreadProps) {
   const { t } = useLocale();
   const [state, formAction, isPending] = useActionState(addComment, null);
+  const formRef = useRef<HTMLFormElement>(null);
   const tree = buildCommentTree(comments);
+
+  function handleKeyDown(e: React.KeyboardEvent<HTMLTextAreaElement>) {
+    if (e.key === "Enter" && !e.shiftKey && !e.ctrlKey) {
+      e.preventDefault();
+      formRef.current?.requestSubmit();
+    }
+  }
 
   return (
     <div className="flex flex-col gap-4">
       <div className="border-b pb-4">
-        <form action={formAction} className="space-y-2">
+        <form ref={formRef} action={formAction} className="space-y-2">
           {Object.entries(hiddenFields).map(([name, value]) => (
             <input key={name} type="hidden" name={name} value={value} />
           ))}
           <input type="hidden" name="csrfToken" value={getCsrfTokenClient()} />
-          <Textarea
-            name="content"
-            placeholder={t("comments.placeholder")}
-            rows={3}
-            required
-            maxLength={2000}
-            disabled={isPending}
-          />
+          <div className="flex items-end gap-2">
+            <Textarea
+              name="content"
+              placeholder={t("comments.placeholder")}
+              rows={1}
+              required
+              maxLength={2000}
+              disabled={isPending}
+              onKeyDown={handleKeyDown}
+              className="min-h-[38px] resize-none"
+            />
+            <Button type="submit" size="icon" disabled={isPending} title={t("comments.submit")}>
+              <Send className="h-4 w-4" />
+            </Button>
+          </div>
           {state?.error && (
             <p className="text-xs text-red-600 dark:text-red-400">{state.error}</p>
           )}
-          <Button type="submit" disabled={isPending}>
-            {isPending ? t("comments.posting") : t("comments.submit")}
-          </Button>
         </form>
       </div>
       <ScrollArea className="max-h-[60vh] pr-4">
