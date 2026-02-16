@@ -238,6 +238,14 @@ Use ChatGPT with Operator (or any browser agent) as independent reviewer:
 
 ---
 
+## The Big Lesson: Never Use an LLM as a Scheduler
+
+See [Sprint Orchestrator](Sprint-Orchestrator) for the full story — 4 iterations from "agent remembers" to deterministic bash script.
+
+**TL;DR:** We tried instructions → state machine → cron triggers → deterministic script. Only the script works reliably. The AI agent should be a **worker** (executes tasks), not the **orchestrator** (decides when to run them). Gate transitions on machine-verifiable evidence (CI green, tests pass), not agent self-reports.
+
+---
+
 ## Addendum: Don't Trust Heartbeats for Critical Workflows
 
 **Problem:** The sprint state machine depends on heartbeats to advance. But heartbeats are every 30 min and the agent often skips steps because it gets "distracted" by other checks.

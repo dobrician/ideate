@@ -213,4 +213,60 @@ Current CSRF tests are unit-level with mocks. Add one smoke/E2E test that submit
 
 ---
 
-*Report generated from automated analysis of Ideate codebase at commit 918a680 on main branch.*
+## Sprint 18 Goals
+
+**Snapshot (2026-02-16):** 556 tests, 37 files, all green. `tsc --noEmit` clean. Coverage: 96.4% stmt / 88% branch. 1 open issue (#13 Cloudflare — nice-to-have). Sprint 17 completed all 7 goals (vote bar redesign, comment UI, migration fix).
+
+Focus: **Update stale docs, harden middleware, improve coverage gaps, tick off achievable Nice-to-Have items.**
+
+### Goal 1: Update Known-Issues.md — it's completely stale
+**Priority: High | Effort: 30min**
+`docs/Known-Issues.md` still says "Sprint 1 in progress" and "None yet" under Resolved. Rewrite Open section with current risks (in-memory rate limiter, no JWT revocation, middleware doesn't verify JWT). Move resolved items (CSRF, structured logging, backup automation) to Resolved. Remove risks that are already handled (session security, CSRF).
+
+### Goal 2: Update Nice-to-Have.md — check off completed items
+**Priority: High | Effort: 30min**
+Many items are already done: PDF/CSV export, role-based access, audit logging, API rate limiting, search, structured logging, database backups, PWA. Check them off so the list reflects reality.
+
+### Goal 3: Middleware JWT signature verification
+**Priority: High | Effort: 2-3h**
+Middleware currently checks cookie presence only (line 93-100), not signature. This is a defense-in-depth gap flagged since Sprint 16. Verify the JWT signature in middleware so unauthenticated requests are rejected early without reaching server actions. Add tests.
+
+### Goal 4: Component tests for stat-card.tsx (71% branch coverage)
+**Priority: Medium | Effort: 1-2h**
+`stat-card.tsx` has 71% branch coverage — the lowest of any non-trivial component. Add RTL tests covering all conditional rendering branches (loading, empty, error states). Target 90%+ branch.
+
+### Goal 5: Cover db/index.ts migration bootstrap paths (50% branch)
+**Priority: Medium | Effort: 1-2h**
+`src/db/index.ts` has 50% branch coverage. The uncovered paths (lines 60-61) are migration bootstrap edge cases. Add tests that exercise the missing-migration and first-run paths.
+
+### Goal 6: Cover mail.ts SMTP config fallback paths (77% branch)
+**Priority: Medium | Effort: 1h**
+`src/lib/mail.ts` has 77% branch coverage. Uncovered lines (8-11, 15-16, 41) are SMTP config fallbacks. Add tests for missing/partial SMTP env vars to push branch coverage above 90%.
+
+### Goal 7: Add rate limiting to proposals/votes/search endpoints
+**Priority: Medium | Effort: 2-3h**
+Only auth endpoints are rate-limited. Add rate limiting to mutation server actions (create/edit/delete proposals, vote, comment) and the search API. Use the existing in-memory rate limiter. This was flagged as Low severity but is easy to address now.
+
+### Goal 8: Sprint 18 log entry in Sprint-Log.md
+**Priority: Low | Effort: 15min**
+Add Sprint 18 entry to `docs/wiki/Sprint-Log.md` with goals. Create `docs/wiki/Sprint-18.md` with goal checklist. Update after completion.
+
+| # | Goal | Priority | Effort |
+|---|------|----------|--------|
+| 1 | Update Known-Issues.md | High | 30min |
+| 2 | Update Nice-to-Have.md | High | 30min |
+| 3 | Middleware JWT verification | High | 2-3h |
+| 4 | Component tests for stat-card | Medium | 1-2h |
+| 5 | Cover db/index.ts branches | Medium | 1-2h |
+| 6 | Cover mail.ts branches | Medium | 1h |
+| 7 | Rate limit proposals/votes/search | Medium | 2-3h |
+| 8 | Sprint 18 log + checklist | Low | 15min |
+
+**Total estimated effort:** ~9-13 hours
+
+**Out of scope (same as Sprint 16-17):**
+- PostgreSQL migration, Cloudflare deployment (#13), Redis rate limiter, JWT revocation, multi-tenancy
+
+---
+
+*Report updated for Sprint 18 planning at commit 2193205 on main branch.*

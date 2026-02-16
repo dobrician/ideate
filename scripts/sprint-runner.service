@@ -1,0 +1,11 @@
+[Unit]
+Description=Sprint Runner — deterministic sprint orchestrator
+After=network.target
+
+[Service]
+Type=oneshot
+User=dc
+WorkingDirectory=/home/dc/work/ideate
+ExecStart=/home/dc/work/ideate/scripts/sprint-runner.sh
+Environment=PATH=/home/dc/.npm-global/bin:/usr/local/bin:/usr/bin:/bin
+TimeoutStartSec=3600
