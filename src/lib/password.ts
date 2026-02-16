@@ -1,5 +1,5 @@
 import bcrypt from "bcryptjs";
-import { randomBytes } from "crypto";
+import { randomBytes, createHash } from "crypto";
 import { db } from "@/db";
 import { users } from "@/db/schema";
 import { eq } from "drizzle-orm";
@@ -60,6 +60,14 @@ export function generateSecureToken(): string {
 }
 
 /**
+ * Hash a token with SHA-256 for safe storage.
+ * Raw tokens are sent to users via email; only the hash is stored in the DB.
+ */
+export function hashToken(token: string): string {
+  return createHash("sha256").update(token).digest("hex");
+}
+
+/**
  * Register a new user with email and password
  * @returns Object with userId and verificationToken
  * @throws Error if email already registered with a password
@@ -82,6 +90,7 @@ export async function registerUser(
 
   const passwordHash = await hashPassword(password);
   const verificationToken = generateSecureToken();
+  const hashedVerificationToken = hashToken(verificationToken);
   const verificationExpires = new Date(
     Date.now() + VERIFICATION_TOKEN_EXPIRY_MS
   );
@@ -92,7 +101,7 @@ export async function registerUser(
       .update(users)
       .set({
         passwordHash,
-        verificationToken,
+        verificationToken: hashedVerificationToken,
         verificationTokenExpires: verificationExpires,
       })
       .where(eq(users.id, existing[0].id));
@@ -106,7 +115,7 @@ export async function registerUser(
     email: normalizedEmail,
     passwordHash,
     emailVerified: false,
-    verificationToken,
+    verificationToken: hashedVerificationToken,
     verificationTokenExpires: verificationExpires,
     role: "member",
   });
@@ -152,10 +161,11 @@ export async function authenticateWithPassword(
 export async function verifyEmailToken(
   token: string
 ): Promise<string | null> {
+  const hashedToken = hashToken(token);
   const user = await db
     .select()
     .from(users)
-    .where(eq(users.verificationToken, token))
+    .where(eq(users.verificationToken, hashedToken))
     .limit(1);
 
   if (user.length === 0) {
@@ -199,12 +209,13 @@ export async function generatePasswordResetToken(
   }
 
   const resetToken = generateSecureToken();
+  const hashedResetToken = hashToken(resetToken);
   const resetExpires = new Date(Date.now() + RESET_TOKEN_EXPIRY_MS);
 
   await db
     .update(users)
     .set({
-      resetToken,
+      resetToken: hashedResetToken,
       resetTokenExpires: resetExpires,
     })
     .where(eq(users.id, user[0].id));
@@ -220,10 +231,11 @@ export async function resetPasswordWithToken(
   token: string,
   newPassword: string
 ): Promise<string | null> {
+  const hashedToken = hashToken(token);
   const user = await db
     .select()
     .from(users)
-    .where(eq(users.resetToken, token))
+    .where(eq(users.resetToken, hashedToken))
     .limit(1);
 
   if (user.length === 0) {
@@ -270,6 +282,7 @@ export async function regenerateVerificationToken(
   }
 
   const verificationToken = generateSecureToken();
+  const hashedVerificationToken = hashToken(verificationToken);
   const verificationExpires = new Date(
     Date.now() + VERIFICATION_TOKEN_EXPIRY_MS
   );
@@ -277,7 +290,7 @@ export async function regenerateVerificationToken(
   await db
     .update(users)
     .set({
-      verificationToken,
+      verificationToken: hashedVerificationToken,
       verificationTokenExpires: verificationExpires,
     })
     .where(eq(users.id, user[0].id));

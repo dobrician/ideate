@@ -10,7 +10,7 @@ Based on unified analysis from both Claude and Codex (see docs/sprint22-unified-
 - [x] Goal 2: Validate JWT in middleware — expired/malformed cookies redirect to login, not app errors
 - [x] Goal 3: Fix reset-password raw Zod error exposure — return user-friendly messages
 - [x] Goal 4: Add rate limiting to reset-password endpoint
-- [ ] Goal 5: Hash reset/verification tokens before storing in DB (SHA-256)
+- [x] Goal 5: Hash reset/verification tokens before storing in DB (SHA-256)
 - [ ] Goal 6: Add audit logging to all auth events (login, register, reset, verify, logout)
 
 **UX (user-visible):**

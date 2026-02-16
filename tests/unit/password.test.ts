@@ -1,4 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
+import { createHash } from "crypto";
 
 // Mock db
 const mockDbSelectResult: Record<string, unknown>[] = [];
@@ -131,8 +132,31 @@ describe("Password Module", () => {
     });
   });
 
+  describe("hashToken", () => {
+    it("should produce a 64-character hex SHA-256 hash", async () => {
+      const { hashToken } = await import("@/lib/password");
+      const hash = hashToken("test-token");
+      expect(hash).toHaveLength(64);
+      expect(/^[0-9a-f]+$/.test(hash)).toBe(true);
+    });
+
+    it("should produce consistent hashes for the same input", async () => {
+      const { hashToken } = await import("@/lib/password");
+      const hash1 = hashToken("same-token");
+      const hash2 = hashToken("same-token");
+      expect(hash1).toBe(hash2);
+    });
+
+    it("should produce different hashes for different inputs", async () => {
+      const { hashToken } = await import("@/lib/password");
+      const hash1 = hashToken("token-a");
+      const hash2 = hashToken("token-b");
+      expect(hash1).not.toBe(hash2);
+    });
+  });
+
   describe("registerUser", () => {
-    it("should create a new user with password", async () => {
+    it("should create a new user with password and hash the verification token", async () => {
       mockDbInsertValues.mockResolvedValue(undefined);
 
       const { registerUser } = await import("@/lib/password");
@@ -142,6 +166,14 @@ describe("Password Module", () => {
       expect(result.verificationToken).toBeDefined();
       expect(result.verificationToken).toHaveLength(64);
       expect(mockDbInsertValues).toHaveBeenCalledTimes(1);
+
+      // Verify the stored token is a SHA-256 hash, not the raw token
+      const storedData = mockDbInsertValues.mock.calls[0][0];
+      const expectedHash = createHash("sha256")
+        .update(result.verificationToken)
+        .digest("hex");
+      expect(storedData.verificationToken).toBe(expectedHash);
+      expect(storedData.verificationToken).not.toBe(result.verificationToken);
     });
 
     it("should throw if email already has a password", async () => {
@@ -289,7 +321,7 @@ describe("Password Module", () => {
       expect(result).toBeNull();
     });
 
-    it("should generate reset token for existing user", async () => {
+    it("should generate reset token for existing user and store hash", async () => {
       mockDbSelectResult.push({
         id: "user-123",
         email: "user@example.com",
@@ -300,6 +332,14 @@ describe("Password Module", () => {
       const token = await generatePasswordResetToken("user@example.com");
       expect(token).toBeDefined();
       expect(token).toHaveLength(64);
+
+      // Verify the stored token is a SHA-256 hash, not the raw token
+      const storedData = mockDbUpdateSet.mock.calls[0][0];
+      const expectedHash = createHash("sha256")
+        .update(token!)
+        .digest("hex");
+      expect(storedData.resetToken).toBe(expectedHash);
+      expect(storedData.resetToken).not.toBe(token);
     });
   });
 
@@ -361,7 +401,7 @@ describe("Password Module", () => {
       expect(result).toBeNull();
     });
 
-    it("should generate new verification token", async () => {
+    it("should generate new verification token and store hash", async () => {
       mockDbSelectResult.push({
         id: "user-123",
         email: "user@example.com",
@@ -372,6 +412,13 @@ describe("Password Module", () => {
       const token = await regenerateVerificationToken("user@example.com");
       expect(token).toBeDefined();
       expect(token).toHaveLength(64);
+
+      // Verify the stored token is a SHA-256 hash
+      const storedData = mockDbUpdateSet.mock.calls[0][0];
+      const expectedHash = createHash("sha256")
+        .update(token!)
+        .digest("hex");
+      expect(storedData.verificationToken).toBe(expectedHash);
     });
   });
 });
