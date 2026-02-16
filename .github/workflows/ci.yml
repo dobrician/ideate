@@ -57,7 +57,7 @@ jobs:
       - run: mkdir -p data
       - run: npm run build
         env:
-          DATABASE_URL: data/ideate.db
+          DATABASE_URL: ${{ github.workspace }}/data/ideate.db
           JWT_SECRET: ci-test-secret-minimum-32-characters-long
           APP_URL: http://localhost:3000
           NEXT_PUBLIC_APP_URL: http://localhost:3000
