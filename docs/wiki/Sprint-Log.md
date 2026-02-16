@@ -530,7 +530,7 @@
 - [x] New Proposal form alignment and spacing fixes
 - [x] Visual hierarchy improvements — badges, empty states, cards
 - [x] Dark/light mode consistency check
-- [ ] Mobile responsive fixes (320px+)
+- [x] Mobile responsive fixes (320px+)
 - [ ] Login/register/auth pages visual polish
 - [ ] Dashboard layout improvements
 - [ ] Consistent button styles and spacing across all pages
