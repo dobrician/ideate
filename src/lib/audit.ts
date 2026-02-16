@@ -9,7 +9,8 @@ type AuditAction =
   | "logout"
   | "vote"
   | "unvote"
-  | "comment";
+  | "comment"
+  | "project_comment";
 
 type AuditEntity =
   | "project"
