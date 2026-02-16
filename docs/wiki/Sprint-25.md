@@ -12,7 +12,7 @@
 - [x] **Goal 2:** Graceful degradation — user-facing error states when AI is unavailable
 - [x] **Goal 3:** AI suggestion reliability — retry logic and response validation
 - [x] **Goal 4:** Cover dashboard/queries.ts (10% stmt / 0% branch)
-- [ ] **Goal 5:** Exhaustive E2E tests with mocked LLM responses
+- [x] **Goal 5:** Exhaustive E2E tests with mocked LLM responses
 - [ ] **Goal 6:** Mobile responsive polish on AI dialogs
 - [ ] **Goal 7:** Integrate new logo (#40)
 

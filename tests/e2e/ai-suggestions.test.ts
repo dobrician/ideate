@@ -24,7 +24,6 @@ test.describe("AI Suggestions E2E", () => {
     const seed = await seedTestData(page.request);
     await loginAsTestUser(page, seed);
 
-    // Mock the LLM API response at network level
     await page.route("**/api/proposals/suggest", async (route) => {
       await route.fulfill({
         status: 200,
@@ -33,11 +32,9 @@ test.describe("AI Suggestions E2E", () => {
       });
     });
 
-    // Navigate to the seeded project
     await page.goto(`/projects/${seed.projectId}`);
     await page.waitForLoadState("domcontentloaded");
 
-    // Click the "Sugestii AI" / AI Suggestions button (by icon + text)
     const suggestBtn = page.locator("button").filter({ hasText: /Suggest|Sugestii/i });
     await expect(suggestBtn).toBeVisible();
     await suggestBtn.click();
@@ -169,6 +166,101 @@ test.describe("AI Suggestions E2E", () => {
     const detailDialog = page.getByRole("dialog", { name: "Implement Dark Mode" });
     await expect(detailDialog).toBeVisible({ timeout: 5000 });
     await expect(detailDialog.getByText(/Add theme context/)).toBeVisible();
+  });
+
+  test("shows rate limited message when API returns RATE_LIMITED", async ({ page }) => {
+    const seed = await seedTestData(page.request);
+    await loginAsTestUser(page, seed);
+
+    await page.route("**/api/proposals/suggest", async (route) => {
+      await route.fulfill({
+        status: 429,
+        contentType: "application/json",
+        body: JSON.stringify({ proposals: [], code: "RATE_LIMITED" }),
+      });
+    });
+
+    await page.goto(`/projects/${seed.projectId}`);
+    await page.waitForLoadState("domcontentloaded");
+
+    const suggestBtn = page.locator("button").filter({ hasText: /Suggest|Sugestii/i });
+    await suggestBtn.click();
+
+    const dialog = page.locator("[role='dialog']").first();
+    await expect(dialog).toBeVisible({ timeout: 10000 });
+    await expect(dialog.getByText(/rate limit|limită/i)).toBeVisible({ timeout: 5000 });
+  });
+
+  test("shows no-keys message when API returns NO_KEYS", async ({ page }) => {
+    const seed = await seedTestData(page.request);
+    await loginAsTestUser(page, seed);
+
+    await page.route("**/api/proposals/suggest", async (route) => {
+      await route.fulfill({
+        status: 503,
+        contentType: "application/json",
+        body: JSON.stringify({ proposals: [], code: "NO_KEYS" }),
+      });
+    });
+
+    await page.goto(`/projects/${seed.projectId}`);
+    await page.waitForLoadState("domcontentloaded");
+
+    const suggestBtn = page.locator("button").filter({ hasText: /Suggest|Sugestii/i });
+    await suggestBtn.click();
+
+    const dialog = page.locator("[role='dialog']").first();
+    await expect(dialog).toBeVisible({ timeout: 10000 });
+    await expect(dialog.getByText(/not configured|configurat/i)).toBeVisible({ timeout: 5000 });
+  });
+
+  test("shows unavailable message when API returns AI_UNAVAILABLE", async ({ page }) => {
+    const seed = await seedTestData(page.request);
+    await loginAsTestUser(page, seed);
+
+    await page.route("**/api/proposals/suggest", async (route) => {
+      await route.fulfill({
+        status: 503,
+        contentType: "application/json",
+        body: JSON.stringify({ proposals: [], code: "AI_UNAVAILABLE" }),
+      });
+    });
+
+    await page.goto(`/projects/${seed.projectId}`);
+    await page.waitForLoadState("domcontentloaded");
+
+    const suggestBtn = page.locator("button").filter({ hasText: /Suggest|Sugestii/i });
+    await suggestBtn.click();
+
+    const dialog = page.locator("[role='dialog']").first();
+    await expect(dialog).toBeVisible({ timeout: 10000 });
+    await expect(dialog.getByText(/unavailable|indisponibil/i)).toBeVisible({ timeout: 5000 });
+  });
+
+  test("shows empty state when API returns no suggestions", async ({ page }) => {
+    const seed = await seedTestData(page.request);
+    await loginAsTestUser(page, seed);
+
+    await page.route("**/api/proposals/suggest", async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({ proposals: [] }),
+      });
+    });
+
+    await page.goto(`/projects/${seed.projectId}`);
+    await page.waitForLoadState("domcontentloaded");
+
+    const suggestBtn = page.locator("button").filter({ hasText: /Suggest|Sugestii/i });
+    await suggestBtn.click();
+
+    const dialog = page.locator("[role='dialog']").first();
+    await expect(dialog).toBeVisible({ timeout: 10000 });
+    // Should show "no suggestions" or close button
+    await expect(
+      dialog.locator("button").filter({ hasText: /Close|Închide/i }).first()
+    ).toBeVisible({ timeout: 5000 });
   });
 
   test("toggling vote removes selection", async ({ page }) => {
