@@ -4,6 +4,12 @@ Reverse chronological. Click each sprint for full details.
 
 ---
 
+### 🏃 [Sprint 19 — AI Features from Ideator](Sprint-19) *(2026-02-16)*
+**Focus:** Port all AI features from ideator: project summaries, AI proposal suggestions (✨), similarity check, markdown renderer
+**Stats:** 🔧 In progress | ~7.5h estimated
+
+---
+
 ### ✅ [Sprint 18 — UI Polish & Chat Redesign](Sprint-18) *(2026-02-16)*
 **Focus:** Vote bar polish, messenger-style chat redesign, test coverage gaps
 **Stats:** 8 commits | 32/32 smoke | Issues #37-39
