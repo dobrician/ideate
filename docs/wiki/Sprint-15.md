@@ -13,8 +13,8 @@
 - [x] Improve magic link login UX — explanation text + "check your email" screen (#29)
 
 **Navigation Polish:**
-- [ ] Replace hand-rolled header dropdown with shadcn DropdownMenu (ARIA, keyboard nav)
-- [ ] Add Header/AppShell component tests (desktop, mobile, admin, auth-gated)
+- [x] Replace hand-rolled header dropdown with shadcn DropdownMenu (ARIA, keyboard nav)
+- [x] Add Header/AppShell component tests (desktop, mobile, admin, auth-gated)
 - [ ] Clean up dead sidebar CSS variables and unused translation keys
 
 **Infrastructure:**
