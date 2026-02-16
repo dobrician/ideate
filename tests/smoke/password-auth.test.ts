@@ -2,6 +2,7 @@ import { test, expect } from "@playwright/test";
 import { readFileSync } from "fs";
 
 const APP_URL = process.env.APP_URL || "https://idea.surmont.co";
+const ORIGIN = new URL(APP_URL).origin;
 const MAIL_LOG_FILE = process.env.MAIL_LOG_FILE || "/tmp/ideate-logs/mail.log";
 const TEST_EMAIL_PREFIX = `smokepass${Date.now()}`;
 const TEST_EMAIL = `${TEST_EMAIL_PREFIX}@surcod.ro`;
@@ -105,7 +106,7 @@ test.describe("Smoke Tests - Password Auth Flow", () => {
         password: "short",
         confirmPassword: "short",
       },
-      headers: { "Content-Type": "application/json" },
+      headers: { "Content-Type": "application/json", Origin: ORIGIN },
     });
     expect(response.status()).toBe(400);
     const data = await response.json();
@@ -118,7 +119,7 @@ test.describe("Smoke Tests - Password Auth Flow", () => {
         email: "nonexistent@example.com",
         password: "Password123",
       },
-      headers: { "Content-Type": "application/json" },
+      headers: { "Content-Type": "application/json", Origin: ORIGIN },
     });
     expect(response.status()).toBe(401);
     const data = await response.json();
@@ -130,7 +131,7 @@ test.describe("Smoke Tests - Password Auth Flow", () => {
   }) => {
     const response = await request.post(`${APP_URL}/api/auth/forgot-password`, {
       data: { email: "nobody@example.com" },
-      headers: { "Content-Type": "application/json" },
+      headers: { "Content-Type": "application/json", Origin: ORIGIN },
     });
     expect(response.status()).toBe(200);
     const data = await response.json();
@@ -146,7 +147,7 @@ test.describe("Smoke Tests - Password Auth Flow", () => {
         password: "NewPassword123",
         confirmPassword: "NewPassword123",
       },
-      headers: { "Content-Type": "application/json" },
+      headers: { "Content-Type": "application/json", Origin: ORIGIN },
     });
     expect(response.status()).toBe(400);
   });
@@ -163,7 +164,7 @@ test.describe("Smoke Tests - Password Auth Flow", () => {
         password: TEST_PASSWORD,
         confirmPassword: TEST_PASSWORD,
       },
-      headers: { "Content-Type": "application/json" },
+      headers: { "Content-Type": "application/json", Origin: ORIGIN },
     });
     expect(regResponse.status()).toBe(200);
     const regData = await regResponse.json();
@@ -174,7 +175,7 @@ test.describe("Smoke Tests - Password Auth Flow", () => {
       `${APP_URL}/api/auth/login-password`,
       {
         data: { email: TEST_EMAIL, password: TEST_PASSWORD },
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", Origin: ORIGIN },
       }
     );
     expect(preLoginResponse.status()).toBe(403);
@@ -196,7 +197,7 @@ test.describe("Smoke Tests - Password Auth Flow", () => {
       `${APP_URL}/api/auth/login-password`,
       {
         data: { email: TEST_EMAIL, password: TEST_PASSWORD },
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", Origin: ORIGIN },
       }
     );
     expect(loginResponse.status()).toBe(200);

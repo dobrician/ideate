@@ -53,7 +53,7 @@ vi.mock("@/lib/audit", () => ({
 
 import { POST as registerPOST } from "@/app/api/auth/register/route";
 import { POST as loginPasswordPOST } from "@/app/api/auth/login-password/route";
-import { GET as verifyEmailGET } from "@/app/auth/verify-email/route";
+import { POST as verifyEmailPOST } from "@/app/api/auth/verify-email/route";
 import { POST as forgotPasswordPOST } from "@/app/api/auth/forgot-password/route";
 import { POST as resetPasswordPOST } from "@/app/api/auth/reset-password/route";
 
@@ -279,53 +279,47 @@ describe("POST /auth/login-password", () => {
   });
 });
 
-describe("GET /auth/verify-email", () => {
-  it("should redirect to login?verified=true on success", async () => {
+describe("POST /api/auth/verify-email", () => {
+  it("should return success on valid token", async () => {
     mockVerifyEmailToken.mockResolvedValue("user@example.com");
 
-    const req = createGetRequest(
-      "/auth/verify-email?token=valid-token-123"
-    );
-    const res = await verifyEmailGET(req);
+    const req = createPostRequest("/api/auth/verify-email", {
+      token: "valid-token-123",
+    });
+    const res = await verifyEmailPOST(req);
+    const data = await res.json();
 
-    expect(res.status).toBe(307);
-    const location = res.headers.get("Location");
-    expect(location).toContain("/auth/login?verified=true");
+    expect(res.status).toBe(200);
+    expect(data.success).toBe(true);
   });
 
-  it("should redirect to login with error for invalid token", async () => {
+  it("should return 400 for invalid token", async () => {
     mockVerifyEmailToken.mockResolvedValue(null);
 
-    const req = createGetRequest(
-      "/auth/verify-email?token=bad-token"
-    );
-    const res = await verifyEmailGET(req);
+    const req = createPostRequest("/api/auth/verify-email", {
+      token: "bad-token",
+    });
+    const res = await verifyEmailPOST(req);
 
-    expect(res.status).toBe(307);
-    const location = res.headers.get("Location");
-    expect(location).toContain("error=invalid_or_expired_token");
+    expect(res.status).toBe(400);
   });
 
-  it("should redirect to login with error when token is missing", async () => {
-    const req = createGetRequest("/auth/verify-email");
-    const res = await verifyEmailGET(req);
+  it("should return 400 when token is missing", async () => {
+    const req = createPostRequest("/api/auth/verify-email", {});
+    const res = await verifyEmailPOST(req);
 
-    expect(res.status).toBe(307);
-    const location = res.headers.get("Location");
-    expect(location).toContain("error=missing_token");
+    expect(res.status).toBe(400);
   });
 
-  it("should redirect to login on verification error", async () => {
+  it("should return 500 on verification error", async () => {
     mockVerifyEmailToken.mockRejectedValue(new Error("DB error"));
 
-    const req = createGetRequest(
-      "/auth/verify-email?token=crash-token"
-    );
-    const res = await verifyEmailGET(req);
+    const req = createPostRequest("/api/auth/verify-email", {
+      token: "crash-token",
+    });
+    const res = await verifyEmailPOST(req);
 
-    expect(res.status).toBe(307);
-    const location = res.headers.get("Location");
-    expect(location).toContain("error=verification_failed");
+    expect(res.status).toBe(500);
   });
 });
 

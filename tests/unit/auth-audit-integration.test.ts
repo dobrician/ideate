@@ -53,7 +53,7 @@ vi.mock("@/lib/mail", () => ({
 
 import { POST as logoutPOST } from "@/app/auth/logout/route";
 import { GET as verifyGET } from "@/app/auth/verify/route";
-import { GET as verifyEmailGET } from "@/app/auth/verify-email/route";
+import { POST as verifyEmailPOST } from "@/app/api/auth/verify-email/route";
 import { POST as requestPOST } from "@/app/auth/request/route";
 import { POST as resendPOST } from "@/app/api/auth/resend-verification/route";
 import { POST as loginPOST } from "@/app/api/auth/login-password/route";
@@ -132,12 +132,12 @@ describe("Audit logging integration across auth routes", () => {
     });
   });
 
-  describe("GET /auth/verify-email", () => {
+  describe("POST /api/auth/verify-email", () => {
     it("should audit log verify_email on success", async () => {
       mockVerifyEmailToken.mockResolvedValue("user@example.com");
 
-      const req = createGetRequest("/auth/verify-email?token=valid");
-      await verifyEmailGET(req);
+      const req = createPostRequest("/api/auth/verify-email", { token: "valid" });
+      await verifyEmailPOST(req);
 
       expect(mockLogAudit).toHaveBeenCalledWith(
         expect.objectContaining({ action: "verify_email", entity: "user", details: "email=user@example.com" })
@@ -147,8 +147,8 @@ describe("Audit logging integration across auth routes", () => {
     it("should not audit log on invalid token", async () => {
       mockVerifyEmailToken.mockResolvedValue(null);
 
-      const req = createGetRequest("/auth/verify-email?token=bad");
-      await verifyEmailGET(req);
+      const req = createPostRequest("/api/auth/verify-email", { token: "bad" });
+      await verifyEmailPOST(req);
 
       expect(mockLogAudit).not.toHaveBeenCalled();
     });

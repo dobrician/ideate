@@ -4,6 +4,7 @@ import { sendPasswordResetEmail } from "@/lib/mail";
 import { requireOrigin } from "@/lib/csrf";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { getClientIp } from "@/lib/request-utils";
+import { logAudit } from "@/lib/audit";
 import { logger } from "@/lib/logger";
 import { z } from "zod";
 
@@ -74,6 +75,7 @@ export async function POST(request: NextRequest) {
     }
 
     const resetToken = await generatePasswordResetToken(email);
+    logAudit({ userId: null, action: "password_reset_request", entity: "user", details: `email=${email}`, ipAddress: clientIp });
 
     if (resetToken) {
       const resetLink = `${APP_URL}/auth/reset-password?token=${encodeURIComponent(resetToken)}`;

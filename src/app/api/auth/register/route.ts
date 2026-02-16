@@ -4,6 +4,7 @@ import { sendVerificationEmail } from "@/lib/mail";
 import { requireOrigin } from "@/lib/csrf";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { getClientIp } from "@/lib/request-utils";
+import { logAudit } from "@/lib/audit";
 import { logger } from "@/lib/logger";
 import { z } from "zod";
 
@@ -75,7 +76,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { verificationToken } = await registerUser(email, password);
+    const { userId, verificationToken } = await registerUser(email, password);
+    logAudit({ userId, action: "register", entity: "user", details: `email=${email}`, ipAddress: clientIp });
 
     const verifyLink = `${APP_URL}/auth/verify-email?token=${encodeURIComponent(verificationToken)}`;
 

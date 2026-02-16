@@ -3,6 +3,7 @@ import { resetPasswordWithToken, validatePassword } from "@/lib/password";
 import { requireOrigin } from "@/lib/csrf";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { getClientIp } from "@/lib/request-utils";
+import { logAudit } from "@/lib/audit";
 import { logger } from "@/lib/logger";
 import { z } from "zod";
 
@@ -83,11 +84,14 @@ export async function POST(request: NextRequest) {
     const email = await resetPasswordWithToken(token, password);
 
     if (!email) {
+      logAudit({ userId: null, action: "password_reset", entity: "user", details: "invalid_or_expired_token", ipAddress: clientIp });
       return NextResponse.json(
         { error: "Invalid or expired reset link. Please request a new one." },
         { status: 400 }
       );
     }
+
+    logAudit({ userId: null, action: "password_reset", entity: "user", details: `email=${email}`, ipAddress: clientIp });
 
     return NextResponse.json({
       success: true,
