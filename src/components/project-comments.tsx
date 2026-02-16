@@ -8,9 +8,10 @@ import type { Comment } from "./comment-thread";
 interface ProjectCommentsProps {
   projectId: string;
   comments: Comment[];
+  currentUserId?: string;
 }
 
-export function ProjectComments({ projectId, comments }: ProjectCommentsProps) {
+export function ProjectComments({ projectId, comments, currentUserId }: ProjectCommentsProps) {
   const { t } = useLocale();
 
   return (
@@ -22,10 +23,13 @@ export function ProjectComments({ projectId, comments }: ProjectCommentsProps) {
           ({comments.length})
         </span>
       </h2>
-      <CommentThread
-        comments={comments}
-        hiddenFields={{ projectId }}
-      />
+      <div className="h-[400px]">
+        <CommentThread
+          comments={comments}
+          hiddenFields={{ projectId }}
+          currentUserId={currentUserId}
+        />
+      </div>
     </div>
   );
 }

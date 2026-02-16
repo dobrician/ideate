@@ -212,7 +212,7 @@ export default async function ProjectPage({ params, searchParams }: ProjectPageP
             )}
           </div>
 
-          <ProjectComments projectId={id} comments={projectComments} />
+          <ProjectComments projectId={id} comments={projectComments} currentUserId={user.id} />
         </CardContent>
       </Card>
     </div>

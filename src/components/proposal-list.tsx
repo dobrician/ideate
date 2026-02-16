@@ -214,6 +214,7 @@ function ProposalItem({
               proposalTitle={proposal.title}
               comments={proposal.comments}
               commentCount={proposal.commentCount}
+              currentUserId={currentUserId}
             />
           </div>
         </div>

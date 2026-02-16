@@ -13,6 +13,7 @@ interface DiscussionSheetProps {
   proposalTitle: string;
   comments: Comment[];
   commentCount: number;
+  currentUserId?: string;
 }
 
 export function DiscussionSheet({
@@ -21,6 +22,7 @@ export function DiscussionSheet({
   proposalTitle,
   comments,
   commentCount,
+  currentUserId,
 }: DiscussionSheetProps) {
   const { t } = useLocale();
 
@@ -42,6 +44,7 @@ export function DiscussionSheet({
           <CommentThread
             comments={comments}
             hiddenFields={{ proposalId }}
+            currentUserId={currentUserId}
           />
         </div>
       </SheetContent>
