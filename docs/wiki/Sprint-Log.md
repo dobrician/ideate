@@ -4,6 +4,12 @@ Reverse chronological. Click each sprint for full details.
 
 ---
 
+### 🔄 [Sprint 25 — AI Features: Suggestions, Summarization, Reliability](Sprint-25) *(2026-02-16)*
+**Focus:** Structured LLM logging, graceful AI degradation, suggestion reliability (retry + validation), dashboard/queries.ts coverage, E2E tests with mocked LLM, mobile AI dialog polish, new logo integration
+**Stats:** 702 tests | Issue #46, #40
+
+---
+
 ### ✅ [Sprint 24 — Project Detail Page](Sprint-24) *(2026-02-16)*
 **Focus:** Markdown rendering (descriptions, proposals, comments), edit project dialog, two-column layout with sticky sidebar, deadline enforcement, mobile comment height, project CRUD unit tests, E2E tests
 **Stats:** 12 commits | 702 tests | Issue #45

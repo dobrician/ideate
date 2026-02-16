@@ -430,4 +430,59 @@ Add component tests for the redesigned dashboard (stat cards, quick actions, emp
 
 ---
 
-*Report updated for Sprint 24 planning on 2026-02-16.*
+## Sprint 25 Goals
+
+**Snapshot (2026-02-16):** 702 tests, 47 files, all green. `tsc --noEmit` clean. Coverage: 97.67% stmt / 90.45% branch / 98.51% func / 98.46% line. 6 open issues (#46-#49 future sprint plans, #40 logo, #13 Cloudflare).
+
+**Theme: AI features — suggestions, summarization, reliability (Issue #46)**
+
+AI infrastructure exists (Gemini primary + OpenAI fallback, per-provider throttling, rate limiting) but has no structured logging, no user-visible error states when AI is down, and no E2E tests with mocked LLM responses. The `dashboard/queries.ts` coverage gap (10% stmt / 0% branch) is the worst in the codebase and should be closed.
+
+### Goal 1: Structured LLM logging — request/response/latency/errors
+**Priority: High | Effort: 2-3h**
+`llm.ts` has no logging. Add structured pino logs for every LLM call: provider, model, prompt length, response length, latency ms, tokens used, cost estimate, and error details. Log at `info` for success, `warn` for fallback, `error` for total failure. This is essential for debugging AI issues in production.
+
+### Goal 2: Graceful degradation — user-facing error states when AI is unavailable
+**Priority: High | Effort: 2-3h**
+When both LLM providers fail or are rate-limited, `suggest-proposals.tsx` shows a generic error string. Improve: distinguish between rate-limited (show "try again in X minutes"), provider errors (show "AI temporarily unavailable"), and no API keys configured (hide the AI button entirely). Apply the same pattern to `regenerate-summary-button.tsx`.
+
+### Goal 3: AI suggestion reliability — retry logic and response validation
+**Priority: High | Effort: 2h**
+The `/api/proposals/suggest` route calls `completeWithFallback` once and trusts the response. Add: (a) JSON schema validation on the LLM response (reject malformed suggestions), (b) one automatic retry on parse failure with a stricter prompt, (c) `extractJson` from `similarity-api` is already tested — reuse it for robust JSON extraction from LLM output.
+
+### Goal 4: Cover dashboard/queries.ts (10% stmt / 0% branch)
+**Priority: High | Effort: 2-3h**
+Worst coverage gap in the codebase. `getDashboardData` and `getRecentActivity` need integration-style unit tests with a test DB. Cover: user with projects, user with no projects (fallback path), empty database, and platform stats aggregation. Target >90% stmt and branch.
+
+### Goal 5: Exhaustive E2E tests with mocked LLM responses
+**Priority: High | Effort: 2-3h**
+Current `tests/e2e/ai-suggestions.test.ts` exists but needs expansion. Write Playwright tests that mock the `/api/proposals/suggest` endpoint to return controlled responses. Cover: successful generation, thumbs up/down voting, submit selected proposals, error state, rate-limit state, empty results, and detail dialog. Test at mobile viewport too.
+
+### Goal 6: Mobile responsive polish on AI dialogs
+**Priority: Medium | Effort: 1-2h**
+Audit `suggest-proposals.tsx` dialog and `regenerate-summary-button.tsx` at 320px/375px viewports. Ensure: dialog doesn't overflow, suggestion cards stack properly, vote buttons are touch-friendly (min 44px tap target), detail dialog scrolls correctly. Fix any issues found.
+
+### Goal 7: Integrate new logo (#40)
+**Priority: Medium | Effort: 1h**
+Carried from Sprint 24. Update header component, generate favicon set, update PWA manifest icons. Issue #40.
+
+| # | Goal | Priority | Effort | Issue |
+|---|------|----------|--------|-------|
+| 1 | Structured LLM logging | High | 2-3h | #46 |
+| 2 | Graceful AI degradation | High | 2-3h | #46 |
+| 3 | AI suggestion reliability | High | 2h | #46 |
+| 4 | Cover dashboard/queries.ts | High | 2-3h | — |
+| 5 | E2E tests with mocked LLM | High | 2-3h | #46 |
+| 6 | Mobile polish on AI dialogs | Medium | 1-2h | #46 |
+| 7 | Integrate new logo (#40) | Medium | 1h | #40 |
+
+**Total estimated effort:** ~12-18 hours
+
+**Out of scope:**
+- Comments/discussion overhaul (Sprint 26, Issue #47)
+- Voting UX/animations (Sprint 27, Issue #48)
+- PostgreSQL migration, Cloudflare (#13), Redis rate limiter, JWT revocation
+
+---
+
+*Report updated for Sprint 25 planning on 2026-02-16.*
