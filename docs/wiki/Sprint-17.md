@@ -20,3 +20,10 @@
 - Commit + push after EACH fix
 - After each goal, edit this file: change `- [ ]` to `- [x]` (do NOT add new lines)
 - Lint + type check + tests + build must pass before each push
+
+## Outcomes
+- 7 commits, **32/32 smoke** (11.8s)
+- Vote bar redesign: green from left, red from right, proportional to max total, background only on title
+- Sorting: (pro-contra) descending, tie-break by contra ascending
+- Comment UI: textarea moved to top, submit button styled as primary
+- Migration runner fixed: reads drizzle journal, applies missing migrations in order
