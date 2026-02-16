@@ -1,245 +1,217 @@
-# OpenClaw + Claude Code — Project Management Lessons
+# Working with AI Agents — Lessons Learned
 
-Hard-won lessons from building Ideate with autonomous AI agents. Everything here was learned the painful way — by failing first.
-
----
-
-## 1. Claude Code Won't Remember — Write It Down
-
-**Problem:** Claude Code has no memory between sessions. Instructions given verbally are forgotten.
-
-**Solution:** All operational instructions go in files that are always loaded:
-- `TOOLS.md` — tool-specific instructions (always in context)
-- `HEARTBEAT.md` — periodic checks and sprint lifecycle rules
-- `memory/sprint-state.json` — state machine for sprint flow
-- `memory/sprint-checklists.md` — step-by-step checklists
-
-**Rule:** If you tell Claude Code something important, it must end up in a file. "Mental notes" don't survive session restarts.
+Universal lessons about working with OpenClaw and autonomous AI agents. These apply to any project, not just Ideate. Learned the hard way.
 
 ---
 
-## 2. Incremental Commits, Not Bulk
+## The Core Problem
 
-**Problem:** Claude Code defaults to doing an entire sprint and committing everything at the end. No visibility into progress.
+AI agents wake up fresh every session. They have no persistent memory, no discipline, and no habits. Everything you don't write down explicitly will be forgotten. Everything you write down but put in the wrong place will be ignored. And even things in the right place will sometimes be skipped if the agent gets "distracted" by the task at hand.
 
-**Solution:** Sprint prompts MUST include:
+You are not working with a junior developer. You are working with a brilliant amnesiac who needs a very specific operating environment to function.
+
+---
+
+## 1. The Agent Doesn't Remember — You Must Externalize Everything
+
+**What happens:** You tell the agent something important. It acknowledges. Next session, it has no idea.
+
+**Why:** Each session starts fresh. Chat history is compacted into summaries that lose detail. MEMORY.md gets truncated if too long.
+
+**Fix:**
+- Critical operational instructions → `TOOLS.md` (always loaded in full)
+- Periodic checks and workflows → `HEARTBEAT.md` (always loaded)
+- Context and history → `MEMORY.md` (may be truncated — don't put procedures here)
+- State tracking → JSON files (machine-readable, unambiguous)
+
+**Rule of thumb:** If you'd be upset that the agent forgot it, it belongs in TOOLS.md or HEARTBEAT.md, not in conversation.
+
+---
+
+## 2. Long Checklists Get Abandoned Midway
+
+**What happens:** You give the agent a 10-step checklist. It does steps 1-3 thoroughly, then "forgets" steps 4-10 because it got absorbed in the work.
+
+**Why:** LLMs have finite attention. The longer the task, the more likely later steps get dropped. The agent optimizes for the immediate task and loses sight of the meta-process.
+
+**Fixes:**
+- **State machines over checklists.** Instead of "do these 10 things," use a JSON state file that tracks which step is next. The agent reads state → does ONE step → updates state → next heartbeat picks up the next step.
+- **Inline critical steps in HEARTBEAT.md**, not as a reference to another file. "See checklist in X" = guaranteed to be skipped.
+- **Automate what you can.** If a step can be a script or git hook, make it one. Don't rely on the agent's "discipline."
+
+---
+
+## 3. Instructions in Memory ≠ Instructions Followed
+
+**What happens:** The instruction is clearly written in MEMORY.md. The agent doesn't follow it. You remind the agent. It apologizes and says "you're right, it's in MEMORY.md." Then does it again next time.
+
+**Why:** 
+- MEMORY.md may be truncated in context (large files get cut)
+- Even when loaded, the agent scans rather than reads carefully
+- In-the-moment task focus overrides background instructions
+- The agent is not actually "reading" files like a human — it's pattern-matching on context
+
+**Fixes:**
+- Move procedures from MEMORY.md to TOOLS.md (never truncated)
+- Keep MEMORY.md for context/history, not operational rules
+- For critical workflows: use state files + heartbeat checks, not just written instructions
+- Accept that you'll need to verify compliance, not just trust it
+
+---
+
+## 4. "Ask Before Acting" = Nothing Gets Done
+
+**What happens:** You tell the agent to handle things autonomously. It asks "should I deploy?" "should I start the next sprint?" "want me to fix this?"
+
+**Why:** The agent defaults to being cautious. It's trained to be helpful, and "asking permission" feels helpful.
+
+**Fix:** Be explicit about autonomy boundaries:
+- **Do without asking:** Deploy, run tests, fix CI, sync wiki, start next sprint, routine maintenance
+- **Ask first:** Anything external (emails, public posts), architectural decisions, spending money
+- **Only message when:** Something needs human decision, tool limits approaching, server problems
+
+Write these boundaries in AGENTS.md or HEARTBEAT.md.
+
+---
+
+## 5. Don't Reference Files — Inline the Content
+
+**What happens:** HEARTBEAT.md says "follow the checklist in memory/sprint-checklists.md." The agent never opens that file.
+
+**Why:** Every file reference is a step the agent might skip. The agent is already processing HEARTBEAT.md — adding a "go read this other file" instruction introduces indirection that gets lost.
+
+**Fix:** Put the actual steps directly in the file the agent reads. Yes, it makes HEARTBEAT.md longer. That's fine. One long file that gets followed > two short files where the second one is ignored.
+
+---
+
+## 6. Prompts Need Explicit Micro-Instructions
+
+**What happens:** You say "do the sprint and update the wiki." The agent does the sprint. Doesn't update the wiki.
+
+**Why:** The agent focuses on the primary task (write code) and treats secondary instructions (update wiki) as optional. Vague instructions ("update the wiki") are interpreted loosely.
+
+**Fix:** Be painfully specific in prompts:
 ```
-"Commit and git push after EACH completed goal."
+BAD:  "Do Sprint 14 and keep the wiki updated."
+GOOD: "After EACH goal, edit docs/wiki/Sprint-14.md: change '- [ ]' to '- [x]' 
+       for that goal. Do NOT add new lines or create separate doc commits."
 ```
 
-Without this explicit instruction, Claude Code will batch everything into one massive commit at the end.
+Specify the exact file, the exact edit, and what NOT to do.
 
 ---
 
-## 3. Wiki Updates via Git Hooks, Not Manual Edits
+## 7. Automate Instead of Instructing
 
-**Problem:** Telling Claude Code to "update the wiki after each commit" results in:
-- Separate doc-only commits (noise)
-- Adding new lines instead of checking off existing checkboxes
-- Forgetting to update entirely
+**What happens:** You tell the agent to do X after every commit. It does it for the first 3 commits, then stops.
 
-**Solution:** A `post-commit` git hook that automatically:
-1. Reads the commit message for issue numbers (`#16`, `#22`, etc.)
-2. Finds matching `- [ ]` lines in the current sprint's wiki file
-3. Changes them to `- [x]`
-4. Amends the commit to include the wiki update
+**Why:** Repetitive meta-tasks (update wiki, check CI, sync docs) compete for attention with the actual work. The agent prioritizes the interesting task.
 
-```bash
-# .githooks/post-commit — auto-checks sprint goals
-for ISSUE in $(echo "$COMMIT_MSG" | grep -oE '#[0-9]+' | tr -d '#'); do
-  sed -i "s/- \[ \]\(.*#${ISSUE}\)/- [x]\1/" "$SPRINT_FILE"
-done
-git add "$SPRINT_FILE" && git commit --amend --no-edit --no-verify
-```
+**Fix:** Git hooks, GitHub Actions, cron jobs, scripts. If a task is mechanical and repeatable, don't make it an instruction — make it automation.
 
-**Setup:** `git config core.hooksPath .githooks`
+**Examples:**
+- Wiki sync → GitHub Actions workflow on push
+- Sprint goal checkoff → post-commit git hook matching issue numbers
+- CI check → GitHub Actions (already exists)
+- Deploy → script, not manual steps
 
 ---
 
-## 4. Wiki Structure: Summary + Sub-Pages
+## 8. State Files > Natural Language Instructions
 
-**Problem:** A single Sprint-Log.md file grows to 600+ lines. Impossible to navigate.
+**What happens:** You write in HEARTBEAT.md: "After a sprint finishes, do the post-sprint checklist, then analysis, then pre-sprint, then launch." The agent does post-sprint, then launches the next sprint, skipping analysis.
 
-**Solution:**
-- `Sprint-Log.md` — overview with one-liner per sprint (newest first) + link to sub-page
-- `Sprint-01.md` ... `Sprint-NN.md` — full details per sprint
+**Why:** Natural language is ambiguous and skimmable. The agent reads "sprint finishes → launch next sprint" and skips the middle.
 
-**Auto-sync:** GitHub Actions workflow syncs `docs/wiki/*.md` to GitHub Wiki on every push:
-```yaml
-# .github/workflows/wiki-sync.yml
-on:
-  push:
-    paths: ['docs/wiki/**']
-jobs:
-  sync:
-    uses: Andrew-Chen-Wang/github-wiki-action@v4
-    with:
-      path: docs/wiki/
-```
-
----
-
-## 5. Sprint State Machine
-
-**Problem:** Post-sprint steps (deploy, smoke tests, retrospective, analysis, next sprint goals) get skipped because the agent "forgets" or rushes to the next sprint.
-
-**Solution:** A JSON state file that dictates what to do next:
+**Fix:** Use a JSON state machine:
 ```json
 {
-  "currentSprint": 13,
   "status": "complete",
-  "postSprintDone": false,
+  "postSprintDone": true,
   "analysisDone": false,
-  "preSprintDone": false,
-  "nextSprint": 14
+  "preSprintDone": false
 }
 ```
 
-At every heartbeat, the agent reads this file FIRST and acts based on state:
-- `postSprintDone: false` → run post-sprint checklist
-- `analysisDone: false` → launch deep analysis
-- `preSprintDone: false` → define next sprint goals from analysis
-
-The agent updates the file after each step. No step can be skipped.
+The agent reads the state file and can only do ONE thing: the next `false` field. It updates the file after each step. No step can be skipped because the state won't advance.
 
 ---
 
-## 6. Deep Analysis Between Sprints
+## 9. The Agent Will Optimize for the Wrong Thing
 
-**Problem:** Sprints get planned based on inertia ("what's next on the list?") instead of actual project needs.
+**What happens:** You want: working features + wiki updates + tests + proper commits. The agent delivers: working features only. Everything else is "extra."
 
-**Solution:** After every sprint, launch Claude Code to analyze the entire codebase:
-- Architecture, code quality, security, performance
-- Test gaps, UX gaps, tech debt
-- Missing features, competitive comparison
-- Save to `docs/deep-analysis-report.md`
+**Why:** The agent sees code completion as the primary success metric. Process tasks (docs, wiki, tests) feel secondary.
 
-Next sprint goals come FROM the analysis, not from guessing.
-
----
-
-## 7. Post-Sprint Checklist (Inline, Not Referenced)
-
-**Problem:** Having a checklist in a separate file (`memory/sprint-checklists.md`) that says "follow this checklist" doesn't work — the agent skips the indirection.
-
-**Solution:** Inline the FULL checklist directly in `HEARTBEAT.md`:
-```markdown
-POST-SPRINT (every single step, no skipping):
-1. npm run lint && npx tsc --noEmit && npm test && npm run build
-2. gh run list --limit 1 — CI must be green
-3. docker compose up -d --build
-4. npm run test:smoke — ALL must pass
-5. Update Sprint-NN.md with Outcomes section
-6. git commit + push
-7. Write retrospective in memory/YYYY-MM-DD.md
-8. Update MEMORY.md with lessons
-9. Launch deep analysis
-10. Define next sprint goals FROM analysis
-11. Launch next sprint
-```
+**Fix:** 
+- Make process tasks part of the definition of done in the prompt
+- "npm run lint + tsc + test + build must pass BEFORE each push" 
+- Gate the work: if tests don't pass, the goal isn't done
+- Use hooks and CI to enforce, not just instructions
 
 ---
 
-## 8. Mail Log for Smoke Tests
+## 10. Verify, Don't Trust
 
-**Problem:** Smoke tests that depend on email delivery (magic links, verification) are slow and flaky. SMTP delivery takes 10-60 seconds.
+**What happens:** The agent says "done, all goals complete, 32/32 tests pass." You check — 3 tests are failing, wiki isn't updated, deploy wasn't done.
 
-**Solution:** Log email URLs to a file instead of waiting for delivery:
-```typescript
-// In mail.ts — append URL to log file after sending
-function logMail(to: string, type: string, url: string) {
-  const logFile = process.env.MAIL_LOG_FILE || "";
-  if (!logFile) return;
-  appendFileSync(logFile, JSON.stringify({ to, type, url, timestamp: new Date().toISOString() }) + "\n");
-}
-```
+**Why:** The agent reports what it believes happened, not always what actually happened. It's not lying — it's confabulating based on patterns.
 
-Smoke tests read the URL directly from the log file instead of polling Gmail.
-
-**Result:** Tests went from 1.7 minutes to 11.5 seconds. Zero flakiness.
-
-**Docker setup:** Mount a shared directory (not file) for permissions:
-```yaml
-volumes:
-  - /tmp/ideate-logs:/tmp/ideate-logs
-environment:
-  - MAIL_LOG_FILE=/tmp/ideate-logs/mail.log
-```
+**Fix:**
+- Always run verification yourself (or via automated checks)
+- Smoke tests against real staging, not just unit tests
+- Have a second agent (ChatGPT Operator, Codex) verify the first agent's work
+- Don't accept "done" without evidence (CI green, smoke tests passing, staging responding)
 
 ---
 
-## 9. Claude Code Prompt Template
+## 11. External Review Catches What the Builder Misses
 
-The optimal sprint prompt structure:
-```
-Sprint N — [Title]. Do IN ORDER, commit+push after EACH:
+**What happens:** The development agent says the UI is polished and translations are complete. A real user test reveals broken logout, missing translations, and confusing UX.
 
-1. [Goal with specific details, file paths, what to change]
-2. [Goal...]
-...
+**Why:** The agent that wrote the code can't objectively evaluate it. It has built-in confirmation bias about its own work.
 
-CRITICAL RULES:
-- Commit and git push after EACH completed goal (not bulk!)
-- After each goal, edit docs/wiki/Sprint-NN.md: change '- [ ]' to '- [x]'
-  for that goal. Do NOT add new lines or create separate doc commits.
-- npm run lint + npx tsc --noEmit + npm test + npm run build must pass
-  before each push
-- All files < 300 lines
-```
+**Fix:** Use a separate agent (ChatGPT Operator, or any browser-capable agent) as an independent reviewer:
+1. Create test accounts programmatically
+2. Write a detailed review prompt
+3. Let the reviewer navigate the app like a real user
+4. Collect findings as GitHub issues
+5. Feed into next sprint
 
-**Key flags:** `claude -p "..." --max-turns 120 --dangerously-skip-permissions`
+Review twice: once to find bugs, once to verify fixes.
 
 ---
 
-## 10. Don't Ask — Just Do
+## 12. Heartbeats Are Your Control Loop
 
-**Problem:** The agent asks "should I deploy?" or "want me to start the next sprint?" — wasting time and interrupting the human.
+**What happens:** You launch a long-running task and come back hours later to find it died 10 minutes in, or finished but nothing was done after.
 
-**Solution:** The agent should:
-- Execute all post-sprint steps automatically
-- Launch the next sprint without asking
-- Only message the human when:
-  - Something needs their decision
-  - Tool usage > 80%
-  - Server problems they need to address
-  - Daily report (once per day)
+**Why:** No monitoring = no recovery. The agent needs periodic check-ins.
 
----
+**Fix:** OpenClaw heartbeats (every ~30 min) should:
+1. Check state file → act on current state
+2. Check if background processes are alive
+3. Check git log for recent activity
+4. If something died → restart
+5. If something finished → execute next steps
 
-## 11. Tool Instructions in TOOLS.md, Not MEMORY.md
-
-**Problem:** MEMORY.md gets truncated in the agent's context window. Critical tool instructions (like `--dangerously-skip-permissions` for Claude Code) are lost.
-
-**Solution:** All operational tool instructions go in `TOOLS.md`, which is always loaded in full. MEMORY.md is for context and history, not procedures.
+The heartbeat is your control loop. Everything important should be reachable from it.
 
 ---
 
-## 12. UI/UX Review with ChatGPT Operator
+## Summary Table
 
-**Problem:** The developer agent can't objectively evaluate UX — it wrote the code.
-
-**Solution:** Use ChatGPT with Operator (browser agent) as an independent reviewer:
-1. Create test accounts (register + verify programmatically)
-2. Write a detailed prompt with test steps, pages to visit, what to look for
-3. Send the prompt + credentials as a file
-4. Agent navigates the real app like a user, takes screenshots, writes report
-5. Create GitHub issues from findings
-6. Feed issues into next sprint
-
-Run the review twice: once to find issues, once after fixes to verify.
-
----
-
-## Summary
-
-| Problem | Solution |
-|---------|----------|
-| Agent forgets instructions | Write them in always-loaded files (TOOLS.md, HEARTBEAT.md) |
-| Bulk commits, no visibility | "commit+push after EACH goal" in prompt |
-| Wiki not updated | Git post-commit hook auto-checks goals |
-| Sprint steps skipped | State machine (sprint-state.json) |
-| Sprints planned by inertia | Deep analysis between sprints |
-| Checklist ignored | Inline in HEARTBEAT.md, not referenced |
-| Slow/flaky email tests | Mail log file, read directly |
-| Agent asks too much | "Don't ask, just do" rule |
-| UX blind spots | External ChatGPT Operator review |
+| Problem | Root Cause | Solution |
+|---------|-----------|----------|
+| Agent forgets instructions | No persistent memory | TOOLS.md / HEARTBEAT.md (always loaded) |
+| Checklist items skipped | Attention fades on long lists | State machine (JSON file) |
+| Written rules not followed | Wrong file / truncated context | TOOLS.md for procedures, MEMORY.md for context only |
+| Asks too many questions | Default cautious behavior | Explicit autonomy boundaries in AGENTS.md |
+| Referenced files not opened | Indirection gets skipped | Inline content, don't reference |
+| Vague instructions ignored | Ambiguity = optional | Painfully specific micro-instructions |
+| Repetitive tasks forgotten | Task fatigue | Automate (hooks, CI, scripts) |
+| Steps skipped in workflows | Natural language is skimmable | JSON state machine |
+| Process tasks deprioritized | Code = primary, docs = secondary | Make process part of definition of done |
+| Agent reports false completion | Confabulation | Independent verification |
+| Builder can't review own work | Confirmation bias | External agent review |
+| Long tasks die unnoticed | No monitoring | Heartbeat control loop |
