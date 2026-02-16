@@ -88,6 +88,92 @@ export async function sendMagicLinkEmail(
 }
 
 /**
+ * Send email verification email
+ * @param email - Recipient email address
+ * @param verifyLink - Verification URL
+ */
+export async function sendVerificationEmail(
+  email: string,
+  verifyLink: string
+): Promise<void> {
+  const transport = getTransporter();
+
+  const subject = "Verify your email - Ideate";
+  const text = `Welcome to Ideate!\n\nPlease verify your email address by clicking the link below:\n\n${verifyLink}\n\nThis link will expire in 24 hours.\n\nIf you didn't create an account, you can safely ignore this email.`;
+  const html = `
+    <!DOCTYPE html>
+    <html>
+      <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      </head>
+      <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
+        <h1 style="color: #0070f3; margin-bottom: 24px;">Welcome to Ideate!</h1>
+        <p style="margin-bottom: 16px;">Please verify your email address to activate your account:</p>
+        <p style="margin: 32px 0;">
+          <a href="${verifyLink}" style="background-color: #0070f3; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; display: inline-block; font-weight: 600;">Verify Email</a>
+        </p>
+        <p style="margin-bottom: 16px; color: #666; font-size: 14px;">Or copy and paste this link into your browser:</p>
+        <p style="margin-bottom: 32px; word-break: break-all; font-size: 14px; color: #666;">${verifyLink}</p>
+        <hr style="border: none; border-top: 1px solid #eee; margin: 32px 0;">
+        <p style="color: #999; font-size: 12px; margin-bottom: 8px;">This link will expire in 24 hours.</p>
+        <p style="color: #999; font-size: 12px;">If you didn't create an account, you can safely ignore this email.</p>
+      </body>
+    </html>
+  `;
+
+  try {
+    await transport.sendMail({ from: SMTP_FROM, to: email, subject, text, html });
+  } catch (error) {
+    console.error("Failed to send verification email:", error);
+    throw new Error("Failed to send verification email");
+  }
+}
+
+/**
+ * Send password reset email
+ * @param email - Recipient email address
+ * @param resetLink - Password reset URL
+ */
+export async function sendPasswordResetEmail(
+  email: string,
+  resetLink: string
+): Promise<void> {
+  const transport = getTransporter();
+
+  const subject = "Reset your password - Ideate";
+  const text = `You requested a password reset for your Ideate account.\n\nClick the link below to reset your password:\n\n${resetLink}\n\nThis link will expire in 1 hour.\n\nIf you didn't request this, you can safely ignore this email.`;
+  const html = `
+    <!DOCTYPE html>
+    <html>
+      <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      </head>
+      <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
+        <h1 style="color: #0070f3; margin-bottom: 24px;">Reset Your Password</h1>
+        <p style="margin-bottom: 16px;">You requested a password reset for your Ideate account. Click the button below to set a new password:</p>
+        <p style="margin: 32px 0;">
+          <a href="${resetLink}" style="background-color: #0070f3; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; display: inline-block; font-weight: 600;">Reset Password</a>
+        </p>
+        <p style="margin-bottom: 16px; color: #666; font-size: 14px;">Or copy and paste this link into your browser:</p>
+        <p style="margin-bottom: 32px; word-break: break-all; font-size: 14px; color: #666;">${resetLink}</p>
+        <hr style="border: none; border-top: 1px solid #eee; margin: 32px 0;">
+        <p style="color: #999; font-size: 12px; margin-bottom: 8px;">This link will expire in 1 hour.</p>
+        <p style="color: #999; font-size: 12px;">If you didn't request this, you can safely ignore this email.</p>
+      </body>
+    </html>
+  `;
+
+  try {
+    await transport.sendMail({ from: SMTP_FROM, to: email, subject, text, html });
+  } catch (error) {
+    console.error("Failed to send password reset email:", error);
+    throw new Error("Failed to send password reset email");
+  }
+}
+
+/**
  * Verify SMTP connection
  * @returns True if connection successful
  */
