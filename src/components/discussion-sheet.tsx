@@ -174,7 +174,7 @@ export function DiscussionSheet({
   return (
     <Sheet>
       <SheetTrigger asChild>
-        <Button variant="ghost" size="sm" className="text-muted-foreground">
+        <Button variant="ghost" size="sm" className="text-muted-foreground" title={t("comments.open")}>
           <MessageSquare className="mr-1 h-4 w-4" />
           <span className="text-sm">{commentCount}</span>
         </Button>

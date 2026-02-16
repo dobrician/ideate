@@ -41,6 +41,7 @@ export function Header({ onToggleSidebar }: HeaderProps) {
         size="icon"
         className="lg:hidden"
         onClick={onToggleSidebar}
+        title={t("nav.toggleSidebar")}
       >
         <MenuIcon className="h-5 w-5" />
         <span className="sr-only">{t("nav.toggleSidebar")}</span>
@@ -58,7 +59,7 @@ export function Header({ onToggleSidebar }: HeaderProps) {
 
       <div className="ml-auto flex items-center gap-2">
         <LocaleSwitcher />
-        <Button asChild variant="ghost" size="icon">
+        <Button asChild variant="ghost" size="icon" title={t("nav.profile")}>
           <Link href="/profile">
             <User className="h-4 w-4" />
             <span className="sr-only">{t("nav.profile")}</span>

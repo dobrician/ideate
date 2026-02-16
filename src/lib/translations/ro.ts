@@ -142,6 +142,7 @@ export const ro: Record<string, string> = {
   "comments.noComments":
     "Niciun comentariu inca. Incepe discutia!",
   "comments.replyPosted": "Raspuns postat",
+  "comments.open": "Deschide discutia",
 
   // Dashboard
   "dashboard.title": "Dashboard",
@@ -319,6 +320,8 @@ export const ro: Record<string, string> = {
   // Export
   "export.pdf": "PDF",
   "export.csv": "CSV",
+  "export.pdfTooltip": "Descarca raportul ca PDF",
+  "export.csvTooltip": "Descarca datele ca CSV",
   "export.failed": "Exportul a esuat",
 
   // PWA

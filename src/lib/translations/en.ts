@@ -135,6 +135,7 @@ export const en: Record<string, string> = {
   "comments.posting": "Posting...",
   "comments.noComments": "No comments yet. Start the discussion!",
   "comments.replyPosted": "Reply posted",
+  "comments.open": "Open discussion",
 
   // Dashboard
   "dashboard.title": "Dashboard",
@@ -300,6 +301,8 @@ export const en: Record<string, string> = {
   // Export
   "export.pdf": "PDF",
   "export.csv": "CSV",
+  "export.pdfTooltip": "Download report as PDF",
+  "export.csvTooltip": "Download data as CSV",
   "export.failed": "Failed to export report",
 
   // PWA

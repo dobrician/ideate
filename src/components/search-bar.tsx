@@ -74,7 +74,7 @@ export function SearchBar() {
         <Input
           type="search"
           placeholder={t("search.placeholder")}
-          aria-label="Search projects and proposals"
+          aria-label={t("search.placeholder")}
           value={query}
           onChange={(e) => handleChange(e.target.value)}
           onFocus={() => results.length > 0 && setIsOpen(true)}

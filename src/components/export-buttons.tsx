@@ -30,7 +30,7 @@ export function ExportButtons({ projectId }: ExportButtonsProps) {
         variant="outline"
         size="sm"
         onClick={() => handleExport("pdf")}
-        title="Download HTML report"
+        title={t("export.pdfTooltip")}
       >
         <Download className="mr-1 h-3 w-3" />
         {t("export.pdf")}
@@ -39,7 +39,7 @@ export function ExportButtons({ projectId }: ExportButtonsProps) {
         variant="outline"
         size="sm"
         onClick={() => handleExport("csv")}
-        title="Download CSV"
+        title={t("export.csvTooltip")}
       >
         <Download className="mr-1 h-3 w-3" />
         {t("export.csv")}
