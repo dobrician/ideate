@@ -33,6 +33,9 @@ export default function LoginPage() {
   const [error, setError] = useState(errorParam || "");
   const [success, setSuccess] = useState(false);
   const [verifiedBanner, setVerifiedBanner] = useState(verified);
+  const [needsVerification, setNeedsVerification] = useState(false);
+  const [resendLoading, setResendLoading] = useState(false);
+  const [resendSuccess, setResendSuccess] = useState(false);
 
   async function handleMagicLink(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -64,6 +67,8 @@ export default function LoginPage() {
     e.preventDefault();
     setIsLoading(true);
     setError("");
+    setNeedsVerification(false);
+    setResendSuccess(false);
 
     try {
       const response = await fetch("/api/auth/login-password", {
@@ -73,6 +78,9 @@ export default function LoginPage() {
       });
       const data = await response.json();
       if (!response.ok) {
+        if (data.code === "EMAIL_NOT_VERIFIED") {
+          setNeedsVerification(true);
+        }
         setError(data.error || "Failed to sign in");
         return;
       }
@@ -81,6 +89,25 @@ export default function LoginPage() {
       setError(t("common.errorOccurred"));
     } finally {
       setIsLoading(false);
+    }
+  }
+
+  async function handleResendVerification() {
+    setResendLoading(true);
+    setResendSuccess(false);
+    try {
+      const response = await fetch("/api/auth/resend-verification", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email }),
+      });
+      if (response.ok) {
+        setResendSuccess(true);
+      }
+    } catch {
+      // silent — the button already gave feedback
+    } finally {
+      setResendLoading(false);
     }
   }
 
@@ -176,6 +203,22 @@ export default function LoginPage() {
                   <p className="text-sm text-red-800 dark:text-red-200">
                     {error}
                   </p>
+                  {needsVerification && !resendSuccess && (
+                    <Button
+                      type="button"
+                      variant="link"
+                      className="mt-1 h-auto p-0 text-xs text-red-700 dark:text-red-300"
+                      onClick={handleResendVerification}
+                      disabled={resendLoading}
+                    >
+                      {resendLoading ? t("auth.sending") : t("auth.resendVerification")}
+                    </Button>
+                  )}
+                  {resendSuccess && (
+                    <p className="mt-1 text-xs text-green-700 dark:text-green-300">
+                      {t("auth.verifyEmailNote")}
+                    </p>
+                  )}
                 </div>
               )}
 

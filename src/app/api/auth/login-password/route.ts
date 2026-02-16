@@ -4,6 +4,7 @@ import { setSessionCookie } from "@/lib/auth";
 import { requireOrigin } from "@/lib/csrf";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { getClientIp } from "@/lib/request-utils";
+import { logAudit } from "@/lib/audit";
 import { logger } from "@/lib/logger";
 import { z } from "zod";
 
@@ -80,6 +81,7 @@ export async function POST(request: NextRequest) {
     const authResult = await authenticateWithPassword(email, password);
 
     if (!authResult) {
+      logAudit({ userId: null, action: "login_failed", entity: "session", details: `email=${email}`, ipAddress: clientIp });
       return NextResponse.json(
         { error: "Invalid email or password" },
         { status: 401 }
@@ -97,6 +99,7 @@ export async function POST(request: NextRequest) {
     }
 
     await setSessionCookie(authResult.userId, email);
+    logAudit({ userId: authResult.userId, action: "login", entity: "session", ipAddress: clientIp });
 
     return NextResponse.json({
       success: true,
