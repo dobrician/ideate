@@ -21,7 +21,7 @@ export function PwaInstall() {
     useState<BeforeInstallPromptEvent | null>(null);
   const [dismissed, setDismissed] = useState(() => {
     if (typeof window === "undefined") return true;
-    return sessionStorage.getItem(DISMISSED_KEY) === "1";
+    return localStorage.getItem(DISMISSED_KEY) === "1";
   });
 
   useEffect(() => {
@@ -35,7 +35,7 @@ export function PwaInstall() {
   }, []);
 
   function dismiss() {
-    sessionStorage.setItem(DISMISSED_KEY, "1");
+    localStorage.setItem(DISMISSED_KEY, "1");
     setDismissed(true);
   }
 

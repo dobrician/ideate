@@ -13,7 +13,7 @@
 
 **Bug Fixes (from retest report):**
 - [x] Fix logout redirect to 0.0.0.0 — use APP_URL (#23)
-- [ ] Fix PWA banner: show once, remember dismissal in localStorage (#24)
+- [x] Fix PWA banner: show once, remember dismissal in localStorage (#24)
 - [ ] Fix Romanian typos/diacritics throughout (#25)
 - [ ] Hide Sign Out from guest/logged-out nav (#26)
 - [ ] Fix proposal form submit button off-screen (#27)
