@@ -264,3 +264,21 @@
 - GitHub issues #2, #3, #9, #10, #11 addressed
 - ESLint config fixed for Next.js 16 + ESLint 9 compatibility
 - Auto-migration system ensures seamless DB schema updates on startup
+
+---
+
+## Sprint 6 — PWA, Export & Quality (2026-02-16)
+**Status:** 🔄 IN PROGRESS
+
+### Goals
+- [ ] PDF/CSV export for project reports (#7)
+- [ ] PWA support — service worker, manifest, offline mode (#12)
+- [ ] Comprehensive E2E tests for all user flows (auth, projects, proposals, voting, comments)
+- [ ] Security hardening — rate limiting on auth endpoints, input sanitization
+- [ ] Notification system — email notifications for votes and comments on user's proposals
+- [ ] Project deadlines — countdown, auto-close voting when deadline passes
+- [ ] Admin panel — user management, system stats
+- [ ] SEO — meta tags, Open Graph, sitemap.xml
+
+### Outcomes
+- TBD (sprint in progress)
