@@ -15,7 +15,7 @@
 **Navigation Polish:**
 - [x] Replace hand-rolled header dropdown with shadcn DropdownMenu (ARIA, keyboard nav)
 - [x] Add Header/AppShell component tests (desktop, mobile, admin, auth-gated)
-- [ ] Clean up dead sidebar CSS variables and unused translation keys
+- [x] Clean up dead sidebar CSS variables and unused translation keys
 
 **Infrastructure:**
 - [ ] Add structured error logging with pino (JSON, timestamps, request IDs)

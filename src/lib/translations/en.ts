@@ -7,8 +7,6 @@ export const en: Record<string, string> = {
   "nav.signOut": "Sign Out",
   "nav.admin": "Admin",
   "nav.search": "Search projects & proposals...",
-  "nav.navigation": "Navigation",
-  "nav.toggleSidebar": "Toggle sidebar",
 
   // Home page
   "home.title": "Ideate",

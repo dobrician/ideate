@@ -7,8 +7,6 @@ export const ro: Record<string, string> = {
   "nav.signOut": "Delogare",
   "nav.admin": "Admin",
   "nav.search": "Caută proiecte și propuneri...",
-  "nav.navigation": "Navigare",
-  "nav.toggleSidebar": "Comută bara laterală",
 
   // Home page
   "home.title": "Ideate",
