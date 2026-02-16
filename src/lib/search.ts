@@ -9,6 +9,7 @@ interface SearchResult {
   description: string | null;
   type: "project" | "proposal";
   snippet: string;
+  projectId?: string;
 }
 
 /**
@@ -68,7 +69,7 @@ function searchFts(
 
   const proposalResults = sqlite
     .prepare(
-      `SELECT p.id, p.title, p.description,
+      `SELECT p.id, p.title, p.description, p.projectId,
               snippet(proposals_fts, 0, '<mark>', '</mark>', '...', 32) as snippet
        FROM proposals_fts
        JOIN proposals p ON p.rowid = proposals_fts.rowid
@@ -80,6 +81,7 @@ function searchFts(
     id: string;
     title: string;
     description: string | null;
+    projectId: string;
     snippet: string;
   }>;
 
@@ -91,6 +93,7 @@ function searchFts(
     ...proposalResults.map((r) => ({
       ...r,
       type: "proposal" as const,
+      projectId: r.projectId,
     })),
   ];
 
@@ -119,7 +122,7 @@ function searchFallback(
 
   const proposalResults = sqlite
     .prepare(
-      `SELECT id, title, description
+      `SELECT id, title, description, projectId
        FROM proposals
        WHERE title LIKE ? OR description LIKE ?
        LIMIT ?`
@@ -128,6 +131,7 @@ function searchFallback(
     id: string;
     title: string;
     description: string | null;
+    projectId: string;
   }>;
 
   return [
@@ -140,6 +144,7 @@ function searchFallback(
       ...r,
       type: "proposal" as const,
       snippet: r.title,
+      projectId: r.projectId,
     })),
   ].slice(0, limit);
 }

@@ -10,6 +10,7 @@ interface SearchResult {
   title: string;
   type: "project" | "proposal";
   snippet: string;
+  projectId?: string;
 }
 
 /**
@@ -101,7 +102,7 @@ export function SearchBar() {
               href={
                 result.type === "project"
                   ? `/projects/${result.id}`
-                  : `/projects/${result.id}`
+                  : `/projects/${result.projectId || result.id}`
               }
               className="flex items-start gap-2 p-3 hover:bg-accent transition-colors duration-150 border-b last:border-b-0 focus:bg-accent focus:outline-none"
               onClick={() => setIsOpen(false)}
