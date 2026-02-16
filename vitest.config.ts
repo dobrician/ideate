@@ -20,6 +20,7 @@ export default defineConfig({
         "src/app/api/search/route.ts",
         "src/app/api/email/deliverability/route.ts",
         "src/app/profile/actions.ts",
+        "src/app/projects/actions.ts",
         "src/app/projects/[id]/proposals/actions.ts",
       ],
       exclude: [
