@@ -46,8 +46,24 @@ export default async function DashboardPage() {
         </p>
       </div>
 
-      {/* Stats cards — personal counts with platform context */}
-      <div className="mb-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4" role="region" aria-label="Your statistics">
+      {/* Mobile stat pills (compact 2x2 grid) */}
+      <div className="mb-6 grid grid-cols-2 gap-2 sm:hidden" role="region" aria-label="Your statistics">
+        {[
+          { icon: <FolderOpen className="h-3.5 w-3.5" />, value: userStats.projectCount, label: t("dashboard.stats.projects") },
+          { icon: <Lightbulb className="h-3.5 w-3.5" />, value: userStats.proposalCount, label: t("dashboard.stats.proposals") },
+          { icon: <ThumbsUp className="h-3.5 w-3.5" />, value: userStats.voteCount, label: t("dashboard.stats.votes") },
+          { icon: <MessageSquare className="h-3.5 w-3.5" />, value: userStats.commentCount, label: t("dashboard.stats.comments") },
+        ].map((s) => (
+          <div key={s.label} className="flex items-center gap-2 rounded-lg border bg-card px-3 py-2">
+            <span className="text-muted-foreground">{s.icon}</span>
+            <span className="text-sm font-bold">{s.value}</span>
+            <span className="truncate text-xs text-muted-foreground">{s.label}</span>
+          </div>
+        ))}
+      </div>
+
+      {/* Desktop stat cards */}
+      <div className="mb-8 hidden gap-4 sm:grid sm:grid-cols-2 lg:grid-cols-4" role="region" aria-label="Your statistics">
         <StatCard
           title={t("dashboard.stats.projects")}
           value={userStats.projectCount}
