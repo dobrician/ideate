@@ -166,6 +166,9 @@ export const ro: Record<string, string> = {
   "dashboard.browseProjects": "Răsfoiește Proiecte",
   "dashboard.deadlineOverdue": "Expirat",
   "dashboard.deadlineDaysLeft": "{count}z rămase",
+  "dashboard.projectProposals": "{count} propuneri",
+  "dashboard.projectVotes": "{count} voturi",
+  "dashboard.projectComments": "{count} comentarii",
 
   // Profile
   "profile.title": "Profil",

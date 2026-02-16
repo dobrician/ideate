@@ -16,7 +16,19 @@ export async function getDashboardData(userId: string) {
     totalStats,
   ] = await Promise.all([
     db
-      .select()
+      .select({
+        id: projects.id,
+        title: projects.title,
+        description: projects.description,
+        status: projects.status,
+        deadline: projects.deadline,
+        createdAt: projects.createdAt,
+        updatedAt: projects.updatedAt,
+        userId: projects.userId,
+        proposalCount: sql<number>`(SELECT COUNT(*) FROM proposals WHERE proposals.project_id = projects.id)`,
+        voteCount: sql<number>`(SELECT COUNT(*) FROM votes WHERE votes.proposal_id IN (SELECT id FROM proposals WHERE proposals.project_id = projects.id))`,
+        commentCount: sql<number>`(SELECT COUNT(*) FROM comments WHERE comments.project_id = projects.id)`,
+      })
       .from(projects)
       .where(eq(projects.userId, userId))
       .orderBy(asc(projects.deadline), desc(projects.createdAt))

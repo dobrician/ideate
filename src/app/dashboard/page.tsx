@@ -123,19 +123,26 @@ export default async function DashboardPage() {
                   <li key={p.id}>
                     <Link
                       href={`/projects/${p.id}`}
-                      className="group flex items-center justify-between rounded-md px-2 py-1.5 transition-colors hover:bg-muted/50"
+                      className="group rounded-md px-2 py-1.5 transition-colors hover:bg-muted/50 block"
                     >
-                      <span className="truncate text-sm font-medium group-hover:underline">
-                        {p.title}
+                      <span className="flex items-center justify-between">
+                        <span className="truncate text-sm font-medium group-hover:underline">
+                          {p.title}
+                        </span>
+                        <span className="flex shrink-0 gap-1.5">
+                          {(() => {
+                            const dl = deadlineBadge(p.deadline, t);
+                            return dl ? <Badge className={dl.className}>{dl.label}</Badge> : null;
+                          })()}
+                          <Badge className={statusBadgeClass(p.status)}>
+                            {statusLabel(p.status, t)}
+                          </Badge>
+                        </span>
                       </span>
-                      <span className="flex shrink-0 gap-1.5">
-                        {(() => {
-                          const dl = deadlineBadge(p.deadline, t);
-                          return dl ? <Badge className={dl.className}>{dl.label}</Badge> : null;
-                        })()}
-                        <Badge className={statusBadgeClass(p.status)}>
-                          {statusLabel(p.status, t)}
-                        </Badge>
+                      <span className="mt-0.5 flex gap-3 text-xs text-muted-foreground">
+                        <span>{t("dashboard.projectProposals", { count: p.proposalCount })}</span>
+                        <span>{t("dashboard.projectVotes", { count: p.voteCount })}</span>
+                        <span>{t("dashboard.projectComments", { count: p.commentCount })}</span>
                       </span>
                     </Link>
                   </li>
