@@ -555,3 +555,35 @@
 - First sprint with incremental commits working correctly — wiki updated in real-time via GitHub Actions
 - Claude Code completed all 10 goals within 120 turns (2 sessions: goals 1-4, then 5-10)
 - No smoke test regressions despite significant UI changes
+
+---
+
+## Sprint 11 — Critical UX Fixes from UI Review (2026-02-16)
+**Status:** 🏃 IN PROGRESS
+
+### Goals (from ChatGPT Operator UI/UX review report)
+
+**Critical:**
+- [ ] Fix logout: clear session properly, redirect to clean public page with NO logged-in navigation
+- [ ] Auth pages (login/register/forgot-password/reset-password): use minimal layout WITHOUT sidebar/nav — clean, centered, no "Sign Out" link
+- [ ] Fix locale persistence: save locale in cookie/localStorage, persist across ALL page navigations
+- [ ] Complete ALL remaining Romanian translations — dashboard titles, project cards, forms, buttons, empty states, EVERYTHING
+- [ ] Admin access denied: show 403 page with explanation instead of silent redirect
+- [ ] PWA install popup: show only once per session, remember dismissal
+
+**Major:**
+- [ ] Voting UX: highlight selected vote state (filled icons, color), add hover tooltip "Click again to remove"
+- [ ] Delete confirmation: add modal before destructive actions (project delete, proposal delete)
+- [ ] Search: make it functional or hide it until implemented
+- [ ] Date format: localize to dd.mm.yyyy for RO locale
+- [ ] Profile page: translate all field labels and buttons
+
+**Minor:**
+- [ ] Dark mode contrast: increase contrast for grey text on dark backgrounds
+- [ ] Add tooltips to all icon buttons (export, edit, theme, language)
+
+### Constraints
+- Commit + push after EACH fix
+- Update this Sprint Log after each commit
+- All files < 300 lines
+- Lint + type check + tests + build must pass before each push
