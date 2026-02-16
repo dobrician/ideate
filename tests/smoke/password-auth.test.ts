@@ -13,33 +13,57 @@ const TEST_PASSWORD = "SmokeTest123";
 function getTokenFromEmail(
   email: string,
   linkPath: string,
-  maxWaitMs = 20000
+  maxWaitMs = 30000
 ): string {
   const startTime = Date.now();
   const pollInterval = 3000;
+  const tokenRegex = new RegExp(
+    `${linkPath.replace(/\//g, "\\/")}\\?token=([a-f0-9]+)`
+  );
+
+  // Snapshot existing tokens so we only return fresh ones
+  const seenTokens = new Set<string>();
+  try {
+    const output = execSync(
+      `source /home/dc/.config/gogcli/gog.env && gog gmail search "from:idea@surcod.ro to:${email} newer_than:5m" --max 3 --json`,
+      { encoding: "utf-8", shell: "/bin/bash", timeout: 10000 }
+    );
+    const parsed = JSON.parse(output);
+    if (parsed.threads) {
+      for (const thread of parsed.threads) {
+        try {
+          const threadOutput = execSync(
+            `source /home/dc/.config/gogcli/gog.env && gog gmail read ${thread.id}`,
+            { encoding: "utf-8", shell: "/bin/bash", timeout: 10000 }
+          );
+          const matches = threadOutput.matchAll(new RegExp(tokenRegex, "g"));
+          for (const m of matches) seenTokens.add(m[1]);
+        } catch { /* ignore */ }
+      }
+    }
+  } catch { /* no existing emails, fine */ }
 
   while (Date.now() - startTime < maxWaitMs) {
     try {
       const output = execSync(
-        `source /home/dc/.config/gogcli/gog.env && gog gmail search "from:idea@surcod.ro to:${email} newer_than:2m" --max 1 --json`,
+        `source /home/dc/.config/gogcli/gog.env && gog gmail search "from:idea@surcod.ro to:${email} newer_than:5m" --max 3 --json`,
         { encoding: "utf-8", shell: "/bin/bash", timeout: 10000 }
       );
 
       const parsed = JSON.parse(output);
-      if (parsed.threads && parsed.threads.length > 0) {
-        const threadId = parsed.threads[0].id;
-        const threadOutput = execSync(
-          `source /home/dc/.config/gogcli/gog.env && gog gmail read ${threadId}`,
-          { encoding: "utf-8", shell: "/bin/bash", timeout: 10000 }
-        );
+      if (parsed.threads) {
+        for (const thread of parsed.threads) {
+          try {
+            const threadOutput = execSync(
+              `source /home/dc/.config/gogcli/gog.env && gog gmail read ${thread.id}`,
+              { encoding: "utf-8", shell: "/bin/bash", timeout: 10000 }
+            );
 
-        // Find token= parameter in the email matching linkPath
-        const tokenRegex = new RegExp(
-          `${linkPath.replace("/", "\\/")}\\?token=([a-f0-9]+)`
-        );
-        const match = threadOutput.match(tokenRegex);
-        if (match) {
-          return match[1];
+            const match = threadOutput.match(tokenRegex);
+            if (match && !seenTokens.has(match[1])) {
+              return match[1];
+            }
+          } catch { /* ignore read failures */ }
         }
       }
     } catch {

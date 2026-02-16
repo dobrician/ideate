@@ -9,35 +9,58 @@ const TEST_EMAIL = process.env.TEST_EMAIL || "smoketest@surcod.ro";
  * Requires gog CLI with credentials configured.
  * All @surcod.ro emails forward to ciprian.dobrea@gmail.com via Cloudflare catch-all.
  */
-function getLatestMagicLinkToken(email: string, maxWaitMs = 15000): string {
+function getLatestMagicLinkToken(email: string, maxWaitMs = 30000): string {
   const startTime = Date.now();
   const pollInterval = 3000;
+  // Track tokens we've already seen so we only return freshly delivered ones
+  const seenTokens = new Set<string>();
+
+  // Snapshot existing tokens before the magic link request
+  try {
+    const output = execSync(
+      `source /home/dc/.config/gogcli/gog.env && gog gmail search "from:idea@surcod.ro to:${email} newer_than:5m" --max 3 --json`,
+      { encoding: "utf-8", shell: "/bin/bash", timeout: 10000 }
+    );
+    const parsed = JSON.parse(output);
+    if (parsed.threads) {
+      for (const thread of parsed.threads) {
+        try {
+          const threadOutput = execSync(
+            `source /home/dc/.config/gogcli/gog.env && gog gmail read ${thread.id}`,
+            { encoding: "utf-8", shell: "/bin/bash", timeout: 10000 }
+          );
+          const tokenMatches = threadOutput.matchAll(/token=([A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+)/g);
+          for (const m of tokenMatches) seenTokens.add(m[1]);
+        } catch { /* ignore */ }
+      }
+    }
+  } catch { /* no existing emails, fine */ }
 
   while (Date.now() - startTime < maxWaitMs) {
     try {
       const output = execSync(
-        `source /home/dc/.config/gogcli/gog.env && gog gmail search "from:idea@surcod.ro to:${email} newer_than:2m" --max 1 --json`,
+        `source /home/dc/.config/gogcli/gog.env && gog gmail search "from:idea@surcod.ro to:${email} newer_than:5m" --max 3 --json`,
         { encoding: "utf-8", shell: "/bin/bash", timeout: 10000 }
       );
 
       const parsed = JSON.parse(output);
       if (parsed.threads && parsed.threads.length > 0) {
-        const threadId = parsed.threads[0].id;
+        // Check threads newest-first for a fresh token
+        for (const thread of parsed.threads) {
+          const threadOutput = execSync(
+            `source /home/dc/.config/gogcli/gog.env && gog gmail read ${thread.id}`,
+            { encoding: "utf-8", shell: "/bin/bash", timeout: 10000 }
+          );
 
-        // Read the thread and get the last message
-        const threadOutput = execSync(
-          `source /home/dc/.config/gogcli/gog.env && gog gmail read ${threadId}`,
-          { encoding: "utf-8", shell: "/bin/bash", timeout: 10000 }
-        );
-
-        // Find the last message sent to our test email
-        const messages = threadOutput.split(/=== Message \d+\/\d+:/);
-        for (let i = messages.length - 1; i >= 0; i--) {
-          const msg = messages[i];
-          if (msg.includes(`To: ${email}`) || msg.includes(`to: ${email}`)) {
-            const tokenMatch = msg.match(/token=([A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+)/);
-            if (tokenMatch) {
-              return tokenMatch[1];
+          // Find the last message sent to our test email
+          const messages = threadOutput.split(/=== Message \d+\/\d+:/);
+          for (let i = messages.length - 1; i >= 0; i--) {
+            const msg = messages[i];
+            if (msg.includes(`To: ${email}`) || msg.includes(`to: ${email}`)) {
+              const tokenMatch = msg.match(/token=([A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+)/);
+              if (tokenMatch && !seenTokens.has(tokenMatch[1])) {
+                return tokenMatch[1];
+              }
             }
           }
         }
