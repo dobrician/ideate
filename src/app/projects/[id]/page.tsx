@@ -187,7 +187,7 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
           </div>
 
           <div className="border-t pt-6">
-            <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div className="mb-4 grid grid-cols-[1fr_auto] items-center gap-3">
               <h2 className="text-lg font-semibold">
                 {t("proposals.count", { count: proposalsWithStats.length })}
               </h2>
