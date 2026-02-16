@@ -476,9 +476,68 @@
 - [x] Keep magic link auth working alongside password auth (dual auth)
 - [x] i18n: all new strings in both EN and RO
 
+### Outcomes
+- 21 conventional commits (9 features + 12 fixes/refactors)
+- **541 unit tests, all passing** (up from 479, +62 new tests)
+- **32/32 smoke tests pass** (up from 23, +9 new tests, runtime: 11.5s)
+- CI green (all 4 jobs)
+- Password auth with bcrypt hashing
+  - Registration page with email, password, confirm password, complexity validation
+  - Min 8 chars with uppercase, lowercase, and number requirement
+  - `src/lib/password.ts` — registerUser, verifyEmail, loginWithPassword, requestPasswordReset, resetPassword
+- Dual-auth login page
+  - Toggle between password login and magic link on same page
+  - Both auth methods fully functional and independent
+- Email verification flow
+  - Verification email sent on register via SMTP (idea@surcod.ro)
+  - Verify endpoint with secure token validation
+  - Resend verification endpoint for unverified users
+- Password recovery flow
+  - Forgot password page → email with time-limited reset link → reset password page
+  - Anti-enumeration: forgot-password always returns success regardless of email existence
+- Rate limiting on all auth endpoints (per email + per IP)
+- i18n: all new strings in EN and RO
+- Logout fix: POST /auth/logout now redirects to /auth/login (supports JSON via Accept header for API callers)
+- Mail log system for smoke testing
+  - Appends verification/reset URLs to log file (JSON lines)
+  - Eliminates SMTP delivery delay dependency in tests (1.7min → 11.5s)
+  - Docker volume mount at /tmp/ideate-logs/mail.log
+- DB migration: `0003_sprint9_password_auth.sql` — passwordHash, emailVerified columns
+- New pages: /auth/register, /auth/forgot-password, /auth/reset-password, /auth/verify-email
+- New API routes: /api/auth/register, /api/auth/login-password, /api/auth/forgot-password, /api/auth/reset-password, /api/auth/resend-verification
+
 ### Constraints
 - Do NOT break existing magic link auth
 - All new emails via SMTP (idea@surcod.ro)
 - Follow existing code patterns (Route Handlers for cookie-setting endpoints)
 - All files < 300 lines
 - Lint + type check + build must pass
+
+### Notes
+- Magic link auth fully preserved and working alongside password auth
+- Smoke tests reduced from ~2 minutes to 11.5 seconds via mail log approach
+- Key lesson: Claude Code should commit+push after each goal, not bulk at end
+
+---
+
+## Sprint 10 — UI/UX Polish & Complete Romanian Translation (2026-02-16)
+**Status:** 🏃 IN PROGRESS
+
+### Goals
+- [ ] Complete Romanian (RO) translations — all UI strings (#15)
+- [ ] Fix locale switcher — page content must translate, not just sidebar
+- [ ] Localize dates and numbers per locale
+- [ ] New Proposal form alignment and spacing fixes
+- [ ] Visual hierarchy improvements — badges, empty states, cards
+- [ ] Dark/light mode consistency check
+- [ ] Mobile responsive fixes (320px+)
+- [ ] Login/register/auth pages visual polish
+- [ ] Dashboard layout improvements
+- [ ] Consistent button styles and spacing across all pages
+
+### Constraints
+- Do NOT break existing functionality
+- All files < 300 lines
+- Lint + type check + build must pass
+- Commit + push after EACH completed goal (not bulk at end)
+- Update this Sprint Log after each commit
