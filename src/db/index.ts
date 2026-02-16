@@ -26,6 +26,7 @@ function applyMigrations(): void {
     "0001_sprint5_audit_search.sql",
     "0002_sprint7_indexes.sql",
     "0003_sprint9_password_auth.sql",
+    "0004_sprint13_indexes.sql",
   ];
 
   for (const file of migrations) {
