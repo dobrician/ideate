@@ -19,7 +19,7 @@ Based on unified analysis from both Claude and Codex (see docs/sprint22-unified-
 - [x] Goal 9: Fix duplicate page section at bottom (#42) + proposal form should be modal (#41)
 
 **Tests:**
-- [ ] Goal 10: Fix stale E2E auth tests + add mobile viewport auth tests
+- [x] Goal 10: Fix stale E2E auth tests + add mobile viewport auth tests
 - [ ] Goal 11: Sprint 22 log + outcomes in Sprint-Log.md
 
 ## Constraints
