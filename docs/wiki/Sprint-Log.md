@@ -601,3 +601,23 @@
 - Hit 120 max turns — 2 minor goals deferred (dark mode contrast, tooltips)
 - All critical and major issues from UI review addressed
 - Based on ChatGPT Operator real-user review report
+
+---
+
+## Sprint 12 — Polish & Deferred Fixes (2026-02-16)
+**Status:** 🏃 IN PROGRESS
+
+### Goals
+- [ ] Profile page: translate all field labels and buttons to RO
+- [ ] Dark mode contrast: increase contrast for grey text on dark backgrounds (WCAG AA)
+- [ ] Add tooltips to all icon buttons (export PDF/CSV, edit, delete, theme toggle, language toggle)
+- [ ] Verify logout works end-to-end on staging (clear session, no sidebar on public pages)
+- [ ] Verify locale persistence on staging (switch to RO, navigate 5+ pages, must stay RO)
+- [ ] Verify voting UX on staging (vote highlight visible, tooltip works)
+- [ ] Run full smoke test suite and fix any failures
+- [ ] Version bump to v1.1.0
+
+### Constraints
+- Commit + push after EACH fix
+- Update this Sprint Log after each commit
+- Lint + type check + tests + build must pass before each push
