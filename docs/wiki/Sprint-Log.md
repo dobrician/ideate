@@ -4,9 +4,9 @@ Reverse chronological. Click each sprint for full details.
 
 ---
 
-### 🏃 [Sprint 14 — UI Overhaul & Bug Fixes](Sprint-14) *(2026-02-16)*
+### ✅ [Sprint 14 — UI Overhaul & Bug Fixes](Sprint-14) *(2026-02-16)*
 **Focus:** Remove sidebar, top nav bar, homepage=dashboard, dark mode toggle, proposal bar chart, logout/PWA/i18n bug fixes
-**Stats:** 🔧 In progress | Issues #16-27
+**Stats:** 10 commits | 562 tests | 32/32 smoke | Issues #16-27
 
 ---
 
