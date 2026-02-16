@@ -1,10 +1,7 @@
 -- Sprint 16: Add project-level comments support
 -- Allow comments on projects directly (not just proposals)
 
--- Add project_id column (nullable, references projects)
-ALTER TABLE comments ADD COLUMN project_id TEXT REFERENCES projects(id) ON DELETE CASCADE;
---> statement-breakpoint
--- Make proposal_id nullable (was NOT NULL before)
+-- Make proposal_id nullable and add project_id
 -- SQLite doesn't support ALTER COLUMN, so we recreate the table
 CREATE TABLE comments_new (
 	`id` text PRIMARY KEY NOT NULL,
