@@ -1,21 +1,57 @@
 import { test, expect } from "@playwright/test";
 import { execSync } from "child_process";
+import { readFileSync } from "fs";
 
 const APP_URL = process.env.APP_URL || "https://idea.surmont.co";
+const MAIL_LOG_FILE = process.env.MAIL_LOG_FILE || "/tmp/ideate-mail.log";
 const TEST_EMAIL = process.env.TEST_EMAIL || "smoketest@surcod.ro";
 
 /**
- * Extract the latest magic link token from Gmail inbox.
+ * Try to get the magic link URL from the mail log file.
+ * Returns the full URL or null if not found within timeout.
+ */
+function getUrlFromMailLog(
+  email: string,
+  type: string,
+  maxWaitMs = 10000
+): string | null {
+  const startTime = Date.now();
+  const pollInterval = 500;
+
+  while (Date.now() - startTime < maxWaitMs) {
+    try {
+      const content = readFileSync(MAIL_LOG_FILE, "utf-8");
+      const lines = content.trim().split("\n").reverse();
+      for (const line of lines) {
+        if (!line) continue;
+        const entry = JSON.parse(line);
+        if (entry.to === email && entry.type === type) {
+          return entry.url;
+        }
+      }
+    } catch {
+      // File may not exist yet
+    }
+
+    const waitUntil = Date.now() + pollInterval;
+    while (Date.now() < waitUntil) {
+      // busy-wait
+    }
+  }
+
+  return null;
+}
+
+/**
+ * Extract the latest magic link token from Gmail inbox (fallback).
  * Requires gog CLI with credentials configured.
  * All @surcod.ro emails forward to ciprian.dobrea@gmail.com via Cloudflare catch-all.
  */
-function getLatestMagicLinkToken(email: string, maxWaitMs = 30000): string {
+function getLatestMagicLinkTokenFromGmail(email: string, maxWaitMs = 30000): string {
   const startTime = Date.now();
   const pollInterval = 3000;
-  // Track tokens we've already seen so we only return freshly delivered ones
   const seenTokens = new Set<string>();
 
-  // Snapshot existing tokens before the magic link request
   try {
     const output = execSync(
       `source /home/dc/.config/gogcli/gog.env && gog gmail search "from:idea@surcod.ro to:${email} newer_than:5m" --max 3 --json`,
@@ -45,14 +81,12 @@ function getLatestMagicLinkToken(email: string, maxWaitMs = 30000): string {
 
       const parsed = JSON.parse(output);
       if (parsed.threads && parsed.threads.length > 0) {
-        // Check threads newest-first for a fresh token
         for (const thread of parsed.threads) {
           const threadOutput = execSync(
             `source /home/dc/.config/gogcli/gog.env && gog gmail read ${thread.id}`,
             { encoding: "utf-8", shell: "/bin/bash", timeout: 10000 }
           );
 
-          // Find the last message sent to our test email
           const messages = threadOutput.split(/=== Message \d+\/\d+:/);
           for (let i = messages.length - 1; i >= 0; i--) {
             const msg = messages[i];
@@ -69,7 +103,6 @@ function getLatestMagicLinkToken(email: string, maxWaitMs = 30000): string {
       // Gmail search failed, retry
     }
 
-    // Wait before polling again
     execSync(`sleep ${pollInterval / 1000}`);
   }
 
@@ -88,13 +121,19 @@ test.describe("Smoke Tests - Full Auth Flow", () => {
     const requestData = await requestResponse.json();
     expect(requestData.success).toBe(true);
 
-    // Step 2: Wait for email and extract token
-    const token = getLatestMagicLinkToken(TEST_EMAIL);
-    expect(token).toBeTruthy();
-    expect(token.split(".")).toHaveLength(3); // Valid JWT format
+    // Step 2: Get magic link URL from mail log, fall back to Gmail polling
+    let verifyUrl: string;
+    const logUrl = getUrlFromMailLog(TEST_EMAIL, "magic-link", 10000);
+    if (logUrl) {
+      verifyUrl = logUrl;
+    } else {
+      const token = getLatestMagicLinkTokenFromGmail(TEST_EMAIL);
+      expect(token).toBeTruthy();
+      expect(token.split(".")).toHaveLength(3);
+      verifyUrl = `${APP_URL}/auth/verify?token=${token}`;
+    }
 
     // Step 3: Click magic link (verify endpoint)
-    const verifyUrl = `${APP_URL}/auth/verify?token=${token}`;
     await page.goto(verifyUrl);
 
     // Should redirect to homepage after successful auth
