@@ -14,7 +14,7 @@ export function ProjectComments({ projectId, comments }: ProjectCommentsProps) {
   const { t } = useLocale();
 
   return (
-    <div className="border-t pt-6">
+    <div className="border-t p-4 pt-6">
       <h2 className="mb-4 flex items-center gap-2 text-lg font-semibold">
         <MessageSquare className="h-5 w-5" />
         {t("comments.projectDiscussion")}

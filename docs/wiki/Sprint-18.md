@@ -8,10 +8,10 @@
 - [x] Remove solid vote bars and percentage labels — keep only title background + vote count icons (#38)
 
 **Chat/Comments Redesign (#39):**
-- [ ] Add proper padding throughout comment drawer and project comments section (#39)
-- [ ] Input UX: single-line input + button on same row. Enter = submit, Ctrl+Enter = new line (#39)
-- [ ] Real-time: new comments appear without page reload — use optimistic update or polling (#39)
-- [ ] Messenger layout: chat box at bottom, messages scroll up, user avatars, chat bubbles, timestamps (#39)
+- [x] Add proper padding throughout comment drawer and project comments section (#39)
+- [x] Input UX: single-line input + button on same row. Enter = submit, Ctrl+Enter = new line (#39)
+- [x] Real-time: new comments appear without page reload — use optimistic update or polling (#39)
+- [x] Messenger layout: chat box at bottom, messages scroll up, user avatars, chat bubbles, timestamps (#39)
 
 **From Analysis:**
 - [ ] Increase test coverage: stat-card branches, db/index migration paths, mail.ts SMTP fallbacks

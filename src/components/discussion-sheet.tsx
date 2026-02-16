@@ -38,7 +38,7 @@ export function DiscussionSheet({
             {t("comments.title")}: {proposalTitle}
           </SheetTitle>
         </SheetHeader>
-        <div className="mt-4 h-[calc(100vh-10rem)]">
+        <div className="mt-4 h-[calc(100vh-10rem)] p-4">
           <CommentThread
             comments={comments}
             hiddenFields={{ proposalId }}
