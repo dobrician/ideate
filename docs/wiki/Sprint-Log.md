@@ -529,7 +529,7 @@
 - [x] Localize dates and numbers per locale
 - [x] New Proposal form alignment and spacing fixes
 - [x] Visual hierarchy improvements — badges, empty states, cards
-- [ ] Dark/light mode consistency check
+- [x] Dark/light mode consistency check
 - [ ] Mobile responsive fixes (320px+)
 - [ ] Login/register/auth pages visual polish
 - [ ] Dashboard layout improvements
