@@ -119,20 +119,13 @@ export const en: Record<string, string> = {
   // Voting
   "vote.pro": "Pro",
   "vote.contra": "Contra",
-  "vote.cast": "Vote",
   "vote.remove": "Remove vote",
-  "vote.noVotes": "No votes yet",
 
   // Comments / Discussion
   "comments.title": "Discussion",
-  "comments.discussionTitle": "Discussion: {title}",
   "comments.placeholder": "Add a comment...",
-  "comments.replyPlaceholder": "Write a reply...",
   "comments.submit": "Post Comment",
-  "comments.reply": "Reply",
-  "comments.posting": "Posting...",
   "comments.noComments": "No comments yet. Start the discussion!",
-  "comments.replyPosted": "Reply posted",
   "comments.open": "Open discussion",
   "comments.projectDiscussion": "Project Discussion",
 
