@@ -68,11 +68,16 @@ export default async function DashboardPage() {
       <div className="grid gap-6 lg:grid-cols-2">
         {/* User's projects */}
         <Card>
-          <CardHeader>
-            <CardTitle className="text-lg">{t("dashboard.yourProjects")}</CardTitle>
-            <CardDescription>
-              {userProjects.length} project{userProjects.length !== 1 ? "s" : ""}
-            </CardDescription>
+          <CardHeader className="flex flex-row items-start justify-between">
+            <div>
+              <CardTitle className="text-lg">{t("dashboard.yourProjects")}</CardTitle>
+              <CardDescription>
+                {userProjects.length} project{userProjects.length !== 1 ? "s" : ""}
+              </CardDescription>
+            </div>
+            <Link href="/projects" className="text-xs font-medium text-primary hover:underline">
+              {t("dashboard.viewAll")}
+            </Link>
           </CardHeader>
           <CardContent>
             {userProjects.length === 0 ? (
@@ -216,26 +221,31 @@ export default async function DashboardPage() {
                   <li key={a.id} className="text-sm">
                     <Link
                       href={`/projects/${a.projectId}`}
-                      className="group block rounded-md px-2 py-1.5 transition-colors hover:bg-muted/50"
+                      className="group flex gap-2 rounded-md px-2 py-1.5 transition-colors hover:bg-muted/50"
                     >
-                      <span className="font-medium group-hover:underline">
-                        {a.userName || a.userEmail || "Someone"}
-                      </span>
-                      <span className="text-muted-foreground">
-                        {" "}{t("dashboard.commentedOn")}{" "}
-                      </span>
-                      <span className="font-medium group-hover:underline">
-                        {a.proposalTitle}
-                      </span>
-                      {a.createdAt && (
-                        <time className="ml-1 text-xs text-muted-foreground" dateTime={a.createdAt.toISOString()}>
-                          {formatRelativeTime(a.createdAt, t)}
-                        </time>
-                      )}
+                      <MessageSquare className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" />
+                      <div className="min-w-0">
+                        <div>
+                          <span className="font-medium group-hover:underline">
+                            {a.userName || a.userEmail || "Someone"}
+                          </span>
+                          <span className="text-muted-foreground">
+                            {" "}{t("dashboard.commentedOn")}{" "}
+                          </span>
+                          <span className="font-medium group-hover:underline">
+                            {a.proposalTitle}
+                          </span>
+                          {a.createdAt && (
+                            <time className="ml-1 text-xs text-muted-foreground" dateTime={a.createdAt.toISOString()}>
+                              {formatRelativeTime(a.createdAt, t)}
+                            </time>
+                          )}
+                        </div>
+                        <p className="mt-0.5 line-clamp-1 text-muted-foreground">
+                          {a.content}
+                        </p>
+                      </div>
                     </Link>
-                    <p className="mt-0.5 line-clamp-1 px-2 text-muted-foreground">
-                      {a.content}
-                    </p>
                   </li>
                 ))}
               </ul>

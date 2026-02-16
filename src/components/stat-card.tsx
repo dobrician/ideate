@@ -26,7 +26,7 @@ export function StatCard({
       </CardHeader>
       <CardContent>
         <p className="text-2xl font-bold" aria-label={`${title}: ${value}`}>
-          {value}
+          {value.toLocaleString()}
         </p>
       </CardContent>
     </Card>

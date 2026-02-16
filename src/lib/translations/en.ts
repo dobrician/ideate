@@ -153,6 +153,7 @@ export const en: Record<string, string> = {
   "dashboard.totalVotes": "{count} total votes cast",
   "dashboard.commentedOn": "commented on",
   "dashboard.inProject": "in {project}",
+  "dashboard.viewAll": "View all",
 
   // Profile
   "profile.title": "Profile",

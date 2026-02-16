@@ -163,6 +163,7 @@ export const ro: Record<string, string> = {
   "dashboard.totalVotes": "{count} voturi totale",
   "dashboard.commentedOn": "a comentat la",
   "dashboard.inProject": "in {project}",
+  "dashboard.viewAll": "Vezi toate",
 
   // Profile
   "profile.title": "Profil",
