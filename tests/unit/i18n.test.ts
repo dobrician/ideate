@@ -64,7 +64,7 @@ describe("I18n Library", () => {
     it("should translate a key in Romanian", () => {
       const result = t("ro", "nav.home");
 
-      expect(result).toBe("Acasa");
+      expect(result).toBe("Acasă");
     });
 
     it("should fall back to English when locale is invalid", () => {
@@ -154,7 +154,7 @@ describe("I18n Library", () => {
       expect(t("ro", "home.title")).toBe("Ideate");
 
       expect(t("en", "home.subtitle")).toBe("Democratic Idea Prioritization");
-      expect(t("ro", "home.subtitle")).toBe("Prioritizarea Democratica a Ideilor");
+      expect(t("ro", "home.subtitle")).toBe("Prioritizarea Democratică a Ideilor");
     });
 
     it("should translate project keys", () => {
@@ -180,7 +180,7 @@ describe("I18n Library", () => {
 
     it("should translate comment keys", () => {
       expect(t("en", "comments.title")).toBe("Discussion");
-      expect(t("ro", "comments.title")).toBe("Discutie");
+      expect(t("ro", "comments.title")).toBe("Discuție");
     });
 
     it("should translate dashboard keys", () => {
@@ -195,10 +195,10 @@ describe("I18n Library", () => {
 
     it("should translate common keys", () => {
       expect(t("en", "common.loading")).toBe("Loading...");
-      expect(t("ro", "common.loading")).toBe("Se incarca...");
+      expect(t("ro", "common.loading")).toBe("Se încarcă...");
 
       expect(t("en", "common.save")).toBe("Save");
-      expect(t("ro", "common.save")).toBe("Salveaza");
+      expect(t("ro", "common.save")).toBe("Salvează");
     });
   });
 
@@ -214,7 +214,7 @@ describe("I18n Library", () => {
       const { locale, t: translateFn } = getTranslations("ro");
 
       expect(locale).toBe("ro");
-      expect(translateFn("nav.home")).toBe("Acasa");
+      expect(translateFn("nav.home")).toBe("Acasă");
     });
 
     it("should use default locale when not specified", () => {
@@ -339,7 +339,7 @@ describe("I18n Server", () => {
       const { locale, t: translateFn } = await getTranslationsServer();
 
       expect(locale).toBe("ro");
-      expect(translateFn("nav.home")).toBe("Acasa");
+      expect(translateFn("nav.home")).toBe("Acasă");
     });
 
     it("should use provided locale instead of cookie", async () => {
