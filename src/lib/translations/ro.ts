@@ -8,6 +8,7 @@ export const ro: Record<string, string> = {
   "nav.admin": "Admin",
   "nav.search": "Cauta proiecte si propuneri...",
   "nav.navigation": "Navigare",
+  "nav.toggleSidebar": "Comuta bara laterala",
 
   // Home page
   "home.title": "Ideate",

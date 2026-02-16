@@ -1,9 +1,12 @@
+"use client";
+
 import { DarkModeToggle } from "@/components/dark-mode-toggle";
 import { SearchBar } from "@/components/search-bar";
 import { LocaleSwitcher } from "@/components/locale-switcher";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { User } from "lucide-react";
+import { useLocale } from "@/lib/use-locale";
 
 function MenuIcon({ className }: { className?: string }) {
   return (
@@ -29,6 +32,8 @@ interface HeaderProps {
 }
 
 export function Header({ onToggleSidebar }: HeaderProps) {
+  const { t } = useLocale();
+
   return (
     <header role="banner" className="sticky top-0 z-50 flex h-14 items-center gap-4 border-b bg-background px-4 lg:px-6">
       <Button
@@ -38,7 +43,7 @@ export function Header({ onToggleSidebar }: HeaderProps) {
         onClick={onToggleSidebar}
       >
         <MenuIcon className="h-5 w-5" />
-        <span className="sr-only">Toggle sidebar</span>
+        <span className="sr-only">{t("nav.toggleSidebar")}</span>
       </Button>
 
       <div className="flex items-center gap-2">
@@ -56,7 +61,7 @@ export function Header({ onToggleSidebar }: HeaderProps) {
         <Button asChild variant="ghost" size="icon">
           <Link href="/profile">
             <User className="h-4 w-4" />
-            <span className="sr-only">Profile</span>
+            <span className="sr-only">{t("nav.profile")}</span>
           </Link>
         </Button>
         <DarkModeToggle />

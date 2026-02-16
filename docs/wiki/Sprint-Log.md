@@ -608,7 +608,7 @@
 **Status:** 🏃 IN PROGRESS
 
 ### Goals
-- [ ] Profile page: translate all field labels and buttons to RO
+- [x] Profile page: translate all field labels and buttons to RO
 - [ ] Dark mode contrast: increase contrast for grey text on dark backgrounds (WCAG AA)
 - [ ] Add tooltips to all icon buttons (export PDF/CSV, edit, delete, theme toggle, language toggle)
 - [ ] Verify logout works end-to-end on staging (clear session, no sidebar on public pages)

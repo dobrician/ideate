@@ -67,7 +67,7 @@ export function Sidebar({ open, onClose }: SidebarProps) {
         )}
       >
         <div className="flex h-14 items-center border-b px-4">
-          <span className="text-lg font-semibold">Navigation</span>
+          <span className="text-lg font-semibold">{t("nav.navigation")}</span>
         </div>
         <ScrollArea className="h-[calc(100vh-3.5rem)]">
           <nav className="space-y-1 p-4" aria-label="Site navigation">
