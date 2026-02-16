@@ -16,7 +16,7 @@
 - [x] Fix PWA banner: show once, remember dismissal in localStorage (#24)
 - [x] Fix Romanian typos/diacritics throughout (#25)
 - [x] Hide Sign Out from guest/logged-out nav (#26)
-- [ ] Fix proposal form submit button off-screen (#27)
+- [x] Fix proposal form submit button off-screen (#27)
 
 ## Constraints
 - Commit + push after EACH fix

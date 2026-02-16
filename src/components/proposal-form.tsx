@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useState, useEffect } from "react";
+import { useActionState, useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -23,6 +23,7 @@ export function ProposalForm({ projectId }: ProposalFormProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [initialVote, setInitialVote] = useState<"1" | "-1">("1");
   const [state, formAction, isPending] = useActionState(createProposal, null);
+  const formEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!state) return;
@@ -34,6 +35,14 @@ export function ProposalForm({ projectId }: ProposalFormProps) {
       toast.error(state.error);
     }
   }, [state, t]);
+
+  useEffect(() => {
+    if (isOpen) {
+      requestAnimationFrame(() => {
+        formEndRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+      });
+    }
+  }, [isOpen]);
 
   return (
     <>
@@ -122,7 +131,7 @@ export function ProposalForm({ projectId }: ProposalFormProps) {
               </div>
             )}
 
-            <div className="flex justify-end gap-2 pt-1">
+            <div className="flex justify-end gap-2 pt-1" ref={formEndRef}>
               <Button
                 type="button"
                 variant="outline"
