@@ -1,4 +1,5 @@
 import { cookies } from "next/headers";
+import { timingSafeEqual } from "crypto";
 
 const CSRF_COOKIE_NAME = "csrf_token";
 
@@ -25,7 +26,10 @@ export async function validateCsrfToken(submittedToken: string): Promise<boolean
   }
 
   // Constant-time comparison to prevent timing attacks
-  return cookieCsrfToken === submittedToken;
+  const a = Buffer.from(cookieCsrfToken, "utf-8");
+  const b = Buffer.from(submittedToken, "utf-8");
+  if (a.length !== b.length) return false;
+  return timingSafeEqual(a, b);
 }
 
 /**
