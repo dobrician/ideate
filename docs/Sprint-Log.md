@@ -140,3 +140,22 @@
 - GitHub issue #4 (AI rate limiting) addressed with throttling
 - CHANGELOG.md updated with v0.3.0
 - All 8 sprint tasks completed
+
+---
+
+## Sprint 11 — Critical UX Fixes (2026-02-16)
+**Status:** IN PROGRESS
+
+### Goals
+- [x] 1. Fix logout — clear session properly, redirect to clean page with no sidebar
+- [x] 2. Auth pages minimal layout — no sidebar, no logged-in nav
+- [ ] 3. Locale persistence — persist in cookie, survive navigation
+- [ ] 4. Missing Romanian translations — all reported strings
+- [ ] 5. Admin 403 — proper Access Denied page
+- [ ] 6. PWA install popup — show once per session
+- [ ] 7. Voting UX — highlight selected vote, tooltip to remove
+- [ ] 8. Delete confirmation — modal dialog for destructive actions
+- [ ] 9. Search — functional search with results dropdown
+- [ ] 10. Date format — localize to dd.mm.yyyy for RO
+- [ ] 11. Dark mode contrast — WCAG AA compliance
+- [ ] 12. Tooltips — title/tooltip on all icon buttons
