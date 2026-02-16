@@ -3,7 +3,7 @@
 
 ## Goals
 
-- [ ] Goal 1: New logo — header, favicon, PWA manifest (Issue #40)
+- [x] Goal 1: New logo — header, favicon, PWA manifest (Issue #40)
 - [ ] Goal 2: Cover csrf-client.ts (0% coverage)
 - [ ] Goal 3: Cover proposals/actions.ts uncovered error paths
 - [ ] Goal 4: Cover auth.ts uncovered branches (83% branch)
