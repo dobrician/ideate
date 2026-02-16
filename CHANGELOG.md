@@ -7,6 +7,41 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.0-rc1] - 2026-02-16
+
+### Security
+- Added authentication (401) to `/api/search`, `/api/votes/stream` endpoints
+- Added admin-only auth guard (401/403) to `/api/email/deliverability` endpoint
+- Added error logging to `/api/me` catch block
+- Added outer try/catch with 500 response to `/api/votes/stream` SSE endpoint
+
+### Changed
+- Extracted project data fetching into `src/app/projects/[id]/queries.ts` (page: 306 -> 204 lines)
+- All API routes now return proper error responses (400/401/403/404/500)
+- Test coverage improved from 96.35% to 97.55% lines (479 tests, up from 453)
+
+### Added
+- Error recovery test suite (`tests/unit/error-recovery.test.ts`, 15 tests)
+  - SMTP send failure and connection timeout handling
+  - AI API timeout, 429 rate limit, and 500 server error recovery
+  - Invalid/expired/malformed JWT token handling
+  - Vote events and rate limiter stress testing
+  - XSS sanitization verification
+- Coverage gap tests (`tests/unit/coverage-gaps.test.ts`, 8 tests)
+  - Rate limiter cleanup function with time manipulation
+  - i18n variable interpolation and locale fallback
+- Expanded smoke test suite (20 tests, up from 8)
+  - Search API authentication enforcement
+  - Export API authentication enforcement
+  - SSE vote stream authentication enforcement
+  - i18n locale rendering and switcher presence
+  - Admin panel authentication requirement
+  - Email deliverability admin-only access
+  - `/api/me` unauthenticated response
+
+### Fixed
+- Version bumped to v1.0.0-rc1 (all tests pass, zero build errors)
+
 ## [0.7.0] - 2026-02-16
 
 ### Added

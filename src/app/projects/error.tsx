@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
@@ -34,7 +35,7 @@ export default function ProjectsError({
           <div className="flex gap-2">
             <Button onClick={reset}>Try Again</Button>
             <Button asChild variant="outline">
-              <a href="/">Go Home</a>
+              <Link href="/">Go Home</Link>
             </Button>
           </div>
         </CardContent>

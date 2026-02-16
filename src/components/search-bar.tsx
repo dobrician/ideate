@@ -65,7 +65,7 @@ export function SearchBar() {
   }, []);
 
   return (
-    <div ref={containerRef} className="relative w-full max-w-sm" role="combobox" aria-expanded={isOpen} aria-haspopup="listbox">
+    <div ref={containerRef} className="relative w-full max-w-sm" role="combobox" aria-expanded={isOpen} aria-controls="search-results-listbox" aria-haspopup="listbox">
       <div className="relative">
         <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" aria-hidden="true" />
         <Input
@@ -80,7 +80,7 @@ export function SearchBar() {
       </div>
 
       {isOpen && (
-        <div role="listbox" aria-label="Search results" className="absolute top-full left-0 right-0 z-50 mt-1 bg-popover border rounded-md shadow-lg max-h-80 overflow-y-auto animate-in fade-in-0 slide-in-from-top-1 duration-150">
+        <div id="search-results-listbox" role="listbox" aria-label="Search results" className="absolute top-full left-0 right-0 z-50 mt-1 bg-popover border rounded-md shadow-lg max-h-80 overflow-y-auto animate-in fade-in-0 slide-in-from-top-1 duration-150">
           {loading && (
             <div className="p-3 text-sm text-muted-foreground" role="status" aria-live="polite">
               Searching...

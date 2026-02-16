@@ -2,21 +2,58 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 
 // Mock the deliverability module
 const mockCheckDeliverability = vi.fn();
+const mockGetCurrentUser = vi.fn();
 
 vi.mock("@/lib/email-deliverability", () => ({
   checkDeliverability: (...args: unknown[]) => mockCheckDeliverability(...args),
 }));
 
+vi.mock("@/lib/auth", () => ({
+  getCurrentUser: () => mockGetCurrentUser(),
+}));
+
+vi.mock("@/lib/rbac", () => ({
+  hasPermission: (role: string, permission: string) => {
+    if (permission === "user:manage") return role === "admin";
+    return false;
+  },
+}));
+
 // Import after mocks
 import { GET } from "@/app/api/email/deliverability/route";
 
+const adminUser = { id: "admin-1", email: "admin@example.com", role: "admin" };
+const memberUser = { id: "user-1", email: "user@example.com", role: "member" };
+
 beforeEach(() => {
   mockCheckDeliverability.mockReset();
+  mockGetCurrentUser.mockReset();
+  mockGetCurrentUser.mockResolvedValue(adminUser);
 });
 
 describe("Email Deliverability API Route", () => {
   describe("GET /api/email/deliverability", () => {
-    it("should return a deliverability report", async () => {
+    it("should return 401 when not authenticated", async () => {
+      mockGetCurrentUser.mockResolvedValue(null);
+
+      const response = await GET();
+      const data = await response.json();
+
+      expect(response.status).toBe(401);
+      expect(data.error).toBe("Unauthorized");
+    });
+
+    it("should return 403 when user is not admin", async () => {
+      mockGetCurrentUser.mockResolvedValue(memberUser);
+
+      const response = await GET();
+      const data = await response.json();
+
+      expect(response.status).toBe(403);
+      expect(data.error).toBe("Forbidden");
+    });
+
+    it("should return a deliverability report for admin", async () => {
       const mockReport = {
         domain: "surcod.ro",
         spf: { exists: true, records: ["v=spf1"], valid: true },
@@ -95,6 +132,12 @@ describe("Email Deliverability API Route", () => {
       // Re-mock after module reset
       vi.doMock("@/lib/email-deliverability", () => ({
         checkDeliverability: mockCheckDeliverability,
+      }));
+      vi.doMock("@/lib/auth", () => ({
+        getCurrentUser: () => Promise.resolve(adminUser),
+      }));
+      vi.doMock("@/lib/rbac", () => ({
+        hasPermission: () => true,
       }));
 
       const { GET: GET2 } = await import("@/app/api/email/deliverability/route");

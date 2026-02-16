@@ -20,7 +20,8 @@ export async function GET() {
       firstName: user.firstName,
       lastName: user.lastName,
     });
-  } catch {
+  } catch (error) {
+    console.error("Get current user error:", error);
     return NextResponse.json({ error: "Server error" }, { status: 500 });
   }
 }

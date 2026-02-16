@@ -56,7 +56,7 @@ export default function LoginPage() {
         <CardHeader className="space-y-1">
           <CardTitle className="text-2xl font-bold">Sign in to Ideate</CardTitle>
           <CardDescription>
-            Enter your email address and we'll send you a magic link to sign in
+            Enter your email address and we&apos;ll send you a magic link to sign in
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -64,7 +64,7 @@ export default function LoginPage() {
             <div className="space-y-4">
               <div className="rounded-md bg-green-50 p-4 dark:bg-green-950">
                 <p className="text-sm text-green-800 dark:text-green-200">
-                  Check your email! We've sent you a magic link to sign in.
+                  Check your email! We&apos;ve sent you a magic link to sign in.
                 </p>
               </div>
               <Button
@@ -103,7 +103,7 @@ export default function LoginPage() {
               </Button>
 
               <p className="text-center text-xs text-muted-foreground">
-                We'll send you a secure link that expires in 15 minutes
+                We&apos;ll send you a secure link that expires in 15 minutes
               </p>
             </form>
           )}

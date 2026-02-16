@@ -4,9 +4,14 @@ import { NextRequest } from "next/server";
 // ── Mocks ──────────────────────────────────────────────────────────────────
 
 const mockSearch = vi.fn();
+const mockGetCurrentUser = vi.fn();
 
 vi.mock("@/lib/search", () => ({
   search: (...args: unknown[]) => mockSearch(...args),
+}));
+
+vi.mock("@/lib/auth", () => ({
+  getCurrentUser: () => mockGetCurrentUser(),
 }));
 
 // ── Import SUT ─────────────────────────────────────────────────────────────
@@ -19,16 +24,31 @@ function createRequest(url: string): NextRequest {
   return new NextRequest(new URL(url, "http://localhost:3000"));
 }
 
+const mockUser = { id: "user-1", email: "test@example.com", role: "member" };
+
 // ── Setup ──────────────────────────────────────────────────────────────────
 
 beforeEach(() => {
   mockSearch.mockClear();
+  mockGetCurrentUser.mockReset();
+  mockGetCurrentUser.mockResolvedValue(mockUser);
 });
 
 // ── Tests ──────────────────────────────────────────────────────────────────
 
 describe("Search API Route", () => {
   describe("GET /api/search", () => {
+    it("should return 401 when not authenticated", async () => {
+      mockGetCurrentUser.mockResolvedValue(null);
+      const request = createRequest("/api/search?q=test");
+
+      const response = await GET(request);
+      const data = await response.json();
+
+      expect(response.status).toBe(401);
+      expect(data.error).toBe("Unauthorized");
+    });
+
     it("should return empty results for empty query", async () => {
       const request = createRequest("/api/search?q=");
 

@@ -103,11 +103,13 @@ tests/
 See [`docs/openapi.yaml`](docs/openapi.yaml) for the full OpenAPI 3.1 specification.
 
 Key endpoints:
-- `GET /api/health` — System health check
-- `GET /api/search?q=<query>` — Full-text search
-- `GET /api/projects/:id` — Get project details
-- `GET /api/votes/stream?projectId=<id>` — Real-time vote SSE stream
-- `GET /api/email/deliverability` — SPF/DKIM/MX check
+- `GET /api/health` — System health check (public)
+- `GET /api/search?q=<query>` — Full-text search (auth required)
+- `GET /api/projects/:id` — Get project details (auth required)
+- `GET /api/projects/:id/export?format=pdf|csv` — Export report (auth required)
+- `GET /api/votes/stream?projectId=<id>` — Real-time vote SSE stream (auth required)
+- `GET /api/me` — Current user info (auth required)
+- `GET /api/email/deliverability` — SPF/DKIM/MX check (admin only)
 
 ## Data Model
 
@@ -127,7 +129,13 @@ Key endpoints:
 - **Audit logging** — track all user actions
 - **i18n** — English and Romanian with locale switcher
 - **Dashboard** — personal overview with stats and activity feed
-- **Email deliverability** — SPF/DKIM/MX verification helper
+- **PDF/CSV export** — project reports with proposals, votes, and comments
+- **PWA** — offline support, install prompt, service worker
+- **Admin panel** — user management, system stats, audit log viewer
+- **Project deadlines** — countdown timer, auto-close voting
+- **Email notifications** — vote and comment alerts for proposal owners
+- **Security** — rate limiting, input sanitization, CSP, security headers
+- **SEO** — Open Graph, sitemap.xml, JSON-LD structured data
 
 ## Contributing
 
