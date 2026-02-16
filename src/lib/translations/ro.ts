@@ -135,6 +135,8 @@ export const ro: Record<string, string> = {
     "Niciun comentariu încă. Începe discuția!",
   "comments.open": "Deschide discuția",
   "comments.projectDiscussion": "Discuție Proiect",
+  "comments.you": "Tu",
+  "comments.newMessages": "Mesaje noi",
 
   // Dashboard
   "dashboard.title": "Dashboard",

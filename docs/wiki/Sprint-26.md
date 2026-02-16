@@ -6,7 +6,7 @@
 
 ## Goals
 
-- [ ] Goal 1: Messenger-style comment bubbles with avatars
+- [x] Goal 1: Messenger-style comment bubbles with avatars
 - [ ] Goal 2: Real-time comment updates (SSE or polling)
 - [ ] Goal 3: Enter to submit, Shift+Enter for newline
 - [ ] Goal 4: Scroll-to-bottom and auto-scroll behavior
