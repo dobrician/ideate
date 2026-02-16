@@ -4,7 +4,13 @@ Reverse chronological. Click each sprint for full details.
 
 ---
 
-### 🔄 [Sprint 25 — AI Features: Suggestions, Summarization, Reliability](Sprint-25) *(2026-02-16)*
+### 🔄 [Sprint 26 — Comments & Discussion: Messenger-Style, Real-Time](Sprint-26) *(2026-02-16)*
+**Focus:** Messenger-style bubbles with avatars, real-time comment updates (SSE/polling), enter-to-submit + auto-grow textarea, scroll-to-bottom behavior, mobile messenger UX, exhaustive tests
+**Stats:** 718 tests | Issue #47
+
+---
+
+### ✅ [Sprint 25 — AI Features: Suggestions, Summarization, Reliability](Sprint-25) *(2026-02-16)*
 **Focus:** Structured LLM logging, graceful AI degradation, suggestion reliability (retry + validation), dashboard/queries.ts coverage, E2E tests with mocked LLM, mobile AI dialog polish, new logo integration
 **Stats:** 702 tests | Issue #46, #40
 
