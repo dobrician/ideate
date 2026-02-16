@@ -458,3 +458,27 @@
 - All sprint goals achieved
 - Zero build errors, zero test failures
 - Ready for staging deployment and smoke test verification
+
+## Sprint 9 — Email/Password Authentication (2026-02-16)
+**Status:** 🏃 IN PROGRESS
+
+### Goals
+- [ ] Add `passwordHash` and `emailVerified` columns to users table + migration
+- [ ] Registration page (`/auth/register`) — email, password, confirm password
+- [ ] Password hashing with bcrypt (or argon2)
+- [ ] Email verification flow: send verification email on register, verify endpoint
+- [ ] Login page update: support both magic link AND email/password
+- [ ] Password recovery flow: forgot password → email with reset link → reset password page
+- [ ] Password requirements: min 8 chars, complexity validation
+- [ ] Rate limiting on login attempts (per email + per IP)
+- [ ] Update existing tests + add new tests for all new flows
+- [ ] Smoke test: full register → verify email → login with password → forgot password → reset
+- [ ] Keep magic link auth working alongside password auth (dual auth)
+- [ ] i18n: all new strings in both EN and RO
+
+### Constraints
+- Do NOT break existing magic link auth
+- All new emails via SMTP (idea@surcod.ro)
+- Follow existing code patterns (Route Handlers for cookie-setting endpoints)
+- All files < 300 lines
+- Lint + type check + build must pass
