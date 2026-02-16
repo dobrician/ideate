@@ -7,6 +7,7 @@ import { db } from "@/db";
 import { proposals, users } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import nodemailer from "nodemailer";
+import { escapeHtml } from "@/lib/sanitize";
 
 const SMTP_HOST = process.env.SMTP_HOST || "";
 const SMTP_PORT = parseInt(process.env.SMTP_PORT || "587", 10);
@@ -91,8 +92,8 @@ export async function notifyVote(
       subject: `Your proposal "${proposal[0].title}" was ${voteType}`,
       text: `Someone ${voteType} your proposal "${proposal[0].title}".\n\nView it here: ${projectUrl}`,
       html: `
-        <p>Hi ${owner[0].firstName || "there"},</p>
-        <p>Someone <strong>${voteType}</strong> your proposal "<strong>${proposal[0].title}</strong>".</p>
+        <p>Hi ${escapeHtml(owner[0].firstName || "there")},</p>
+        <p>Someone <strong>${voteType}</strong> your proposal "<strong>${escapeHtml(proposal[0].title)}</strong>".</p>
         <p><a href="${projectUrl}" style="color:#0070f3;">View Project</a></p>
         <p style="color:#999;font-size:12px;">You received this because you own this proposal on Ideate.</p>
       `,
@@ -148,9 +149,9 @@ export async function notifyComment(
       subject: `New comment on "${proposal[0].title}"`,
       text: `Someone commented on your proposal "${proposal[0].title}":\n\n"${preview}"\n\nView it here: ${projectUrl}`,
       html: `
-        <p>Hi ${owner[0].firstName || "there"},</p>
-        <p>Someone commented on your proposal "<strong>${proposal[0].title}</strong>":</p>
-        <blockquote style="border-left:3px solid #e0e0e0;padding-left:12px;color:#666;">${preview}</blockquote>
+        <p>Hi ${escapeHtml(owner[0].firstName || "there")},</p>
+        <p>Someone commented on your proposal "<strong>${escapeHtml(proposal[0].title)}</strong>":</p>
+        <blockquote style="border-left:3px solid #e0e0e0;padding-left:12px;color:#666;">${escapeHtml(preview)}</blockquote>
         <p><a href="${projectUrl}" style="color:#0070f3;">View Project</a></p>
         <p style="color:#999;font-size:12px;">You received this because you own this proposal on Ideate.</p>
       `,
