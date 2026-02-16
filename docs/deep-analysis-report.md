@@ -1,14 +1,8 @@
-# Ideate v1.1.0 Deep Analysis Report
+# Ideate Deep Analysis Report
 
 **Date:** 2026-02-16
-**Prepared for:** Sprint 13 Planning
-**Scope:** Full codebase audit (TypeScript, security, performance, architecture, production readiness)
-
----
-
-## Executive Summary
-
-Ideate is a well-structured Next.js idea prioritization platform at ~11,400 lines of TypeScript with solid fundamentals: zero type errors, 541 passing tests at 95.3% coverage, Zod validation on all API inputs, and RBAC enforcement throughout. However, the application has critical gaps blocking production readiness: SQLite cannot scale past a single server, the in-memory rate limiter resets on every deploy, CSRF "constant-time" comparison uses `===` instead of `timingSafeEqual`, and there is no team/organization model, meaning every user sees everything. The codebase is lean enough that Sprint 13 can address the most critical security and scalability issues while Sprint 14-16 can tackle the missing multi-tenancy, analytics, and onboarding features needed for a real product launch.
+**Prepared for:** Sprint 15 Planning
+**Scope:** Full codebase audit post-Sprint 14 (diagnostics, UI overhaul review, security, production readiness)
 
 ---
 
@@ -17,223 +11,187 @@ Ideate is a well-structured Next.js idea prioritization platform at ~11,400 line
 | Check | Result |
 |-------|--------|
 | `tsc --noEmit` | **Clean** -- zero errors, zero warnings |
-| `npm audit` | **4 moderate** vulnerabilities (esbuild via drizzle-kit dev dependency) |
-| `vitest --coverage` | **541 tests, 30 files, all passing** -- 95.3% statements, 85.7% branches, 96.7% functions |
-| Tech debt markers | **Zero** `TODO`, `FIXME`, `HACK`, `XXX` in src/ |
-| Largest file | `proposals/actions.ts` (341 lines) -- acceptable, but approaching split threshold |
+| `npm audit` | **4 moderate** -- esbuild via drizzle-kit (dev dependency only, not production) |
+| `vitest --coverage` | **562 tests, 32 files, all passing** |
+| Statement coverage | **97.25%** (up from 95.3% in Sprint 13) |
+| Branch coverage | **89.11%** (up from 85.7%) |
+| Function coverage | **99.18%** (up from 96.7%) |
+| Line coverage | **98.61%** |
 
-### Coverage Gaps Worth Noting
+### Coverage Gaps Remaining
 
-| File | Stmts | Branch | Issue |
+| File | Stmts | Branch | Notes |
 |------|-------|--------|-------|
-| `status-utils.ts` | **0%** | **0%** | Completely untested |
-| `email-deliverability.ts` | 82.5% | 58.8% | Error paths untested |
-| `notifications.ts` | 92.2% | 78.4% | Debounce edge cases uncovered |
 | `stat-card.tsx` | 92.3% | 71.4% | Conditional rendering branches |
-| `export.ts` | 96.7% | 79.2% | Some format edge cases |
+| `proposals/actions.ts` | 92.9% | 90.3% | A few error paths |
+| `db/index.ts` | 91.7% | 50% | Migration bootstrap paths |
+| `mail.ts` | 96.4% | 76.7% | SMTP config fallback paths |
+| `notifications.ts` | 92.7% | 83.3% | Debounce edge cases |
 
 ---
 
-## Top 10 Highest-Impact Improvements
+## Open GitHub Issues
 
-### 1. Replace SQLite with PostgreSQL (Critical -- Scalability)
-SQLite is a single-file, single-writer database. It cannot handle concurrent writes from multiple server instances, makes horizontal scaling impossible, and has no connection pooling. This is the single biggest blocker to production deployment.
+| # | Title | Label |
+|---|-------|-------|
+| 30 | Registration form lacks inline validation errors | bug |
+| 29 | Magic link login needs explanation | enhancement |
+| 28 | Add admin link to navigation for admin users | enhancement |
+| 19 | Project-level comments/discussions | enhancement |
+| 13 | Cloudflare deployment (Pages + D1) | nice-to-have |
 
-**Effort:** 2-3 days (Drizzle ORM abstracts most of it)
-
-### 2. Move Rate Limiting to Redis/Persistent Store (Critical -- Security)
-`src/lib/rate-limit.ts` uses an in-memory `Map`. Every server restart or new deployment resets all rate limits. In a multi-instance deployment, each instance has its own limits, making brute-force protection ineffective.
-
-**Effort:** 0.5-1 day
-
-### 3. Fix CSRF Timing-Safe Comparison (Critical -- Security)
-`src/lib/csrf.ts:28` -- the comment says "Constant-time comparison to prevent timing attacks" but the implementation uses JavaScript `===`, which is not constant-time. Must use `crypto.timingSafeEqual()` with Buffer conversion.
-
-**Effort:** 15 minutes
-
-### 4. Add Multi-Tenancy / Team Model (High -- Architecture)
-There is no concept of teams, organizations, or workspaces. Every authenticated user can see every project. The RBAC system has roles but no scoping: a "viewer" role applies globally, not per-project or per-team. This is a fundamental gap for any multi-user deployment.
-
-**Effort:** 3-5 days
-
-### 5. Tighten CSP -- Remove `unsafe-eval` (High -- Security)
-`src/middleware.ts:65` -- the Content-Security-Policy includes `'unsafe-eval'` in `script-src`. This significantly weakens XSS protection. Next.js 16 with the App Router should work without `unsafe-eval`; at minimum, use `'nonce-based'` CSP.
-
-**Effort:** 0.5-1 day
-
-### 6. Add Input Sanitization to Notification Emails (High -- Security)
-`src/lib/notifications.ts:95-96` -- proposal titles and user names are interpolated directly into HTML email templates without escaping. An attacker could craft a proposal title containing `<script>` or phishing HTML that gets emailed to other users (stored XSS via email).
-
-**Effort:** 30 minutes (use the existing `escapeHtml` from `sanitize.ts`)
-
-### 7. Eliminate Duplicated `getClientIp` Functions (Medium -- Maintenance)
-The `getClientIp()` function is copy-pasted identically in 4 API route files (`register`, `login-password`, `forgot-password`, `resend-verification`). Extract to a shared utility.
-
-**Effort:** 20 minutes
-
-### 8. Add Database Indexes for Query Performance (Medium -- Performance)
-The schema in `src/db/schema.ts` has no explicit indexes beyond primary keys and the votes composite PK. Queries filtering by `proposals.projectId`, `comments.proposalId`, `users.email`, and `auditLogs.userId` will table-scan as data grows.
-
-**Effort:** 30 minutes
-
-### 9. Deduplicate SMTP Transporter Creation (Medium -- Maintenance)
-Both `src/lib/mail.ts` and `src/lib/notifications.ts` independently create their own nodemailer transporter singletons with identical SMTP configuration. This means two SMTP connections where one would suffice, and config changes need to be made in two places.
-
-**Effort:** 30 minutes
-
-### 10. Add Test Coverage for `status-utils.ts` (Low -- Quality)
-The only file at 0% coverage. It's small (35 lines) but the gap is visible in reports and easy to fix.
-
-**Effort:** 15 minutes
+5 issues remain. Issues 28-30 are small UX fixes from Sprint 14 triage. Issue 19 is a feature request. Issue 13 is a deployment option.
 
 ---
 
-## Security Findings
+## UI Overhaul Review (Sidebar Removed, Top Nav)
 
-### Critical
+The sidebar-to-top-nav migration from Sprint 14 is **functionally complete**. No broken tests. All 562 tests pass.
 
-| Issue | Location | Description |
-|-------|----------|-------------|
-| **CSRF timing attack** | `csrf.ts:28` | Uses `===` instead of `crypto.timingSafeEqual()`. Comment explicitly claims constant-time but implementation is not. |
-| **Rate limiter is ephemeral** | `rate-limit.ts` | In-memory store resets on deploy. No protection in multi-instance setups. Brute-force on login/register is possible after any restart. |
+### Dead Code to Clean Up
 
-### High
+| Item | Location |
+|------|----------|
+| 16 `--sidebar-*` CSS custom properties | `src/app/globals.css` (lines 26-33, 63-70, 98-105) |
+| `nav.toggleSidebar` translation key | `src/lib/translations/en.ts` + `ro.ts` line 11 |
+| `nav.navigation` translation key | `src/lib/translations/en.ts` + `ro.ts` line 10 |
+| Stale comment "no sidebar" | `src/app/auth/logout/route.ts` line 6 |
 
-| Issue | Location | Description |
-|-------|----------|-------------|
-| **HTML injection in emails** | `notifications.ts:95-96,153` | Proposal title and user firstName interpolated into HTML emails without escaping. Stored XSS vector. |
-| **`unsafe-eval` in CSP** | `middleware.ts:65` | `script-src` allows `unsafe-eval`, undermining XSS protection. |
-| **Middleware auth only checks cookie existence** | `middleware.ts:93-95` | Middleware checks `sessionCookie?.value` existence but does NOT verify the JWT. An invalid/expired/tampered JWT will pass the middleware and reach the page, where it fails later. This means unauthenticated users can reach protected page shells before being redirected client-side. |
+### Navigation Concerns
 
-### Medium
-
-| Issue | Location | Description |
-|-------|----------|-------------|
-| **Gemini API key in URL** | `llm.ts:135` | `?key=${GEMINI_KEY}` in URL means the key appears in server logs and any HTTP proxy logs. Prefer header-based auth. |
-| **No account lockout** | Auth routes | Rate limiting caps attempts per window but never locks an account after repeated failures. A determined attacker can wait out each 15-minute window indefinitely. |
-| **`/api/search` is public** | `middleware.ts:20` | Listed in PUBLIC_PATHS but the handler requires auth. Inconsistent -- middleware lets the request through, then the handler rejects it. Not a vulnerability, but confusing and could mask future issues. |
-| **No CORS configuration** | `middleware.ts` | No explicit CORS headers. Relies on `SameSite: strict` cookies, which is good, but API routes could still be probed. |
-
-### Low
-
-| Issue | Location | Description |
-|-------|----------|-------------|
-| **npm audit: 4 moderate vulns** | `drizzle-kit` chain | esbuild <= 0.24.2 allows development server request hijacking. Only affects `drizzle-kit` (dev dependency), not production. |
-| **Vote value not validated** | `actions.ts:212` | `castVote` accepts `value: number` from the client with no validation that it's 1 or -1. A caller could pass 999. |
+| Concern | Severity | Details |
+|---------|----------|---------|
+| Hand-rolled dropdown menu | Medium | Header user dropdown lacks ARIA `role="menu"`, keyboard nav, focus trap. Shadcn `DropdownMenu` component already exists in the project. |
+| Auth state fetched on every page load | Medium | Header calls `/api/me` on every mount. No caching. Potential flash of unauthenticated state on fast navigations. |
+| No component tests for Header/AppShell | Medium | E2E covers basic link presence but no mobile nav, auth-gated visibility, or dropdown behavior tests. |
 
 ---
 
-## Performance Findings
+## Security Findings (Current State)
 
-| Area | Status | Details |
-|------|--------|---------|
-| **Bundle size** | Unknown | No `next build` analysis run. `@next/bundle-analyzer` is installed but no baseline captured. |
-| **DB queries** | N-query risk | `export/route.ts` makes 1 query per project + 1 for proposals + 1 for all comments. Acceptable for now, but no pagination on proposals/comments means large projects will be slow. |
-| **No database indexes** | Risk | `proposals.projectId`, `comments.proposalId`, `auditLogs.userId` have no indexes. Will degrade as tables grow past ~10K rows. |
-| **SSE keepalive** | 30s interval | `votes/stream/route.ts` sends keepalive every 30s. Reasonable, but no connection cap -- a malicious client could open hundreds of SSE connections. |
-| **LLM calls** | Blocking | `buildProposalSummary` is called synchronously during proposal creation. If the LLM is slow (2-5s), the user waits. Should be async/queued. |
-| **In-memory debounce** | OK for now | Notification debounce map in `notifications.ts` grows unbounded. Not a problem at small scale, but should be LRU-capped. |
-| **Password hashing** | Intentionally slow | bcrypt tests take 6.2s (correct behavior), but login latency will be 200-500ms per attempt. Fine for auth, just noting it. |
+### Resolved Since Sprint 13
+- CSRF now uses `timingSafeEqual` (fixed)
+- Vote value validation added (fixed)
+- HTML sanitization in notification emails (fixed)
+- CSP `unsafe-eval` removed (fixed)
+- Database indexes added on foreign keys (fixed)
+- Gemini API key moved to header auth (fixed)
 
----
+### Still Open
 
-## Missing Features for Production Readiness
-
-### Must-Have (Blocks Launch)
-
-1. **Multi-tenancy / Organizations** -- No team or workspace model. All users see all projects.
-2. **PostgreSQL migration** -- SQLite cannot serve concurrent users in production.
-3. **Persistent rate limiting** -- Redis or database-backed.
-4. **Email preferences / unsubscribe** -- Notification emails have no opt-out. Likely violates CAN-SPAM/GDPR.
-5. **Error monitoring** -- No Sentry, LogRocket, or equivalent. `console.error` statements are the only error reporting.
-6. **Environment validation** -- No startup check that required env vars (JWT_SECRET, SMTP_*, DATABASE_URL) are properly set.
-
-### Should-Have (Expected by Users)
-
-7. **User onboarding flow** -- No welcome screen, tutorial, or guided first project creation.
-8. **Analytics dashboard** -- `getAiUsageStats()` exists but is not exposed in any UI. No project-level analytics (participation rates, vote trends over time).
-9. **User profile avatars** -- `avatarUrl` field exists in schema but is never populated or displayed.
-10. **Activity feed / notifications UI** -- Email notifications exist but there's no in-app notification center.
-11. **Project archival workflow** -- Status can be set to "archived" but there's no batch archive, no "completed" status, no closure summary.
-12. **Pagination** -- No pagination on project lists, proposal lists, or comment threads. Will break with >50 items.
-13. **File attachments on proposals** -- No way to attach documents, images, or links to proposals.
-14. **Mobile responsive audit** -- Unknown if the UI works well on mobile. No viewport testing evidence.
-
-### Nice-to-Have (Competitive Differentiation)
-
-15. **SSO / OAuth** -- Only magic link + password auth. No Google, GitHub, or SAML SSO.
-16. **Webhooks / integrations** -- No way to connect to Slack, Teams, or external tools.
-17. **API rate limiting headers** -- API responses don't include `X-RateLimit-*` headers for client awareness.
-18. **Proposal merging / linking** -- No way to mark duplicate proposals or merge similar ones.
-19. **Bulk operations** -- No multi-select for proposals (bulk delete, bulk archive, bulk move).
-20. **Audit log viewer** -- `auditLogs` table exists but there's no UI to browse it.
+| Severity | Issue | Details |
+|----------|-------|---------|
+| **HIGH** | CSRF module is dead code | `requireCsrfToken` is never called in any Server Action. The module exists but is not wired in. `sameSite: strict` provides implicit protection only. |
+| **HIGH** | In-memory rate limiter | Resets on restart, per-process only. Ineffective in multi-instance deployments. |
+| **MEDIUM** | Middleware skips JWT verification | Only checks cookie presence, not signature. Auth is enforced at the Server Action layer, so it's safe but adds latency before rejection. |
+| **MEDIUM** | No token revocation | Compromised JWTs are valid for up to 7 days with no way to invalidate. |
+| **MEDIUM** | No structured logging | All errors go to `console.error`. No Sentry, no request IDs, no structured format. |
+| **MEDIUM** | Migration failures silently swallowed | `src/db/index.ts` catches and ignores migration errors at startup. |
+| **LOW** | No rate limiting on proposals/votes/search | Only auth endpoints are rate-limited. |
+| **LOW** | No account lockout mechanism | Rate limits reset per window; no permanent lockout after repeated failures. |
 
 ---
 
-## Suggested Sprint 13 Goals
+## Production Readiness Gaps
 
-Sprint 13 should focus on **security hardening and scalability foundations** -- the unsexy work that unblocks everything else.
-
-| # | Goal | Priority | Estimate |
-|---|------|----------|----------|
-| 1 | Fix CSRF timing-safe comparison (`crypto.timingSafeEqual`) | Critical | 0.5h |
-| 2 | Sanitize HTML in notification email templates | Critical | 0.5h |
-| 3 | Validate vote value is 1 or -1 in `castVote` | Critical | 0.5h |
-| 4 | Remove `unsafe-eval` from CSP (test Next.js compat) | High | 2h |
-| 5 | Add database indexes on foreign keys and frequent query columns | High | 1h |
-| 6 | Extract shared `getClientIp` utility; deduplicate SMTP transporter | Medium | 1h |
-| 7 | Add pagination to project list and proposal list (limit 20, cursor-based) | High | 4h |
-| 8 | Move Gemini API key from URL param to request header | Medium | 1h |
-| 9 | Add tests for `status-utils.ts` and improve `email-deliverability.ts` branch coverage | Medium | 1h |
-| 10 | Spike: evaluate PostgreSQL migration path (Drizzle dialect swap, test locally) | High | 4h |
-
-**Total estimated effort:** ~16 hours (fits a 1-week sprint for 1 developer)
+| Area | Status | Gap |
+|------|--------|-----|
+| Auth/sessions | Good | No token revocation store |
+| CSRF | Broken | Module exists but is never called |
+| Rate limiting | Weak | In-memory, single-process only |
+| Error boundaries | Good | Per-route error boundaries exist |
+| Email | Good | Real SMTP, working templates |
+| i18n | Good | EN + RO complete and in sync |
+| Observability | Missing | No structured logging, no error tracking service |
+| Backups | Missing | No SQLite backup strategy (no litestream, no cron) |
+| File uploads | Missing | Avatar URL field exists but no upload endpoint |
+| Multi-tenancy | Missing | All users see all projects globally |
 
 ---
 
-## Roadmap: Sprints 14-16
+## PostgreSQL Migration Assessment
 
-### Sprint 14: Database Migration & Persistent Infrastructure
-- Migrate from SQLite to PostgreSQL (Drizzle dialect swap + migration scripts)
-- Implement Redis-backed rate limiting
-- Add environment variable validation on startup (fail fast)
-- Integrate error monitoring (Sentry or equivalent)
-- Add `X-RateLimit-*` response headers to all rate-limited endpoints
+The migration plan at `docs/postgres-migration-plan.md` is thorough and well-structured. Key facts:
 
-### Sprint 15: Multi-Tenancy & User Experience
-- Design and implement organization/team model (schema + RBAC scoping)
-- Project visibility scoping (team-only, org-wide, public)
-- User onboarding flow (welcome screen, first project wizard)
-- In-app notification center (replace email-only notifications)
-- Email preferences and unsubscribe links (GDPR compliance)
+- **21 files affected**, 5 phases, estimated 9-14 hours total
+- Biggest risk: FTS5 to PostgreSQL `tsvector` rewrite for full-text search
+- Test environment needs rethinking (no `:memory:` in PostgreSQL)
+- Infrastructure changes: Docker Compose, backup scripts, CI services
 
-### Sprint 16: Analytics & Polish
-- Project analytics dashboard (participation rates, vote trends, AI usage)
-- Audit log viewer in admin panel
-- User profile completion (avatar upload, display name)
-- Proposal pagination and infinite scroll
-- Mobile responsive pass (audit + fixes)
-- SSO integration spike (Google OAuth as first provider)
+**Recommendation: Do NOT migrate in Sprint 15.** The current SQLite setup works fine for the single-instance deployment at `idea.surmont.co`. The migration is a 2-3 day effort that blocks other work and is only necessary when scaling to multiple instances. Defer to Sprint 16+ or when multi-instance deployment is actually needed. Instead, focus Sprint 15 on security fixes and UX improvements that directly affect users.
 
 ---
 
-## Appendix: File Size Distribution
+## Sprint 15 Goals
 
-| File | Lines | Note |
-|------|-------|------|
-| `translations/ro.ts` | 350 | Expected for i18n |
-| `proposals/actions.ts` | 341 | Largest logic file -- approaching split threshold |
-| `translations/en.ts` | 331 | Expected for i18n |
-| `password.ts` | 286 | Complex but justified (registration, reset, hashing) |
-| `auth/login/page.tsx` | 285 | Large form component |
-| `auth.ts` | 283 | Core auth logic |
-| `dashboard/page.tsx` | 258 | Could benefit from component extraction |
-| `dropdown-menu.tsx` | 257 | Generated UI component (shadcn) |
-| `discussion-sheet.tsx` | 253 | Complex UI -- reasonable |
-| `proposal-list.tsx` | 247 | Complex UI -- reasonable |
+Focus: **Security hardening, UX bug fixes, and navigation polish.** Realistic scope for 1 developer, 1 week.
 
-No file exceeds 350 lines. The codebase is well-decomposed.
+### Goal 1: Wire CSRF validation into all Server Actions
+**Priority: High | Effort: 2-3h**
+The `requireCsrfToken` function exists and is correct but is never called. Add CSRF validation to every mutation in `projects/actions.ts`, `proposals/actions.ts`, `admin/actions.ts`, and `profile/actions.ts`. This closes the biggest security gap remaining.
+
+### Goal 2: Fix registration form inline validation errors (Issue #30)
+**Priority: High | Effort: 2-3h**
+The registration form currently submits and shows errors only after server round-trip. Add client-side inline validation (required fields, email format, password strength) with error messages displayed next to each field.
+
+### Goal 3: Add admin link to navigation for admin users (Issue #28)
+**Priority: Medium | Effort: 1-2h**
+The admin link is already in the header's mobile dropdown but is reportedly missing or inconsistent. Verify the admin link renders correctly in both desktop nav and mobile nav for users with the admin role. Add E2E test coverage.
+
+### Goal 4: Improve magic link login UX (Issue #29)
+**Priority: Medium | Effort: 1-2h**
+Add clear explanation text on the magic link login page: what it is, how it works, and that users should check their email. Add a "check your email" confirmation screen after submission.
+
+### Goal 5: Replace hand-rolled header dropdown with shadcn DropdownMenu
+**Priority: Medium | Effort: 2-3h**
+The current user profile dropdown in `header.tsx` is a custom `div` with no ARIA roles, no keyboard navigation, and no focus trap. Replace with the existing `src/components/ui/dropdown-menu.tsx` shadcn component for proper accessibility.
+
+### Goal 6: Add Header/AppShell component tests
+**Priority: Medium | Effort: 3-4h**
+No component-level tests exist for the navigation. Add Vitest + React Testing Library tests covering: desktop nav links render, mobile nav renders, admin link visible only for admin users, sign out visible only when authenticated, dropdown opens/closes, auth-gated routes skip navigation.
+
+### Goal 7: Clean up dead sidebar code
+**Priority: Low | Effort: 30min**
+Remove the 16 `--sidebar-*` CSS variables from `globals.css`, the unused `nav.toggleSidebar` and `nav.navigation` translation keys, and the stale "no sidebar" comment.
+
+### Goal 8: Add structured error logging
+**Priority: Medium | Effort: 2-3h**
+Replace bare `console.error` calls with a lightweight structured logger (e.g., `pino`) that outputs JSON with timestamps, request IDs, and error context. This is the minimum observability needed before any production incident occurs. Wire it into Server Actions and API routes.
+
+### Goal 9: Fail fast on migration errors at startup
+**Priority: Medium | Effort: 30min**
+`src/db/index.ts` silently swallows migration failures. Change the catch block to log the error and call `process.exit(1)` so a broken migration is immediately visible instead of running against an incomplete schema.
+
+### Goal 10: Project-level comments/discussions spike (Issue #19)
+**Priority: Low | Effort: 2-3h**
+Spike only: design the schema additions (comments table already exists for proposals; extend to project-level), plan the UI placement, and document the approach. Do not implement in this sprint.
 
 ---
 
-*Report generated by deep analysis of Ideate v1.1.0 codebase. All findings verified against source code.*
+### Sprint 15 Summary
+
+| # | Goal | Priority | Effort |
+|---|------|----------|--------|
+| 1 | Wire CSRF validation into Server Actions | High | 2-3h |
+| 2 | Fix registration inline validation (Issue #30) | High | 2-3h |
+| 3 | Admin nav link fix (Issue #28) | Medium | 1-2h |
+| 4 | Magic link login UX (Issue #29) | Medium | 1-2h |
+| 5 | Replace header dropdown with shadcn DropdownMenu | Medium | 2-3h |
+| 6 | Header/AppShell component tests | Medium | 3-4h |
+| 7 | Clean up dead sidebar code | Low | 0.5h |
+| 8 | Structured error logging | Medium | 2-3h |
+| 9 | Fail fast on migration errors | Medium | 0.5h |
+| 10 | Project comments/discussions spike (Issue #19) | Low | 2-3h |
+
+**Total estimated effort:** ~18-24 hours (fits a 1-week sprint)
+
+**What's deliberately out of scope:**
+- PostgreSQL migration (defer to Sprint 16+ -- not needed at current scale)
+- Multi-tenancy/teams (requires PostgreSQL first)
+- Redis-backed rate limiting (defer until multi-instance deployment is planned)
+- Cloudflare deployment (Issue #13 -- nice-to-have, not blocking)
+- File upload/avatar support (not user-requested)
+
+---
+
+*Report generated from automated analysis of Ideate codebase at commit 47f5692 on main branch.*

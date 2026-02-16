@@ -4,6 +4,12 @@ Reverse chronological. Click each sprint for full details.
 
 ---
 
+### 🏃 [Sprint 15 — Security, UX Fixes & Nav Polish](Sprint-15) *(2026-02-16)*
+**Focus:** CSRF wiring, registration validation, admin nav, magic link UX, shadcn dropdown, structured logging, project comments spike
+**Stats:** 🔧 In progress | Issues #19, #28, #29, #30
+
+---
+
 ### ✅ [Sprint 14 — UI Overhaul & Bug Fixes](Sprint-14) *(2026-02-16)*
 **Focus:** Remove sidebar, top nav bar, homepage=dashboard, dark mode toggle, proposal bar chart, logout/PWA/i18n bug fixes
 **Stats:** 10 commits | 562 tests | 32/32 smoke | Issues #16-27
