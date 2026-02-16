@@ -235,3 +235,18 @@ Use ChatGPT with Operator (or any browser agent) as independent reviewer:
 | Sprint-Log.md grows to 600+ lines | Sub-pages per sprint + summary overview |
 | Claude Code uses wrong flags | Document in TOOLS.md: `--dangerously-skip-permissions` |
 | Docker bind mount permission issues | Use directory mounts, not file mounts |
+
+---
+
+## Addendum: Don't Trust Heartbeats for Critical Workflows
+
+**Problem:** The sprint state machine depends on heartbeats to advance. But heartbeats are every 30 min and the agent often skips steps because it gets "distracted" by other checks.
+
+**Solution:** Add a dedicated cron job (every 10 min) that ONLY checks the sprint state and forces advancement. Separate from heartbeat — single responsibility.
+
+```
+Cron (10 min) → read sprint-state.json → if step pending → execute NOW
+Heartbeat (30 min) → monitoring, health, wiki sync, server checks
+```
+
+**Lesson:** If a workflow is critical, don't bundle it with other checks. Give it its own trigger. The more independent triggers compete for attention, the more likely each one gets skipped.
