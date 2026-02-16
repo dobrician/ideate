@@ -125,21 +125,14 @@ export const ro: Record<string, string> = {
   // Voting
   "vote.pro": "Pro",
   "vote.contra": "Contra",
-  "vote.cast": "Votează",
   "vote.remove": "Șterge vot",
-  "vote.noVotes": "Niciun vot încă",
 
   // Comments / Discussion
   "comments.title": "Discuție",
-  "comments.discussionTitle": "Discuție: {title}",
   "comments.placeholder": "Adaugă un comentariu...",
-  "comments.replyPlaceholder": "Scrie un răspuns...",
   "comments.submit": "Postează Comentariu",
-  "comments.reply": "Răspunde",
-  "comments.posting": "Se postează...",
   "comments.noComments":
     "Niciun comentariu încă. Începe discuția!",
-  "comments.replyPosted": "Răspuns postat",
   "comments.open": "Deschide discuția",
   "comments.projectDiscussion": "Discuție Proiect",
 
