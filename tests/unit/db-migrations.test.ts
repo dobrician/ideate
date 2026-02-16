@@ -46,7 +46,7 @@ describe("db/index migration logic", () => {
 
     await import("@/db/index");
 
-    // CREATE TABLE was called, but no migration SQL was executed beyond that
+    // Only CREATE TABLE — returns early before BEGIN IMMEDIATE when no journal
     expect(mockExec).toHaveBeenCalledTimes(1);
     expect(mockExec.mock.calls[0][0]).toContain("_migrations");
   });
@@ -66,8 +66,8 @@ describe("db/index migration logic", () => {
 
     await import("@/db/index");
 
-    // Only CREATE TABLE, no migration SQL executed
-    expect(mockExec).toHaveBeenCalledTimes(1);
+    // CREATE TABLE + BEGIN IMMEDIATE + COMMIT (migration skipped)
+    expect(mockExec).toHaveBeenCalledTimes(3);
   });
 
   it("should skip migration file that does not exist on disk", async () => {
@@ -86,8 +86,8 @@ describe("db/index migration logic", () => {
 
     await import("@/db/index");
 
-    // Only CREATE TABLE, no migration SQL executed
-    expect(mockExec).toHaveBeenCalledTimes(1);
+    // CREATE TABLE + BEGIN IMMEDIATE + COMMIT (no .sql file to apply)
+    expect(mockExec).toHaveBeenCalledTimes(3);
   });
 
   it("should apply pending migration with statement breakpoints", async () => {
@@ -106,8 +106,10 @@ describe("db/index migration logic", () => {
 
     await import("@/db/index");
 
-    // CREATE TABLE + 2 migration statements
-    expect(mockExec).toHaveBeenCalledTimes(3);
+    // CREATE TABLE + BEGIN IMMEDIATE + 2 migration statements + COMMIT
+    expect(mockExec).toHaveBeenCalledTimes(5);
+    expect(mockExec.mock.calls[1][0]).toBe("BEGIN IMMEDIATE");
+    expect(mockExec.mock.calls[4][0]).toBe("COMMIT");
     expect(mockRun).toHaveBeenCalledWith("0001_create.sql");
   });
 });

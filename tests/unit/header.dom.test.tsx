@@ -29,6 +29,10 @@ vi.mock("@/lib/use-locale", () => ({
   }),
 }));
 
+vi.mock("next/image", () => ({
+  default: (props: Record<string, unknown>) => <img {...props} />,
+}));
+
 vi.mock("@/components/dark-mode-toggle", () => ({
   DarkModeToggle: () => <button data-testid="dark-mode-toggle">Theme</button>,
 }));
@@ -89,12 +93,14 @@ describe("Header", () => {
       expect(dashLink).not.toHaveAttribute("aria-current");
     });
 
-    it("shows Ideate logo linking to /", async () => {
+    it("shows Ideate logo image + text linking to /", async () => {
       mockFetchResponse(null, false);
       await renderHeader();
 
       const logo = screen.getByText("Ideate");
-      expect(logo.closest("a")).toHaveAttribute("href", "/");
+      const link = logo.closest("a");
+      expect(link).toHaveAttribute("href", "/");
+      expect(link?.querySelector("img")).toHaveAttribute("src", "/logo.png");
     });
   });
 

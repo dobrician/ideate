@@ -55,7 +55,7 @@ export default async function RootLayout({
     <html lang={locale} suppressHydrationWarning>
       <head>
         <link rel="icon" href="/icons/icon.svg" type="image/svg+xml" />
-        <link rel="apple-touch-icon" href="/icons/icon.svg" />
+        <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
       </head>
       <body className={`${inter.className} antialiased`}>
         <ThemeProvider>

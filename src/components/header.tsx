@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { User, LogOut, Shield } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -47,8 +48,9 @@ export function Header() {
   return (
     <header role="banner" className="sticky top-0 z-50 border-b bg-background">
       <div className="mx-auto flex h-14 max-w-7xl items-center gap-4 px-4 lg:px-6">
-        <Link href="/" className="text-lg font-semibold hover:opacity-80">
-          Ideate
+        <Link href="/" className="flex items-center gap-2 hover:opacity-80">
+          <Image src="/logo.png" alt="" width={28} height={28} className="h-7 w-7" />
+          <span className="text-lg font-semibold">Ideate</span>
         </Link>
 
         <nav className="hidden items-center gap-1 md:flex" aria-label="Main navigation">
