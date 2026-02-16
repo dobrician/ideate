@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useCallback, useEffect, useRef, useState } from "react";
+import { useActionState, useCallback, useEffect, useOptimistic, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -130,13 +130,31 @@ function isNearBottom(el: Element, threshold = 100): boolean {
 export function CommentThread({ comments, hiddenFields, currentUserId }: CommentThreadProps) {
   const { t } = useLocale();
   const router = useRouter();
-  const [state, formAction, isPending] = useActionState(addComment, null);
+  const [state, baseFormAction, isPending] = useActionState(addComment, null);
   const formRef = useRef<HTMLFormElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const prevCountRef = useRef(comments.length);
   const [showNewIndicator, setShowNewIndicator] = useState(false);
-  const sorted = buildCommentTree(comments);
+  const [optimisticComments, addOptimisticComment] = useOptimistic(
+    comments,
+    (current: Comment[], newComment: Comment) => [...current, newComment]
+  );
+  const sorted = buildCommentTree(optimisticComments);
+
+  async function formAction(formData: FormData) {
+    const content = formData.get("content") as string;
+    if (content && currentUserId) {
+      addOptimisticComment({
+        id: `optimistic-${optimisticComments.length}`,
+        content,
+        parentId: null,
+        userId: currentUserId,
+        createdAt: null,
+      });
+    }
+    return baseFormAction(formData);
+  }
 
   const getViewport = useCallback(() => {
     return scrollRef.current?.querySelector("[data-slot='scroll-area-viewport']") as Element | null;
