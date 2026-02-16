@@ -7,6 +7,7 @@ import { hasPermission, canManageResource } from "@/lib/rbac";
 import type { Role } from "@/lib/rbac";
 import { eq } from "drizzle-orm";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import {
   Card,
   CardContent,
@@ -22,6 +23,7 @@ import { ExportButtons } from "@/components/export-buttons";
 import { DeadlineCountdown } from "@/components/deadline-countdown";
 import { getProjectProposals } from "./queries";
 import { getTranslations } from "@/lib/i18n-server";
+import { statusBadgeClass, statusLabel } from "@/lib/status-utils";
 
 interface ProjectPageProps {
   params: Promise<{ id: string }>;
@@ -119,17 +121,9 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
                 {projectData.title}
               </CardTitle>
               <CardDescription className="mt-2 flex flex-wrap items-center gap-2 sm:gap-4">
-                <span
-                  className={`rounded-full px-3 py-1 text-xs font-medium ${
-                    projectData.status === "active"
-                      ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
-                      : projectData.status === "draft"
-                        ? "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200"
-                        : "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200"
-                  }`}
-                >
-                  {projectData.status}
-                </span>
+                <Badge className={statusBadgeClass(projectData.status)}>
+                  {statusLabel(projectData.status, t)}
+                </Badge>
                 {projectData.deadline && (
                   <DeadlineCountdown deadline={projectData.deadline} />
                 )}

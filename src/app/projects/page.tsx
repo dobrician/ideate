@@ -4,6 +4,7 @@ import { projects } from "@/db/schema";
 import { getCurrentUser } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import {
   Card,
   CardContent,
@@ -12,8 +13,10 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Pagination } from "@/components/pagination";
+import { FolderOpen, Calendar, Clock } from "lucide-react";
 import { desc, count } from "drizzle-orm";
 import { getTranslations } from "@/lib/i18n-server";
+import { statusBadgeClass, statusLabel } from "@/lib/status-utils";
 
 const PAGE_SIZE = 12;
 
@@ -62,14 +65,17 @@ export default async function ProjectsPage({ searchParams }: ProjectsPageProps) 
       </div>
 
       {allProjects.length === 0 && page === 1 ? (
-        <Card>
-          <CardHeader>
-            <CardTitle>{t("projects.noProjects")}</CardTitle>
-            <CardDescription>
-              {t("projects.noProjectsDesc")}
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
+        <Card className="py-12 text-center">
+          <CardContent className="flex flex-col items-center gap-4">
+            <div className="rounded-full bg-muted p-4">
+              <FolderOpen className="h-8 w-8 text-muted-foreground" />
+            </div>
+            <div className="space-y-1">
+              <p className="text-lg font-semibold">{t("projects.noProjects")}</p>
+              <p className="text-sm text-muted-foreground">
+                {t("projects.noProjectsDesc")}
+              </p>
+            </div>
             <Button asChild>
               <Link href="/projects/new">{t("projects.createFirst")}</Link>
             </Button>
@@ -80,23 +86,15 @@ export default async function ProjectsPage({ searchParams }: ProjectsPageProps) 
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {allProjects.map((project) => (
               <Link key={project.id} href={`/projects/${project.id}`}>
-                <Card className="h-full transition-shadow hover:shadow-lg">
+                <Card className="h-full transition-all duration-200 hover:shadow-lg hover:border-primary/20">
                   <CardHeader>
                     <div className="flex items-start justify-between gap-2">
                       <CardTitle className="line-clamp-2 text-base">
                         {project.title}
                       </CardTitle>
-                      <span
-                        className={`shrink-0 rounded-full px-2 py-1 text-xs font-medium ${
-                          project.status === "active"
-                            ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
-                            : project.status === "draft"
-                              ? "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200"
-                              : "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200"
-                        }`}
-                      >
-                        {project.status}
-                      </span>
+                      <Badge className={statusBadgeClass(project.status)}>
+                        {statusLabel(project.status, t)}
+                      </Badge>
                     </div>
                     {project.description && (
                       <CardDescription className="line-clamp-3">
@@ -105,19 +103,25 @@ export default async function ProjectsPage({ searchParams }: ProjectsPageProps) 
                     )}
                   </CardHeader>
                   <CardContent>
-                    <div className="text-sm text-muted-foreground">
-                      <p>
-                        {t("projects.deadline")}:{" "}
-                        {project.deadline
-                          ? new Date(project.deadline).toLocaleDateString(dateFmt)
-                          : t("projects.deadlineNotSet")}
-                      </p>
-                      <p>
-                        {t("projects.created")}:{" "}
-                        {project.createdAt
-                          ? new Date(project.createdAt).toLocaleDateString(dateFmt)
-                          : t("projects.unknown")}
-                      </p>
+                    <div className="space-y-1.5 text-sm text-muted-foreground">
+                      <div className="flex items-center gap-1.5">
+                        <Calendar className="h-3.5 w-3.5" />
+                        <span>
+                          {t("projects.deadline")}:{" "}
+                          {project.deadline
+                            ? new Date(project.deadline).toLocaleDateString(dateFmt)
+                            : t("projects.deadlineNotSet")}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-1.5">
+                        <Clock className="h-3.5 w-3.5" />
+                        <span>
+                          {t("projects.created")}:{" "}
+                          {project.createdAt
+                            ? new Date(project.createdAt).toLocaleDateString(dateFmt)
+                            : t("projects.unknown")}
+                        </span>
+                      </div>
                     </div>
                   </CardContent>
                 </Card>

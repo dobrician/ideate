@@ -13,7 +13,7 @@ import { VoteBar } from "@/components/vote-bar";
 import { DiscussionSheet } from "@/components/discussion-sheet";
 import { deleteProposal } from "@/app/projects/[id]/proposals/actions";
 import { useVoteStream } from "@/lib/use-vote-stream";
-import { Trash2 } from "lucide-react";
+import { Trash2, Lightbulb } from "lucide-react";
 import { toast } from "sonner";
 import { useLocale } from "@/lib/use-locale";
 
@@ -63,9 +63,14 @@ export function ProposalList({
 
   if (proposals.length === 0) {
     return (
-      <p className="py-4 text-center text-sm text-muted-foreground">
-        {t("proposals.noProposals")}
-      </p>
+      <div className="flex flex-col items-center gap-3 py-8 text-center">
+        <div className="rounded-full bg-muted p-3">
+          <Lightbulb className="h-5 w-5 text-muted-foreground" />
+        </div>
+        <p className="text-sm text-muted-foreground">
+          {t("proposals.noProposals")}
+        </p>
+      </div>
     );
   }
 

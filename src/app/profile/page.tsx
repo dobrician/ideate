@@ -4,9 +4,12 @@ import { projects, proposals } from "@/db/schema";
 import { getCurrentUser } from "@/lib/auth";
 import { eq, desc } from "drizzle-orm";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
+import { FolderOpen, Lightbulb } from "lucide-react";
 import { ProfileForm } from "./profile-form";
 import { getTranslations } from "@/lib/i18n-server";
+import { statusBadgeClass, statusLabel } from "@/lib/status-utils";
 
 /**
  * User profile page showing user info, their projects and proposals
@@ -93,20 +96,25 @@ export default async function ProfilePage() {
           </CardHeader>
           <CardContent>
             {userProjects.length === 0 ? (
-              <p className="text-sm text-muted-foreground">{t("profile.noProjects")}</p>
+              <div className="flex flex-col items-center gap-3 py-4 text-center">
+                <div className="rounded-full bg-muted p-3">
+                  <FolderOpen className="h-5 w-5 text-muted-foreground" />
+                </div>
+                <p className="text-sm text-muted-foreground">{t("profile.noProjects")}</p>
+              </div>
             ) : (
               <ul className="space-y-2">
                 {userProjects.map((p) => (
-                  <li key={p.id}>
+                  <li key={p.id} className="flex items-center justify-between rounded-md px-2 py-1.5 transition-colors hover:bg-muted/50">
                     <Link
                       href={`/projects/${p.id}`}
-                      className="text-sm font-medium text-primary hover:underline"
+                      className="truncate text-sm font-medium text-primary hover:underline"
                     >
                       {p.title}
                     </Link>
-                    <span className="ml-2 text-xs text-muted-foreground">
-                      {p.status}
-                    </span>
+                    <Badge className={`shrink-0 ${statusBadgeClass(p.status)}`}>
+                      {statusLabel(p.status, t)}
+                    </Badge>
                   </li>
                 ))}
               </ul>
@@ -120,11 +128,16 @@ export default async function ProfilePage() {
           </CardHeader>
           <CardContent>
             {userProposals.length === 0 ? (
-              <p className="text-sm text-muted-foreground">{t("profile.noProposals")}</p>
+              <div className="flex flex-col items-center gap-3 py-4 text-center">
+                <div className="rounded-full bg-muted p-3">
+                  <Lightbulb className="h-5 w-5 text-muted-foreground" />
+                </div>
+                <p className="text-sm text-muted-foreground">{t("profile.noProposals")}</p>
+              </div>
             ) : (
               <ul className="space-y-2">
                 {userProposals.map((p) => (
-                  <li key={p.id}>
+                  <li key={p.id} className="rounded-md px-2 py-1.5 transition-colors hover:bg-muted/50">
                     <Link
                       href={`/projects/${p.projectId}`}
                       className="text-sm font-medium text-primary hover:underline"

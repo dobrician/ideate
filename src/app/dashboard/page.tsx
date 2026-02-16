@@ -1,8 +1,5 @@
 import { redirect } from "next/navigation";
-import { db } from "@/db";
-import { projects, proposals, votes, comments, users } from "@/db/schema";
 import { getCurrentUser } from "@/lib/auth";
-import { eq, desc, sql, count } from "drizzle-orm";
 import {
   Card,
   CardContent,
@@ -16,10 +13,13 @@ import {
   FolderOpen,
   Lightbulb,
   ThumbsUp,
+  ThumbsDown,
   MessageSquare,
 } from "lucide-react";
 import { StatCard, formatRelativeTime } from "@/components/stat-card";
 import { getTranslations } from "@/lib/i18n-server";
+import { statusBadgeClass, statusLabel } from "@/lib/status-utils";
+import { getDashboardData } from "./queries";
 
 /**
  * Dashboard page showing user overview, recent votes, and activity feed
@@ -29,77 +29,8 @@ export default async function DashboardPage() {
   if (!user) redirect("/auth/login");
   const { t } = await getTranslations();
 
-  // Parallel queries for dashboard stats
-  const [
-    userProjects,
-    userProposals,
-    userVoteCount,
-    recentVotes,
-    recentActivity,
-    totalStats,
-  ] = await Promise.all([
-    db
-      .select()
-      .from(projects)
-      .where(eq(projects.userId, user.id))
-      .orderBy(desc(projects.createdAt))
-      .limit(5),
-    db
-      .select({
-        id: proposals.id,
-        title: proposals.title,
-        projectId: proposals.projectId,
-        projectTitle: projects.title,
-        createdAt: proposals.createdAt,
-      })
-      .from(proposals)
-      .leftJoin(projects, eq(proposals.projectId, projects.id))
-      .where(eq(proposals.userId, user.id))
-      .orderBy(desc(proposals.createdAt))
-      .limit(5),
-    db
-      .select({ total: count() })
-      .from(votes)
-      .where(eq(votes.userId, user.id)),
-    db
-      .select({
-        proposalId: votes.proposalId,
-        value: votes.value,
-        proposalTitle: proposals.title,
-        projectId: proposals.projectId,
-        createdAt: votes.createdAt,
-      })
-      .from(votes)
-      .innerJoin(proposals, eq(votes.proposalId, proposals.id))
-      .where(eq(votes.userId, user.id))
-      .orderBy(desc(votes.createdAt))
-      .limit(8),
-    db
-      .select({
-        id: comments.id,
-        content: comments.content,
-        createdAt: comments.createdAt,
-        userName: users.firstName,
-        userEmail: users.email,
-        proposalTitle: proposals.title,
-        projectId: proposals.projectId,
-      })
-      .from(comments)
-      .leftJoin(users, eq(comments.userId, users.id))
-      .leftJoin(proposals, eq(comments.proposalId, proposals.id))
-      .orderBy(desc(comments.createdAt))
-      .limit(10),
-    db
-      .select({
-        projectCount: sql<number>`(SELECT COUNT(*) FROM projects)`,
-        proposalCount: sql<number>`(SELECT COUNT(*) FROM proposals)`,
-        voteCount: sql<number>`(SELECT COUNT(*) FROM votes)`,
-        commentCount: sql<number>`(SELECT COUNT(*) FROM comments)`,
-      })
-      .from(sql`(SELECT 1)`),
-  ]);
-
-  const stats = totalStats[0];
+  const { userProjects, userProposals, userVoteCount, recentVotes, recentActivity, stats } =
+    await getDashboardData(user.id);
 
   return (
     <div className="container mx-auto max-w-6xl px-4 py-8">
@@ -145,25 +76,30 @@ export default async function DashboardPage() {
           </CardHeader>
           <CardContent>
             {userProjects.length === 0 ? (
-              <p className="text-sm text-muted-foreground">
-                {t("dashboard.noProjects")}{" "}
-                <Link href="/projects/new" className="underline">
-                  {t("dashboard.createOne")}
-                </Link>
-              </p>
+              <div className="flex flex-col items-center gap-3 py-4 text-center">
+                <div className="rounded-full bg-muted p-3">
+                  <FolderOpen className="h-5 w-5 text-muted-foreground" />
+                </div>
+                <p className="text-sm text-muted-foreground">
+                  {t("dashboard.noProjects")}{" "}
+                  <Link href="/projects/new" className="font-medium text-primary hover:underline">
+                    {t("dashboard.createOne")}
+                  </Link>
+                </p>
+              </div>
             ) : (
-              <ul className="space-y-3" role="list">
+              <ul className="space-y-2" role="list">
                 {userProjects.map((p) => (
                   <li key={p.id}>
                     <Link
                       href={`/projects/${p.id}`}
-                      className="group flex items-center justify-between rounded-md px-2 py-1 transition-colors hover:bg-muted/50"
+                      className="group flex items-center justify-between rounded-md px-2 py-1.5 transition-colors hover:bg-muted/50"
                     >
                       <span className="truncate text-sm font-medium group-hover:underline">
                         {p.title}
                       </span>
-                      <Badge variant="outline" className="shrink-0">
-                        {p.status}
+                      <Badge className={`shrink-0 ${statusBadgeClass(p.status)}`}>
+                        {statusLabel(p.status, t)}
                       </Badge>
                     </Link>
                   </li>
@@ -183,22 +119,27 @@ export default async function DashboardPage() {
           </CardHeader>
           <CardContent>
             {userProposals.length === 0 ? (
-              <p className="text-sm text-muted-foreground">
-                {t("dashboard.noProposals")}
-              </p>
+              <div className="flex flex-col items-center gap-3 py-4 text-center">
+                <div className="rounded-full bg-muted p-3">
+                  <Lightbulb className="h-5 w-5 text-muted-foreground" />
+                </div>
+                <p className="text-sm text-muted-foreground">
+                  {t("dashboard.noProposals")}
+                </p>
+              </div>
             ) : (
-              <ul className="space-y-3" role="list">
+              <ul className="space-y-2" role="list">
                 {userProposals.map((p) => (
                   <li key={p.id}>
                     <Link
                       href={`/projects/${p.projectId}`}
-                      className="group block rounded-md px-2 py-1 transition-colors hover:bg-muted/50"
+                      className="group block rounded-md px-2 py-1.5 transition-colors hover:bg-muted/50"
                     >
                       <span className="truncate text-sm font-medium group-hover:underline">
                         {p.title}
                       </span>
                       <span className="block truncate text-xs text-muted-foreground">
-                        in {p.projectTitle ?? "Unknown project"}
+                        {t("dashboard.inProject", { project: p.projectTitle ?? "Unknown project" })}
                       </span>
                     </Link>
                   </li>
@@ -213,27 +154,35 @@ export default async function DashboardPage() {
           <CardHeader>
             <CardTitle className="text-lg">{t("dashboard.recentVotes")}</CardTitle>
             <CardDescription>
-              {t("dashboard.totalVotes", { count: userVoteCount[0]?.total ?? 0 })}
+              {t("dashboard.totalVotes", { count: userVoteCount })}
             </CardDescription>
           </CardHeader>
           <CardContent>
             {recentVotes.length === 0 ? (
-              <p className="text-sm text-muted-foreground">
-                {t("dashboard.noVotes")}
-              </p>
+              <div className="flex flex-col items-center gap-3 py-4 text-center">
+                <div className="rounded-full bg-muted p-3">
+                  <ThumbsUp className="h-5 w-5 text-muted-foreground" />
+                </div>
+                <p className="text-sm text-muted-foreground">
+                  {t("dashboard.noVotes")}
+                </p>
+              </div>
             ) : (
-              <ul className="space-y-3" role="list">
+              <ul className="space-y-2" role="list">
                 {recentVotes.map((v) => (
                   <li
                     key={`${v.proposalId}-${v.createdAt?.getTime()}`}
-                    className="flex items-center gap-2"
+                    className="flex items-center gap-2 rounded-md px-2 py-1.5 transition-colors hover:bg-muted/50"
                   >
-                    <Badge
-                      variant={v.value === 1 ? "default" : "destructive"}
-                      className="shrink-0"
-                    >
-                      {v.value === 1 ? "+1" : "-1"}
-                    </Badge>
+                    {v.value === 1 ? (
+                      <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-emerald-100 dark:bg-emerald-900/50">
+                        <ThumbsUp className="h-3 w-3 text-emerald-700 dark:text-emerald-300" />
+                      </span>
+                    ) : (
+                      <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-red-100 dark:bg-red-900/50">
+                        <ThumbsDown className="h-3 w-3 text-red-700 dark:text-red-300" />
+                      </span>
+                    )}
                     <Link
                       href={`/projects/${v.projectId}`}
                       className="truncate text-sm transition-colors hover:underline"
@@ -255,14 +204,19 @@ export default async function DashboardPage() {
           </CardHeader>
           <CardContent>
             {recentActivity.length === 0 ? (
-              <p className="text-sm text-muted-foreground">{t("dashboard.noActivity")}</p>
+              <div className="flex flex-col items-center gap-3 py-4 text-center">
+                <div className="rounded-full bg-muted p-3">
+                  <MessageSquare className="h-5 w-5 text-muted-foreground" />
+                </div>
+                <p className="text-sm text-muted-foreground">{t("dashboard.noActivity")}</p>
+              </div>
             ) : (
-              <ul className="space-y-3" role="list">
+              <ul className="space-y-2" role="list">
                 {recentActivity.map((a) => (
                   <li key={a.id} className="text-sm">
                     <Link
                       href={`/projects/${a.projectId}`}
-                      className="group block rounded-md px-2 py-1 transition-colors hover:bg-muted/50"
+                      className="group block rounded-md px-2 py-1.5 transition-colors hover:bg-muted/50"
                     >
                       <span className="font-medium group-hover:underline">
                         {a.userName || a.userEmail || "Someone"}
