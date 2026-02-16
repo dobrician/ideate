@@ -4,6 +4,12 @@ Reverse chronological. Click each sprint for full details.
 
 ---
 
+### 🔄 [Sprint 20 — Coverage Gaps, Dead Code & Hardening](Sprint-20) *(2026-02-16)*
+**Focus:** New logo (#40), csrf-client/proposals/auth/notifications/export coverage, dead code removal
+**Stats:** In progress
+
+---
+
 ### ✅ [Sprint 19 — AI Features from Ideator](Sprint-19) *(2026-02-16)*
 **Focus:** Port all AI features from ideator: project summaries, AI proposal suggestions (✨), similarity check, markdown renderer
 **Stats:** 10 commits | 32/32 smoke | 30 new tests
