@@ -20,6 +20,7 @@ const PUBLIC_PATHS = [
   "/api/search",
   "/api/email/deliverability",
   "/api/me",
+  "/api/cron/project-summaries",
   "/sitemap.xml",
   "/robots.txt",
   "/manifest.json",
