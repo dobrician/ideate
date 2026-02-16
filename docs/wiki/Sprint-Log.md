@@ -609,7 +609,7 @@
 
 ### Goals
 - [x] Profile page: translate all field labels and buttons to RO
-- [ ] Dark mode contrast: increase contrast for grey text on dark backgrounds (WCAG AA)
+- [x] Dark mode contrast: increase contrast for grey text on dark backgrounds (WCAG AA)
 - [ ] Add tooltips to all icon buttons (export PDF/CSV, edit, delete, theme toggle, language toggle)
 - [ ] Verify logout works end-to-end on staging (clear session, no sidebar on public pages)
 - [ ] Verify locale persistence on staging (switch to RO, navigate 5+ pages, must stay RO)
