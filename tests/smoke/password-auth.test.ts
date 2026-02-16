@@ -108,7 +108,7 @@ test.describe("Smoke Tests - Password Auth Flow", () => {
   test("registration with weak password returns error", async ({
     request,
   }) => {
-    const response = await request.post(`${APP_URL}/auth/register`, {
+    const response = await request.post(`${APP_URL}/api/auth/register`, {
       data: {
         email: "weakpass@example.com",
         password: "short",
@@ -122,7 +122,7 @@ test.describe("Smoke Tests - Password Auth Flow", () => {
   });
 
   test("login with non-existent user returns error", async ({ request }) => {
-    const response = await request.post(`${APP_URL}/auth/login-password`, {
+    const response = await request.post(`${APP_URL}/api/auth/login-password`, {
       data: {
         email: "nonexistent@example.com",
         password: "Password123",
@@ -137,7 +137,7 @@ test.describe("Smoke Tests - Password Auth Flow", () => {
   test("forgot-password for non-existent email returns success (anti-enum)", async ({
     request,
   }) => {
-    const response = await request.post(`${APP_URL}/auth/forgot-password`, {
+    const response = await request.post(`${APP_URL}/api/auth/forgot-password`, {
       data: { email: "nobody@example.com" },
       headers: { "Content-Type": "application/json" },
     });
@@ -149,7 +149,7 @@ test.describe("Smoke Tests - Password Auth Flow", () => {
   test("reset-password with invalid token returns error", async ({
     request,
   }) => {
-    const response = await request.post(`${APP_URL}/auth/reset-password`, {
+    const response = await request.post(`${APP_URL}/api/auth/reset-password`, {
       data: {
         token: "invalid-token",
         password: "NewPassword123",
@@ -166,7 +166,7 @@ test.describe("Smoke Tests - Password Auth Flow", () => {
     test.setTimeout(60000);
 
     // Step 1: Register
-    const regResponse = await request.post(`${APP_URL}/auth/register`, {
+    const regResponse = await request.post(`${APP_URL}/api/auth/register`, {
       data: {
         email: TEST_EMAIL,
         password: TEST_PASSWORD,
@@ -180,7 +180,7 @@ test.describe("Smoke Tests - Password Auth Flow", () => {
 
     // Step 2: Login before verification should fail
     const preLoginResponse = await request.post(
-      `${APP_URL}/auth/login-password`,
+      `${APP_URL}/api/auth/login-password`,
       {
         data: { email: TEST_EMAIL, password: TEST_PASSWORD },
         headers: { "Content-Type": "application/json" },
@@ -206,7 +206,7 @@ test.describe("Smoke Tests - Password Auth Flow", () => {
 
     // Step 5: Login with password after verification
     const loginResponse = await request.post(
-      `${APP_URL}/auth/login-password`,
+      `${APP_URL}/api/auth/login-password`,
       {
         data: { email: TEST_EMAIL, password: TEST_PASSWORD },
         headers: { "Content-Type": "application/json" },
