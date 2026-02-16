@@ -353,4 +353,31 @@ export const ro: Record<string, string> = {
   // Locale switcher
   "locale.switchToRo": "Schimbă în Română",
   "locale.switchToEn": "Schimbă în Engleză",
+
+  // AI Suggestions
+  "suggestions.cta": "Sugestii AI",
+  "suggestions.title": "Sugestii AI",
+  "suggestions.subtitle": "Idei de propuneri generate de AI pentru acest proiect",
+  "suggestions.generating": "Se generează sugestii...",
+  "suggestions.none": "Nu s-au putut genera sugestii",
+  "suggestions.error": "A apărut o eroare la generarea sugestiilor",
+  "suggestions.noSummary": "Niciun rezumat disponibil",
+  "suggestions.viewDetails": "Vezi detalii",
+  "suggestions.cancel": "Anulează",
+  "suggestions.close": "Închide",
+  "suggestions.addSelected": "Adaugă selectate",
+  "suggestions.submitting": "Se adaugă...",
+
+  // Project Summary
+  "projectSummary.regenerate": "Regenerează rezumatul",
+  "projectSummary.regenerating": "Se generează...",
+  "projectSummary.success": "Rezumat actualizat",
+  "projectSummary.error": "Nu s-a putut genera rezumatul",
+
+  // Similarity Check
+  "similarity.checking": "Se verifică propunerile similare...",
+  "similarity.warning": "Similar cu o propunere existentă",
+  "similarity.score": "{score}% similar",
+  "similarity.explanation": "{explanation}",
+  "similarity.highOverlap": "Suprapunere ridicată detectată — verifică propunerile existente",
 };

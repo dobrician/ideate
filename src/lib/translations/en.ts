@@ -334,4 +334,31 @@ export const en: Record<string, string> = {
   // Locale switcher
   "locale.switchToRo": "Switch to Romanian",
   "locale.switchToEn": "Switch to English",
+
+  // AI Suggestions
+  "suggestions.cta": "AI Suggestions",
+  "suggestions.title": "AI Suggestions",
+  "suggestions.subtitle": "AI-generated proposal ideas for this project",
+  "suggestions.generating": "Generating suggestions...",
+  "suggestions.none": "No suggestions could be generated",
+  "suggestions.error": "Something went wrong generating suggestions",
+  "suggestions.noSummary": "No summary available",
+  "suggestions.viewDetails": "View details",
+  "suggestions.cancel": "Cancel",
+  "suggestions.close": "Close",
+  "suggestions.addSelected": "Add selected",
+  "suggestions.submitting": "Adding...",
+
+  // Project Summary
+  "projectSummary.regenerate": "Regenerate Summary",
+  "projectSummary.regenerating": "Generating...",
+  "projectSummary.success": "Summary updated",
+  "projectSummary.error": "Could not generate summary",
+
+  // Similarity Check
+  "similarity.checking": "Checking for similar proposals...",
+  "similarity.warning": "Similar to existing proposal",
+  "similarity.score": "{score}% similar",
+  "similarity.explanation": "{explanation}",
+  "similarity.highOverlap": "High overlap detected — consider reviewing existing proposals",
 };
