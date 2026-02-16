@@ -12,7 +12,7 @@
 **APIs:**
 - [x] Project summary API + Regenerate Summary button on project page
 - [x] Cron endpoint for batch project summaries — /api/cron/project-summaries
-- [ ] Submit-suggested API — create proposals from AI suggestions with auto-vote
+- [x] Submit-suggested API — create proposals from AI suggestions with auto-vote
 
 **UI:**
 - [ ] AI Suggestions sparkles button + modal (vote/preview/submit flow) (#40-logo can wait)
