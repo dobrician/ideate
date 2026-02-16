@@ -134,6 +134,7 @@ export const en: Record<string, string> = {
   "comments.noComments": "No comments yet. Start the discussion!",
   "comments.replyPosted": "Reply posted",
   "comments.open": "Open discussion",
+  "comments.projectDiscussion": "Project Discussion",
 
   // Dashboard
   "dashboard.title": "Dashboard",

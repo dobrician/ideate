@@ -15,8 +15,6 @@ import { logAudit } from "@/lib/audit";
 import { notifyVote } from "@/lib/notifications";
 import { requireCsrfToken } from "@/lib/csrf";
 
-export { addComment } from "./comment-actions";
-
 async function isDeadlinePassed(projectId: string): Promise<boolean> {
   const project = await db
     .select({ deadline: projects.deadline })

@@ -22,7 +22,9 @@ import { ProposalList } from "@/components/proposal-list";
 import { ExportButtons } from "@/components/export-buttons";
 import { DeadlineCountdown } from "@/components/deadline-countdown";
 import { getProjectProposals, PROPOSALS_PAGE_SIZE } from "./queries";
+import { getProjectComments } from "@/db/queries";
 import { Pagination } from "@/components/pagination";
+import { ProjectComments } from "@/components/project-comments";
 import { getTranslations } from "@/lib/i18n-server";
 import { statusBadgeClass, statusLabel } from "@/lib/status-utils";
 
@@ -97,8 +99,11 @@ export default async function ProjectPage({ params, searchParams }: ProjectPageP
   const sp = await searchParams;
   const proposalPage = Math.max(1, parseInt(sp.page || "1", 10) || 1);
   const proposalOffset = (proposalPage - 1) * PROPOSALS_PAGE_SIZE;
-  const { proposals: proposalsWithStats, total: proposalTotal } =
-    await getProjectProposals(id, user.id, PROPOSALS_PAGE_SIZE, proposalOffset);
+  const [{ proposals: proposalsWithStats, total: proposalTotal }, projectComments] =
+    await Promise.all([
+      getProjectProposals(id, user.id, PROPOSALS_PAGE_SIZE, proposalOffset),
+      getProjectComments(id),
+    ]);
   const proposalTotalPages = Math.ceil(proposalTotal / PROPOSALS_PAGE_SIZE);
 
   return (
@@ -206,6 +211,8 @@ export default async function ProjectPage({ params, searchParams }: ProjectPageP
               </div>
             )}
           </div>
+
+          <ProjectComments projectId={id} comments={projectComments} />
         </CardContent>
       </Card>
     </div>
