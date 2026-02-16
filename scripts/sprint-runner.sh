@@ -145,7 +145,7 @@ if [ "$PRE_DONE" = "false" ]; then
   # Extract goals from report and create sprint doc
   # This part uses Claude Code to create the sprint wiki page and launch
   cd "$REPO"
-  claude -p "Read docs/deep-analysis-report.md. Create docs/wiki/Sprint-$(printf '%02d' $NEXT).md with the goals as checkboxes. Update docs/wiki/Sprint-Log.md with a new entry at the top. Commit and push with message 'docs: Sprint $NEXT goals'. Then execute the sprint goals: do each one in order, commit+push after EACH goal. After each goal, edit docs/wiki/Sprint-$(printf '%02d' $NEXT).md: change '- [ ]' to '- [x]' for that goal. Do NOT add new lines. npm run lint + npx tsc --noEmit + npm test + npm run build must pass before each push. All files < 300 lines." \
+  nohup setsid claude -p "Read docs/deep-analysis-report.md. Create docs/wiki/Sprint-$(printf '%02d' $NEXT).md with the goals as checkboxes. Update docs/wiki/Sprint-Log.md with a new entry at the top. Commit and push with message 'docs: Sprint $NEXT goals'. Then execute the sprint goals: do each one in order, commit+push after EACH goal. After each goal, edit docs/wiki/Sprint-$(printf '%02d' $NEXT).md: change '- [ ]' to '- [x]' for that goal. Do NOT add new lines. npm run lint + npx tsc --noEmit + npm test + npm run build must pass before each push. All files < 300 lines." \
     --max-turns 120 --dangerously-skip-permissions >> "$LOG" 2>&1 &
 
   SPRINT_PID=$!
