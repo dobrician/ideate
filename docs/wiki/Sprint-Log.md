@@ -4,6 +4,12 @@ Reverse chronological. Click each sprint for full details.
 
 ---
 
+### 🏃 [Sprint 18 — UI Polish & Chat Redesign](Sprint-18) *(2026-02-16)*
+**Focus:** Vote bar polish, messenger-style chat redesign, test coverage gaps
+**Stats:** 🔧 In progress | Issues #37-39
+
+---
+
 ### ✅ [Sprint 17 — Vote Bar Redesign & Polish](Sprint-17) *(2026-02-16)*
 **Focus:** Vote bar chart redesign (green left/red right, proportional), comment UI polish, migration runner fix
 **Stats:** 7 commits | 32/32 smoke | Issues #32-34, #36
