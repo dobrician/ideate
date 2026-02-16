@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import Link from "next/link";
 import { db } from "@/db";
 import { users, projects, proposals, votes, comments, auditLogs } from "@/db/schema";
 import { getCurrentUser } from "@/lib/auth";
@@ -12,7 +13,8 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Users, FolderOpen, Lightbulb, ThumbsUp } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Users, FolderOpen, Lightbulb, ThumbsUp, ShieldX } from "lucide-react";
 import { UserRoleManager } from "./user-role-manager";
 import { StatCard } from "@/components/stat-card";
 import { getTranslations } from "@/lib/i18n-server";
@@ -24,10 +26,22 @@ export default async function AdminPage() {
   const user = await getCurrentUser();
   if (!user) redirect("/auth/login");
 
-  if (!hasPermission(user.role as Role, "user:manage")) {
-    redirect("/dashboard");
-  }
   const { t, locale } = await getTranslations();
+
+  if (!hasPermission(user.role as Role, "user:manage")) {
+    return (
+      <div className="flex min-h-[60vh] flex-col items-center justify-center px-4 text-center">
+        <ShieldX className="mb-4 h-16 w-16 text-destructive" />
+        <h1 className="text-2xl font-bold">{t("common.accessDenied")}</h1>
+        <p className="mt-2 max-w-md text-muted-foreground">
+          {t("common.accessDeniedDesc")}
+        </p>
+        <Button asChild className="mt-6">
+          <Link href="/dashboard">{t("common.goToDashboard")}</Link>
+        </Button>
+      </div>
+    );
+  }
   const dateFmt = locale === "ro" ? "ro-RO" : "en-US";
 
   const [allUsers, stats, recentAudit] = await Promise.all([
