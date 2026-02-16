@@ -20,6 +20,7 @@ export function Header() {
   const pathname = usePathname();
   const { t } = useLocale();
   const [isAdmin, setIsAdmin] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
@@ -27,6 +28,7 @@ export function Header() {
     fetch("/api/me")
       .then((r) => (r.ok ? r.json() : null))
       .then((data) => {
+        if (data) setIsLoggedIn(true);
         if (data?.role === "admin") setIsAdmin(true);
       })
       .catch(() => {});
@@ -114,15 +116,17 @@ export function Header() {
                     {t("nav.admin")}
                   </Link>
                 )}
-                <form action="/auth/logout" method="POST">
-                  <button
-                    type="submit"
-                    className="flex w-full items-center gap-2 px-3 py-2 text-sm hover:bg-accent"
-                  >
-                    <LogOut className="h-4 w-4" />
-                    {t("nav.signOut")}
-                  </button>
-                </form>
+                {isLoggedIn && (
+                  <form action="/auth/logout" method="POST">
+                    <button
+                      type="submit"
+                      className="flex w-full items-center gap-2 px-3 py-2 text-sm hover:bg-accent"
+                    >
+                      <LogOut className="h-4 w-4" />
+                      {t("nav.signOut")}
+                    </button>
+                  </form>
+                )}
               </div>
             )}
           </div>
