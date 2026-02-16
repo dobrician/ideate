@@ -78,11 +78,12 @@ export function ProposalList({
     });
   }, [proposals, voteUpdates]);
 
-  const maxUpvotes = useMemo(() => {
+  const maxTotalVotes = useMemo(() => {
     let max = 0;
     for (const p of proposals) {
       const live = voteUpdates.get(p.id);
-      max = Math.max(max, live?.upvotes ?? p.upvotes);
+      const total = (live?.upvotes ?? p.upvotes) + (live?.downvotes ?? p.downvotes);
+      max = Math.max(max, total);
     }
     return max;
   }, [proposals, voteUpdates]);
@@ -113,7 +114,7 @@ export function ProposalList({
             isAdmin={isAdmin}
             liveUpvotes={live?.upvotes}
             liveDownvotes={live?.downvotes}
-            maxUpvotes={maxUpvotes}
+            maxTotalVotes={maxTotalVotes}
           />
         );
       })}
@@ -128,7 +129,7 @@ function ProposalItem({
   isAdmin,
   liveUpvotes,
   liveDownvotes,
-  maxUpvotes,
+  maxTotalVotes,
 }: {
   proposal: ProposalWithStats;
   projectId: string;
@@ -136,7 +137,7 @@ function ProposalItem({
   isAdmin: boolean;
   liveUpvotes?: number;
   liveDownvotes?: number;
-  maxUpvotes: number;
+  maxTotalVotes: number;
 }) {
   const { t, locale } = useLocale();
   const [showFull, setShowFull] = useState(false);
@@ -146,7 +147,9 @@ function ProposalItem({
 
   const upvotes = liveUpvotes ?? proposal.upvotes;
   const downvotes = liveDownvotes ?? proposal.downvotes;
-  const barWidth = maxUpvotes > 0 ? Math.round((upvotes / maxUpvotes) * 100) : 0;
+  const voteWidth = maxTotalVotes > 0 ? 100 / maxTotalVotes : 0;
+  const greenWidth = Math.round(upvotes * voteWidth);
+  const redWidth = Math.round(downvotes * voteWidth);
 
   async function handleDelete() {
     setIsDeleting(true);
@@ -175,13 +178,13 @@ function ProposalItem({
           {upvotes > 0 && (
             <div
               className="h-full bg-gradient-to-r from-green-500/20 to-green-500/5 transition-all duration-300"
-              style={{ width: `${barWidth}%` }}
+              style={{ width: `${greenWidth}%` }}
             />
           )}
           {downvotes > 0 && (
             <div
-              className="h-full bg-gradient-to-l from-red-500/20 to-red-500/5 transition-all duration-300 ml-auto"
-              style={{ width: `${maxUpvotes > 0 ? Math.round((downvotes / maxUpvotes) * 100) : 0}%` }}
+              className="h-full ml-auto bg-gradient-to-l from-red-500/20 to-red-500/5 transition-all duration-300"
+              style={{ width: `${redWidth}%` }}
             />
           )}
         </div>

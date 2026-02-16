@@ -131,16 +131,16 @@ describe("ProposalList", () => {
     expect(titles).toEqual(["High Priority", "Mid Priority", "Low Priority"]);
   });
 
-  it("scales bar chart width proportionally to max upvotes", () => {
+  it("scales bar chart width proportionally to max total votes", () => {
     const proposals = [
-      makeProposal({ id: "a", title: "A", upvotes: 10, downvotes: 0 }),
-      makeProposal({ id: "b", title: "B", upvotes: 5, downvotes: 0 }),
-      makeProposal({ id: "c", title: "C", upvotes: 0, downvotes: 3 }),
+      makeProposal({ id: "a", title: "A", upvotes: 3, downvotes: 2 }),
+      makeProposal({ id: "b", title: "B", upvotes: 2, downvotes: 1 }),
+      makeProposal({ id: "c", title: "C", upvotes: 0, downvotes: 1 }),
     ];
     const { container } = render(
       <ProposalList proposals={proposals} projectId="proj1" currentUserId="u1" isAdmin={false} />
     );
-    // The bar container has aria-hidden="true"; individual fills have style widths
+    // Bar container has aria-hidden="true"; individual fills have style widths
     const barContainers = container.querySelectorAll('[aria-hidden="true"]');
     const widths: string[] = [];
     barContainers.forEach((c) => {
@@ -148,9 +148,11 @@ describe("ProposalList", () => {
         widths.push((el as HTMLElement).style.width);
       });
     });
-    // max upvotes = 10: A=100%, B=50%, C has 0 upvotes so no green bar
-    expect(widths).toContain("100%");
-    expect(widths).toContain("50%");
+    // maxTotalVotes = 5 (A: 3+2), voteWidth = 20% per vote
+    // A: green=60%, red=40%. B: green=40%, red=20%. C: red=20%
+    expect(widths).toContain("60%");
+    expect(widths).toContain("40%");
+    expect(widths).toContain("20%");
     // No 0% width bar should be rendered
     expect(widths).not.toContain("0%");
   });
