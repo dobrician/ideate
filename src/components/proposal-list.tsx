@@ -136,7 +136,7 @@ function ProposalItem({
       className="rounded-lg border bg-card px-4"
     >
       <AccordionTrigger className="py-3 hover:no-underline">
-        <div className="flex w-full items-center justify-between pr-2">
+        <div className="flex w-full flex-col gap-2 pr-2 sm:flex-row sm:items-center sm:justify-between">
           <div className="min-w-0 flex-1 text-left">
             <span className="font-medium">{proposal.title}</span>
             <span className="ml-2 text-xs text-muted-foreground">

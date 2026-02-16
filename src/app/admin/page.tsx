@@ -74,7 +74,7 @@ export default async function AdminPage() {
   return (
     <div className="container mx-auto max-w-6xl px-4 py-8">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold">{t("admin.title")}</h1>
+        <h1 className="text-2xl font-bold sm:text-3xl">{t("admin.title")}</h1>
         <p className="text-muted-foreground">
           {t("admin.subtitle")}
         </p>
@@ -132,15 +132,15 @@ export default async function AdminPage() {
                 {recentAudit.map((entry) => (
                   <div
                     key={entry.id}
-                    className="flex items-center gap-3 text-sm"
+                    className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm"
                   >
                     <span className="shrink-0 rounded bg-muted px-2 py-0.5 text-xs font-medium">
                       {entry.action}
                     </span>
-                    <span className="font-medium">
+                    <span className="truncate font-medium">
                       {entry.userEmail || "System"}
                     </span>
-                    <span className="text-muted-foreground">
+                    <span className="truncate text-muted-foreground">
                       {entry.entity}
                       {entry.entityId ? ` #${entry.entityId.substring(0, 8)}` : ""}
                     </span>

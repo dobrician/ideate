@@ -35,7 +35,7 @@ export default async function DashboardPage() {
   return (
     <div className="container mx-auto max-w-6xl px-4 py-8">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold">{t("dashboard.title")}</h1>
+        <h1 className="text-2xl font-bold sm:text-3xl">{t("dashboard.title")}</h1>
         <p className="text-muted-foreground">
           {t("dashboard.welcomeBack", { name: user.firstName || user.email })}
         </p>
