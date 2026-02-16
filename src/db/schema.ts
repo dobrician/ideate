@@ -10,6 +10,16 @@ export const users = sqliteTable("users", {
   firstName: text("first_name"),
   lastName: text("last_name"),
   avatarUrl: text("avatar_url"),
+  passwordHash: text("password_hash"),
+  emailVerified: integer("email_verified", { mode: "boolean" })
+    .notNull()
+    .default(false),
+  verificationToken: text("verification_token"),
+  verificationTokenExpires: integer("verification_token_expires", {
+    mode: "timestamp",
+  }),
+  resetToken: text("reset_token"),
+  resetTokenExpires: integer("reset_token_expires", { mode: "timestamp" }),
   role: text("role", { enum: ["admin", "manager", "member", "viewer"] })
     .notNull()
     .default("member"),
