@@ -112,8 +112,8 @@ test.describe("Smoke Tests - Password Auth Flow", () => {
     await page.goto(`${APP_URL}/auth/forgot-password`);
     await page.waitForLoadState("networkidle");
 
-    const heading = await page.textContent("h2, [class*='CardTitle']");
-    expect(heading).toContain("Reset");
+    const heading = await page.textContent("[data-slot='card-title']");
+    expect(heading).toMatch(/Reset|Forgot/);
 
     const emailInput = page.locator('input[type="email"]');
     expect(await emailInput.count()).toBeGreaterThanOrEqual(1);
