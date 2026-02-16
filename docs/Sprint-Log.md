@@ -151,7 +151,7 @@
 - [x] 2. Auth pages minimal layout — no sidebar, no logged-in nav
 - [x] 3. Locale persistence — persist in cookie, survive navigation
 - [x] 4. Missing Romanian translations — all reported strings
-- [ ] 5. Admin 403 — proper Access Denied page
+- [x] 5. Admin 403 — proper Access Denied page
 - [ ] 6. PWA install popup — show once per session
 - [ ] 7. Voting UX — highlight selected vote, tooltip to remove
 - [ ] 8. Delete confirmation — modal dialog for destructive actions
