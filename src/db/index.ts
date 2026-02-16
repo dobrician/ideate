@@ -12,23 +12,23 @@ sqlite.pragma("journal_mode = WAL");
 sqlite.pragma("busy_timeout = 5000");
 sqlite.pragma("foreign_keys = ON");
 
-// Auto-apply pending migrations
+interface JournalEntry { idx: number; tag: string }
+interface Journal { entries: JournalEntry[] }
+
+// Auto-apply pending migrations from drizzle journal
 function applyMigrations(): void {
   sqlite.exec(
     "CREATE TABLE IF NOT EXISTS _migrations (name TEXT PRIMARY KEY, applied_at INTEGER DEFAULT (unixepoch()))"
   );
 
-  const migrationDir = resolve(
-    process.env.NODE_ENV === "production" ? "drizzle" : "drizzle"
-  );
+  const migrationDir = resolve("drizzle");
+  const journalPath = resolve(migrationDir, "meta", "_journal.json");
+  if (!existsSync(journalPath)) return;
 
-  const migrations = [
-    "0000_secret_kree.sql",
-    "0001_sprint5_audit_search.sql",
-    "0002_sprint7_indexes.sql",
-    "0003_sprint9_password_auth.sql",
-    "0004_sprint13_indexes.sql",
-  ];
+  const journal: Journal = JSON.parse(readFileSync(journalPath, "utf-8"));
+  const migrations = journal.entries
+    .sort((a, b) => a.idx - b.idx)
+    .map((e) => `${e.tag}.sql`);
 
   for (const file of migrations) {
     const applied = sqlite
@@ -50,6 +50,7 @@ function applyMigrations(): void {
     }
 
     sqlite.prepare("INSERT INTO _migrations (name) VALUES (?)").run(file);
+    logger.info({ migration: file }, "Applied migration");
   }
 }
 
