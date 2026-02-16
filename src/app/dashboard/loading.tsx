@@ -20,6 +20,10 @@ export default function DashboardLoading() {
           </Card>
         ))}
       </div>
+      <div className="mb-8 flex gap-3">
+        <Skeleton className="h-9 w-32" />
+        <Skeleton className="h-9 w-36" />
+      </div>
       <div className="grid gap-6 lg:grid-cols-2">
         {Array.from({ length: 4 }).map((_, i) => (
           <Card key={i}>

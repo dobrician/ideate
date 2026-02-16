@@ -11,7 +11,7 @@ Based on unified analysis from Claude + Codex (see docs/sprint23-unified-plan.md
 - [x] Goal 3: Replace platform-wide stats with personal stats
 
 **Layout redesign:**
-- [ ] Goal 4: Add Quick Actions bar
+- [x] Goal 4: Add Quick Actions bar
 - [ ] Goal 5: Add deadline badges and urgency sorting to "Your Projects"
 - [ ] Goal 6: Enrich "Your Projects" cards with per-project stats
 

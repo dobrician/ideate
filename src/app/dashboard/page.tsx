@@ -9,12 +9,15 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
+import { Button } from "@/components/ui/button";
 import {
   FolderOpen,
   Lightbulb,
   ThumbsUp,
   ThumbsDown,
   MessageSquare,
+  Plus,
+  Compass,
 } from "lucide-react";
 import { StatCard, formatRelativeTime } from "@/components/stat-card";
 import { getTranslations } from "@/lib/i18n-server";
@@ -69,6 +72,22 @@ export default async function DashboardPage() {
           description={t("dashboard.stats.ofTotal", { total: platformStats.commentCount })}
           icon={<MessageSquare className="h-4 w-4 text-muted-foreground" />}
         />
+      </div>
+
+      {/* Quick Actions */}
+      <div className="mb-8 flex flex-wrap gap-3" role="region" aria-label={t("dashboard.quickActions")}>
+        <Button asChild>
+          <Link href="/projects/new">
+            <Plus className="mr-2 h-4 w-4" />
+            {t("dashboard.newProject")}
+          </Link>
+        </Button>
+        <Button variant="outline" asChild>
+          <Link href="/projects">
+            <Compass className="mr-2 h-4 w-4" />
+            {t("dashboard.browseProjects")}
+          </Link>
+        </Button>
       </div>
 
       <div className="grid gap-6 lg:grid-cols-2">

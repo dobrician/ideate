@@ -151,6 +151,9 @@ export const en: Record<string, string> = {
   "dashboard.commentedOn": "commented on",
   "dashboard.inProject": "in {project}",
   "dashboard.viewAll": "View all",
+  "dashboard.quickActions": "Quick Actions",
+  "dashboard.newProject": "New Project",
+  "dashboard.browseProjects": "Browse Projects",
 
   // Profile
   "profile.title": "Profile",

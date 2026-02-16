@@ -161,6 +161,9 @@ export const ro: Record<string, string> = {
   "dashboard.commentedOn": "a comentat la",
   "dashboard.inProject": "în {project}",
   "dashboard.viewAll": "Vezi toate",
+  "dashboard.quickActions": "Acțiuni Rapide",
+  "dashboard.newProject": "Proiect Nou",
+  "dashboard.browseProjects": "Răsfoiește Proiecte",
 
   // Profile
   "profile.title": "Profil",
