@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/card";
 import Link from "next/link";
 import { DeleteProjectButton } from "./delete-button";
+import { EditProjectDialog } from "@/components/edit-project-dialog";
 import { ProposalForm } from "@/components/proposal-form";
 import { ProposalList } from "@/components/proposal-list";
 import { ExportButtons } from "@/components/export-buttons";
@@ -119,9 +120,13 @@ export default async function ProjectPage({ params, searchParams }: ProjectPageP
           <ExportButtons projectId={id} />
           {canEdit && (
             <>
-              <Button asChild variant="outline" size="sm">
-                <Link href={`/projects/${id}/edit`}>{t("projects.edit")}</Link>
-              </Button>
+              <EditProjectDialog
+                projectId={id}
+                title={projectData.title}
+                description={projectData.description}
+                deadline={projectData.deadline}
+                status={projectData.status}
+              />
               <DeleteProjectButton projectId={id} />
             </>
           )}
