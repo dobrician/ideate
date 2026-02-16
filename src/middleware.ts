@@ -10,6 +10,12 @@ const PUBLIC_PATHS = [
   "/api/votes/stream",
   "/api/search",
   "/api/email/deliverability",
+  "/api/me",
+  "/sitemap.xml",
+  "/robots.txt",
+  "/manifest.json",
+  "/sw.js",
+  "/offline.html",
 ];
 
 /**
@@ -19,10 +25,11 @@ function isPublicPath(pathname: string): boolean {
   if (PUBLIC_PATHS.includes(pathname)) {
     return true;
   }
-  // Allow static assets and Next.js internals
+  // Allow static assets, Next.js internals, and icons
   if (
     pathname.startsWith("/_next/") ||
     pathname.startsWith("/favicon") ||
+    pathname.startsWith("/icons/") ||
     pathname.includes(".")
   ) {
     return true;
@@ -31,14 +38,42 @@ function isPublicPath(pathname: string): boolean {
 }
 
 /**
- * Auth middleware — redirects unauthenticated users to /auth/login
- * for protected routes. JWT verification is lightweight (cookie check only).
+ * Add security headers to the response
+ */
+function addSecurityHeaders(response: NextResponse): NextResponse {
+  response.headers.set("X-Content-Type-Options", "nosniff");
+  response.headers.set("X-Frame-Options", "DENY");
+  response.headers.set("X-XSS-Protection", "1; mode=block");
+  response.headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
+  response.headers.set(
+    "Permissions-Policy",
+    "camera=(), microphone=(), geolocation=()"
+  );
+  response.headers.set(
+    "Content-Security-Policy",
+    [
+      "default-src 'self'",
+      "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
+      "style-src 'self' 'unsafe-inline'",
+      "img-src 'self' data: blob:",
+      "font-src 'self' https://fonts.gstatic.com",
+      "connect-src 'self'",
+      "frame-ancestors 'none'",
+    ].join("; ")
+  );
+  return response;
+}
+
+/**
+ * Auth middleware with security headers.
+ * Redirects unauthenticated users to /auth/login for protected routes.
  */
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   if (isPublicPath(pathname)) {
-    return NextResponse.next();
+    const response = NextResponse.next();
+    return addSecurityHeaders(response);
   }
 
   const sessionCookie = request.cookies.get("session");
@@ -46,10 +81,12 @@ export function middleware(request: NextRequest) {
   if (!sessionCookie?.value) {
     const loginUrl = new URL("/auth/login", request.url);
     loginUrl.searchParams.set("redirect", pathname);
-    return NextResponse.redirect(loginUrl);
+    const response = NextResponse.redirect(loginUrl);
+    return addSecurityHeaders(response);
   }
 
-  return NextResponse.next();
+  const response = NextResponse.next();
+  return addSecurityHeaders(response);
 }
 
 export const config = {

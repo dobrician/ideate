@@ -13,6 +13,7 @@ const translations: Record<Locale, Record<string, string>> = {
     "nav.dashboard": "Dashboard",
     "nav.profile": "Profile",
     "nav.signOut": "Sign Out",
+    "nav.admin": "Admin",
     "nav.search": "Search projects & proposals...",
 
     // Home page
@@ -127,6 +128,7 @@ const translations: Record<Locale, Record<string, string>> = {
     "nav.dashboard": "Dashboard",
     "nav.profile": "Profil",
     "nav.signOut": "Delogare",
+    "nav.admin": "Admin",
     "nav.search": "Cauta proiecte si propuneri...",
 
     // Home page

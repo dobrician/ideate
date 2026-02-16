@@ -15,9 +15,24 @@ import {
   LayoutDashboard,
 } from "lucide-react";
 
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  name: "Ideate",
+  description:
+    "Enterprise-grade democratic idea prioritization platform for teams",
+  applicationCategory: "BusinessApplication",
+  operatingSystem: "Any",
+  url: "https://idea.surmont.co",
+};
+
 export default function HomePage() {
   return (
     <div className="mx-auto max-w-4xl space-y-8 px-4 py-8">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       <div className="text-center sm:text-left">
         <h2 className="text-3xl font-bold tracking-tight">
           Welcome to Ideate

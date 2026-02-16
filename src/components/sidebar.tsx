@@ -4,8 +4,16 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Home, FolderOpen, User, LogOut, LayoutDashboard } from "lucide-react";
+import {
+  Home,
+  FolderOpen,
+  User,
+  LogOut,
+  LayoutDashboard,
+  Shield,
+} from "lucide-react";
 import { useLocale } from "@/lib/use-locale";
+import { useEffect, useState } from "react";
 
 interface SidebarProps {
   open: boolean;
@@ -22,6 +30,23 @@ const navItems = [
 export function Sidebar({ open, onClose }: SidebarProps) {
   const pathname = usePathname();
   const { t } = useLocale();
+  const [isAdmin, setIsAdmin] = useState(false);
+
+  useEffect(() => {
+    fetch("/api/me")
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data) => {
+        if (data?.role === "admin") setIsAdmin(true);
+      })
+      .catch(() => {});
+  }, []);
+
+  const allItems = [
+    ...navItems,
+    ...(isAdmin
+      ? [{ href: "/admin", labelKey: "nav.admin", icon: Shield }]
+      : []),
+  ];
 
   return (
     <>
@@ -43,7 +68,7 @@ export function Sidebar({ open, onClose }: SidebarProps) {
         </div>
         <ScrollArea className="h-[calc(100vh-3.5rem)]">
           <nav className="space-y-1 p-4">
-            {navItems.map((item) => {
+            {allItems.map((item) => {
               const isActive =
                 item.href === "/"
                   ? pathname === "/"

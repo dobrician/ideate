@@ -7,6 +7,73 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.6.0] - 2026-02-16
+
+### Added
+- PDF/CSV export for project reports (fixes #7)
+  - API route `GET /api/projects/[id]/export?format=pdf|csv`
+  - HTML report with vote charts, proposals, and comments
+  - CSV export with all project data in tabular format
+  - Export buttons on project detail page
+- Progressive Web App (PWA) support (fixes #12)
+  - Web manifest (`public/manifest.json`) with app metadata
+  - Service worker (`public/sw.js`) with offline caching
+  - Offline fallback page (`public/offline.html`)
+  - Install prompt banner component
+  - SVG app icon
+- Email notifications for votes and comments
+  - Proposal owners notified when their proposals receive votes
+  - Proposal owners notified when comments are added
+  - Debounced notifications (max 1 per proposal per 15 minutes)
+  - Fire-and-forget: never breaks application flow
+- Project deadline countdown and auto-close
+  - Live countdown timer component (days, hours, minutes, seconds)
+  - Voting and commenting blocked after deadline passes
+  - "Voting Closed" badge for expired projects
+  - Urgent styling when deadline is imminent
+- Admin panel (`/admin`)
+  - Admin-only access with RBAC enforcement
+  - User management with inline role editing
+  - System stats dashboard (users, projects, proposals, votes)
+  - Audit log viewer showing recent 20 entries
+  - Admin link in sidebar (visible only to admins)
+  - `GET /api/me` endpoint for current user info
+- SEO improvements
+  - Dynamic `generateMetadata` on project pages (title, description, Open Graph)
+  - `robots.txt` with sitemap reference
+  - Dynamic `sitemap.xml` listing all projects
+  - JSON-LD structured data (WebApplication schema)
+  - Canonical metadata in root layout
+- Comprehensive E2E tests (Playwright)
+  - Auth flow tests (login page, form validation, protected routes)
+  - Navigation tests (homepage, header, 404, public assets)
+  - API endpoint tests (search, export, health, rate limiting)
+  - Security header tests (CSP, X-Frame-Options, CORS)
+- Unit tests for new modules
+  - Rate limiter tests (6 tests)
+  - Input sanitization tests (11 tests)
+  - Export generation tests (12 tests)
+
+### Security
+- Rate limiting on `/auth/request` endpoint
+  - Max 5 requests per email per 15 minutes
+  - Max 20 requests per IP per 15 minutes
+  - Returns 429 with Retry-After header
+- Input sanitization library (`src/lib/sanitize.ts`)
+  - HTML entity escaping, tag stripping, object sanitization
+- Security headers via middleware
+  - Content-Security-Policy (CSP) with strict directives
+  - X-Content-Type-Options: nosniff
+  - X-Frame-Options: DENY
+  - X-XSS-Protection: 1; mode=block
+  - Referrer-Policy: strict-origin-when-cross-origin
+  - Permissions-Policy: camera=(), microphone=(), geolocation=()
+
+### Changed
+- Sidebar now shows Admin link for admin users
+- i18n translations extended with admin navigation key
+- Middleware updated with security headers and PWA public paths
+
 ## [0.5.0] - 2026-02-16
 
 ### Added

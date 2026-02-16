@@ -1,4 +1,5 @@
 import { notFound, redirect } from "next/navigation";
+import type { Metadata } from "next";
 import { db } from "@/db";
 import { projects, proposals, votes, comments, users } from "@/db/schema";
 import { getCurrentUser } from "@/lib/auth";
@@ -17,9 +18,43 @@ import Link from "next/link";
 import { DeleteProjectButton } from "./delete-button";
 import { ProposalForm } from "@/components/proposal-form";
 import { ProposalList } from "@/components/proposal-list";
+import { ExportButtons } from "@/components/export-buttons";
+import { DeadlineCountdown } from "@/components/deadline-countdown";
 
 interface ProjectPageProps {
   params: Promise<{ id: string }>;
+}
+
+/**
+ * Generate dynamic metadata for the project page (SEO + Open Graph)
+ */
+export async function generateMetadata({
+  params,
+}: ProjectPageProps): Promise<Metadata> {
+  const { id } = await params;
+  const project = await db
+    .select({ title: projects.title, description: projects.description })
+    .from(projects)
+    .where(eq(projects.id, id))
+    .limit(1);
+
+  if (project.length === 0) {
+    return { title: "Project Not Found" };
+  }
+
+  const desc = project[0].description
+    ? project[0].description.substring(0, 160)
+    : "View proposals, vote, and discuss ideas";
+
+  return {
+    title: project[0].title,
+    description: desc,
+    openGraph: {
+      title: project[0].title,
+      description: desc,
+      type: "article",
+    },
+  };
 }
 
 /**
@@ -162,14 +197,17 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
         <Button asChild variant="outline" size="sm">
           <Link href="/projects">&larr; Back to Projects</Link>
         </Button>
-        {canEdit && (
-          <div className="flex gap-2">
-            <Button asChild variant="outline" size="sm">
-              <Link href={`/projects/${id}/edit`}>Edit</Link>
-            </Button>
-            <DeleteProjectButton projectId={id} />
-          </div>
-        )}
+        <div className="flex flex-wrap gap-2">
+          <ExportButtons projectId={id} />
+          {canEdit && (
+            <>
+              <Button asChild variant="outline" size="sm">
+                <Link href={`/projects/${id}/edit`}>Edit</Link>
+              </Button>
+              <DeleteProjectButton projectId={id} />
+            </>
+          )}
+        </div>
       </div>
 
       <Card>
@@ -191,15 +229,9 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
                 >
                   {projectData.status}
                 </span>
-                <span className="text-sm">
-                  Deadline:{" "}
-                  {projectData.deadline
-                    ? new Date(projectData.deadline).toLocaleDateString(
-                        "en-US",
-                        { year: "numeric", month: "long", day: "numeric" }
-                      )
-                    : "Not set"}
-                </span>
+                {projectData.deadline && (
+                  <DeadlineCountdown deadline={projectData.deadline} />
+                )}
               </CardDescription>
             </div>
           </div>

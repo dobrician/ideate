@@ -1,7 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { generateMagicLink } from "@/lib/auth";
 import { sendMagicLinkEmail } from "@/lib/mail";
+import { checkRateLimit } from "@/lib/rate-limit";
 import { z } from "zod";
+
+const WINDOW_MS = 15 * 60 * 1000; // 15 minutes
+const MAX_PER_EMAIL = 5;
+const MAX_PER_IP = 20;
 
 /**
  * Email validation schema
@@ -11,11 +16,39 @@ const emailSchema = z.object({
 });
 
 /**
+ * Extract client IP from request headers
+ */
+function getClientIp(request: NextRequest): string {
+  return (
+    request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
+    request.headers.get("x-real-ip") ||
+    "unknown"
+  );
+}
+
+/**
  * POST /auth/request
- * Request a magic link to be sent to the provided email
+ * Request a magic link to be sent to the provided email.
+ * Rate limited: 5 per email / 20 per IP per 15 minutes.
  */
 export async function POST(request: NextRequest) {
   try {
+    const clientIp = getClientIp(request);
+
+    // IP-level rate limit
+    const ipCheck = checkRateLimit(`auth:ip:${clientIp}`, MAX_PER_IP, WINDOW_MS);
+    if (!ipCheck.allowed) {
+      return NextResponse.json(
+        { error: "Too many requests. Please try again later." },
+        {
+          status: 429,
+          headers: {
+            "Retry-After": String(Math.ceil(ipCheck.retryAfterMs / 1000)),
+          },
+        }
+      );
+    }
+
     const body = await request.json();
 
     // Validate email
@@ -30,16 +63,29 @@ export async function POST(request: NextRequest) {
 
     const { email } = result.data;
 
+    // Per-email rate limit
+    const emailCheck = checkRateLimit(
+      `auth:email:${email}`,
+      MAX_PER_EMAIL,
+      WINDOW_MS
+    );
+    if (!emailCheck.allowed) {
+      // Still return success to prevent email enumeration
+      return NextResponse.json({
+        success: true,
+        message:
+          "If an account exists with this email, a magic link has been sent.",
+      });
+    }
+
     // Generate magic link
     const magicLink = generateMagicLink(email);
 
-    // Send email (in production, handle errors gracefully to prevent email enumeration)
+    // Send email
     try {
       await sendMagicLinkEmail(email, magicLink);
     } catch (error) {
       console.error("Failed to send magic link:", error);
-      // In production, still return success to prevent email enumeration
-      // In dev, we can show the error
       if (process.env.NODE_ENV === "development") {
         return NextResponse.json(
           { error: "Failed to send email. Check SMTP configuration." },
@@ -51,7 +97,8 @@ export async function POST(request: NextRequest) {
     // Always return success to prevent email enumeration attacks
     return NextResponse.json({
       success: true,
-      message: "If an account exists with this email, a magic link has been sent.",
+      message:
+        "If an account exists with this email, a magic link has been sent.",
     });
   } catch (error) {
     console.error("Magic link request error:", error);

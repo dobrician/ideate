@@ -1,0 +1,186 @@
+/**
+ * Export utilities for generating PDF and CSV reports of projects.
+ */
+
+interface ExportProposal {
+  title: string;
+  description: string | null;
+  summary: string | null;
+  authorName: string;
+  createdAt: Date | null;
+  upvotes: number;
+  downvotes: number;
+  comments: ExportComment[];
+}
+
+interface ExportComment {
+  content: string;
+  authorName: string;
+  createdAt: Date | null;
+}
+
+interface ExportProject {
+  title: string;
+  description: string | null;
+  status: string;
+  deadline: Date | null;
+  createdAt: Date | null;
+  proposals: ExportProposal[];
+}
+
+/**
+ * Generate CSV content for a project report
+ */
+export function generateCsv(project: ExportProject): string {
+  const rows: string[][] = [];
+
+  rows.push([
+    "Type",
+    "Title",
+    "Author",
+    "Description",
+    "Upvotes",
+    "Downvotes",
+    "Date",
+  ]);
+
+  rows.push([
+    "Project",
+    project.title,
+    "",
+    project.description || "",
+    "",
+    "",
+    formatDate(project.createdAt),
+  ]);
+
+  for (const proposal of project.proposals) {
+    rows.push([
+      "Proposal",
+      proposal.title,
+      proposal.authorName,
+      proposal.description || proposal.summary || "",
+      String(proposal.upvotes),
+      String(proposal.downvotes),
+      formatDate(proposal.createdAt),
+    ]);
+
+    for (const comment of proposal.comments) {
+      rows.push([
+        "Comment",
+        `Re: ${proposal.title}`,
+        comment.authorName,
+        comment.content,
+        "",
+        "",
+        formatDate(comment.createdAt),
+      ]);
+    }
+  }
+
+  return rows.map((row) => row.map(escapeCsvField).join(",")).join("\n");
+}
+
+/**
+ * Generate HTML content for PDF-style report
+ */
+export function generateReportHtml(project: ExportProject): string {
+  const totalVotes = project.proposals.reduce(
+    (sum, p) => sum + p.upvotes + p.downvotes,
+    0
+  );
+  const totalComments = project.proposals.reduce(
+    (sum, p) => sum + p.comments.length,
+    0
+  );
+
+  let proposalsHtml = "";
+  for (const proposal of project.proposals) {
+    const total = proposal.upvotes + proposal.downvotes;
+    const proPct = total > 0 ? Math.round((proposal.upvotes / total) * 100) : 0;
+
+    let commentsHtml = "";
+    for (const comment of proposal.comments) {
+      commentsHtml += `
+        <div style="margin-left:20px;padding:8px 0;border-bottom:1px solid #f0f0f0;">
+          <strong>${escapeHtml(comment.authorName)}</strong>
+          <span style="color:#666;font-size:12px;margin-left:8px;">${formatDate(comment.createdAt)}</span>
+          <p style="margin:4px 0 0;">${escapeHtml(comment.content)}</p>
+        </div>`;
+    }
+
+    proposalsHtml += `
+      <div style="margin-bottom:24px;padding:16px;border:1px solid #e0e0e0;border-radius:8px;">
+        <h3 style="margin:0 0 8px;">${escapeHtml(proposal.title)}</h3>
+        <p style="color:#666;font-size:13px;margin:0 0 8px;">
+          by ${escapeHtml(proposal.authorName)} &middot; ${formatDate(proposal.createdAt)}
+        </p>
+        ${proposal.description ? `<p style="margin:0 0 12px;">${escapeHtml(proposal.description)}</p>` : ""}
+        <div style="display:flex;gap:16px;margin-bottom:8px;">
+          <span style="color:#16a34a;font-weight:600;">+${proposal.upvotes} Pro</span>
+          <span style="color:#dc2626;font-weight:600;">-${proposal.downvotes} Contra</span>
+          <span style="color:#666;">${proPct}% approval</span>
+        </div>
+        <div style="height:8px;background:#fee2e2;border-radius:4px;overflow:hidden;">
+          <div style="height:100%;width:${proPct}%;background:#bbf7d0;"></div>
+        </div>
+        ${proposal.comments.length > 0 ? `<div style="margin-top:12px;"><strong>${proposal.comments.length} comment${proposal.comments.length !== 1 ? "s" : ""}</strong>${commentsHtml}</div>` : ""}
+      </div>`;
+  }
+
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>${escapeHtml(project.title)} - Report</title>
+  <style>
+    body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;max-width:800px;margin:0 auto;padding:40px 20px;color:#111;line-height:1.5;}
+    @media print{body{padding:20px;}}
+  </style>
+</head>
+<body>
+  <h1>${escapeHtml(project.title)}</h1>
+  <p style="color:#666;">
+    Status: <strong>${project.status}</strong> &middot;
+    Deadline: <strong>${formatDate(project.deadline)}</strong> &middot;
+    Created: <strong>${formatDate(project.createdAt)}</strong>
+  </p>
+  ${project.description ? `<p>${escapeHtml(project.description)}</p>` : ""}
+  <div style="display:flex;gap:24px;margin:16px 0;padding:12px;background:#f9fafb;border-radius:8px;">
+    <div><strong>${project.proposals.length}</strong> proposals</div>
+    <div><strong>${totalVotes}</strong> votes</div>
+    <div><strong>${totalComments}</strong> comments</div>
+  </div>
+  <h2>Proposals</h2>
+  ${proposalsHtml || "<p>No proposals yet.</p>"}
+  <footer style="margin-top:40px;padding-top:16px;border-top:1px solid #e0e0e0;color:#999;font-size:12px;">
+    Generated by Ideate on ${new Date().toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })}
+  </footer>
+</body>
+</html>`;
+}
+
+function formatDate(date: Date | null): string {
+  if (!date) return "N/A";
+  return new Date(date).toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+  });
+}
+
+function escapeCsvField(field: string): string {
+  const str = field.replace(/\r?\n/g, " ");
+  if (str.includes(",") || str.includes('"') || str.includes("\n")) {
+    return `"${str.replace(/"/g, '""')}"`;
+  }
+  return str;
+}
+
+function escapeHtml(str: string): string {
+  return str
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+}

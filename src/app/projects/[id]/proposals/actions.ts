@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { db } from "@/db";
-import { proposals, votes, comments } from "@/db/schema";
+import { projects, proposals, votes, comments } from "@/db/schema";
 import { requireAuth } from "@/lib/auth";
 import { hasPermission, canManageResource } from "@/lib/rbac";
 import type { Role } from "@/lib/rbac";
@@ -12,6 +12,21 @@ import { emitVoteChange } from "@/lib/vote-events";
 import { eq, and, sql } from "drizzle-orm";
 import { randomUUID } from "crypto";
 import { logAudit } from "@/lib/audit";
+import { notifyVote, notifyComment } from "@/lib/notifications";
+
+/**
+ * Check if a project's deadline has passed
+ */
+async function isDeadlinePassed(projectId: string): Promise<boolean> {
+  const project = await db
+    .select({ deadline: projects.deadline })
+    .from(projects)
+    .where(eq(projects.id, projectId))
+    .limit(1);
+
+  if (!project[0]?.deadline) return false;
+  return new Date(project[0].deadline).getTime() < Date.now();
+}
 
 /**
  * Compute upvotes/downvotes for a proposal and emit SSE event
@@ -188,6 +203,10 @@ export async function castVote(
       return { error: "You don't have permission to vote" };
     }
 
+    if (await isDeadlinePassed(projectId)) {
+      return { error: "Voting is closed — the project deadline has passed" };
+    }
+
     await db
       .insert(votes)
       .values({
@@ -209,6 +228,7 @@ export async function castVote(
     });
 
     await emitVoteUpdate(proposalId, projectId);
+    notifyVote(proposalId, projectId, user.id, value);
     revalidatePath(`/projects/${projectId}`);
     return { success: true };
   } catch (error) {
@@ -228,6 +248,10 @@ export async function removeVote(proposalId: string, projectId: string) {
 
     if (!hasPermission(user.role as Role, "vote:cast")) {
       return { error: "You don't have permission to vote" };
+    }
+
+    if (await isDeadlinePassed(projectId)) {
+      return { error: "Voting is closed — the project deadline has passed" };
     }
 
     await db
@@ -269,6 +293,11 @@ export async function addComment(
       return { error: "You don't have permission to comment" };
     }
 
+    const commentProjectId = formData.get("projectId") as string;
+    if (commentProjectId && (await isDeadlinePassed(commentProjectId))) {
+      return { error: "Comments are closed — the project deadline has passed" };
+    }
+
     const data = {
       proposalId: formData.get("proposalId") as string,
       content: formData.get("content") as string,
@@ -298,6 +327,7 @@ export async function addComment(
       entityId: proposalId,
     });
 
+    notifyComment(proposalId, projectId || "", user.id, content);
     if (projectId) {
       revalidatePath(`/projects/${projectId}`);
     }
