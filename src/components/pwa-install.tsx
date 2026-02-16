@@ -10,14 +10,19 @@ interface BeforeInstallPromptEvent extends Event {
   userChoice: Promise<{ outcome: "accepted" | "dismissed" }>;
 }
 
+const DISMISSED_KEY = "pwa-install-dismissed";
+
 /**
- * PWA install prompt banner
+ * PWA install prompt banner — shows once per session
  */
 export function PwaInstall() {
   const { t } = useLocale();
   const [deferredPrompt, setDeferredPrompt] =
     useState<BeforeInstallPromptEvent | null>(null);
-  const [dismissed, setDismissed] = useState(false);
+  const [dismissed, setDismissed] = useState(() => {
+    if (typeof window === "undefined") return true;
+    return sessionStorage.getItem(DISMISSED_KEY) === "1";
+  });
 
   useEffect(() => {
     const handler = (e: Event) => {
@@ -29,6 +34,11 @@ export function PwaInstall() {
     return () => window.removeEventListener("beforeinstallprompt", handler);
   }, []);
 
+  function dismiss() {
+    sessionStorage.setItem(DISMISSED_KEY, "1");
+    setDismissed(true);
+  }
+
   async function handleInstall() {
     if (!deferredPrompt) return;
     await deferredPrompt.prompt();
@@ -36,6 +46,7 @@ export function PwaInstall() {
     if (outcome === "accepted") {
       setDeferredPrompt(null);
     }
+    dismiss();
   }
 
   if (!deferredPrompt || dismissed) return null;
@@ -56,7 +67,7 @@ export function PwaInstall() {
         variant="ghost"
         size="icon"
         className="h-6 w-6"
-        onClick={() => setDismissed(true)}
+        onClick={dismiss}
       >
         <X className="h-3 w-3" />
       </Button>
