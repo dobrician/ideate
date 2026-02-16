@@ -29,8 +29,10 @@ export default async function DashboardPage() {
   if (!user) redirect("/auth/login");
   const { t } = await getTranslations();
 
-  const { userProjects, userProposals, userVoteCount, recentVotes, recentActivity, stats } =
-    await getDashboardData(user.id);
+  const {
+    userProjects, userProposals, userVoteCount, recentVotes, recentActivity,
+    userStats, platformStats,
+  } = await getDashboardData(user.id);
 
   return (
     <div className="container mx-auto max-w-6xl px-4 py-8">
@@ -41,26 +43,30 @@ export default async function DashboardPage() {
         </p>
       </div>
 
-      {/* Stats cards */}
-      <div className="mb-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4" role="region" aria-label="Platform statistics">
+      {/* Stats cards — personal counts with platform context */}
+      <div className="mb-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4" role="region" aria-label="Your statistics">
         <StatCard
           title={t("dashboard.stats.projects")}
-          value={Number(stats?.projectCount ?? 0)}
+          value={userStats.projectCount}
+          description={t("dashboard.stats.ofTotal", { total: platformStats.projectCount })}
           icon={<FolderOpen className="h-4 w-4 text-muted-foreground" />}
         />
         <StatCard
           title={t("dashboard.stats.proposals")}
-          value={Number(stats?.proposalCount ?? 0)}
+          value={userStats.proposalCount}
+          description={t("dashboard.stats.ofTotal", { total: platformStats.proposalCount })}
           icon={<Lightbulb className="h-4 w-4 text-muted-foreground" />}
         />
         <StatCard
           title={t("dashboard.stats.votes")}
-          value={Number(stats?.voteCount ?? 0)}
+          value={userStats.voteCount}
+          description={t("dashboard.stats.ofTotal", { total: platformStats.voteCount })}
           icon={<ThumbsUp className="h-4 w-4 text-muted-foreground" />}
         />
         <StatCard
           title={t("dashboard.stats.comments")}
-          value={Number(stats?.commentCount ?? 0)}
+          value={userStats.commentCount}
+          description={t("dashboard.stats.ofTotal", { total: platformStats.commentCount })}
           icon={<MessageSquare className="h-4 w-4 text-muted-foreground" />}
         />
       </div>

@@ -10,6 +10,7 @@ export async function getDashboardData(userId: string) {
     userProjects,
     userProposals,
     userVoteCount,
+    userCommentCount,
     recentVotes,
     recentActivity,
     totalStats,
@@ -38,6 +39,10 @@ export async function getDashboardData(userId: string) {
       .from(votes)
       .where(eq(votes.userId, userId)),
     db
+      .select({ total: count() })
+      .from(comments)
+      .where(eq(comments.userId, userId)),
+    db
       .select({
         proposalId: votes.proposalId,
         value: votes.value,
@@ -61,13 +66,26 @@ export async function getDashboardData(userId: string) {
       .from(sql`(SELECT 1)`),
   ]);
 
+  const platformStats = totalStats[0];
   return {
     userProjects,
     userProposals,
     userVoteCount: userVoteCount[0]?.total ?? 0,
+    userCommentCount: userCommentCount[0]?.total ?? 0,
     recentVotes,
     recentActivity,
-    stats: totalStats[0],
+    userStats: {
+      projectCount: userProjects.length,
+      proposalCount: userProposals.length,
+      voteCount: userVoteCount[0]?.total ?? 0,
+      commentCount: userCommentCount[0]?.total ?? 0,
+    },
+    platformStats: {
+      projectCount: Number(platformStats?.projectCount ?? 0),
+      proposalCount: Number(platformStats?.proposalCount ?? 0),
+      voteCount: Number(platformStats?.voteCount ?? 0),
+      commentCount: Number(platformStats?.commentCount ?? 0),
+    },
   };
 }
 

@@ -13,10 +13,12 @@ export function StatCard({
   title,
   value,
   icon,
+  description,
 }: {
   title: string;
   value: number;
   icon: React.ReactNode;
+  description?: string;
 }) {
   return (
     <Card>
@@ -28,6 +30,9 @@ export function StatCard({
         <p className="text-2xl font-bold" aria-label={`${title}: ${value}`}>
           {value.toLocaleString()}
         </p>
+        {description && (
+          <p className="text-xs text-muted-foreground">{description}</p>
+        )}
       </CardContent>
     </Card>
   );
