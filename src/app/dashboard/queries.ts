@@ -1,6 +1,6 @@
 import { db } from "@/db";
 import { projects, proposals, votes, comments, users } from "@/db/schema";
-import { eq, desc, sql, count, or, inArray } from "drizzle-orm";
+import { eq, desc, asc, sql, count, or, inArray } from "drizzle-orm";
 
 /**
  * Fetch all data needed for the dashboard page in parallel.
@@ -19,7 +19,7 @@ export async function getDashboardData(userId: string) {
       .select()
       .from(projects)
       .where(eq(projects.userId, userId))
-      .orderBy(desc(projects.createdAt))
+      .orderBy(asc(projects.deadline), desc(projects.createdAt))
       .limit(5),
     db
       .select({

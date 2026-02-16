@@ -154,6 +154,8 @@ export const en: Record<string, string> = {
   "dashboard.quickActions": "Quick Actions",
   "dashboard.newProject": "New Project",
   "dashboard.browseProjects": "Browse Projects",
+  "dashboard.deadlineOverdue": "Overdue",
+  "dashboard.deadlineDaysLeft": "{count}d left",
 
   // Profile
   "profile.title": "Profile",

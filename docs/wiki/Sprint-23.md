@@ -12,7 +12,7 @@ Based on unified analysis from Claude + Codex (see docs/sprint23-unified-plan.md
 
 **Layout redesign:**
 - [x] Goal 4: Add Quick Actions bar
-- [ ] Goal 5: Add deadline badges and urgency sorting to "Your Projects"
+- [x] Goal 5: Add deadline badges and urgency sorting to "Your Projects"
 - [ ] Goal 6: Enrich "Your Projects" cards with per-project stats
 
 **Mobile optimization:**

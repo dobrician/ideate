@@ -164,6 +164,8 @@ export const ro: Record<string, string> = {
   "dashboard.quickActions": "Acțiuni Rapide",
   "dashboard.newProject": "Proiect Nou",
   "dashboard.browseProjects": "Răsfoiește Proiecte",
+  "dashboard.deadlineOverdue": "Expirat",
+  "dashboard.deadlineDaysLeft": "{count}z rămase",
 
   // Profile
   "profile.title": "Profil",

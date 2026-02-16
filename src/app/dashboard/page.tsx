@@ -21,7 +21,7 @@ import {
 } from "lucide-react";
 import { StatCard, formatRelativeTime } from "@/components/stat-card";
 import { getTranslations } from "@/lib/i18n-server";
-import { statusBadgeClass, statusLabel } from "@/lib/status-utils";
+import { statusBadgeClass, statusLabel, deadlineBadge } from "@/lib/status-utils";
 import { getDashboardData } from "./queries";
 
 /**
@@ -128,9 +128,15 @@ export default async function DashboardPage() {
                       <span className="truncate text-sm font-medium group-hover:underline">
                         {p.title}
                       </span>
-                      <Badge className={`shrink-0 ${statusBadgeClass(p.status)}`}>
-                        {statusLabel(p.status, t)}
-                      </Badge>
+                      <span className="flex shrink-0 gap-1.5">
+                        {(() => {
+                          const dl = deadlineBadge(p.deadline, t);
+                          return dl ? <Badge className={dl.className}>{dl.label}</Badge> : null;
+                        })()}
+                        <Badge className={statusBadgeClass(p.status)}>
+                          {statusLabel(p.status, t)}
+                        </Badge>
+                      </span>
                     </Link>
                   </li>
                 ))}

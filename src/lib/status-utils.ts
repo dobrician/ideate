@@ -32,3 +32,33 @@ export function statusLabel(status: string, t: TranslateFn): string {
       return status;
   }
 }
+
+/**
+ * Returns { label, className } for a deadline badge.
+ * green (>7d), yellow (1-7d), red (overdue), grey (no deadline).
+ */
+export function deadlineBadge(
+  deadline: Date | null,
+  t: TranslateFn,
+): { label: string; className: string } | null {
+  if (!deadline) return null;
+  const now = Date.now();
+  const diff = deadline.getTime() - now;
+  const days = Math.ceil(diff / 86_400_000);
+  if (days < 0) {
+    return {
+      label: t("dashboard.deadlineOverdue"),
+      className: "border-transparent bg-red-100 text-red-800 dark:bg-red-900/50 dark:text-red-300",
+    };
+  }
+  if (days <= 7) {
+    return {
+      label: t("dashboard.deadlineDaysLeft", { count: days }),
+      className: "border-transparent bg-amber-100 text-amber-800 dark:bg-amber-900/50 dark:text-amber-300",
+    };
+  }
+  return {
+    label: t("dashboard.deadlineDaysLeft", { count: days }),
+    className: "border-transparent bg-emerald-100 text-emerald-800 dark:bg-emerald-900/50 dark:text-emerald-300",
+  };
+}
