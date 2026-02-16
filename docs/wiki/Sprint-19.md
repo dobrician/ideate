@@ -4,7 +4,7 @@
 ## Goals
 
 **Foundation:**
-- [ ] Project summary generation library — src/lib/project-summary.ts with ideator prompts
+- [x] Project summary generation library — src/lib/project-summary.ts with ideator prompts
 - [ ] Markdown renderer component — src/components/markdown-renderer.tsx
 - [ ] AI suggestions API — POST /api/proposals/suggest with brainstorm prompt
 - [ ] i18n keys for all AI UI strings (EN + RO, ~20 keys)
