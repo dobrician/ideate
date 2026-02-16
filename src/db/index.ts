@@ -9,15 +9,30 @@ const DB_PATH = process.env.DATABASE_URL ?? resolve("data/ideate.db");
 
 const sqlite = new Database(DB_PATH);
 sqlite.pragma("journal_mode = WAL");
-sqlite.pragma("busy_timeout = 5000");
+sqlite.pragma("busy_timeout = 15000");
 sqlite.pragma("foreign_keys = ON");
 
 interface JournalEntry { idx: number; tag: string }
 interface Journal { entries: JournalEntry[] }
 
-// Auto-apply pending migrations from drizzle journal
+// Errors that are safe to ignore when re-running migrations
+// (e.g., partial application left tables/columns already created)
+const IDEMPOTENT_ERRORS = [
+  "duplicate column name",
+  "already exists",
+  "table comments_new already exists",
+];
+
+function isIdempotentError(err: unknown): boolean {
+  const msg = err instanceof Error ? err.message : String(err);
+  return IDEMPOTENT_ERRORS.some((e) => msg.toLowerCase().includes(e));
+}
+
+// Auto-apply pending migrations from drizzle journal.
 // Uses IMMEDIATE transaction to prevent race conditions when multiple
-// Next.js build workers import this module simultaneously.
+// Next.js workers import this module simultaneously.
+// Tolerates idempotent errors (duplicate column, table exists) to handle
+// partially-applied migrations safely.
 function applyMigrations(): void {
   sqlite.exec(
     "CREATE TABLE IF NOT EXISTS _migrations (name TEXT PRIMARY KEY, applied_at INTEGER DEFAULT (unixepoch()))"
@@ -51,7 +66,16 @@ function applyMigrations(): void {
         .filter(Boolean);
 
       for (const stmt of statements) {
-        sqlite.exec(stmt);
+        try {
+          sqlite.exec(stmt);
+        } catch (stmtErr) {
+          if (isIdempotentError(stmtErr)) {
+            logger.info({ migration: file, error: String(stmtErr) },
+              "Skipped idempotent statement");
+            continue;
+          }
+          throw stmtErr;
+        }
       }
 
       sqlite.prepare("INSERT INTO _migrations (name) VALUES (?)").run(file);
@@ -64,11 +88,23 @@ function applyMigrations(): void {
   }
 }
 
-try {
-  applyMigrations();
-} catch (error) {
-  logger.fatal({ err: error }, "Migration failed — aborting startup");
-  process.exit(1);
+const MAX_RETRIES = 3;
+for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
+  try {
+    applyMigrations();
+    break;
+  } catch (error) {
+    const isBusy = error instanceof Error &&
+      error.message.includes("SQLITE_BUSY");
+    if (isBusy && attempt < MAX_RETRIES) {
+      logger.info({ attempt }, "Migration locked, retrying...");
+      Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0,
+        1000 * attempt);
+      continue;
+    }
+    logger.fatal({ err: error }, "Migration failed — aborting startup");
+    process.exit(1);
+  }
 }
 
 export const db = drizzle(sqlite, { schema });

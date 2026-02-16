@@ -1,4 +1,4 @@
-CREATE TABLE `comments` (
+CREATE TABLE IF NOT EXISTS `comments` (
 	`id` text PRIMARY KEY NOT NULL,
 	`proposal_id` text NOT NULL,
 	`parent_id` text,
@@ -10,7 +10,7 @@ CREATE TABLE `comments` (
 	FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON UPDATE no action ON DELETE set null
 );
 --> statement-breakpoint
-CREATE TABLE `projects` (
+CREATE TABLE IF NOT EXISTS `projects` (
 	`id` text PRIMARY KEY NOT NULL,
 	`title` text NOT NULL,
 	`description` text,
@@ -23,7 +23,7 @@ CREATE TABLE `projects` (
 	FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON UPDATE no action ON DELETE set null
 );
 --> statement-breakpoint
-CREATE TABLE `proposals` (
+CREATE TABLE IF NOT EXISTS `proposals` (
 	`id` text PRIMARY KEY NOT NULL,
 	`project_id` text NOT NULL,
 	`title` text NOT NULL,
@@ -37,7 +37,7 @@ CREATE TABLE `proposals` (
 	FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON UPDATE no action ON DELETE set null
 );
 --> statement-breakpoint
-CREATE TABLE `users` (
+CREATE TABLE IF NOT EXISTS `users` (
 	`id` text PRIMARY KEY NOT NULL,
 	`email` text NOT NULL,
 	`first_name` text,
@@ -48,8 +48,8 @@ CREATE TABLE `users` (
 	`updated_at` integer DEFAULT (unixepoch())
 );
 --> statement-breakpoint
-CREATE UNIQUE INDEX `users_email_unique` ON `users` (`email`);--> statement-breakpoint
-CREATE TABLE `votes` (
+CREATE UNIQUE INDEX IF NOT EXISTS `users_email_unique` ON `users` (`email`);--> statement-breakpoint
+CREATE TABLE IF NOT EXISTS `votes` (
 	`proposal_id` text NOT NULL,
 	`user_id` text NOT NULL,
 	`value` integer NOT NULL,

@@ -26,9 +26,17 @@ vi.mock("fs", () => ({
   readFileSync: (...args: unknown[]) => mockReadFileSync(...args),
 }));
 
+const mockLogInfo = vi.fn();
+const mockLogFatal = vi.fn();
+
 vi.mock("@/lib/logger", () => ({
-  logger: { info: vi.fn(), fatal: vi.fn(), error: vi.fn() },
+  logger: { info: mockLogInfo, fatal: mockLogFatal, error: vi.fn() },
 }));
+
+// Prevent process.exit from actually killing the test runner
+const mockExit = vi.spyOn(process, "exit").mockImplementation(() => {
+  throw new Error("process.exit called");
+});
 
 describe("db/index migration logic", () => {
   beforeEach(() => {
@@ -38,6 +46,9 @@ describe("db/index migration logic", () => {
     mockPragma.mockReset();
     mockExistsSync.mockReset();
     mockReadFileSync.mockReset();
+    mockLogInfo.mockReset();
+    mockLogFatal.mockReset();
+    mockExit.mockClear();
   });
 
   it("should skip migrations when journal file does not exist", async () => {
@@ -111,5 +122,85 @@ describe("db/index migration logic", () => {
     expect(mockExec.mock.calls[1][0]).toBe("BEGIN IMMEDIATE");
     expect(mockExec.mock.calls[4][0]).toBe("COMMIT");
     expect(mockRun).toHaveBeenCalledWith("0001_create.sql");
+  });
+
+  it("should skip duplicate column errors (idempotent)", async () => {
+    mockExistsSync.mockReturnValue(true);
+    mockReadFileSync.mockImplementation((path: string) => {
+      if (path.includes("_journal.json")) {
+        return JSON.stringify({ entries: [{ idx: 0, tag: "0002_alter" }] });
+      }
+      return "ALTER TABLE users ADD COLUMN foo TEXT;";
+    });
+    const mockRun = vi.fn();
+    mockPrepare.mockReturnValue({
+      get: vi.fn().mockReturnValue(null),
+      run: mockRun,
+    });
+    // First exec calls succeed, ALTER TABLE throws duplicate column
+    let execCallCount = 0;
+    mockExec.mockImplementation((sql: string) => {
+      execCallCount++;
+      if (sql.includes("ALTER TABLE")) {
+        throw new Error("duplicate column name: foo");
+      }
+    });
+
+    await import("@/db/index");
+
+    // Migration was recorded despite the skipped statement
+    expect(mockRun).toHaveBeenCalledWith("0002_alter.sql");
+    expect(mockLogInfo).toHaveBeenCalledWith(
+      expect.objectContaining({ migration: "0002_alter.sql" }),
+      "Skipped idempotent statement"
+    );
+  });
+
+  it("should retry on SQLITE_BUSY errors", async () => {
+    mockExistsSync.mockReturnValue(true);
+    mockReadFileSync.mockReturnValue(
+      JSON.stringify({ entries: [{ idx: 0, tag: "0000_init" }] })
+    );
+    mockPrepare.mockReturnValue({
+      get: vi.fn().mockReturnValue({ 1: 1 }),
+      run: vi.fn(),
+    });
+
+    let callCount = 0;
+    mockExec.mockImplementation(() => {
+      callCount++;
+      // Fail on first attempt's BEGIN IMMEDIATE, succeed on second
+      if (callCount === 2) {
+        throw new Error("SQLITE_BUSY: database is locked");
+      }
+    });
+
+    await import("@/db/index");
+
+    expect(mockLogInfo).toHaveBeenCalledWith(
+      expect.objectContaining({ attempt: 1 }),
+      "Migration locked, retrying..."
+    );
+  });
+
+  it("should abort after max retries on persistent SQLITE_BUSY", async () => {
+    mockExistsSync.mockReturnValue(true);
+    mockReadFileSync.mockReturnValue(
+      JSON.stringify({ entries: [{ idx: 0, tag: "0000_init" }] })
+    );
+    mockPrepare.mockReturnValue({
+      get: vi.fn().mockReturnValue(null),
+      run: vi.fn(),
+    });
+    // Always throw SQLITE_BUSY on BEGIN IMMEDIATE
+    mockExec.mockImplementation((sql: string) => {
+      if (sql === "BEGIN IMMEDIATE") {
+        throw new Error("SQLITE_BUSY: database is locked");
+      }
+      if (sql === "ROLLBACK") return;
+    });
+
+    await expect(import("@/db/index")).rejects.toThrow("process.exit called");
+    expect(mockLogFatal).toHaveBeenCalled();
   });
 });

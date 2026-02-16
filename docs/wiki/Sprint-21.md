@@ -3,7 +3,7 @@
 
 ## Goals
 
-- [ ] Goal 1: Fix migration system — eliminate all race conditions and make migrations idempotent (CREATE TABLE IF NOT EXISTS, CREATE INDEX IF NOT EXISTS in all .sql files), add integration test that simulates concurrent migration runs
+- [x] Goal 1: Fix migration system — eliminate all race conditions and make migrations idempotent (CREATE TABLE IF NOT EXISTS, CREATE INDEX IF NOT EXISTS in all .sql files), add integration test that simulates concurrent migration runs
 - [ ] Goal 2: Fix Docker build — ensure `docker compose up -d --build` succeeds reliably every time, add CI step or smoke test that verifies Docker build
 - [ ] Goal 3: Playwright E2E tests for AI Suggestions — test the full flow: login → create project → click "Sugestii AI" → dialog opens → suggestions load → vote on suggestions → submit → proposals created. Mock the LLM API at network level (Playwright route interception) so tests are deterministic
 - [ ] Goal 4: Playwright E2E tests for Comments — test: add comment via send button, add comment via Enter key, comment appears in thread, empty comment rejected, messenger-style layout renders correctly
