@@ -2,7 +2,7 @@ import { type Page, type APIRequestContext } from "@playwright/test";
 
 const E2E_TEST_SECRET = process.env.E2E_TEST_SECRET || "e2e-test-secret";
 
-interface SeedData {
+export interface SeedData {
   email: string;
   password: string;
   userId: string;
