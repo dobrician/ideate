@@ -19,7 +19,7 @@
 
 **Infrastructure:**
 - [x] Add structured error logging with pino (JSON, timestamps, request IDs)
-- [x] Project-level comments/discussions spike — schema + UI design doc (#19)
+- [ ] Project-level comments/discussions spike — schema + UI design doc (#19)
 
 **Hot Fix:**
 - [ ] Proposal bar chart backgrounds must scale proportionally to votes, not full width (#31)
