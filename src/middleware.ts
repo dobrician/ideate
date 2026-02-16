@@ -74,14 +74,19 @@ function addSecurityHeaders(response: NextResponse): NextResponse {
 }
 
 /**
- * Auth middleware with security headers.
- * Redirects unauthenticated users to /auth/login for protected routes.
+ * Auth middleware with security headers and locale forwarding.
+ * Forwards locale cookie as a header so Next.js invalidates
+ * its client router cache when locale changes.
  */
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
+  const locale = request.cookies.get("locale")?.value || "en";
 
   if (isPublicPath(pathname)) {
-    const response = NextResponse.next();
+    const response = NextResponse.next({
+      request: { headers: new Headers(request.headers) },
+    });
+    response.headers.set("x-locale", locale);
     return addSecurityHeaders(response);
   }
 
@@ -94,7 +99,10 @@ export function middleware(request: NextRequest) {
     return addSecurityHeaders(response);
   }
 
-  const response = NextResponse.next();
+  const response = NextResponse.next({
+    request: { headers: new Headers(request.headers) },
+  });
+  response.headers.set("x-locale", locale);
   return addSecurityHeaders(response);
 }
 

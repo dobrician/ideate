@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useSyncExternalStore } from "react";
 import { t as translate, type Locale } from "./i18n";
 
 function getLocaleFromCookie(): Locale {
@@ -10,12 +10,23 @@ function getLocaleFromCookie(): Locale {
   return val === "ro" ? "ro" : "en";
 }
 
+function subscribe(cb: () => void) {
+  window.addEventListener("storage", cb);
+  window.addEventListener("languagechange", cb);
+  return () => {
+    window.removeEventListener("storage", cb);
+    window.removeEventListener("languagechange", cb);
+  };
+}
+
+const serverLocale = (): Locale => "en";
+
 /**
  * Client-side hook for translations.
- * Reads locale from cookie.
+ * Reads locale from cookie reactively via useSyncExternalStore.
  */
 export function useLocale() {
-  const locale = getLocaleFromCookie();
+  const locale = useSyncExternalStore(subscribe, getLocaleFromCookie, serverLocale);
 
   const t = useMemo(
     () =>
