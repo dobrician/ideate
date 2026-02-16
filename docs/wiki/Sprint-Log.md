@@ -532,7 +532,7 @@
 - [x] Dark/light mode consistency check
 - [x] Mobile responsive fixes (320px+)
 - [x] Login/register/auth pages visual polish
-- [ ] Dashboard layout improvements
+- [x] Dashboard layout improvements
 - [ ] Consistent button styles and spacing across all pages
 
 ### Constraints
