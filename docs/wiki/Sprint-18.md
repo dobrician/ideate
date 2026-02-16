@@ -4,7 +4,7 @@
 ## Goals
 
 **Vote Bar Polish:**
-- [ ] Fix background padding — extend to full card width, edge-to-edge (#37)
+- [x] Fix background padding — extend to full card width, edge-to-edge (#37)
 - [ ] Remove solid vote bars and percentage labels — keep only title background + vote count icons (#38)
 
 **Chat/Comments Redesign (#39):**
