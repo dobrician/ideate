@@ -1,0 +1,162 @@
+// @vitest-environment jsdom
+import { describe, it, expect, vi, beforeEach } from "vitest";
+import { render, screen } from "@testing-library/react";
+import "@testing-library/jest-dom/vitest";
+
+// ── Mocks ──────────────────────────────────────────────────────
+
+vi.mock("@/lib/use-locale", () => ({
+  useLocale: () => ({
+    locale: "en",
+    t: (key: string) => {
+      const map: Record<string, string> = {
+        "proposals.noProposals": "No proposals yet. Be the first to submit one!",
+        "proposals.by": "by",
+        "proposals.delete": "Delete",
+        "proposals.deleteConfirm": "Delete this proposal?",
+        "proposals.deleted": "Proposal deleted",
+        "proposals.showSummary": "Show summary",
+        "proposals.showFull": "Show full description",
+        "vote.pro": "Pro",
+        "vote.contra": "Contra",
+        "vote.remove": "Remove vote",
+        "vote.noVotes": "No votes yet",
+        "common.cancel": "Cancel",
+        "common.delete": "Delete",
+        "deleteProject.deleting": "Deleting...",
+        "comments.open": "Open discussion",
+        "comments.title": "Discussion",
+        "comments.discussionTitle": "Discussion: {title}",
+        "comments.placeholder": "Add a comment...",
+        "comments.noComments": "No comments yet.",
+        "comments.submit": "Post Comment",
+        "comments.posting": "Posting...",
+        "comments.reply": "Reply",
+        "comments.replyPlaceholder": "Write a reply...",
+        "comments.replyPosted": "Reply posted",
+      };
+      return map[key] ?? key;
+    },
+  }),
+}));
+
+vi.mock("@/lib/use-vote-stream", () => ({
+  useVoteStream: () => new Map(),
+}));
+
+vi.mock("@/app/projects/[id]/proposals/actions", () => ({
+  deleteProposal: vi.fn(async () => ({ success: true })),
+  castVote: vi.fn(async () => ({ success: true })),
+  removeVote: vi.fn(async () => ({ success: true })),
+}));
+
+vi.mock("@/app/projects/[id]/proposals/comment-actions", () => ({
+  addComment: vi.fn(async () => ({ success: true })),
+}));
+
+vi.mock("@/lib/csrf-client", () => ({
+  getCsrfTokenClient: () => "mock-csrf",
+}));
+
+vi.mock("sonner", () => ({ toast: { success: vi.fn(), error: vi.fn() } }));
+
+// ── Import after mocks ─────────────────────────────────────────
+
+import { ProposalList } from "@/components/proposal-list";
+
+function makeProposal(overrides: Partial<{
+  id: string;
+  title: string;
+  description: string | null;
+  summary: string | null;
+  userId: string | null;
+  createdAt: Date | null;
+  upvotes: number;
+  downvotes: number;
+  userVote: number | null;
+  commentCount: number;
+  comments: [];
+  authorName: string;
+}> = {}) {
+  return {
+    id: overrides.id ?? "p1",
+    title: overrides.title ?? "Proposal A",
+    description: overrides.description ?? "Description A",
+    summary: overrides.summary ?? null,
+    userId: overrides.userId ?? "u1",
+    createdAt: overrides.createdAt ?? new Date("2025-01-01"),
+    upvotes: overrides.upvotes ?? 0,
+    downvotes: overrides.downvotes ?? 0,
+    userVote: overrides.userVote ?? null,
+    commentCount: overrides.commentCount ?? 0,
+    comments: overrides.comments ?? [],
+    authorName: overrides.authorName ?? "Test Author",
+  };
+}
+
+// ── Tests ───────────────────────────────────────────────────────
+
+describe("ProposalList", () => {
+  beforeEach(() => vi.clearAllMocks());
+
+  it("renders empty state when no proposals", () => {
+    render(
+      <ProposalList proposals={[]} projectId="proj1" currentUserId="u1" isAdmin={false} />
+    );
+    expect(screen.getByText(/No proposals yet/)).toBeInTheDocument();
+  });
+
+  it("renders proposal titles", () => {
+    const proposals = [
+      makeProposal({ id: "p1", title: "Feature X" }),
+      makeProposal({ id: "p2", title: "Feature Y" }),
+    ];
+    render(
+      <ProposalList proposals={proposals} projectId="proj1" currentUserId="u1" isAdmin={false} />
+    );
+    expect(screen.getByText("Feature X")).toBeInTheDocument();
+    expect(screen.getByText("Feature Y")).toBeInTheDocument();
+  });
+
+  it("sorts proposals by net votes (highest first)", () => {
+    const proposals = [
+      makeProposal({ id: "low", title: "Low Priority", upvotes: 1, downvotes: 3 }),
+      makeProposal({ id: "high", title: "High Priority", upvotes: 10, downvotes: 0 }),
+      makeProposal({ id: "mid", title: "Mid Priority", upvotes: 5, downvotes: 2 }),
+    ];
+    render(
+      <ProposalList proposals={proposals} projectId="proj1" currentUserId="u1" isAdmin={false} />
+    );
+    const titles = screen.getAllByText(/Priority/).map((el) => el.textContent);
+    expect(titles).toEqual(["High Priority", "Mid Priority", "Low Priority"]);
+  });
+
+  it("scales bar chart width proportionally to max upvotes", () => {
+    const proposals = [
+      makeProposal({ id: "a", title: "A", upvotes: 10, downvotes: 0 }),
+      makeProposal({ id: "b", title: "B", upvotes: 5, downvotes: 0 }),
+      makeProposal({ id: "c", title: "C", upvotes: 0, downvotes: 3 }),
+    ];
+    const { container } = render(
+      <ProposalList proposals={proposals} projectId="proj1" currentUserId="u1" isAdmin={false} />
+    );
+    // The bar chart overlay divs have aria-hidden="true" and use inline width style
+    const bars = container.querySelectorAll('[aria-hidden="true"][style]');
+    const widths = Array.from(bars).map((el) => (el as HTMLElement).style.width);
+    // max upvotes = 10: A=100%, B=50%, C has 0 upvotes so no bar
+    expect(widths).toContain("100%");
+    expect(widths).toContain("50%");
+    // No bar for 0 upvotes
+    expect(widths).not.toContain("0%");
+  });
+
+  it("shows author name for each proposal", () => {
+    const proposals = [
+      makeProposal({ id: "p1", title: "X", authorName: "Alice" }),
+    ];
+    const { container } = render(
+      <ProposalList proposals={proposals} projectId="proj1" currentUserId="u1" isAdmin={false} />
+    );
+    expect(container.textContent).toContain("Alice");
+  });
+});

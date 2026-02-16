@@ -9,7 +9,7 @@
 - [x] Project comments UI: shared comment-thread.tsx, ProjectComments component, Discussion section on project page (#19)
 
 **Testing & Quality:**
-- [ ] Component tests for ProposalList and VoteButtons (bar chart width, vote sorting, empty state)
+- [x] Component tests for ProposalList and VoteButtons (bar chart width, vote sorting, empty state)
 - [ ] E2E test for CSRF rejection (submit without token → verify rejection)
 
 **Cleanup & Infrastructure:**
