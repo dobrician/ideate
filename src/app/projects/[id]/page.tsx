@@ -29,6 +29,7 @@ import { getTranslations } from "@/lib/i18n-server";
 import { statusBadgeClass, statusLabel } from "@/lib/status-utils";
 import { RegenerateSummaryButton } from "@/components/regenerate-summary-button";
 import { SuggestProposalsButton } from "@/components/suggest-proposals";
+import { MarkdownRenderer } from "@/components/markdown-renderer";
 
 interface ProjectPageProps {
   params: Promise<{ id: string }>;
@@ -160,11 +161,7 @@ export default async function ProjectPage({ params, searchParams }: ProjectPageP
           {projectData.description && (
             <div>
               <h2 className="mb-2 text-lg font-semibold">{t("projects.description")}</h2>
-              <div className="prose dark:prose-invert max-w-none">
-                <p className="whitespace-pre-wrap text-muted-foreground">
-                  {projectData.description}
-                </p>
-              </div>
+              <MarkdownRenderer content={projectData.description} className="text-muted-foreground" />
             </div>
           )}
 

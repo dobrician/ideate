@@ -6,7 +6,7 @@
 Based on unified analysis from Claude + Codex (see docs/sprint24-unified-plan.md).
 
 **Markdown rendering:**
-- [ ] Goal 1: Markdown rendering for project descriptions
+- [x] Goal 1: Markdown rendering for project descriptions
 - [ ] Goal 2: Markdown rendering for proposal content
 - [x] Goal 3: Add simple mode to MarkdownRenderer
 - [ ] Goal 4: Markdown rendering for comments (simple mode)
