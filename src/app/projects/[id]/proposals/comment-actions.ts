@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { db } from "@/db";
-import { projects, comments } from "@/db/schema";
+import { projects, proposals, comments } from "@/db/schema";
 import { requireAuth } from "@/lib/auth";
 import { hasPermission } from "@/lib/rbac";
 import type { Role } from "@/lib/rbac";
@@ -59,7 +59,18 @@ export async function addComment(
     const rawProjectId = (formData.get("projectId") as string) || undefined;
     const rawProposalId = (formData.get("proposalId") as string) || undefined;
 
-    if (rawProjectId && (await isDeadlinePassed(rawProjectId))) {
+    // Resolve projectId for deadline check — proposal comments need the parent project
+    let deadlineProjectId = rawProjectId;
+    if (!deadlineProjectId && rawProposalId) {
+      const proposal = await db
+        .select({ projectId: proposals.projectId })
+        .from(proposals)
+        .where(eq(proposals.id, rawProposalId))
+        .limit(1);
+      deadlineProjectId = proposal[0]?.projectId;
+    }
+
+    if (deadlineProjectId && (await isDeadlinePassed(deadlineProjectId))) {
       return { error: "Comments are closed — the project deadline has passed" };
     }
 
@@ -94,7 +105,7 @@ export async function addComment(
       entityId: proposalId || projectId || "",
     });
 
-    const revalidateProjectId = projectId || rawProjectId;
+    const revalidateProjectId = projectId || deadlineProjectId;
     if (proposalId) {
       notifyComment(proposalId, revalidateProjectId || "", user.id, content);
     }

@@ -81,6 +81,11 @@ export async function createProposal(
     }
 
     const { projectId, title, description, initialVote } = result.data;
+
+    if (await isDeadlinePassed(projectId)) {
+      return { error: "Proposals are closed — the project deadline has passed" };
+    }
+
     const summary = await buildProposalSummary(title, description);
     const proposalId = randomUUID();
 

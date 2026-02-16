@@ -191,4 +191,31 @@ describe("addComment", () => {
     const r = await addComment(null, proposalForm());
     expect(r).toEqual({ error: "Failed to post comment" });
   });
+
+  it("rejects proposal comment when project deadline has passed", async () => {
+    const pastDeadline = new Date(Date.now() - 86400000); // yesterday
+    // First select: proposal lookup returns projectId
+    mockSelectLimit.mockResolvedValueOnce([{ projectId: "proj-1" }]);
+    // Second select: project deadline lookup returns past deadline
+    mockSelectLimit.mockResolvedValueOnce([{ deadline: pastDeadline }]);
+
+    const fd = makeFormData({ proposalId: "prop-1", content: "Late comment" });
+    const r = await addComment(null, fd);
+    expect(r).toEqual({
+      error: "Comments are closed — the project deadline has passed",
+    });
+    expect(mockInsertValues).not.toHaveBeenCalled();
+  });
+
+  it("allows proposal comment when project deadline is in the future", async () => {
+    const futureDeadline = new Date(Date.now() + 86400000); // tomorrow
+    // First select: proposal lookup returns projectId
+    mockSelectLimit.mockResolvedValueOnce([{ projectId: "proj-1" }]);
+    // Second select: project deadline lookup returns future deadline
+    mockSelectLimit.mockResolvedValueOnce([{ deadline: futureDeadline }]);
+
+    const fd = makeFormData({ proposalId: "prop-1", content: "Timely comment" });
+    const r = await addComment(null, fd);
+    expect(r).toEqual({ success: true });
+  });
 });

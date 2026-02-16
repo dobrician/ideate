@@ -53,6 +53,7 @@ vi.mock("@/lib/vote-events", () => ({
 }));
 
 const mockInsertValues = vi.fn();
+const mockSelectLimit = vi.fn();
 
 vi.mock("@/db", () => ({
   db: {
@@ -71,7 +72,7 @@ vi.mock("@/db", () => ({
     delete: () => ({ where: () => Promise.resolve() }),
     select: () => ({
       from: () => ({
-        where: () => ({ limit: () => Promise.resolve([]) }),
+        where: () => ({ limit: () => mockSelectLimit() }),
       }),
     }),
   },
@@ -104,8 +105,10 @@ beforeEach(() => {
   mockRequireAuth.mockReset();
   mockBuildProposalSummary.mockReset();
   mockInsertValues.mockReset();
+  mockSelectLimit.mockReset();
   mockRequireAuth.mockResolvedValue(makeUser());
   mockBuildProposalSummary.mockResolvedValue("AI-generated summary");
+  mockSelectLimit.mockResolvedValue([]);
 });
 
 describe("createProposal", () => {
@@ -238,5 +241,22 @@ describe("createProposal", () => {
     );
     const result = await createProposal(null, validFormData());
     expect(result).toEqual({ error: "Forbidden: Invalid CSRF token" });
+  });
+
+  it("rejects proposal when project deadline has passed", async () => {
+    const pastDeadline = new Date(Date.now() - 86400000);
+    mockSelectLimit.mockResolvedValueOnce([{ deadline: pastDeadline }]);
+    const result = await createProposal(null, validFormData());
+    expect(result).toEqual({
+      error: "Proposals are closed — the project deadline has passed",
+    });
+    expect(mockInsertValues).not.toHaveBeenCalled();
+  });
+
+  it("allows proposal when project deadline is in the future", async () => {
+    const futureDeadline = new Date(Date.now() + 86400000);
+    mockSelectLimit.mockResolvedValueOnce([{ deadline: futureDeadline }]);
+    const result = await createProposal(null, validFormData());
+    expect(result).toEqual({ success: true });
   });
 });
