@@ -42,3 +42,10 @@ docker exec "$CONTAINER_NAME" sh -c "test -f ${DB_PATH}-wal && sqlite3 ${DB_PATH
 FILESIZE=$(du -h "$BACKUP_FILE" | cut -f1)
 echo "Backup complete: ${BACKUP_FILE} (${FILESIZE})"
 echo "To restore: ./scripts/restore.sh ${SERVICE} ${BACKUP_FILE}"
+
+# Rotate: delete backups older than 7 days
+RETENTION_DAYS="${BACKUP_RETENTION_DAYS:-7}"
+DELETED=$(find "$BACKUP_DIR" -name "ideate-${SERVICE}-*.db" -mtime +"$RETENTION_DAYS" -delete -print | wc -l)
+if [ "$DELETED" -gt 0 ]; then
+  echo "Rotated: removed ${DELETED} backup(s) older than ${RETENTION_DAYS} days"
+fi

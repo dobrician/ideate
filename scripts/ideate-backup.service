@@ -1,0 +1,11 @@
+[Unit]
+Description=Ideate SQLite daily backup
+After=docker.service
+Requires=docker.service
+
+[Service]
+Type=oneshot
+WorkingDirectory=/home/dc/work/ideate
+ExecStart=/home/dc/work/ideate/scripts/backup.sh staging /home/dc/work/ideate/backups
+StandardOutput=journal
+StandardError=journal

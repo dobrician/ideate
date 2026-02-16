@@ -14,7 +14,7 @@
 
 **Cleanup & Infrastructure:**
 - [x] Clean up dead code: unused i18n.ts, unused exports (buildProjectSummary, getAiUsageStats, etc.)
-- [ ] SQLite backup automation: cron/systemd timer, daily with 7-day rotation, WAL checkpoint
+- [x] SQLite backup automation: cron/systemd timer, daily with 7-day rotation, WAL checkpoint
 - [ ] Update Known-Issues.md and Sprint-Log docs to reflect current state
 
 ## Constraints
