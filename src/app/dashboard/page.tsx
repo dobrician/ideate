@@ -144,7 +144,7 @@ export default async function DashboardPage() {
                         {p.title}
                       </span>
                       <span className="block truncate text-xs text-muted-foreground">
-                        {t("dashboard.inProject", { project: p.projectTitle ?? "Unknown project" })}
+                        {t("dashboard.inProject", { project: p.projectTitle ?? t("projects.unknown") })}
                       </span>
                     </Link>
                   </li>
@@ -220,7 +220,7 @@ export default async function DashboardPage() {
                 {recentActivity.map((a) => (
                   <li key={a.id} className="text-sm">
                     <Link
-                      href={`/projects/${a.projectId}`}
+                      href={a.projectId ? `/projects/${a.projectId}` : "/projects"}
                       className="group flex gap-2 rounded-md px-2 py-1.5 transition-colors hover:bg-muted/50"
                     >
                       <MessageSquare className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" />

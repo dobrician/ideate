@@ -20,8 +20,13 @@ export default function DashboardError({
         <CardHeader className="text-center">
           <CardTitle className="text-destructive">{t("common.error")}</CardTitle>
           <CardDescription>
-            {error.message || t("common.errorOccurred")}
+            {t("common.errorOccurred")}
           </CardDescription>
+          {error.digest && (
+            <p className="mt-1 text-xs text-muted-foreground">
+              {t("common.errorId", { id: error.digest })}
+            </p>
+          )}
         </CardHeader>
         <CardContent>
           <div className="flex gap-3">
