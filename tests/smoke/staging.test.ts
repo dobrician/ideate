@@ -44,11 +44,13 @@ test.describe("Smoke Tests - Core", () => {
 
     expect(page.url()).toContain("/auth/login");
     await expect(page.locator('input[type="email"]')).toBeVisible();
-    await expect(page.getByRole("button", { name: "Send Magic Link" })).toBeVisible();
+    // Login defaults to password mode with a magic link toggle
+    await expect(page.locator('input[type="password"]')).toBeVisible();
+    await expect(page.getByRole("button", { name: "Sign In with Password" })).toBeVisible();
+    await expect(page.getByRole("button", { name: /Magic Link/i })).toBeVisible();
 
     const pageContent = await page.textContent("body");
     expect(pageContent).toContain("Sign in");
-    expect(pageContent).toContain("magic link");
   });
 
   test("static assets load successfully", async ({ page }) => {
