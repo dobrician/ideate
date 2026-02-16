@@ -17,9 +17,10 @@ interface Suggestion {
 }
 
 /**
- * Build the brainstorm prompt — verbatim from ideator.
+ * Build the brainstorm prompt.
+ * When `strict` is true, the prompt emphasises JSON-only output (used for retries).
  */
-function buildPrompt(req: SuggestRequest): string {
+function buildPrompt(req: SuggestRequest, strict = false): string {
   const locale = req.locale || LOCALE;
   const existingList = req.proposals.length
     ? req.proposals
@@ -27,7 +28,7 @@ function buildPrompt(req: SuggestRequest): string {
         .join("\n")
     : "(none)";
 
-  return [
+  const lines = [
     `You are helping a team brainstorm NEW proposals for a project.`,
     `Respond ONLY in ${locale} (app locale from LOCALE env) with JSON array of up to 3 objects, each having "title", "details", and "summary".`,
     `Write "details" in structured Markdown with clear sections (use ## headings) and concise bullet lists/sub-lists for implementation notes/steps; provide enough context to act on the idea.`,
@@ -42,7 +43,16 @@ function buildPrompt(req: SuggestRequest): string {
     existingList,
     ``,
     `Return JSON like: [{"title":"...","details":"...","summary":"..."}]`,
-  ].join("\n");
+  ];
+
+  if (strict) {
+    lines.push(
+      ``,
+      `IMPORTANT: Return ONLY the raw JSON array. No prose, no code fences, no explanation.`
+    );
+  }
+
+  return lines.join("\n");
 }
 
 /**
@@ -127,7 +137,20 @@ export async function POST(request: Request) {
       );
     }
 
-    const proposals = tryParseSuggestions(text);
+    let proposals = tryParseSuggestions(text);
+
+    // Retry once with stricter prompt if first attempt returned text but parsed empty
+    if (proposals.length === 0) {
+      const retryPrompt = buildPrompt(body, true);
+      const retry = await completeWithFallback(retryPrompt, {
+        maxTokens: 2048,
+        temperature: 0.4,
+      });
+      if (retry.text) {
+        proposals = tryParseSuggestions(retry.text);
+      }
+    }
+
     return NextResponse.json({ proposals });
   } catch {
     return NextResponse.json(
