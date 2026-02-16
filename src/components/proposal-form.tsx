@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { createProposal } from "@/app/projects/[id]/proposals/actions";
-import { ThumbsUp, ThumbsDown, Plus } from "lucide-react";
+import { ThumbsUp, ThumbsDown } from "lucide-react";
 import { toast } from "sonner";
 import { useLocale } from "@/lib/use-locale";
 
@@ -42,7 +42,6 @@ export function ProposalForm({ projectId }: ProposalFormProps) {
         variant={isOpen ? "outline" : "default"}
         size="sm"
       >
-        <Plus className={`mr-1 h-4 w-4 transition-transform ${isOpen ? "rotate-45" : ""}`} />
         {t("proposalForm.newProposal")}
       </Button>
 
