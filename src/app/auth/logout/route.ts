@@ -3,7 +3,7 @@ import { clearSession } from "@/lib/auth";
 
 /**
  * POST /auth/logout
- * Clear session and logout user
+ * Clear session and redirect to login (clean page, no sidebar)
  */
 export async function POST(request: NextRequest) {
   try {
@@ -17,12 +17,12 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    return NextResponse.redirect(
-      new URL(
-        "/auth/login",
-        process.env.APP_URL || "http://localhost:3000"
-      )
-    );
+    const url = new URL("/auth/login", request.url);
+    const response = NextResponse.redirect(url);
+    // Ensure cookies are cleared in the redirect response as well
+    response.cookies.delete("session");
+    response.cookies.delete("csrf_token");
+    return response;
   } catch (error) {
     console.error("Logout error:", error);
     return NextResponse.json(
