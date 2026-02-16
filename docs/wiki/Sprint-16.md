@@ -10,7 +10,7 @@
 
 **Testing & Quality:**
 - [x] Component tests for ProposalList and VoteButtons (bar chart width, vote sorting, empty state)
-- [ ] E2E test for CSRF rejection (submit without token → verify rejection)
+- [x] E2E test for CSRF rejection (submit without token → verify rejection)
 
 **Cleanup & Infrastructure:**
 - [ ] Clean up dead code: unused i18n.ts, unused exports (buildProjectSummary, getAiUsageStats, etc.)
