@@ -4,6 +4,12 @@ Reverse chronological. Click each sprint for full details.
 
 ---
 
+### 🏃 [Sprint 14 — UI Overhaul & Bug Fixes](Sprint-14) *(2026-02-16)*
+**Focus:** Remove sidebar, top nav bar, homepage=dashboard, dark mode toggle, proposal bar chart, logout/PWA/i18n bug fixes
+**Stats:** 🔧 In progress | Issues #16-27
+
+---
+
 ### ✅ [Sprint 13 — Security Hardening & Scalability](Sprint-13) *(2026-02-16)*
 **Focus:** CSRF fix, HTML sanitization in emails, vote validation, CSP hardening, DB indexes, pagination, PostgreSQL spike
 **Stats:** 10 commits | 562 tests | 32/32 smoke
