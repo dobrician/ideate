@@ -18,7 +18,6 @@ import {
   ThumbsUp,
   ThumbsDown,
   Eye,
-  X,
   Loader2,
 } from "lucide-react";
 import { toast } from "sonner";
@@ -157,14 +156,14 @@ export function SuggestProposalsButton({
       </Button>
 
       <Dialog open={open} onOpenChange={(v) => !v && handleClose()}>
-        <DialogContent className="sm:max-w-2xl max-h-[85vh] overflow-y-auto">
+        <DialogContent className="sm:max-w-2xl max-h-[85vh] overflow-y-auto p-4 sm:p-6">
           <DialogHeader>
             <DialogTitle>{t("suggestions.title")}</DialogTitle>
             <DialogDescription>{t("suggestions.subtitle")}</DialogDescription>
           </DialogHeader>
 
           {loading && (
-            <div className="flex items-center justify-center gap-2 py-8">
+            <div className="flex items-center justify-center gap-2 py-6 sm:py-8">
               <Loader2 className="h-5 w-5 animate-spin" />
               <span className="text-sm text-muted-foreground">
                 {t("suggestions.generating")}
@@ -173,13 +172,13 @@ export function SuggestProposalsButton({
           )}
 
           {error && !loading && (
-            <div className="py-6 text-center text-sm text-muted-foreground">
+            <div className="py-4 sm:py-6 text-center text-sm text-muted-foreground">
               {error}
             </div>
           )}
 
           {!loading && !error && suggestions.length > 0 && (
-            <div className="space-y-3">
+            <div className="space-y-2 sm:space-y-3">
               {suggestions.map((s, i) => (
                 <SuggestionCard
                   key={i}
@@ -221,7 +220,7 @@ export function SuggestProposalsButton({
         open={detailIdx !== null}
         onOpenChange={(v) => !v && setDetailIdx(null)}
       >
-        <DialogContent className="sm:max-w-2xl max-h-[85vh] overflow-y-auto">
+        <DialogContent className="sm:max-w-2xl max-h-[85vh] overflow-y-auto p-4 sm:p-6">
           {detailIdx !== null && suggestions[detailIdx] && (
             <>
               <DialogHeader>
@@ -261,16 +260,16 @@ function SuggestionCard({
 }) {
   return (
     <Card className="group relative">
-      <CardContent className="p-4">
-        <h3 className="font-medium">{suggestion.title}</h3>
-        <p className="mt-1 line-clamp-2 text-sm text-muted-foreground">
+      <CardContent className="p-3 sm:p-4">
+        <h3 className="font-medium text-sm sm:text-base">{suggestion.title}</h3>
+        <p className="mt-1 line-clamp-2 text-xs sm:text-sm text-muted-foreground">
           {suggestion.summary || t("suggestions.noSummary")}
         </p>
-        <div className="mt-3 flex items-center gap-1">
+        <div className="mt-2 sm:mt-3 flex items-center gap-1.5 sm:gap-1">
           <Button
             variant={suggestion.vote === 1 ? "default" : "outline"}
             size="sm"
-            className={`h-7 gap-1 px-2 ${suggestion.vote === 1 ? "bg-green-600 hover:bg-green-700" : ""}`}
+            className={`h-8 sm:h-7 gap-1 px-2.5 sm:px-2 ${suggestion.vote === 1 ? "bg-green-600 hover:bg-green-700" : ""}`}
             onClick={() => onVote(1)}
           >
             <ThumbsUp className="h-3.5 w-3.5" />
@@ -278,7 +277,7 @@ function SuggestionCard({
           <Button
             variant={suggestion.vote === -1 ? "default" : "outline"}
             size="sm"
-            className={`h-7 gap-1 px-2 ${suggestion.vote === -1 ? "bg-red-600 hover:bg-red-700" : ""}`}
+            className={`h-8 sm:h-7 gap-1 px-2.5 sm:px-2 ${suggestion.vote === -1 ? "bg-red-600 hover:bg-red-700" : ""}`}
             onClick={() => onVote(-1)}
           >
             <ThumbsDown className="h-3.5 w-3.5" />
@@ -286,7 +285,7 @@ function SuggestionCard({
           <Button
             variant="ghost"
             size="sm"
-            className="h-7 gap-1 px-2"
+            className="h-8 sm:h-7 gap-1 px-2.5 sm:px-2"
             onClick={onViewDetails}
           >
             <Eye className="h-3.5 w-3.5" />

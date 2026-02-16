@@ -13,7 +13,7 @@
 - [x] **Goal 3:** AI suggestion reliability — retry logic and response validation
 - [x] **Goal 4:** Cover dashboard/queries.ts (10% stmt / 0% branch)
 - [x] **Goal 5:** Exhaustive E2E tests with mocked LLM responses
-- [ ] **Goal 6:** Mobile responsive polish on AI dialogs
+- [x] **Goal 6:** Mobile responsive polish on AI dialogs
 - [ ] **Goal 7:** Integrate new logo (#40)
 
 ---
