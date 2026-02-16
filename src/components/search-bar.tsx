@@ -65,12 +65,13 @@ export function SearchBar() {
   }, []);
 
   return (
-    <div ref={containerRef} className="relative w-full max-w-sm">
+    <div ref={containerRef} className="relative w-full max-w-sm" role="combobox" aria-expanded={isOpen} aria-haspopup="listbox">
       <div className="relative">
-        <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+        <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" aria-hidden="true" />
         <Input
           type="search"
           placeholder="Search projects & proposals..."
+          aria-label="Search projects and proposals"
           value={query}
           onChange={(e) => handleChange(e.target.value)}
           onFocus={() => results.length > 0 && setIsOpen(true)}
@@ -79,32 +80,34 @@ export function SearchBar() {
       </div>
 
       {isOpen && (
-        <div className="absolute top-full left-0 right-0 z-50 mt-1 bg-popover border rounded-md shadow-lg max-h-80 overflow-y-auto">
+        <div role="listbox" aria-label="Search results" className="absolute top-full left-0 right-0 z-50 mt-1 bg-popover border rounded-md shadow-lg max-h-80 overflow-y-auto animate-in fade-in-0 slide-in-from-top-1 duration-150">
           {loading && (
-            <div className="p-3 text-sm text-muted-foreground">
+            <div className="p-3 text-sm text-muted-foreground" role="status" aria-live="polite">
               Searching...
             </div>
           )}
           {!loading && results.length === 0 && query.length >= 2 && (
-            <div className="p-3 text-sm text-muted-foreground">
+            <div className="p-3 text-sm text-muted-foreground" role="status">
               No results found
             </div>
           )}
           {results.map((result) => (
             <a
               key={`${result.type}-${result.id}`}
+              role="option"
+              aria-selected={false}
               href={
                 result.type === "project"
                   ? `/projects/${result.id}`
                   : `/projects/${result.id}`
               }
-              className="flex items-start gap-2 p-3 hover:bg-accent transition-colors border-b last:border-b-0"
+              className="flex items-start gap-2 p-3 hover:bg-accent transition-colors duration-150 border-b last:border-b-0 focus:bg-accent focus:outline-none"
               onClick={() => setIsOpen(false)}
             >
               {result.type === "project" ? (
-                <FileText className="h-4 w-4 mt-0.5 text-blue-500 shrink-0" />
+                <FileText className="h-4 w-4 mt-0.5 text-blue-500 shrink-0" aria-hidden="true" />
               ) : (
-                <Lightbulb className="h-4 w-4 mt-0.5 text-amber-500 shrink-0" />
+                <Lightbulb className="h-4 w-4 mt-0.5 text-amber-500 shrink-0" aria-hidden="true" />
               )}
               <div className="min-w-0">
                 <div className="text-sm font-medium truncate">

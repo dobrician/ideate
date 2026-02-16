@@ -28,7 +28,7 @@ const jsonLd = {
 
 export default function HomePage() {
   return (
-    <div className="mx-auto max-w-4xl space-y-8 px-4 py-8">
+    <main className="mx-auto max-w-4xl space-y-8 px-4 py-8" role="main">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
@@ -58,10 +58,10 @@ export default function HomePage() {
         </Button>
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        <Card>
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3" role="region" aria-label="Platform features">
+        <Card className="transition-shadow duration-200 hover:shadow-md">
           <CardHeader>
-            <FolderOpen className="mb-2 h-6 w-6 text-muted-foreground" />
+            <FolderOpen className="mb-2 h-6 w-6 text-muted-foreground" aria-hidden="true" />
             <CardTitle>Projects</CardTitle>
             <CardDescription>
               Create and manage idea prioritization projects with deadlines and
@@ -70,9 +70,9 @@ export default function HomePage() {
           </CardHeader>
         </Card>
 
-        <Card>
+        <Card className="transition-shadow duration-200 hover:shadow-md">
           <CardHeader>
-            <Lightbulb className="mb-2 h-6 w-6 text-muted-foreground" />
+            <Lightbulb className="mb-2 h-6 w-6 text-muted-foreground" aria-hidden="true" />
             <CardTitle>Proposals</CardTitle>
             <CardDescription>
               Submit proposals, vote pro or contra, and see AI-generated
@@ -81,9 +81,9 @@ export default function HomePage() {
           </CardHeader>
         </Card>
 
-        <Card>
+        <Card className="transition-shadow duration-200 hover:shadow-md">
           <CardHeader>
-            <BarChart3 className="mb-2 h-6 w-6 text-muted-foreground" />
+            <BarChart3 className="mb-2 h-6 w-6 text-muted-foreground" aria-hidden="true" />
             <CardTitle>Consensus</CardTitle>
             <CardDescription>
               Real-time vote charts show team alignment and help prioritize
@@ -92,9 +92,9 @@ export default function HomePage() {
           </CardHeader>
         </Card>
 
-        <Card>
+        <Card className="transition-shadow duration-200 hover:shadow-md">
           <CardHeader>
-            <Users className="mb-2 h-6 w-6 text-muted-foreground" />
+            <Users className="mb-2 h-6 w-6 text-muted-foreground" aria-hidden="true" />
             <CardTitle>Discussions</CardTitle>
             <CardDescription>
               Threaded comments on every proposal for structured team
@@ -103,9 +103,9 @@ export default function HomePage() {
           </CardHeader>
         </Card>
 
-        <Card>
+        <Card className="transition-shadow duration-200 hover:shadow-md">
           <CardHeader>
-            <LayoutDashboard className="mb-2 h-6 w-6 text-muted-foreground" />
+            <LayoutDashboard className="mb-2 h-6 w-6 text-muted-foreground" aria-hidden="true" />
             <CardTitle>Dashboard</CardTitle>
             <CardDescription>
               Personal overview of your projects, proposals, votes, and recent
@@ -114,6 +114,6 @@ export default function HomePage() {
           </CardHeader>
         </Card>
       </div>
-    </div>
+    </main>
   );
 }

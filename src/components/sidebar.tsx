@@ -52,14 +52,17 @@ export function Sidebar({ open, onClose }: SidebarProps) {
     <>
       {open && (
         <div
-          className="fixed inset-0 z-40 bg-black/50 lg:hidden"
+          className="fixed inset-0 z-40 bg-black/50 transition-opacity lg:hidden"
           onClick={onClose}
+          aria-hidden="true"
         />
       )}
 
       <aside
+        role="navigation"
+        aria-label="Main navigation"
         className={cn(
-          "fixed inset-y-0 left-0 z-50 w-64 border-r bg-sidebar text-sidebar-foreground transition-transform lg:static lg:translate-x-0",
+          "fixed inset-y-0 left-0 z-50 w-64 border-r bg-sidebar text-sidebar-foreground transition-transform duration-200 ease-in-out lg:static lg:translate-x-0",
           open ? "translate-x-0" : "-translate-x-full"
         )}
       >
@@ -67,7 +70,7 @@ export function Sidebar({ open, onClose }: SidebarProps) {
           <span className="text-lg font-semibold">Navigation</span>
         </div>
         <ScrollArea className="h-[calc(100vh-3.5rem)]">
-          <nav className="space-y-1 p-4">
+          <nav className="space-y-1 p-4" aria-label="Site navigation">
             {allItems.map((item) => {
               const isActive =
                 item.href === "/"
@@ -80,14 +83,15 @@ export function Sidebar({ open, onClose }: SidebarProps) {
                   key={item.href}
                   href={item.href}
                   onClick={onClose}
+                  aria-current={isActive ? "page" : undefined}
                   className={cn(
-                    "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors",
+                    "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors duration-150",
                     isActive
                       ? "bg-accent text-accent-foreground"
                       : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
                   )}
                 >
-                  <Icon className="h-4 w-4" />
+                  <Icon className="h-4 w-4" aria-hidden="true" />
                   {t(item.labelKey)}
                 </Link>
               );
@@ -98,9 +102,9 @@ export function Sidebar({ open, onClose }: SidebarProps) {
             <form action="/auth/logout" method="POST">
               <button
                 type="submit"
-                className="flex w-full items-center gap-3 rounded-md px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
+                className="flex w-full items-center gap-3 rounded-md px-3 py-2 text-sm font-medium text-muted-foreground transition-colors duration-150 hover:bg-accent hover:text-accent-foreground"
               >
-                <LogOut className="h-4 w-4" />
+                <LogOut className="h-4 w-4" aria-hidden="true" />
                 {t("nav.signOut")}
               </button>
             </form>

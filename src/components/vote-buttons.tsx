@@ -2,6 +2,7 @@
 
 import { useTransition } from "react";
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 import { castVote, removeVote } from "@/app/projects/[id]/proposals/actions";
 import { ThumbsUp, ThumbsDown } from "lucide-react";
 import { toast } from "sonner";
@@ -39,19 +40,22 @@ export function VoteButtons({
   }
 
   return (
-    <div className="flex items-center gap-1">
+    <div className="flex items-center gap-1" role="group" aria-label="Vote on this proposal">
       <Button
         variant="ghost"
         size="sm"
         onClick={() => handleVote(1)}
         disabled={isPending}
-        className={
+        aria-label={`Upvote (${upvotes} votes)${userVote === 1 ? " - your vote" : ""}`}
+        aria-pressed={userVote === 1}
+        className={cn(
+          "transition-colors duration-150",
           userVote === 1
             ? "text-green-600 hover:text-green-700 dark:text-green-400"
             : "text-muted-foreground hover:text-green-600"
-        }
+        )}
       >
-        <ThumbsUp className="mr-1 h-4 w-4" />
+        <ThumbsUp className="mr-1 h-4 w-4" aria-hidden="true" />
         <span className="text-sm font-medium">{upvotes}</span>
       </Button>
       <Button
@@ -59,13 +63,16 @@ export function VoteButtons({
         size="sm"
         onClick={() => handleVote(-1)}
         disabled={isPending}
-        className={
+        aria-label={`Downvote (${downvotes} votes)${userVote === -1 ? " - your vote" : ""}`}
+        aria-pressed={userVote === -1}
+        className={cn(
+          "transition-colors duration-150",
           userVote === -1
             ? "text-red-600 hover:text-red-700 dark:text-red-400"
             : "text-muted-foreground hover:text-red-600"
-        }
+        )}
       >
-        <ThumbsDown className="mr-1 h-4 w-4" />
+        <ThumbsDown className="mr-1 h-4 w-4" aria-hidden="true" />
         <span className="text-sm font-medium">{downvotes}</span>
       </Button>
     </div>

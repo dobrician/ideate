@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/card";
 import { Users, FolderOpen, Lightbulb, ThumbsUp } from "lucide-react";
 import { UserRoleManager } from "./user-role-manager";
+import { StatCard } from "@/components/stat-card";
 
 /**
  * Admin panel — user management, system stats, audit log
@@ -156,24 +157,3 @@ export default async function AdminPage() {
   );
 }
 
-function StatCard({
-  title,
-  value,
-  icon,
-}: {
-  title: string;
-  value: number;
-  icon: React.ReactNode;
-}) {
-  return (
-    <Card>
-      <CardHeader className="flex flex-row items-center justify-between pb-2">
-        <CardTitle className="text-sm font-medium">{title}</CardTitle>
-        {icon}
-      </CardHeader>
-      <CardContent>
-        <p className="text-2xl font-bold">{value}</p>
-      </CardContent>
-    </Card>
-  );
-}

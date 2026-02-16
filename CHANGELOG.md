@@ -7,6 +7,46 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.7.0] - 2026-02-16
+
+### Added
+- Database performance indexes (15 new indexes)
+  - Indexes on userId, projectId, proposalId for all tables
+  - Composite index on audit_logs (entity, entity_id)
+  - Auto-applied via migration `0002_sprint7_indexes.sql`
+- Admin page error boundary with retry and back-to-dashboard navigation
+- Admin page loading skeleton matching page layout structure
+- Shared `StatCard` component (`src/components/stat-card.tsx`)
+- CSRF module (`src/lib/csrf.ts`) extracted from auth for better separation
+- Comprehensive test suites: csrf, auth-session, notifications, mail, stat-card, utils
+- 63 new unit tests (453 total, up from 390)
+
+### Changed
+- Test coverage improved from 82% to 96.35% lines
+  - auth.ts: 35% -> 97%
+  - notifications.ts: 76% -> 100% line coverage
+  - mail.ts: 0% -> 100% line coverage
+  - utils.ts: 0% -> 100%
+- Dashboard page refactored under 300-line limit (extracted StatCard, formatRelativeTime)
+- Auth module refactored under 300-line limit (CSRF functions extracted to dedicated module)
+- Admin page uses shared StatCard component (removed duplicate)
+
+### Accessibility
+- WCAG 2.1 AA improvements across all pages
+  - `aria-current="page"` on active nav/pagination links
+  - `aria-label` on search input, vote buttons, stat cards, pagination
+  - `aria-pressed` on vote toggle buttons
+  - `aria-hidden="true"` on all decorative icons
+  - `role="navigation"`, `role="banner"`, `role="main"`, `role="combobox"` landmarks
+  - `role="listbox"` and `role="option"` on search results
+  - `role="status"` and `aria-live="polite"` on search loading indicator
+  - `<time>` elements with `dateTime` for activity timestamps
+  - Focus styles on search result items
+
+### Performance
+- 15 database indexes for common query patterns (userId, projectId, proposalId lookups)
+- Smooth CSS transitions on sidebar (200ms), buttons (150ms), cards (200ms hover shadow)
+
 ## [0.6.0] - 2026-02-16
 
 ### Added

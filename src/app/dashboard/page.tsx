@@ -18,6 +18,7 @@ import {
   ThumbsUp,
   MessageSquare,
 } from "lucide-react";
+import { StatCard, formatRelativeTime } from "@/components/stat-card";
 
 /**
  * Dashboard page showing user overview, recent votes, and activity feed
@@ -35,15 +36,12 @@ export default async function DashboardPage() {
     recentActivity,
     totalStats,
   ] = await Promise.all([
-    // User's projects
     db
       .select()
       .from(projects)
       .where(eq(projects.userId, user.id))
       .orderBy(desc(projects.createdAt))
       .limit(5),
-
-    // User's proposals
     db
       .select({
         id: proposals.id,
@@ -57,14 +55,10 @@ export default async function DashboardPage() {
       .where(eq(proposals.userId, user.id))
       .orderBy(desc(proposals.createdAt))
       .limit(5),
-
-    // User's total vote count
     db
       .select({ total: count() })
       .from(votes)
       .where(eq(votes.userId, user.id)),
-
-    // Recent votes by user
     db
       .select({
         proposalId: votes.proposalId,
@@ -78,8 +72,6 @@ export default async function DashboardPage() {
       .where(eq(votes.userId, user.id))
       .orderBy(desc(votes.createdAt))
       .limit(8),
-
-    // Recent platform activity (comments, proposals)
     db
       .select({
         id: comments.id,
@@ -95,8 +87,6 @@ export default async function DashboardPage() {
       .leftJoin(proposals, eq(comments.proposalId, proposals.id))
       .orderBy(desc(comments.createdAt))
       .limit(10),
-
-    // Platform-wide stats
     db
       .select({
         projectCount: sql<number>`(SELECT COUNT(*) FROM projects)`,
@@ -119,7 +109,7 @@ export default async function DashboardPage() {
       </div>
 
       {/* Stats cards */}
-      <div className="mb-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="mb-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4" role="region" aria-label="Platform statistics">
         <StatCard
           title="Projects"
           value={Number(stats?.projectCount ?? 0)}
@@ -160,12 +150,12 @@ export default async function DashboardPage() {
                 </Link>
               </p>
             ) : (
-              <ul className="space-y-3">
+              <ul className="space-y-3" role="list">
                 {userProjects.map((p) => (
                   <li key={p.id}>
                     <Link
                       href={`/projects/${p.id}`}
-                      className="group flex items-center justify-between"
+                      className="group flex items-center justify-between rounded-md px-2 py-1 transition-colors hover:bg-muted/50"
                     >
                       <span className="truncate text-sm font-medium group-hover:underline">
                         {p.title}
@@ -195,12 +185,12 @@ export default async function DashboardPage() {
                 No proposals yet. Visit a project to submit one.
               </p>
             ) : (
-              <ul className="space-y-3">
+              <ul className="space-y-3" role="list">
                 {userProposals.map((p) => (
                   <li key={p.id}>
                     <Link
                       href={`/projects/${p.projectId}`}
-                      className="group block"
+                      className="group block rounded-md px-2 py-1 transition-colors hover:bg-muted/50"
                     >
                       <span className="truncate text-sm font-medium group-hover:underline">
                         {p.title}
@@ -230,7 +220,7 @@ export default async function DashboardPage() {
                 No votes yet. Visit a project to vote on proposals.
               </p>
             ) : (
-              <ul className="space-y-3">
+              <ul className="space-y-3" role="list">
                 {recentVotes.map((v) => (
                   <li
                     key={`${v.proposalId}-${v.createdAt?.getTime()}`}
@@ -244,7 +234,7 @@ export default async function DashboardPage() {
                     </Badge>
                     <Link
                       href={`/projects/${v.projectId}`}
-                      className="truncate text-sm hover:underline"
+                      className="truncate text-sm transition-colors hover:underline"
                     >
                       {v.proposalTitle}
                     </Link>
@@ -265,30 +255,29 @@ export default async function DashboardPage() {
             {recentActivity.length === 0 ? (
               <p className="text-sm text-muted-foreground">No recent activity.</p>
             ) : (
-              <ul className="space-y-3">
+              <ul className="space-y-3" role="list">
                 {recentActivity.map((a) => (
                   <li key={a.id} className="text-sm">
                     <Link
                       href={`/projects/${a.projectId}`}
-                      className="group block"
+                      className="group block rounded-md px-2 py-1 transition-colors hover:bg-muted/50"
                     >
                       <span className="font-medium group-hover:underline">
                         {a.userName || a.userEmail || "Someone"}
                       </span>
                       <span className="text-muted-foreground">
-                        {" "}
-                        commented on{" "}
+                        {" "}commented on{" "}
                       </span>
                       <span className="font-medium group-hover:underline">
                         {a.proposalTitle}
                       </span>
                       {a.createdAt && (
-                        <span className="ml-1 text-xs text-muted-foreground">
+                        <time className="ml-1 text-xs text-muted-foreground" dateTime={a.createdAt.toISOString()}>
                           {formatRelativeTime(a.createdAt)}
-                        </span>
+                        </time>
                       )}
                     </Link>
-                    <p className="mt-0.5 line-clamp-1 text-muted-foreground">
+                    <p className="mt-0.5 line-clamp-1 px-2 text-muted-foreground">
                       {a.content}
                     </p>
                   </li>
@@ -300,38 +289,4 @@ export default async function DashboardPage() {
       </div>
     </div>
   );
-}
-
-function StatCard({
-  title,
-  value,
-  icon,
-}: {
-  title: string;
-  value: number;
-  icon: React.ReactNode;
-}) {
-  return (
-    <Card>
-      <CardHeader className="flex flex-row items-center justify-between pb-2">
-        <CardTitle className="text-sm font-medium">{title}</CardTitle>
-        {icon}
-      </CardHeader>
-      <CardContent>
-        <p className="text-2xl font-bold">{value}</p>
-      </CardContent>
-    </Card>
-  );
-}
-
-function formatRelativeTime(date: Date): string {
-  const now = Date.now();
-  const diff = now - date.getTime();
-  const minutes = Math.floor(diff / 60000);
-  if (minutes < 1) return "just now";
-  if (minutes < 60) return `${minutes}m ago`;
-  const hours = Math.floor(minutes / 60);
-  if (hours < 24) return `${hours}h ago`;
-  const days = Math.floor(hours / 24);
-  return `${days}d ago`;
 }

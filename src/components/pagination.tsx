@@ -41,14 +41,15 @@ export function Pagination({ currentPage, totalPages }: PaginationProps) {
         className="h-8 w-8"
         asChild
         disabled={currentPage <= 1}
+        aria-label="Previous page"
       >
         {currentPage > 1 ? (
           <Link href={buildHref(currentPage - 1)}>
-            <ChevronLeft className="h-4 w-4" />
+            <ChevronLeft className="h-4 w-4" aria-hidden="true" />
           </Link>
         ) : (
           <span>
-            <ChevronLeft className="h-4 w-4" />
+            <ChevronLeft className="h-4 w-4" aria-hidden="true" />
           </span>
         )}
       </Button>
@@ -60,6 +61,8 @@ export function Pagination({ currentPage, totalPages }: PaginationProps) {
           size="icon"
           className="h-8 w-8"
           asChild={page !== currentPage}
+          aria-label={`Page ${page}`}
+          aria-current={page === currentPage ? "page" : undefined}
         >
           {page === currentPage ? (
             <span>{page}</span>
@@ -75,14 +78,15 @@ export function Pagination({ currentPage, totalPages }: PaginationProps) {
         className="h-8 w-8"
         asChild
         disabled={currentPage >= totalPages}
+        aria-label="Next page"
       >
         {currentPage < totalPages ? (
           <Link href={buildHref(currentPage + 1)}>
-            <ChevronRight className="h-4 w-4" />
+            <ChevronRight className="h-4 w-4" aria-hidden="true" />
           </Link>
         ) : (
           <span>
-            <ChevronRight className="h-4 w-4" />
+            <ChevronRight className="h-4 w-4" aria-hidden="true" />
           </span>
         )}
       </Button>

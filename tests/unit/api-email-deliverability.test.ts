@@ -87,6 +87,26 @@ describe("Email Deliverability API Route", () => {
       expect(data.summary).toBe("warn");
     });
 
+    it("should return 500 when SMTP_FROM has no domain", async () => {
+      const original = process.env.SMTP_FROM;
+      process.env.SMTP_FROM = "no-at-sign";
+      vi.resetModules();
+
+      // Re-mock after module reset
+      vi.doMock("@/lib/email-deliverability", () => ({
+        checkDeliverability: mockCheckDeliverability,
+      }));
+
+      const { GET: GET2 } = await import("@/app/api/email/deliverability/route");
+      const response = await GET2();
+      const data = await response.json();
+
+      expect(response.status).toBe(500);
+      expect(data.error).toBe("SMTP_FROM not configured");
+
+      process.env.SMTP_FROM = original;
+    });
+
     it("should include domain in response", async () => {
       mockCheckDeliverability.mockResolvedValue({
         domain: "surcod.ro",
