@@ -105,7 +105,7 @@ describe("POST /api/proposals/suggest", () => {
       expect(prompt).toContain("Weekend trips");
       expect(prompt).toContain("Places to visit near Cluj");
       expect(prompt).toContain("Existing idea");
-      expect(opts).toEqual({ maxTokens: 600, temperature: 0.65 });
+      expect(opts).toEqual({ maxTokens: 2048, temperature: 0.65 });
     });
 
     it("includes locale in prompt", async () => {

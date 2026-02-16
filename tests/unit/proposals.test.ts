@@ -230,4 +230,13 @@ describe("createProposal", () => {
     const result = await createProposal(null, validFormData());
     expect(result).toEqual({ error: "Failed to create proposal. Please try again." });
   });
+
+  it("returns Forbidden error message from CSRF rejection", async () => {
+    const { requireCsrfToken } = await import("@/lib/csrf");
+    vi.mocked(requireCsrfToken).mockRejectedValueOnce(
+      new Error("Forbidden: Invalid CSRF token")
+    );
+    const result = await createProposal(null, validFormData());
+    expect(result).toEqual({ error: "Forbidden: Invalid CSRF token" });
+  });
 });

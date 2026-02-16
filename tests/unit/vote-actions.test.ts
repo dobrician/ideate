@@ -159,6 +159,13 @@ describe("deleteProposal", () => {
     const r = await deleteProposal("prop-1", "proj-1", "csrf");
     expect(r).toEqual({ success: true });
   });
+
+  it("returns generic error on non-auth failure", async () => {
+    mockRequireAuth.mockResolvedValue(makeUser({ role: "admin" }));
+    mockSelectLimit.mockRejectedValue(new Error("DB connection lost"));
+    const r = await deleteProposal("prop-1", "proj-1", "csrf");
+    expect(r).toEqual({ error: "Failed to delete proposal" });
+  });
 });
 
 describe("castVote", () => {
@@ -195,6 +202,18 @@ describe("castVote", () => {
     );
   });
 
+  it("rejects invalid vote value (not 1 or -1)", async () => {
+    const r = await castVote("prop-1", 0, "proj-1", "csrf");
+    expect(r).toEqual({ error: "Invalid vote value — must be 1 or -1" });
+  });
+
+  it("rejects vote when project deadline has passed", async () => {
+    const pastDate = new Date(Date.now() - 86400000).toISOString();
+    mockSelectLimit.mockReturnValue(Promise.resolve([{ deadline: pastDate }]));
+    const r = await castVote("prop-1", 1, "proj-1", "csrf");
+    expect(r).toEqual({ error: "Voting is closed — the project deadline has passed" });
+  });
+
   it("returns error on DB failure", async () => {
     mockInsertValues.mockImplementation(() => {
       throw new Error("DB error");
@@ -215,6 +234,13 @@ describe("removeVote", () => {
     mockRequireAuth.mockResolvedValue(makeUser({ role: "viewer" }));
     const r = await removeVote("prop-1", "proj-1", "csrf");
     expect(r).toEqual({ error: "You don't have permission to vote" });
+  });
+
+  it("rejects vote removal when project deadline has passed", async () => {
+    const pastDate = new Date(Date.now() - 86400000).toISOString();
+    mockSelectLimit.mockReturnValue(Promise.resolve([{ deadline: pastDate }]));
+    const r = await removeVote("prop-1", "proj-1", "csrf");
+    expect(r).toEqual({ error: "Voting is closed — the project deadline has passed" });
   });
 
   it("deletes the vote", async () => {
