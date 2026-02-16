@@ -4,9 +4,9 @@ Reverse chronological. Click each sprint for full details.
 
 ---
 
-### 🏃 [Sprint 15 — Security, UX Fixes & Nav Polish](Sprint-15) *(2026-02-16)*
+### ✅ [Sprint 15 — Security, UX Fixes & Nav Polish](Sprint-15) *(2026-02-16)*
 **Focus:** CSRF wiring, registration validation, admin nav, magic link UX, shadcn dropdown, structured logging, project comments spike
-**Stats:** 🔧 In progress | Issues #19, #28, #29, #30
+**Stats:** 12 commits | 579 tests | 32/32 smoke | Issues #19, #28-31
 
 ---
 

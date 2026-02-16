@@ -28,3 +28,18 @@
 - Commit + push after EACH fix
 - After each goal, edit this file: change `- [ ]` to `- [x]` (do NOT add new lines)
 - Lint + type check + tests + build must pass before each push
+
+## Outcomes
+- 12 commits across 3 sessions, **579 tests** (+17 new), **32/32 smoke** (12.1s)
+- Security: CSRF validation wired into all Server Actions
+- UX: Registration inline validation, magic link explanation, admin nav link
+- Navigation: Radix DropdownMenu with ARIA roles, keyboard nav, focus trap
+- Infrastructure: pino structured logging, fail-fast migrations
+- Cleanup: dead sidebar CSS/translations removed
+- Design: project comments spike doc (`docs/project-comments-spike.md`)
+- Bug fix: proposal bar chart scales proportionally (#31)
+
+## Notes
+- Hit max turns twice (120 + 80) — needed 3 sessions for 11 goals
+- CI broke on header tests (Radix ARIA roles) — fixed in follow-up commit
+- Git hook auto-checkoff working well with issue numbers
