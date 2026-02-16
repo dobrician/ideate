@@ -1,5 +1,39 @@
 import { NextRequest, NextResponse } from "next/server";
 
+/**
+ * Lightweight JWT validation for Edge middleware.
+ * Decodes the payload and checks expiry/structure without full crypto verification
+ * (Edge runtime can't use node:crypto). Full jwt.verify() happens downstream in
+ * getSession()/requireAuth().
+ */
+function isValidSessionJwt(token: string): boolean {
+  try {
+    const parts = token.split(".");
+    if (parts.length !== 3) return false;
+
+    // Decode payload (base64url → JSON)
+    const payload = JSON.parse(
+      atob(parts[1].replace(/-/g, "+").replace(/_/g, "/"))
+    );
+
+    // Must be a session token
+    if (payload.type !== "session") return false;
+
+    // Must have userId
+    if (!payload.userId) return false;
+
+    // Check expiry (with 30s tolerance matching auth.ts clockTolerance)
+    if (typeof payload.exp === "number") {
+      const now = Math.floor(Date.now() / 1000);
+      if (payload.exp + 30 < now) return false;
+    }
+
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 const PUBLIC_PATHS = [
   "/",
   "/auth/login",
@@ -94,10 +128,15 @@ export function middleware(request: NextRequest) {
 
   const sessionCookie = request.cookies.get("session");
 
-  if (!sessionCookie?.value) {
+  // Redirect to login if cookie is missing, empty, expired, or malformed
+  if (!sessionCookie?.value || !isValidSessionJwt(sessionCookie.value)) {
     const loginUrl = new URL("/auth/login", request.url);
     loginUrl.searchParams.set("redirect", pathname);
     const response = NextResponse.redirect(loginUrl);
+    // Clear invalid session cookie so user doesn't get stuck in a redirect loop
+    if (sessionCookie?.value) {
+      response.cookies.delete("session");
+    }
     return addSecurityHeaders(response);
   }
 

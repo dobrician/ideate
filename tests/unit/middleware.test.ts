@@ -4,6 +4,23 @@ import { middleware } from "@/middleware";
 
 const BASE_URL = "http://localhost:3000";
 
+/** Build a fake JWT with the given payload (no real signature, but valid structure). */
+function fakeJwt(payload: Record<string, unknown>): string {
+  const header = btoa(JSON.stringify({ alg: "HS256", typ: "JWT" }));
+  const body = btoa(JSON.stringify(payload));
+  return `${header}.${body}.fake-signature`;
+}
+
+/** A valid-looking session JWT that expires in 1 hour */
+function validSessionJwt(): string {
+  return fakeJwt({
+    userId: "user-123",
+    email: "test@example.com",
+    type: "session",
+    exp: Math.floor(Date.now() / 1000) + 3600,
+  });
+}
+
 /**
  * Create a NextRequest for the given path, optionally with a session cookie.
  */
@@ -156,14 +173,14 @@ describe("Middleware", () => {
 
   describe("protected paths with session cookie", () => {
     it("should allow access to /projects when session cookie is present", () => {
-      const request = createRequest("/projects", { sessionCookie: "valid-session-token" });
+      const request = createRequest("/projects", { sessionCookie: validSessionJwt() });
       const response = middleware(request);
 
       expect(isNextResponse(response)).toBe(true);
     });
 
     it("should allow access to /profile when session cookie is present", () => {
-      const request = createRequest("/profile", { sessionCookie: "valid-session-token" });
+      const request = createRequest("/profile", { sessionCookie: validSessionJwt() });
       const response = middleware(request);
 
       expect(isNextResponse(response)).toBe(true);
@@ -171,8 +188,66 @@ describe("Middleware", () => {
 
     it("should allow access to nested protected paths when session cookie is present", () => {
       const request = createRequest("/projects/123/proposals", {
-        sessionCookie: "valid-session-token",
+        sessionCookie: validSessionJwt(),
       });
+      const response = middleware(request);
+
+      expect(isNextResponse(response)).toBe(true);
+    });
+  });
+
+  describe("JWT validation", () => {
+    it("should redirect when session cookie is a random string (not a JWT)", () => {
+      const request = createRequest("/projects", { sessionCookie: "not-a-jwt" });
+      const response = middleware(request);
+
+      expect(response.status).toBe(307);
+      const redirectUrl = getRedirectUrl(response);
+      expect(redirectUrl!.pathname).toBe("/auth/login");
+    });
+
+    it("should redirect when JWT is expired", () => {
+      const expiredJwt = fakeJwt({
+        userId: "user-123",
+        email: "test@example.com",
+        type: "session",
+        exp: Math.floor(Date.now() / 1000) - 3600, // 1 hour ago
+      });
+      const request = createRequest("/projects", { sessionCookie: expiredJwt });
+      const response = middleware(request);
+
+      expect(response.status).toBe(307);
+      const redirectUrl = getRedirectUrl(response);
+      expect(redirectUrl!.pathname).toBe("/auth/login");
+    });
+
+    it("should redirect when JWT has wrong type", () => {
+      const wrongTypeJwt = fakeJwt({
+        userId: "user-123",
+        email: "test@example.com",
+        type: "magic-link",
+        exp: Math.floor(Date.now() / 1000) + 3600,
+      });
+      const request = createRequest("/projects", { sessionCookie: wrongTypeJwt });
+      const response = middleware(request);
+
+      expect(response.status).toBe(307);
+    });
+
+    it("should redirect when JWT payload has no userId", () => {
+      const noUserJwt = fakeJwt({
+        email: "test@example.com",
+        type: "session",
+        exp: Math.floor(Date.now() / 1000) + 3600,
+      });
+      const request = createRequest("/projects", { sessionCookie: noUserJwt });
+      const response = middleware(request);
+
+      expect(response.status).toBe(307);
+    });
+
+    it("should allow a valid session JWT", () => {
+      const request = createRequest("/projects", { sessionCookie: validSessionJwt() });
       const response = middleware(request);
 
       expect(isNextResponse(response)).toBe(true);
