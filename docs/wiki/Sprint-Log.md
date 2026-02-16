@@ -521,7 +521,7 @@
 ---
 
 ## Sprint 10 — UI/UX Polish & Complete Romanian Translation (2026-02-16)
-**Status:** 🏃 IN PROGRESS
+**Status:** ✅ COMPLETE
 
 ### Goals
 - [x] Complete Romanian (RO) translations — all UI strings (#15)
@@ -533,7 +533,7 @@
 - [x] Mobile responsive fixes (320px+)
 - [x] Login/register/auth pages visual polish
 - [x] Dashboard layout improvements
-- [ ] Consistent button styles and spacing across all pages
+- [x] Consistent button styles and spacing across all pages
 
 ### Constraints
 - Do NOT break existing functionality
