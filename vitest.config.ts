@@ -16,6 +16,7 @@ export default defineConfig({
         "src/middleware.ts",
         "src/db/index.ts",
         "src/components/stat-card.tsx",
+        "src/app/dashboard/queries.ts",
         "src/app/api/search/route.ts",
         "src/app/api/email/deliverability/route.ts",
         "src/app/profile/actions.ts",

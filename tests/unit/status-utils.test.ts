@@ -1,5 +1,5 @@
-import { describe, it, expect, vi } from "vitest";
-import { statusBadgeClass, statusLabel } from "@/lib/status-utils";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import { statusBadgeClass, statusLabel, deadlineBadge } from "@/lib/status-utils";
 
 describe("status-utils", () => {
   describe("statusBadgeClass", () => {
@@ -80,6 +80,68 @@ describe("status-utils", () => {
     it("should return empty string for empty status", () => {
       const result = statusLabel("", mockT);
       expect(result).toBe("");
+    });
+  });
+
+  describe("deadlineBadge", () => {
+    const t = (key: string, vars?: Record<string, string | number>) => {
+      const map: Record<string, string> = {
+        "dashboard.deadlineOverdue": "Overdue",
+        "dashboard.deadlineDaysLeft": `${vars?.count}d left`,
+      };
+      return map[key] ?? key;
+    };
+
+    beforeEach(() => {
+      vi.spyOn(Date, "now").mockReturnValue(
+        new Date("2026-02-16T12:00:00Z").getTime(),
+      );
+    });
+
+    afterEach(() => {
+      vi.restoreAllMocks();
+    });
+
+    it("returns null for null deadline", () => {
+      expect(deadlineBadge(null, t)).toBeNull();
+    });
+
+    it("returns overdue badge with red styling for past deadlines", () => {
+      const past = new Date("2026-02-15T00:00:00Z");
+      const badge = deadlineBadge(past, t)!;
+      expect(badge.label).toBe("Overdue");
+      expect(badge.className).toContain("bg-red-100");
+      expect(badge.className).toContain("text-red-800");
+      expect(badge.className).toContain("dark:bg-red-900/50");
+    });
+
+    it("returns amber badge for deadline within 7 days", () => {
+      const soon = new Date("2026-02-20T12:00:00Z");
+      const badge = deadlineBadge(soon, t)!;
+      expect(badge.label).toBe("4d left");
+      expect(badge.className).toContain("bg-amber-100");
+      expect(badge.className).toContain("text-amber-800");
+    });
+
+    it("returns green badge for deadline more than 7 days away", () => {
+      const future = new Date("2026-03-10T12:00:00Z");
+      const badge = deadlineBadge(future, t)!;
+      expect(badge.className).toContain("bg-emerald-100");
+      expect(badge.className).toContain("text-emerald-800");
+    });
+
+    it("returns amber badge for exactly 7 days", () => {
+      const exact = new Date("2026-02-23T12:00:00Z");
+      const badge = deadlineBadge(exact, t)!;
+      expect(badge.label).toBe("7d left");
+      expect(badge.className).toContain("amber");
+    });
+
+    it("returns correct day count near boundary", () => {
+      // 8 days away → green
+      const eightDays = new Date("2026-02-24T13:00:00Z");
+      const badge = deadlineBadge(eightDays, t)!;
+      expect(badge.className).toContain("emerald");
     });
   });
 });
