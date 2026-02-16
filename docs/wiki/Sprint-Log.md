@@ -4,9 +4,9 @@ Reverse chronological. Click each sprint for full details.
 
 ---
 
-### 🏃 [Sprint 16 — Project Comments & Quality](Sprint-16) *(2026-02-16)*
+### ✅ [Sprint 16 — Project Comments & Quality](Sprint-16) *(2026-02-16)*
 **Focus:** Project-level comments (#19), ProposalList/VoteButtons tests, dead code cleanup, SQLite backup automation, CSRF E2E test
-**Stats:** 🔧 In progress | Issue #19
+**Stats:** 8/8 goals | 556 tests | Issue #19
 
 ---
 

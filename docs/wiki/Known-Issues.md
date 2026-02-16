@@ -4,15 +4,19 @@ Track bugs, limitations, and technical debt here.
 
 ## Open
 
-_None yet — Sprint 1 in progress_
+1. **SQLite concurrent writes** — single-writer lock is fine for low-traffic internal use, but may need Postgres at scale (spike done in Sprint 13).
+2. **Email deliverability** — SMTP provider may need SPF/DKIM setup for surcod.ro to avoid spam filters.
+3. **Pre-existing lint warning** — `useEffect` missing dependency `t` in `projects/[id]/edit/page.tsx:61` (does not affect runtime).
 
 ## Potential Risks
-1. **SQLite concurrent writes** — SQLite has a single-writer lock. For low-traffic internal tool this is fine, but may need WAL mode or migration to D1/Postgres at scale.
-2. **Email deliverability** — configured SMTP provider may need SPF/DKIM setup for surcod.ro to avoid spam filters.
-3. **Docker volume persistence** — SQLite data in Docker volume must be backed up regularly.
-4. **AI API costs** — Gemini/OpenAI calls for summarization need rate limiting.
-5. **Session security** — JWT in cookie needs proper expiry, rotation, and CSRF protection.
+
+1. **AI API costs** — rate-limited to 60 req/hr and 100K tokens/hr (configurable via env). Monitor usage.
 
 ## Resolved
 
-_None yet_
+1. **Docker volume persistence** — daily automated backup with 7-day rotation via systemd timer (Sprint 16).
+2. **AI rate limiting** — per-hour request + token limits with per-provider 429 throttling (Sprint 4).
+3. **Session security** — JWT with expiry, rotation, HttpOnly cookies, and CSRF double-submit tokens (Sprint 2, hardened Sprint 13-15).
+4. **CSRF protection** — double-submit cookie pattern on all server actions, E2E tested (Sprint 15-16).
+5. **HTML sanitization** — escapeHtml/stripHtml/sanitizeInput on all user input; CSP headers hardened (Sprint 13).
+6. **Dead code** — unused exports cleaned up (Sprint 16).
