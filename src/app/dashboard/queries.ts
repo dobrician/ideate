@@ -1,6 +1,6 @@
 import { db } from "@/db";
 import { projects, proposals, votes, comments, users } from "@/db/schema";
-import { eq, desc, sql, count } from "drizzle-orm";
+import { eq, desc, sql, count, or, inArray } from "drizzle-orm";
 
 /**
  * Fetch all data needed for the dashboard page in parallel.
@@ -50,21 +50,7 @@ export async function getDashboardData(userId: string) {
       .where(eq(votes.userId, userId))
       .orderBy(desc(votes.createdAt))
       .limit(8),
-    db
-      .select({
-        id: comments.id,
-        content: comments.content,
-        createdAt: comments.createdAt,
-        userName: users.firstName,
-        userEmail: users.email,
-        proposalTitle: proposals.title,
-        projectId: proposals.projectId,
-      })
-      .from(comments)
-      .leftJoin(users, eq(comments.userId, users.id))
-      .leftJoin(proposals, eq(comments.proposalId, proposals.id))
-      .orderBy(desc(comments.createdAt))
-      .limit(10),
+    getRecentActivity(userId),
     db
       .select({
         projectCount: sql<number>`(SELECT COUNT(*) FROM projects)`,
@@ -83,4 +69,55 @@ export async function getDashboardData(userId: string) {
     recentActivity,
     stats: totalStats[0],
   };
+}
+
+const activityColumns = {
+  id: comments.id,
+  content: comments.content,
+  createdAt: comments.createdAt,
+  userName: users.firstName,
+  userEmail: users.email,
+  proposalTitle: proposals.title,
+  projectId: proposals.projectId,
+};
+
+/**
+ * Get recent activity scoped to the user's projects/proposals.
+ * Falls back to global activity when the user has no projects yet.
+ */
+async function getRecentActivity(userId: string) {
+  const ownProjectIds = db
+    .select({ id: projects.id })
+    .from(projects)
+    .where(eq(projects.userId, userId));
+
+  const ownProposalIds = db
+    .select({ id: proposals.id })
+    .from(proposals)
+    .where(eq(proposals.userId, userId));
+
+  const scoped = await db
+    .select(activityColumns)
+    .from(comments)
+    .leftJoin(users, eq(comments.userId, users.id))
+    .leftJoin(proposals, eq(comments.proposalId, proposals.id))
+    .where(
+      or(
+        inArray(comments.projectId, ownProjectIds),
+        inArray(comments.proposalId, ownProposalIds),
+      ),
+    )
+    .orderBy(desc(comments.createdAt))
+    .limit(10);
+
+  if (scoped.length > 0) return scoped;
+
+  // Fallback: global activity for users with no projects/proposals
+  return db
+    .select(activityColumns)
+    .from(comments)
+    .leftJoin(users, eq(comments.userId, users.id))
+    .leftJoin(proposals, eq(comments.proposalId, proposals.id))
+    .orderBy(desc(comments.createdAt))
+    .limit(10);
 }

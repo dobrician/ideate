@@ -140,7 +140,7 @@ export const en: Record<string, string> = {
   "dashboard.yourProposals": "Your Proposals",
   "dashboard.recentVotes": "Your Recent Votes",
   "dashboard.activity": "Recent Activity",
-  "dashboard.activityDesc": "Latest discussions across all projects",
+  "dashboard.activityDesc": "Latest discussions on your projects",
   "dashboard.noProjects": "No projects yet.",
   "dashboard.createOne": "Create one",
   "dashboard.noProposals": "No proposals yet. Visit a project to submit one.",

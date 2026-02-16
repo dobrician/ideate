@@ -148,7 +148,7 @@ export const ro: Record<string, string> = {
   "dashboard.recentVotes": "Voturile Tale Recente",
   "dashboard.activity": "Activitate Recentă",
   "dashboard.activityDesc":
-    "Ultimele discuții din toate proiectele",
+    "Ultimele discuții din proiectele tale",
   "dashboard.noProjects": "Niciun proiect încă.",
   "dashboard.createOne": "Creează unul",
   "dashboard.noProposals":

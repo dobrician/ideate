@@ -7,7 +7,7 @@ Based on unified analysis from Claude + Codex (see docs/sprint23-unified-plan.md
 
 **Bug fixes & hardening:**
 - [x] Goal 1: Fix null-safe activity links and error leakage
-- [ ] Goal 2: Scope activity feed to user-relevant data
+- [x] Goal 2: Scope activity feed to user-relevant data
 - [ ] Goal 3: Replace platform-wide stats with personal stats
 
 **Layout redesign:**
