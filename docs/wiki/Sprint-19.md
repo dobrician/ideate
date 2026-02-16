@@ -19,7 +19,7 @@
 - [x] Proposal similarity check API + inline UI warnings on proposal form
 
 **Polish:**
-- [ ] Integration tests for AI endpoints + cleanup
+- [x] Integration tests for AI endpoints + cleanup
 
 ## Constraints
 - Commit + push after EACH goal
