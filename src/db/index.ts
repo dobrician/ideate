@@ -49,7 +49,7 @@ function applyMigrations(): void {
       sqlite.exec(stmt);
     }
 
-    sqlite.prepare("INSERT INTO _migrations (name) VALUES (?)").run(file);
+    sqlite.prepare("INSERT OR IGNORE INTO _migrations (name) VALUES (?)").run(file);
     logger.info({ migration: file }, "Applied migration");
   }
 }

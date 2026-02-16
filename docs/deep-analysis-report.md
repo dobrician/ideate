@@ -269,4 +269,60 @@ Add Sprint 18 entry to `docs/wiki/Sprint-Log.md` with goals. Create `docs/wiki/S
 
 ---
 
-*Report updated for Sprint 18 planning at commit 2193205 on main branch.*
+## Sprint 20 Goals
+
+**Snapshot (2026-02-16):** 597 tests, 41 files, all green. `tsc --noEmit` clean. `npm audit`: 4 moderate (dev-only esbuild, unchanged). Coverage: 96.7% stmt / 90.0% branch / 98.3% func / 98.0% line. 2 open issues (#40 new logo, #13 Cloudflare). Sprint 19 ported all AI features from ideator.
+
+Focus: **New logo integration, coverage gaps, remaining dead code, and production hardening.**
+
+### Goal 1: Use new logo in header, favicon, and PWA manifest (Issue #40)
+**Priority: High | Effort: 1-2h**
+Issue #40 requests branding update. Replace current logo/icon in the header component, generate favicon set, and update `manifest.json` with new icons at required sizes.
+
+### Goal 2: Cover csrf-client.ts (0% coverage)
+**Priority: High | Effort: 1-2h**
+`csrf-client.ts` has been at 0% stmt/branch/func since Sprint 16. It's a small file (lines 8-12) that reads CSRF tokens from cookies. Add JSDOM-compatible tests with mocked `document.cookie` to cover all paths.
+
+### Goal 3: Cover proposals/actions.ts uncovered error paths (92% stmt)
+**Priority: Medium | Effort: 1-2h**
+`proposals/actions.ts` has uncovered lines at 166, 185, 189, 234 — error/validation paths. Add tests exercising these branches to push statement coverage above 97%.
+
+### Goal 4: Cover auth.ts uncovered lines (83% branch)
+**Priority: Medium | Effort: 1-2h**
+`src/lib/auth.ts` has 83% branch coverage with uncovered lines 166, 232. Add tests for these edge cases (likely token expiry or session edge paths).
+
+### Goal 5: Cover notifications.ts debounce edge cases (83% branch)
+**Priority: Medium | Effort: 1h**
+`src/lib/notifications.ts` has 83% branch coverage — uncovered lines at 25, 37, 46, 76, 100, 119. Add tests for debounce timing and notification dedup paths.
+
+### Goal 6: Remove remaining dead code identified in Sprint 16
+**Priority: Medium | Effort: 1h**
+Check if these unused exports still exist: `buildProjectSummary` (ai.ts), `getAiUsageStats` (llm.ts), `getPermissions`/`requirePermission`/`canModifyResource` (rbac.ts), `sanitizeObject` (sanitize.ts). Remove any that remain unreferenced.
+
+### Goal 7: Improve export.ts branch coverage (79% branch)
+**Priority: Low | Effort: 1h**
+`src/lib/export.ts` has 79% branch coverage with uncovered lines at 100, 127-148, 164. These are likely format-specific export paths. Add tests for all export format variations.
+
+### Goal 8: Sprint 20 log entry in Sprint-Log.md
+**Priority: Low | Effort: 15min**
+Add Sprint 20 entry to `docs/wiki/Sprint-Log.md`. Create `docs/wiki/Sprint-20.md` with goal checklist. Update after completion.
+
+| # | Goal | Priority | Effort | Issue |
+|---|------|----------|--------|-------|
+| 1 | New logo — header, favicon, PWA | High | 1-2h | #40 |
+| 2 | Cover csrf-client.ts (0%) | High | 1-2h | — |
+| 3 | Cover proposals/actions.ts errors | Medium | 1-2h | — |
+| 4 | Cover auth.ts branches | Medium | 1-2h | — |
+| 5 | Cover notifications.ts edges | Medium | 1h | — |
+| 6 | Remove remaining dead code | Medium | 1h | — |
+| 7 | Cover export.ts branches | Low | 1h | — |
+| 8 | Sprint 20 log + checklist | Low | 15min | — |
+
+**Total estimated effort:** ~8-12 hours
+
+**Out of scope (same as prior sprints):**
+- PostgreSQL migration, Cloudflare deployment (#13), Redis rate limiter, JWT revocation, multi-tenancy
+
+---
+
+*Report updated for Sprint 20 planning at commit 01162e5 on main branch.*
