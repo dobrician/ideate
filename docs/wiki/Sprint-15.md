@@ -8,7 +8,7 @@
 - [ ] Fail fast on migration errors at startup — process.exit(1) instead of swallowing (#19-spike)
 
 **UX Bug Fixes:**
-- [ ] Fix registration form inline validation errors (#30)
+- [x] Fix registration form inline validation errors (#30)
 - [ ] Add admin link to navigation for admin users (#28)
 - [ ] Improve magic link login UX — explanation text + "check your email" screen (#29)
 

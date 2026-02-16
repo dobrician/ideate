@@ -250,8 +250,15 @@ export const en: Record<string, string> = {
   "auth.verifyEmailNote":
     "Please click the link in the email to verify your account. The link expires in 24 hours.",
   "auth.resendVerification": "Resend Verification Email",
+  "auth.emailRequired": "Email is required",
+  "auth.emailInvalid": "Please enter a valid email address",
   "auth.passwordMinLength": "Password must be at least 8 characters",
+  "auth.passwordUppercase": "Password must contain an uppercase letter",
+  "auth.passwordLowercase": "Password must contain a lowercase letter",
+  "auth.passwordNumber": "Password must contain a number",
   "auth.passwordMismatch": "Passwords do not match",
+  "auth.passwordRequired": "Password is required",
+  "auth.confirmPasswordRequired": "Please confirm your password",
   "auth.passwordRequirements":
     "Min 8 characters with uppercase, lowercase, and number",
   "auth.backToLogin": "Back to Sign In",

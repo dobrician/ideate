@@ -14,9 +14,37 @@ import {
 } from "@/components/ui/card";
 import { useLocale } from "@/lib/use-locale";
 
-/**
- * Registration page with email and password
- */
+interface FieldErrors {
+  email?: string;
+  password?: string;
+  confirmPassword?: string;
+}
+
+function validateEmail(email: string, t: (k: string) => string): string | undefined {
+  if (!email.trim()) return t("auth.emailRequired");
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return t("auth.emailInvalid");
+  return undefined;
+}
+
+function validatePassword(password: string, t: (k: string) => string): string | undefined {
+  if (!password) return t("auth.passwordRequired");
+  if (password.length < 8) return t("auth.passwordMinLength");
+  if (!/[A-Z]/.test(password)) return t("auth.passwordUppercase");
+  if (!/[a-z]/.test(password)) return t("auth.passwordLowercase");
+  if (!/\d/.test(password)) return t("auth.passwordNumber");
+  return undefined;
+}
+
+function validateConfirmPassword(
+  password: string,
+  confirmPassword: string,
+  t: (k: string) => string
+): string | undefined {
+  if (!confirmPassword) return t("auth.confirmPasswordRequired");
+  if (password !== confirmPassword) return t("auth.passwordMismatch");
+  return undefined;
+}
+
 export default function RegisterPage() {
   const { t } = useLocale();
   const [email, setEmail] = useState("");
@@ -25,17 +53,34 @@ export default function RegisterPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
+  const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
+  const [touched, setTouched] = useState<Record<string, boolean>>({});
+
+  function validateAll(): FieldErrors {
+    return {
+      email: validateEmail(email, t),
+      password: validatePassword(password, t),
+      confirmPassword: validateConfirmPassword(password, confirmPassword, t),
+    };
+  }
+
+  function handleBlur(field: string) {
+    setTouched((prev) => ({ ...prev, [field]: true }));
+    const errors = validateAll();
+    setFieldErrors(errors);
+  }
 
   async function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    setIsLoading(true);
     setError("");
 
-    if (password !== confirmPassword) {
-      setError(t("auth.passwordMismatch"));
-      setIsLoading(false);
-      return;
-    }
+    const errors = validateAll();
+    setFieldErrors(errors);
+    setTouched({ email: true, password: true, confirmPassword: true });
+
+    if (errors.email || errors.password || errors.confirmPassword) return;
+
+    setIsLoading(true);
 
     try {
       const response = await fetch("/api/auth/register", {
@@ -96,12 +141,10 @@ export default function RegisterPage() {
           <CardTitle className="text-2xl font-bold">
             {t("auth.registerTitle")}
           </CardTitle>
-          <CardDescription>
-            {t("auth.registerDesc")}
-          </CardDescription>
+          <CardDescription>{t("auth.registerDesc")}</CardDescription>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-4" noValidate>
             <div className="space-y-2">
               <Label htmlFor="email">{t("auth.email")}</Label>
               <Input
@@ -110,12 +153,20 @@ export default function RegisterPage() {
                 placeholder="you@example.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                required
+                onBlur={() => handleBlur("email")}
                 disabled={isLoading}
                 autoComplete="email"
                 autoFocus
+                aria-invalid={touched.email && !!fieldErrors.email}
+                aria-describedby={fieldErrors.email ? "email-error" : undefined}
               />
+              {touched.email && fieldErrors.email && (
+                <p id="email-error" className="text-xs text-red-600 dark:text-red-400">
+                  {fieldErrors.email}
+                </p>
+              )}
             </div>
+
             <div className="space-y-2">
               <Label htmlFor="password">{t("auth.password")}</Label>
               <Input
@@ -124,15 +175,26 @@ export default function RegisterPage() {
                 placeholder={t("auth.createPassword")}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                required
+                onBlur={() => handleBlur("password")}
                 disabled={isLoading}
                 autoComplete="new-password"
-                minLength={8}
+                aria-invalid={touched.password && !!fieldErrors.password}
+                aria-describedby={
+                  touched.password && fieldErrors.password
+                    ? "password-error"
+                    : "password-hint"
+                }
               />
-              <p className="text-xs text-muted-foreground">
+              <p id="password-hint" className="text-xs text-muted-foreground">
                 {t("auth.passwordRequirements")}
               </p>
+              {touched.password && fieldErrors.password && (
+                <p id="password-error" className="text-xs text-red-600 dark:text-red-400">
+                  {fieldErrors.password}
+                </p>
+              )}
             </div>
+
             <div className="space-y-2">
               <Label htmlFor="confirmPassword">{t("auth.confirmPassword")}</Label>
               <Input
@@ -141,18 +203,26 @@ export default function RegisterPage() {
                 placeholder={t("auth.confirmNewPassword")}
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
-                required
+                onBlur={() => handleBlur("confirmPassword")}
                 disabled={isLoading}
                 autoComplete="new-password"
-                minLength={8}
+                aria-invalid={touched.confirmPassword && !!fieldErrors.confirmPassword}
+                aria-describedby={
+                  touched.confirmPassword && fieldErrors.confirmPassword
+                    ? "confirm-error"
+                    : undefined
+                }
               />
+              {touched.confirmPassword && fieldErrors.confirmPassword && (
+                <p id="confirm-error" className="text-xs text-red-600 dark:text-red-400">
+                  {fieldErrors.confirmPassword}
+                </p>
+              )}
             </div>
 
             {error && (
               <div className="rounded-md bg-red-50 p-3 dark:bg-red-950">
-                <p className="text-sm text-red-800 dark:text-red-200">
-                  {error}
-                </p>
+                <p className="text-sm text-red-800 dark:text-red-200">{error}</p>
               </div>
             )}
 

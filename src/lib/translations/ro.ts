@@ -265,9 +265,16 @@ export const ro: Record<string, string> = {
   "auth.verifyEmailNote":
     "Apasă pe link-ul din email pentru a verifica contul. Link-ul expiră în 24 de ore.",
   "auth.resendVerification": "Retrimite Email de Verificare",
+  "auth.emailRequired": "Email-ul este obligatoriu",
+  "auth.emailInvalid": "Introdu o adresă de email validă",
   "auth.passwordMinLength":
     "Parola trebuie să aibă minim 8 caractere",
+  "auth.passwordUppercase": "Parola trebuie să conțină o literă mare",
+  "auth.passwordLowercase": "Parola trebuie să conțină o literă mică",
+  "auth.passwordNumber": "Parola trebuie să conțină o cifră",
   "auth.passwordMismatch": "Parolele nu coincid",
+  "auth.passwordRequired": "Parola este obligatorie",
+  "auth.confirmPasswordRequired": "Confirmă parola",
   "auth.passwordRequirements":
     "Minim 8 caractere cu majusculă, literă mică și cifră",
   "auth.backToLogin": "Înapoi la Autentificare",
