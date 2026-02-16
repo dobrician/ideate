@@ -203,6 +203,10 @@ export async function castVote(
       return { error: "You don't have permission to vote" };
     }
 
+    if (value !== 1 && value !== -1) {
+      return { error: "Invalid vote value — must be 1 or -1" };
+    }
+
     if (await isDeadlinePassed(projectId)) {
       return { error: "Voting is closed — the project deadline has passed" };
     }
