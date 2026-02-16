@@ -528,7 +528,7 @@
 - [x] Fix locale switcher — page content must translate, not just sidebar
 - [x] Localize dates and numbers per locale
 - [x] New Proposal form alignment and spacing fixes
-- [ ] Visual hierarchy improvements — badges, empty states, cards
+- [x] Visual hierarchy improvements — badges, empty states, cards
 - [ ] Dark/light mode consistency check
 - [ ] Mobile responsive fixes (320px+)
 - [ ] Login/register/auth pages visual polish
