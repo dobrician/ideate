@@ -16,6 +16,8 @@ interface JournalEntry { idx: number; tag: string }
 interface Journal { entries: JournalEntry[] }
 
 // Auto-apply pending migrations from drizzle journal
+// Uses IMMEDIATE transaction to prevent race conditions when multiple
+// Next.js build workers import this module simultaneously.
 function applyMigrations(): void {
   sqlite.exec(
     "CREATE TABLE IF NOT EXISTS _migrations (name TEXT PRIMARY KEY, applied_at INTEGER DEFAULT (unixepoch()))"
@@ -30,27 +32,35 @@ function applyMigrations(): void {
     .sort((a, b) => a.idx - b.idx)
     .map((e) => `${e.tag}.sql`);
 
-  for (const file of migrations) {
-    const applied = sqlite
-      .prepare("SELECT 1 FROM _migrations WHERE name = ?")
-      .get(file);
-    if (applied) continue;
+  // Acquire exclusive write lock before checking/applying migrations
+  sqlite.exec("BEGIN IMMEDIATE");
+  try {
+    for (const file of migrations) {
+      const applied = sqlite
+        .prepare("SELECT 1 FROM _migrations WHERE name = ?")
+        .get(file);
+      if (applied) continue;
 
-    const filePath = resolve(migrationDir, file);
-    if (!existsSync(filePath)) continue;
+      const filePath = resolve(migrationDir, file);
+      if (!existsSync(filePath)) continue;
 
-    const sql = readFileSync(filePath, "utf-8");
-    const statements = sql
-      .split("--> statement-breakpoint")
-      .map((s) => s.trim())
-      .filter(Boolean);
+      const sql = readFileSync(filePath, "utf-8");
+      const statements = sql
+        .split("--> statement-breakpoint")
+        .map((s) => s.trim())
+        .filter(Boolean);
 
-    for (const stmt of statements) {
-      sqlite.exec(stmt);
+      for (const stmt of statements) {
+        sqlite.exec(stmt);
+      }
+
+      sqlite.prepare("INSERT INTO _migrations (name) VALUES (?)").run(file);
+      logger.info({ migration: file }, "Applied migration");
     }
-
-    sqlite.prepare("INSERT OR IGNORE INTO _migrations (name) VALUES (?)").run(file);
-    logger.info({ migration: file }, "Applied migration");
+    sqlite.exec("COMMIT");
+  } catch (err) {
+    sqlite.exec("ROLLBACK");
+    throw err;
   }
 }
 
