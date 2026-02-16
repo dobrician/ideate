@@ -25,6 +25,7 @@ import { Trash2, Lightbulb } from "lucide-react";
 import { toast } from "sonner";
 import { useLocale } from "@/lib/use-locale";
 import { getCsrfTokenClient } from "@/lib/csrf-client";
+import { MarkdownRenderer } from "@/components/markdown-renderer";
 
 interface Comment {
   id: string;
@@ -222,9 +223,7 @@ function ProposalItem({
       <AccordionContent>
         <div className="space-y-4 px-4 pb-2">
           {displayText && (
-            <div className="whitespace-pre-wrap text-sm text-muted-foreground">
-              {displayText}
-            </div>
+            <MarkdownRenderer content={displayText} className="text-sm text-muted-foreground" />
           )}
 
           {proposal.summary &&
