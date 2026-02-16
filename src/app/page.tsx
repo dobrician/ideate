@@ -1,7 +1,7 @@
+import { redirect } from "next/navigation";
 import Link from "next/link";
 import {
   Card,
-  CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
@@ -15,6 +15,7 @@ import {
   LayoutDashboard,
 } from "lucide-react";
 import { getTranslations } from "@/lib/i18n-server";
+import { getCurrentUser } from "@/lib/auth";
 
 const jsonLd = {
   "@context": "https://schema.org",
@@ -28,6 +29,9 @@ const jsonLd = {
 };
 
 export default async function HomePage() {
+  const user = await getCurrentUser();
+  if (user) redirect("/dashboard");
+
   const { t } = await getTranslations();
 
   return (
@@ -47,15 +51,14 @@ export default async function HomePage() {
 
       <div className="flex flex-col gap-3 sm:flex-row">
         <Button asChild size="lg">
-          <Link href="/projects">
-            <FolderOpen className="mr-2 h-4 w-4" />
-            {t("home.viewProjects")}
+          <Link href="/auth/login">
+            {t("home.getStarted")}
           </Link>
         </Button>
         <Button asChild size="lg" variant="outline">
-          <Link href="/dashboard">
-            <LayoutDashboard className="mr-2 h-4 w-4" />
-            {t("home.dashboard")}
+          <Link href="/projects">
+            <FolderOpen className="mr-2 h-4 w-4" />
+            {t("home.viewProjects")}
           </Link>
         </Button>
       </div>
@@ -65,9 +68,7 @@ export default async function HomePage() {
           <CardHeader>
             <FolderOpen className="mb-2 h-6 w-6 text-muted-foreground" aria-hidden="true" />
             <CardTitle>{t("home.feature.projects")}</CardTitle>
-            <CardDescription>
-              {t("home.feature.projectsDesc")}
-            </CardDescription>
+            <CardDescription>{t("home.feature.projectsDesc")}</CardDescription>
           </CardHeader>
         </Card>
 
@@ -75,9 +76,7 @@ export default async function HomePage() {
           <CardHeader>
             <Lightbulb className="mb-2 h-6 w-6 text-muted-foreground" aria-hidden="true" />
             <CardTitle>{t("home.feature.proposals")}</CardTitle>
-            <CardDescription>
-              {t("home.feature.proposalsDesc")}
-            </CardDescription>
+            <CardDescription>{t("home.feature.proposalsDesc")}</CardDescription>
           </CardHeader>
         </Card>
 
@@ -85,9 +84,7 @@ export default async function HomePage() {
           <CardHeader>
             <BarChart3 className="mb-2 h-6 w-6 text-muted-foreground" aria-hidden="true" />
             <CardTitle>{t("home.feature.consensus")}</CardTitle>
-            <CardDescription>
-              {t("home.feature.consensusDesc")}
-            </CardDescription>
+            <CardDescription>{t("home.feature.consensusDesc")}</CardDescription>
           </CardHeader>
         </Card>
 
@@ -95,9 +92,7 @@ export default async function HomePage() {
           <CardHeader>
             <Users className="mb-2 h-6 w-6 text-muted-foreground" aria-hidden="true" />
             <CardTitle>{t("home.feature.discussion")}</CardTitle>
-            <CardDescription>
-              {t("home.feature.discussionDesc")}
-            </CardDescription>
+            <CardDescription>{t("home.feature.discussionDesc")}</CardDescription>
           </CardHeader>
         </Card>
 
@@ -105,9 +100,7 @@ export default async function HomePage() {
           <CardHeader>
             <LayoutDashboard className="mb-2 h-6 w-6 text-muted-foreground" aria-hidden="true" />
             <CardTitle>{t("home.feature.dashboardTitle")}</CardTitle>
-            <CardDescription>
-              {t("home.feature.dashboardDesc")}
-            </CardDescription>
+            <CardDescription>{t("home.feature.dashboardDesc")}</CardDescription>
           </CardHeader>
         </Card>
       </div>

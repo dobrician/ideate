@@ -6,7 +6,7 @@
 **UI Overhaul (from Ciprian's feedback):**
 - [x] Remove sidebar entirely, all navigation in top bar (#16, #22)
 - [x] Top nav: fixed-width, centered, contains logo, nav links (Dashboard/Projects), search, locale toggle, dark mode toggle, user menu
-- [ ] Homepage = Dashboard for logged-in users (#17)
+- [x] Homepage = Dashboard for logged-in users (#17)
 - [ ] Dark mode as simple toggle button with auto-detect (#18)
 - [ ] Proposal list as bar chart: vote percentage backgrounds, sorted descending (#20)
 - [ ] Fix duplicate plus icon on New Proposal button (#21)
