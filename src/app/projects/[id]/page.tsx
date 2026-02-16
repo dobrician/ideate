@@ -27,6 +27,7 @@ import { Pagination } from "@/components/pagination";
 import { ProjectComments } from "@/components/project-comments";
 import { getTranslations } from "@/lib/i18n-server";
 import { statusBadgeClass, statusLabel } from "@/lib/status-utils";
+import { RegenerateSummaryButton } from "@/components/regenerate-summary-button";
 
 interface ProjectPageProps {
   params: Promise<{ id: string }>;
@@ -146,9 +147,12 @@ export default async function ProjectPage({ params, searchParams }: ProjectPageP
         <CardContent className="space-y-6">
           {projectData.summary && (
             <div className="rounded-md bg-muted/50 p-3">
-              <p className="text-sm italic text-muted-foreground">
-                {projectData.summary}
-              </p>
+              <div className="flex items-start justify-between gap-2">
+                <p className="text-sm italic text-muted-foreground">
+                  {projectData.summary}
+                </p>
+                {canEdit && <RegenerateSummaryButton projectId={id} />}
+              </div>
             </div>
           )}
 
