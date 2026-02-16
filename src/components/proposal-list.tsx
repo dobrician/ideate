@@ -168,17 +168,17 @@ function ProposalItem({
   return (
     <AccordionItem
       value={proposal.id}
-      className="relative overflow-hidden rounded-lg border bg-card px-4"
+      className="rounded-lg border bg-card px-4"
     >
-      {upvotes > 0 && (
-        <div
-          className="pointer-events-none absolute inset-y-0 left-0 bg-gradient-to-r from-green-500/20 to-green-500/5 transition-all duration-300"
-          style={{ width: `${barWidth}%` }}
-          aria-hidden="true"
-        />
-      )}
-      <AccordionTrigger className="relative z-10 py-3 hover:no-underline">
-        <div className="flex w-full flex-col gap-2 pr-2 sm:flex-row sm:items-center sm:justify-between">
+      <AccordionTrigger className="relative overflow-hidden py-3 hover:no-underline">
+        {upvotes > 0 && (
+          <div
+            className="pointer-events-none absolute inset-y-0 left-0 bg-gradient-to-r from-green-500/20 to-green-500/5 transition-all duration-300"
+            style={{ width: `${barWidth}%` }}
+            aria-hidden="true"
+          />
+        )}
+        <div className="relative z-10 flex w-full flex-col gap-2 pr-2 sm:flex-row sm:items-center sm:justify-between">
           <div className="min-w-0 flex-1 text-left">
             <span className="font-medium">{proposal.title}</span>
             <span className="ml-2 text-xs text-muted-foreground">
@@ -206,7 +206,7 @@ function ProposalItem({
           </div>
         </div>
       </AccordionTrigger>
-      <AccordionContent className="relative z-10">
+      <AccordionContent>
         <div className="space-y-4 pb-2">
           <VoteBar upvotes={upvotes} downvotes={downvotes} />
 
