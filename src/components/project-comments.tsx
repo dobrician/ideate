@@ -2,6 +2,7 @@
 
 import { MessageSquare } from "lucide-react";
 import { useLocale } from "@/lib/use-locale";
+import { useCommentPoll } from "@/lib/use-comment-poll";
 import { CommentThread } from "./comment-thread";
 import type { Comment } from "./comment-thread";
 
@@ -13,6 +14,7 @@ interface ProjectCommentsProps {
 
 export function ProjectComments({ projectId, comments, currentUserId }: ProjectCommentsProps) {
   const { t } = useLocale();
+  useCommentPoll();
 
   return (
     <div className="border-t p-4 pt-6">

@@ -4,6 +4,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/co
 import { Button } from "@/components/ui/button";
 import { MessageSquare } from "lucide-react";
 import { useLocale } from "@/lib/use-locale";
+import { useCommentPoll } from "@/lib/use-comment-poll";
 import { CommentThread } from "./comment-thread";
 import type { Comment } from "./comment-thread";
 
@@ -25,6 +26,7 @@ export function DiscussionSheet({
   currentUserId,
 }: DiscussionSheetProps) {
   const { t } = useLocale();
+  useCommentPoll();
 
   return (
     <Sheet>
