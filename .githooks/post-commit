@@ -1,6 +1,6 @@
 #!/bin/bash
 # Auto-check sprint goals based on commit message content
-# Matches issue numbers (#16, #17, etc.) or keywords from goals
+# Matches issue numbers (#16, #22, etc.) — only FIRST unchecked line per issue
 
 SPRINT_FILE=$(ls docs/wiki/Sprint-*.md 2>/dev/null | grep -v "Sprint-Log" | sort -t- -k2 -n | tail -1)
 [ -z "$SPRINT_FILE" ] && exit 0
@@ -13,10 +13,12 @@ COMMIT_MSG=$(git log -1 --pretty=%B)
 CHANGED=false
 
 # Try to match issue numbers in commit message (#16, #22, etc.)
-for ISSUE in $(echo "$COMMIT_MSG" | grep -oE '#[0-9]+' | tr -d '#'); do
-  if grep -q "\- \[ \].*#${ISSUE}" "$SPRINT_FILE" 2>/dev/null; then
-    sed -i "s/- \[ \]\(.*#${ISSUE}\)/- [x]\1/" "$SPRINT_FILE"
-    echo "✅ Auto-checked goal matching #${ISSUE} in $SPRINT_FILE"
+for ISSUE in $(echo "$COMMIT_MSG" | grep -oE '#[0-9]+' | tr -d '#' | sort -u); do
+  # Only check off the FIRST unchecked line matching this issue
+  LINE_NUM=$(grep -n "\- \[ \].*#${ISSUE}" "$SPRINT_FILE" 2>/dev/null | head -1 | cut -d: -f1)
+  if [ -n "$LINE_NUM" ]; then
+    sed -i "${LINE_NUM}s/- \[ \]/- [x]/" "$SPRINT_FILE"
+    echo "✅ Auto-checked first unchecked goal matching #${ISSUE} (line $LINE_NUM) in $SPRINT_FILE"
     CHANGED=true
   fi
 done
