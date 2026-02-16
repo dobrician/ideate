@@ -16,7 +16,7 @@ Based on unified analysis from both Claude and Codex (see docs/sprint22-unified-
 **UX (user-visible):**
 - [x] Goal 7: Create missing verify pages + surface resend-verification on EMAIL_NOT_VERIFIED
 - [x] Goal 8: Add password visibility toggle on all auth pages
-- [ ] Goal 9: Fix duplicate page section at bottom (#42) + proposal form should be modal (#41)
+- [x] Goal 9: Fix duplicate page section at bottom (#42) + proposal form should be modal (#41)
 
 **Tests:**
 - [ ] Goal 10: Fix stale E2E auth tests + add mobile viewport auth tests
