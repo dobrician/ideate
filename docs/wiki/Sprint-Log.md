@@ -4,6 +4,12 @@ Reverse chronological. Click each sprint for full details.
 
 ---
 
+### 🏃 [Sprint 17 — Vote Bar Redesign & Polish](Sprint-17) *(2026-02-16)*
+**Focus:** Vote bar chart redesign (green left/red right, proportional), comment UI polish, migration runner fix
+**Stats:** 🔧 In progress | Issues #32-34, #36
+
+---
+
 ### ✅ [Sprint 16 — Project Comments & Quality](Sprint-16) *(2026-02-16)*
 **Focus:** Project-level comments (#19), ProposalList/VoteButtons tests, dead code cleanup, SQLite backup automation, CSRF E2E test
 **Stats:** 8/8 goals | 556 tests | Issue #19
