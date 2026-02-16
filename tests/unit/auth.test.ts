@@ -156,6 +156,21 @@ describe("Auth Library", () => {
       expect(payload).toBeNull();
     });
 
+    it("should return null for token with non-session type but valid audience/issuer", () => {
+      const token = jwt.sign(
+        { userId: "user-123", email: "test@example.com", type: "magic-link" },
+        process.env.JWT_SECRET!,
+        {
+          expiresIn: "7d",
+          issuer: process.env.APP_URL,
+          audience: process.env.APP_URL,
+          notBefore: Math.floor(Date.now() / 1000),
+        }
+      );
+      const payload = verifySessionToken(token);
+      expect(payload).toBeNull();
+    });
+
     it("should return null for token with wrong audience", () => {
       const wrongAudienceToken = jwt.sign(
         { userId: "user-123", email: "test@example.com", type: "session", jti: "test-jti" },

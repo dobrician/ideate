@@ -96,6 +96,25 @@ describe("Auth Session Functions", () => {
       expect(session?.userId).toBe("user-123");
       expect(session?.email).toBe("test@example.com");
     });
+
+    it("should rotate token when expiry is within 3 days", async () => {
+      const { createSessionToken, getSession } = await import("@/lib/auth");
+      const jwt = await import("jsonwebtoken");
+      const secret = process.env.JWT_SECRET!;
+      const now = Math.floor(Date.now() / 1000);
+      // Create a token that expires in 2 days (below 3-day rotation threshold)
+      const token = jwt.default.sign(
+        { userId: "user-123", email: "test@example.com", type: "session", jti: "rot-jti" },
+        secret,
+        { expiresIn: 60 * 60 * 24 * 2, issuer: process.env.APP_URL, audience: process.env.APP_URL }
+      );
+      mockCookies.get.mockReturnValue({ value: token });
+
+      const session = await getSession();
+      expect(session?.userId).toBe("user-123");
+      // setSessionCookie sets 2 cookies (session + csrf) during rotation
+      expect(mockCookies.set).toHaveBeenCalledTimes(2);
+    });
   });
 
   describe("getCurrentUser", () => {
