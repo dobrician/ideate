@@ -12,7 +12,7 @@
 - [x] Fix duplicate plus icon on New Proposal button (#21)
 
 **Bug Fixes (from retest report):**
-- [ ] Fix logout redirect to 0.0.0.0 — use APP_URL (#23)
+- [x] Fix logout redirect to 0.0.0.0 — use APP_URL (#23)
 - [ ] Fix PWA banner: show once, remember dismissal in localStorage (#24)
 - [ ] Fix Romanian typos/diacritics throughout (#25)
 - [ ] Hide Sign Out from guest/logged-out nav (#26)

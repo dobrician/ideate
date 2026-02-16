@@ -17,7 +17,8 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    const url = new URL("/auth/login", request.url);
+    const baseUrl = process.env.APP_URL || request.url;
+    const url = new URL("/auth/login", baseUrl);
     const response = NextResponse.redirect(url);
     // Ensure cookies are cleared in the redirect response as well
     response.cookies.delete("session");
