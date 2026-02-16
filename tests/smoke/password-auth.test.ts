@@ -83,7 +83,7 @@ test.describe("Smoke Tests - Password Auth Flow", () => {
     await page.goto(`${APP_URL}/auth/register`);
     await page.waitForLoadState("networkidle");
 
-    const heading = await page.textContent("h2, [class*='CardTitle']");
+    const heading = await page.textContent("[data-slot='card-title']");
     expect(heading).toContain("Create");
 
     // Should have email, password, confirm fields
