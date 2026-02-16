@@ -135,6 +135,7 @@ test.describe("Smoke Tests - Full Auth Flow", () => {
     const logoutResponse = await request.post(`${APP_URL}/auth/logout`, {
       headers: {
         Cookie: `session=${sessionCookie!.value}`,
+        Accept: "application/json",
       },
     });
     expect(logoutResponse.status()).toBe(200);
