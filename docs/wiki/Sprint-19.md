@@ -26,3 +26,20 @@
 - After each goal, edit this file: change `- [ ]` to `- [x]` (do NOT add new lines)
 - Lint + type check + tests + build must pass before each push
 - PRESERVE original prompts from ideator verbatim — see docs/sprint-ai-features.md
+
+## Outcomes
+- 10 incremental commits, **32/32 smoke** (12.7s), **30 new tests**
+- Ported ALL AI features from ideator with original prompts preserved:
+  - Project summary generation (lib + API + regenerate button + cron batch)
+  - AI proposal suggestions (✨ sparkles button, modal, vote/preview/submit)
+  - Proposal similarity check (API + inline UI warnings on form)
+  - Submit-suggested API (create proposals from AI suggestions)
+  - Markdown renderer for AI suggestion details
+  - 20+ i18n keys (EN + RO)
+- New files: 9 created, 6 modified
+- LLM: Gemini primary + OpenAI fallback with 15-min throttle (preserved from ideator)
+
+## Notes
+- Cleanest sprint yet — 10/10 in single session, no max turns hit
+- All prompts verbatim from ideator, adapted to our architecture
+- GEMINI_API_KEY needed in .env for AI features to work on staging

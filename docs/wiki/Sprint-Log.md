@@ -4,9 +4,9 @@ Reverse chronological. Click each sprint for full details.
 
 ---
 
-### 🏃 [Sprint 19 — AI Features from Ideator](Sprint-19) *(2026-02-16)*
+### ✅ [Sprint 19 — AI Features from Ideator](Sprint-19) *(2026-02-16)*
 **Focus:** Port all AI features from ideator: project summaries, AI proposal suggestions (✨), similarity check, markdown renderer
-**Stats:** 🔧 In progress | ~7.5h estimated
+**Stats:** 10 commits | 32/32 smoke | 30 new tests
 
 ---
 
