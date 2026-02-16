@@ -19,6 +19,7 @@ import {
   MessageSquare,
 } from "lucide-react";
 import { StatCard, formatRelativeTime } from "@/components/stat-card";
+import { getTranslations } from "@/lib/i18n-server";
 
 /**
  * Dashboard page showing user overview, recent votes, and activity feed
@@ -26,6 +27,7 @@ import { StatCard, formatRelativeTime } from "@/components/stat-card";
 export default async function DashboardPage() {
   const user = await getCurrentUser();
   if (!user) redirect("/auth/login");
+  const { t } = await getTranslations();
 
   // Parallel queries for dashboard stats
   const [
@@ -102,31 +104,31 @@ export default async function DashboardPage() {
   return (
     <div className="container mx-auto max-w-6xl px-4 py-8">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold">Dashboard</h1>
+        <h1 className="text-3xl font-bold">{t("dashboard.title")}</h1>
         <p className="text-muted-foreground">
-          Welcome back, {user.firstName || user.email}
+          {t("dashboard.welcomeBack", { name: user.firstName || user.email })}
         </p>
       </div>
 
       {/* Stats cards */}
       <div className="mb-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4" role="region" aria-label="Platform statistics">
         <StatCard
-          title="Projects"
+          title={t("dashboard.stats.projects")}
           value={Number(stats?.projectCount ?? 0)}
           icon={<FolderOpen className="h-4 w-4 text-muted-foreground" />}
         />
         <StatCard
-          title="Proposals"
+          title={t("dashboard.stats.proposals")}
           value={Number(stats?.proposalCount ?? 0)}
           icon={<Lightbulb className="h-4 w-4 text-muted-foreground" />}
         />
         <StatCard
-          title="Total Votes"
+          title={t("dashboard.stats.votes")}
           value={Number(stats?.voteCount ?? 0)}
           icon={<ThumbsUp className="h-4 w-4 text-muted-foreground" />}
         />
         <StatCard
-          title="Comments"
+          title={t("dashboard.stats.comments")}
           value={Number(stats?.commentCount ?? 0)}
           icon={<MessageSquare className="h-4 w-4 text-muted-foreground" />}
         />
@@ -136,7 +138,7 @@ export default async function DashboardPage() {
         {/* User's projects */}
         <Card>
           <CardHeader>
-            <CardTitle className="text-lg">Your Projects</CardTitle>
+            <CardTitle className="text-lg">{t("dashboard.yourProjects")}</CardTitle>
             <CardDescription>
               {userProjects.length} project{userProjects.length !== 1 ? "s" : ""}
             </CardDescription>
@@ -144,9 +146,9 @@ export default async function DashboardPage() {
           <CardContent>
             {userProjects.length === 0 ? (
               <p className="text-sm text-muted-foreground">
-                No projects yet.{" "}
+                {t("dashboard.noProjects")}{" "}
                 <Link href="/projects/new" className="underline">
-                  Create one
+                  {t("dashboard.createOne")}
                 </Link>
               </p>
             ) : (
@@ -174,7 +176,7 @@ export default async function DashboardPage() {
         {/* User's proposals */}
         <Card>
           <CardHeader>
-            <CardTitle className="text-lg">Your Proposals</CardTitle>
+            <CardTitle className="text-lg">{t("dashboard.yourProposals")}</CardTitle>
             <CardDescription>
               {userProposals.length} recent proposal{userProposals.length !== 1 ? "s" : ""}
             </CardDescription>
@@ -182,7 +184,7 @@ export default async function DashboardPage() {
           <CardContent>
             {userProposals.length === 0 ? (
               <p className="text-sm text-muted-foreground">
-                No proposals yet. Visit a project to submit one.
+                {t("dashboard.noProposals")}
               </p>
             ) : (
               <ul className="space-y-3" role="list">
@@ -209,15 +211,15 @@ export default async function DashboardPage() {
         {/* Recent votes */}
         <Card>
           <CardHeader>
-            <CardTitle className="text-lg">Your Recent Votes</CardTitle>
+            <CardTitle className="text-lg">{t("dashboard.recentVotes")}</CardTitle>
             <CardDescription>
-              {userVoteCount[0]?.total ?? 0} total votes cast
+              {t("dashboard.totalVotes", { count: userVoteCount[0]?.total ?? 0 })}
             </CardDescription>
           </CardHeader>
           <CardContent>
             {recentVotes.length === 0 ? (
               <p className="text-sm text-muted-foreground">
-                No votes yet. Visit a project to vote on proposals.
+                {t("dashboard.noVotes")}
               </p>
             ) : (
               <ul className="space-y-3" role="list">
@@ -248,12 +250,12 @@ export default async function DashboardPage() {
         {/* Activity feed */}
         <Card>
           <CardHeader>
-            <CardTitle className="text-lg">Recent Activity</CardTitle>
-            <CardDescription>Latest discussions across all projects</CardDescription>
+            <CardTitle className="text-lg">{t("dashboard.activity")}</CardTitle>
+            <CardDescription>{t("dashboard.activityDesc")}</CardDescription>
           </CardHeader>
           <CardContent>
             {recentActivity.length === 0 ? (
-              <p className="text-sm text-muted-foreground">No recent activity.</p>
+              <p className="text-sm text-muted-foreground">{t("dashboard.noActivity")}</p>
             ) : (
               <ul className="space-y-3" role="list">
                 {recentActivity.map((a) => (
@@ -266,7 +268,7 @@ export default async function DashboardPage() {
                         {a.userName || a.userEmail || "Someone"}
                       </span>
                       <span className="text-muted-foreground">
-                        {" "}commented on{" "}
+                        {" "}{t("dashboard.commentedOn")}{" "}
                       </span>
                       <span className="font-medium group-hover:underline">
                         {a.proposalTitle}

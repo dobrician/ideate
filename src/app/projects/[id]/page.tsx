@@ -21,6 +21,7 @@ import { ProposalList } from "@/components/proposal-list";
 import { ExportButtons } from "@/components/export-buttons";
 import { DeadlineCountdown } from "@/components/deadline-countdown";
 import { getProjectProposals } from "./queries";
+import { getTranslations } from "@/lib/i18n-server";
 
 interface ProjectPageProps {
   params: Promise<{ id: string }>;
@@ -70,6 +71,7 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
   }
 
   const { id } = await params;
+  const { t } = await getTranslations();
   const role = user.role as Role;
 
   const project = await db
@@ -93,14 +95,14 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
     <div className="container mx-auto max-w-4xl px-4 py-6 sm:py-8">
       <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <Button asChild variant="outline" size="sm">
-          <Link href="/projects">&larr; Back to Projects</Link>
+          <Link href="/projects">&larr; {t("projects.back")}</Link>
         </Button>
         <div className="flex flex-wrap gap-2">
           <ExportButtons projectId={id} />
           {canEdit && (
             <>
               <Button asChild variant="outline" size="sm">
-                <Link href={`/projects/${id}/edit`}>Edit</Link>
+                <Link href={`/projects/${id}/edit`}>{t("projects.edit")}</Link>
               </Button>
               <DeleteProjectButton projectId={id} />
             </>
@@ -145,7 +147,7 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
 
           {projectData.description && (
             <div>
-              <h2 className="mb-2 text-lg font-semibold">Description</h2>
+              <h2 className="mb-2 text-lg font-semibold">{t("projects.description")}</h2>
               <div className="prose dark:prose-invert max-w-none">
                 <p className="whitespace-pre-wrap text-muted-foreground">
                   {projectData.description}
@@ -157,28 +159,28 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
           <div className="grid gap-4 sm:grid-cols-2">
             <div>
               <h3 className="mb-1 text-sm font-medium text-muted-foreground">
-                Created
+                {t("projects.created")}
               </h3>
               <p>
                 {projectData.createdAt
                   ? new Date(projectData.createdAt).toLocaleDateString(
-                      "en-US",
+                      undefined,
                       { year: "numeric", month: "long", day: "numeric" }
                     )
-                  : "Unknown"}
+                  : t("projects.unknown")}
               </p>
             </div>
             <div>
               <h3 className="mb-1 text-sm font-medium text-muted-foreground">
-                Last Updated
+                {t("projects.lastUpdated")}
               </h3>
               <p>
                 {projectData.updatedAt
                   ? new Date(projectData.updatedAt).toLocaleDateString(
-                      "en-US",
+                      undefined,
                       { year: "numeric", month: "long", day: "numeric" }
                     )
-                  : "Never"}
+                  : t("projects.never")}
               </p>
             </div>
           </div>
@@ -186,7 +188,7 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
           <div className="border-t pt-6">
             <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <h2 className="text-lg font-semibold">
-                Proposals ({proposalsWithStats.length})
+                {t("proposals.count", { count: proposalsWithStats.length })}
               </h2>
               {canCreateProposal && <ProposalForm projectId={id} />}
             </div>

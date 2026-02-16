@@ -4,6 +4,7 @@ import { useState } from "react";
 import { updateUserRole } from "./actions";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
+import { useLocale } from "@/lib/use-locale";
 
 interface UserData {
   id: string;
@@ -35,6 +36,7 @@ export function UserRoleManager({
   users,
   currentUserId,
 }: UserRoleManagerProps) {
+  const { t } = useLocale();
   const [loadingId, setLoadingId] = useState<string | null>(null);
 
   async function handleRoleChange(userId: string, newRole: string) {
@@ -45,7 +47,7 @@ export function UserRoleManager({
     if (result.error) {
       toast.error(result.error);
     } else {
-      toast.success("Role updated");
+      toast.success(t("admin.roleUpdated"));
     }
   }
 
@@ -54,10 +56,10 @@ export function UserRoleManager({
       <table className="w-full text-sm">
         <thead>
           <tr className="border-b text-left">
-            <th className="pb-2 font-medium">Email</th>
-            <th className="pb-2 font-medium">Name</th>
-            <th className="pb-2 font-medium">Role</th>
-            <th className="pb-2 font-medium">Joined</th>
+            <th className="pb-2 font-medium">{t("admin.email")}</th>
+            <th className="pb-2 font-medium">{t("admin.name")}</th>
+            <th className="pb-2 font-medium">{t("admin.role")}</th>
+            <th className="pb-2 font-medium">{t("admin.joined")}</th>
           </tr>
         </thead>
         <tbody>
@@ -76,7 +78,7 @@ export function UserRoleManager({
                       className={ROLE_COLORS[u.role] || ""}
                       variant="outline"
                     >
-                      {u.role} (you)
+                      {u.role} {t("admin.you")}
                     </Badge>
                   ) : (
                     <select

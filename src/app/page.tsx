@@ -14,6 +14,7 @@ import {
   Users,
   LayoutDashboard,
 } from "lucide-react";
+import { getTranslations } from "@/lib/i18n-server";
 
 const jsonLd = {
   "@context": "https://schema.org",
@@ -26,7 +27,9 @@ const jsonLd = {
   url: "https://idea.surmont.co",
 };
 
-export default function HomePage() {
+export default async function HomePage() {
+  const { t } = await getTranslations();
+
   return (
     <main className="mx-auto max-w-4xl space-y-8 px-4 py-8" role="main">
       <script
@@ -35,11 +38,10 @@ export default function HomePage() {
       />
       <div className="text-center sm:text-left">
         <h2 className="text-3xl font-bold tracking-tight">
-          Welcome to Ideate
+          {t("home.welcome")}
         </h2>
         <p className="mt-2 text-muted-foreground">
-          Democratic idea prioritization for teams. Create projects, submit
-          proposals, vote, and discuss.
+          {t("home.description")}
         </p>
       </div>
 
@@ -47,13 +49,13 @@ export default function HomePage() {
         <Button asChild size="lg">
           <Link href="/projects">
             <FolderOpen className="mr-2 h-4 w-4" />
-            View Projects
+            {t("home.viewProjects")}
           </Link>
         </Button>
         <Button asChild size="lg" variant="outline">
           <Link href="/dashboard">
             <LayoutDashboard className="mr-2 h-4 w-4" />
-            Dashboard
+            {t("home.dashboard")}
           </Link>
         </Button>
       </div>
@@ -62,10 +64,9 @@ export default function HomePage() {
         <Card className="transition-shadow duration-200 hover:shadow-md">
           <CardHeader>
             <FolderOpen className="mb-2 h-6 w-6 text-muted-foreground" aria-hidden="true" />
-            <CardTitle>Projects</CardTitle>
+            <CardTitle>{t("home.feature.projects")}</CardTitle>
             <CardDescription>
-              Create and manage idea prioritization projects with deadlines and
-              status tracking
+              {t("home.feature.projectsDesc")}
             </CardDescription>
           </CardHeader>
         </Card>
@@ -73,10 +74,9 @@ export default function HomePage() {
         <Card className="transition-shadow duration-200 hover:shadow-md">
           <CardHeader>
             <Lightbulb className="mb-2 h-6 w-6 text-muted-foreground" aria-hidden="true" />
-            <CardTitle>Proposals</CardTitle>
+            <CardTitle>{t("home.feature.proposals")}</CardTitle>
             <CardDescription>
-              Submit proposals, vote pro or contra, and see AI-generated
-              summaries
+              {t("home.feature.proposalsDesc")}
             </CardDescription>
           </CardHeader>
         </Card>
@@ -84,10 +84,9 @@ export default function HomePage() {
         <Card className="transition-shadow duration-200 hover:shadow-md">
           <CardHeader>
             <BarChart3 className="mb-2 h-6 w-6 text-muted-foreground" aria-hidden="true" />
-            <CardTitle>Consensus</CardTitle>
+            <CardTitle>{t("home.feature.consensus")}</CardTitle>
             <CardDescription>
-              Real-time vote charts show team alignment and help prioritize
-              ideas
+              {t("home.feature.consensusDesc")}
             </CardDescription>
           </CardHeader>
         </Card>
@@ -95,10 +94,9 @@ export default function HomePage() {
         <Card className="transition-shadow duration-200 hover:shadow-md">
           <CardHeader>
             <Users className="mb-2 h-6 w-6 text-muted-foreground" aria-hidden="true" />
-            <CardTitle>Discussions</CardTitle>
+            <CardTitle>{t("home.feature.discussion")}</CardTitle>
             <CardDescription>
-              Threaded comments on every proposal for structured team
-              conversations
+              {t("home.feature.discussionDesc")}
             </CardDescription>
           </CardHeader>
         </Card>
@@ -106,10 +104,9 @@ export default function HomePage() {
         <Card className="transition-shadow duration-200 hover:shadow-md">
           <CardHeader>
             <LayoutDashboard className="mb-2 h-6 w-6 text-muted-foreground" aria-hidden="true" />
-            <CardTitle>Dashboard</CardTitle>
+            <CardTitle>{t("home.feature.dashboardTitle")}</CardTitle>
             <CardDescription>
-              Personal overview of your projects, proposals, votes, and recent
-              activity
+              {t("home.feature.dashboardDesc")}
             </CardDescription>
           </CardHeader>
         </Card>

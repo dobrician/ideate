@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { deleteProject } from "../actions";
 import { toast } from "sonner";
+import { useLocale } from "@/lib/use-locale";
 
 interface DeleteProjectButtonProps {
   projectId: string;
@@ -13,6 +14,7 @@ interface DeleteProjectButtonProps {
  * Delete project button with confirmation and toast feedback
  */
 export function DeleteProjectButton({ projectId }: DeleteProjectButtonProps) {
+  const { t } = useLocale();
   const [isDeleting, setIsDeleting] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
 
@@ -29,7 +31,7 @@ export function DeleteProjectButton({ projectId }: DeleteProjectButtonProps) {
       }
       // If successful, deleteProject redirects automatically
     } catch {
-      toast.error("Failed to delete project");
+      toast.error(t("deleteProject.failed"));
       setIsDeleting(false);
       setShowConfirm(false);
     }
@@ -44,7 +46,7 @@ export function DeleteProjectButton({ projectId }: DeleteProjectButtonProps) {
           onClick={handleDelete}
           disabled={isDeleting}
         >
-          {isDeleting ? "Deleting..." : "Confirm Delete"}
+          {isDeleting ? t("deleteProject.deleting") : t("deleteProject.confirm")}
         </Button>
         <Button
           variant="outline"
@@ -52,7 +54,7 @@ export function DeleteProjectButton({ projectId }: DeleteProjectButtonProps) {
           onClick={() => setShowConfirm(false)}
           disabled={isDeleting}
         >
-          Cancel
+          {t("common.cancel")}
         </Button>
       </div>
     );
@@ -60,7 +62,7 @@ export function DeleteProjectButton({ projectId }: DeleteProjectButtonProps) {
 
   return (
     <Button variant="destructive" onClick={() => setShowConfirm(true)}>
-      Delete
+      {t("common.delete")}
     </Button>
   );
 }

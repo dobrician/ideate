@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { Search, FileText, Lightbulb } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import { useLocale } from "@/lib/use-locale";
 
 interface SearchResult {
   id: string;
@@ -16,6 +17,7 @@ interface SearchResult {
  * Renders results in a dropdown overlay.
  */
 export function SearchBar() {
+  const { t } = useLocale();
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<SearchResult[]>([]);
   const [isOpen, setIsOpen] = useState(false);
@@ -70,7 +72,7 @@ export function SearchBar() {
         <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" aria-hidden="true" />
         <Input
           type="search"
-          placeholder="Search projects & proposals..."
+          placeholder={t("search.placeholder")}
           aria-label="Search projects and proposals"
           value={query}
           onChange={(e) => handleChange(e.target.value)}
@@ -83,12 +85,12 @@ export function SearchBar() {
         <div id="search-results-listbox" role="listbox" aria-label="Search results" className="absolute top-full left-0 right-0 z-50 mt-1 bg-popover border rounded-md shadow-lg max-h-80 overflow-y-auto animate-in fade-in-0 slide-in-from-top-1 duration-150">
           {loading && (
             <div className="p-3 text-sm text-muted-foreground" role="status" aria-live="polite">
-              Searching...
+              {t("search.searching")}
             </div>
           )}
           {!loading && results.length === 0 && query.length >= 2 && (
             <div className="p-3 text-sm text-muted-foreground" role="status">
-              No results found
+              {t("search.noResults")}
             </div>
           )}
           {results.map((result) => (

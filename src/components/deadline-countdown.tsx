@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { Clock, AlertTriangle } from "lucide-react";
+import { useLocale } from "@/lib/use-locale";
 
 interface DeadlineCountdownProps {
   deadline: Date | string;
@@ -33,6 +34,7 @@ function calcTimeLeft(deadline: Date): TimeLeft {
  * Countdown timer showing time remaining until project deadline
  */
 export function DeadlineCountdown({ deadline }: DeadlineCountdownProps) {
+  const { t } = useLocale();
   const deadlineMs = new Date(deadline).getTime();
   const [timeLeft, setTimeLeft] = useState<TimeLeft>(
     calcTimeLeft(new Date(deadlineMs))
@@ -50,7 +52,7 @@ export function DeadlineCountdown({ deadline }: DeadlineCountdownProps) {
     return (
       <div className="flex items-center gap-2 rounded-md bg-red-100 px-3 py-2 text-sm font-medium text-red-800 dark:bg-red-900 dark:text-red-200">
         <AlertTriangle className="h-4 w-4" />
-        Voting Closed
+        {t("deadline.closed")}
       </div>
     );
   }
@@ -72,7 +74,7 @@ export function DeadlineCountdown({ deadline }: DeadlineCountdownProps) {
         {String(timeLeft.minutes).padStart(2, "0")}:
         {String(timeLeft.seconds).padStart(2, "0")}
       </span>
-      <span className="text-xs opacity-75">remaining</span>
+      <span className="text-xs opacity-75">{t("deadline.remaining")}</span>
     </div>
   );
 }

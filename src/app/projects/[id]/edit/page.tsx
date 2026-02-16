@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/card";
 import { updateProject } from "../../actions";
 import { toast } from "sonner";
+import { useLocale } from "@/lib/use-locale";
 
 interface ProjectData {
   id: string;
@@ -29,6 +30,7 @@ interface ProjectData {
  */
 export default function EditProjectPage() {
   const router = useRouter();
+  const { t } = useLocale();
   const params = useParams();
   const projectId = params.id as string;
 
@@ -71,12 +73,12 @@ export default function EditProjectPage() {
         toast.error(result.error);
         setIsSaving(false);
       } else if (result?.success) {
-        toast.success("Project updated!");
+        toast.success(t("projectForm.projectUpdated"));
         router.push(`/projects/${projectId}`);
       }
     } catch {
-      setError("An error occurred. Please try again.");
-      toast.error("An error occurred. Please try again.");
+      setError(t("common.errorOccurred"));
+      toast.error(t("common.errorOccurred"));
       setIsSaving(false);
     }
   }
@@ -87,7 +89,7 @@ export default function EditProjectPage() {
         <Card>
           <CardContent className="py-8">
             <p className="text-center text-muted-foreground">
-              Loading project...
+              {t("projectForm.loading")}
             </p>
           </CardContent>
         </Card>
@@ -102,7 +104,7 @@ export default function EditProjectPage() {
           <CardContent className="py-8">
             <p className="text-center text-destructive">{error}</p>
             <div className="mt-4 text-center">
-              <Button onClick={() => router.back()}>Go Back</Button>
+              <Button onClick={() => router.back()}>{t("projectForm.goBack")}</Button>
             </div>
           </CardContent>
         </Card>
@@ -114,13 +116,13 @@ export default function EditProjectPage() {
     <div className="container mx-auto max-w-2xl px-4 py-8">
       <Card>
         <CardHeader>
-          <CardTitle>Edit Project</CardTitle>
-          <CardDescription>Update your project details</CardDescription>
+          <CardTitle>{t("projectForm.editTitle")}</CardTitle>
+          <CardDescription>{t("projectForm.editDesc")}</CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="space-y-2">
-              <Label htmlFor="title">Project Title *</Label>
+              <Label htmlFor="title">{t("projectForm.titleRequired")}</Label>
               <Input
                 id="title"
                 name="title"
@@ -134,7 +136,7 @@ export default function EditProjectPage() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="description">Description</Label>
+              <Label htmlFor="description">{t("projectForm.description")}</Label>
               <Textarea
                 id="description"
                 name="description"
@@ -146,7 +148,7 @@ export default function EditProjectPage() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="deadline">Deadline *</Label>
+              <Label htmlFor="deadline">{t("projectForm.deadlineRequired")}</Label>
               <Input
                 id="deadline"
                 name="deadline"
@@ -163,7 +165,7 @@ export default function EditProjectPage() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="status">Status</Label>
+              <Label htmlFor="status">{t("projectForm.status")}</Label>
               <select
                 id="status"
                 name="status"
@@ -171,9 +173,9 @@ export default function EditProjectPage() {
                 defaultValue={project?.status || "active"}
                 disabled={isSaving}
               >
-                <option value="active">Active</option>
-                <option value="draft">Draft</option>
-                <option value="archived">Archived</option>
+                <option value="active">{t("projects.status.active")}</option>
+                <option value="draft">{t("projects.status.draft")}</option>
+                <option value="archived">{t("projects.status.archived")}</option>
               </select>
             </div>
 
@@ -187,7 +189,7 @@ export default function EditProjectPage() {
 
             <div className="flex gap-4">
               <Button type="submit" disabled={isSaving} className="flex-1">
-                {isSaving ? "Saving..." : "Save Changes"}
+                {isSaving ? t("projectForm.saving") : t("projectForm.update")}
               </Button>
               <Button
                 type="button"
@@ -195,7 +197,7 @@ export default function EditProjectPage() {
                 onClick={() => router.back()}
                 disabled={isSaving}
               >
-                Cancel
+                {t("common.cancel")}
               </Button>
             </div>
           </form>

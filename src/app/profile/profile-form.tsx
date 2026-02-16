@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { updateProfile } from "./actions";
 import { toast } from "sonner";
+import { useLocale } from "@/lib/use-locale";
 
 interface ProfileFormProps {
   firstName: string;
@@ -17,6 +18,7 @@ interface ProfileFormProps {
  * Client form for updating user profile name with toast feedback
  */
 export function ProfileForm({ firstName, lastName }: ProfileFormProps) {
+  const { t } = useLocale();
   const [isLoading, setIsLoading] = useState(false);
 
   async function handleSubmit(formData: FormData) {
@@ -25,7 +27,7 @@ export function ProfileForm({ firstName, lastName }: ProfileFormProps) {
     const result = await updateProfile(formData);
 
     if (result.success) {
-      toast.success("Profile updated!");
+      toast.success(t("profile.updated"));
     } else {
       toast.error(result.error || "Failed to update profile");
     }
@@ -36,13 +38,13 @@ export function ProfileForm({ firstName, lastName }: ProfileFormProps) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Edit Profile</CardTitle>
+        <CardTitle>{t("profile.editProfile")}</CardTitle>
       </CardHeader>
       <CardContent>
         <form action={handleSubmit} className="space-y-4">
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="space-y-2">
-              <Label htmlFor="firstName">First Name</Label>
+              <Label htmlFor="firstName">{t("profile.firstName")}</Label>
               <Input
                 id="firstName"
                 name="firstName"
@@ -53,7 +55,7 @@ export function ProfileForm({ firstName, lastName }: ProfileFormProps) {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="lastName">Last Name</Label>
+              <Label htmlFor="lastName">{t("profile.lastName")}</Label>
               <Input
                 id="lastName"
                 name="lastName"
@@ -66,7 +68,7 @@ export function ProfileForm({ firstName, lastName }: ProfileFormProps) {
           </div>
 
           <Button type="submit" disabled={isLoading}>
-            {isLoading ? "Saving..." : "Save Changes"}
+            {isLoading ? t("profile.updating") : t("profile.update")}
           </Button>
         </form>
       </CardContent>

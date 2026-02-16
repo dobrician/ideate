@@ -8,6 +8,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { addComment } from "@/app/projects/[id]/proposals/actions";
 import { MessageSquare, Reply, CornerDownRight } from "lucide-react";
 import { toast } from "sonner";
+import { useLocale } from "@/lib/use-locale";
 
 interface Comment {
   id: string;
@@ -68,11 +69,12 @@ function CommentNode({
   proposalId: string;
   projectId: string;
 }) {
+  const { t } = useLocale();
   const [replying, setReplying] = useState(false);
   const [state, formAction, isPending] = useActionState(addComment, null);
 
   if (state?.success && replying) {
-    toast.success("Reply posted");
+    toast.success(t("comments.replyPosted"));
     setReplying(false);
   }
   if (state?.error) {
@@ -101,7 +103,7 @@ function CommentNode({
             onClick={() => setReplying(!replying)}
           >
             <Reply className="mr-1 h-3 w-3" />
-            Reply
+            {t("comments.reply")}
           </Button>
         )}
 
@@ -114,7 +116,7 @@ function CommentNode({
               <CornerDownRight className="mt-2 h-4 w-4 shrink-0 text-muted-foreground" />
               <Textarea
                 name="content"
-                placeholder="Write a reply..."
+                placeholder={t("comments.replyPlaceholder")}
                 rows={2}
                 required
                 maxLength={2000}
@@ -127,7 +129,7 @@ function CommentNode({
             )}
             <div className="flex gap-2">
               <Button type="submit" size="sm" disabled={isPending}>
-                {isPending ? "Posting..." : "Reply"}
+                {isPending ? t("comments.posting") : t("comments.reply")}
               </Button>
               <Button
                 type="button"
@@ -135,7 +137,7 @@ function CommentNode({
                 size="sm"
                 onClick={() => setReplying(false)}
               >
-                Cancel
+                {t("common.cancel")}
               </Button>
             </div>
           </form>
@@ -165,6 +167,7 @@ export function DiscussionSheet({
   comments,
   commentCount,
 }: DiscussionSheetProps) {
+  const { t } = useLocale();
   const [state, formAction, isPending] = useActionState(addComment, null);
   const tree = buildCommentTree(comments);
 
@@ -179,7 +182,7 @@ export function DiscussionSheet({
       <SheetContent className="w-full sm:max-w-lg">
         <SheetHeader>
           <SheetTitle className="text-left">
-            Discussion: {proposalTitle}
+            {t("comments.title")}: {proposalTitle}
           </SheetTitle>
         </SheetHeader>
 
@@ -187,7 +190,7 @@ export function DiscussionSheet({
           <ScrollArea className="flex-1 pr-4">
             {tree.length === 0 ? (
               <p className="py-8 text-center text-sm text-muted-foreground">
-                No comments yet. Start the discussion!
+                {t("comments.noComments")}
               </p>
             ) : (
               <div className="space-y-1">
@@ -210,7 +213,7 @@ export function DiscussionSheet({
               <input type="hidden" name="projectId" value={projectId} />
               <Textarea
                 name="content"
-                placeholder="Add a comment..."
+                placeholder={t("comments.placeholder")}
                 rows={3}
                 required
                 maxLength={2000}
@@ -220,7 +223,7 @@ export function DiscussionSheet({
                 <p className="text-xs text-red-600">{state.error}</p>
               )}
               <Button type="submit" size="sm" disabled={isPending}>
-                {isPending ? "Posting..." : "Post Comment"}
+                {isPending ? t("comments.posting") : t("comments.submit")}
               </Button>
             </form>
           </div>

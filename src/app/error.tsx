@@ -3,6 +3,7 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import Link from "next/link";
+import { useLocale } from "@/lib/use-locale";
 
 /**
  * Global error boundary
@@ -14,12 +15,14 @@ export default function GlobalError({
   error: Error & { digest?: string };
   reset: () => void;
 }) {
+  const { t } = useLocale();
+
   return (
     <div className="flex min-h-[60vh] items-center justify-center px-4">
       <Card className="w-full max-w-md text-center">
         <CardHeader>
           <CardTitle className="text-destructive">
-            Something went wrong
+            {t("common.error")}
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -32,9 +35,9 @@ export default function GlobalError({
             </p>
           )}
           <div className="flex justify-center gap-2">
-            <Button onClick={reset}>Try again</Button>
+            <Button onClick={reset}>{t("common.retry")}</Button>
             <Button asChild variant="outline">
-              <Link href="/">Go Home</Link>
+              <Link href="/">{t("common.goHome")}</Link>
             </Button>
           </div>
         </CardContent>

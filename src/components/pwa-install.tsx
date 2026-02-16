@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Download, X } from "lucide-react";
+import { useLocale } from "@/lib/use-locale";
 
 interface BeforeInstallPromptEvent extends Event {
   prompt: () => Promise<void>;
@@ -13,6 +14,7 @@ interface BeforeInstallPromptEvent extends Event {
  * PWA install prompt banner
  */
 export function PwaInstall() {
+  const { t } = useLocale();
   const [deferredPrompt, setDeferredPrompt] =
     useState<BeforeInstallPromptEvent | null>(null);
   const [dismissed, setDismissed] = useState(false);
@@ -41,14 +43,14 @@ export function PwaInstall() {
   return (
     <div className="fixed bottom-4 left-4 right-4 z-50 mx-auto flex max-w-md items-center gap-3 rounded-lg border bg-background p-3 shadow-lg sm:left-auto sm:right-4">
       <div className="flex-1">
-        <p className="text-sm font-medium">Install Ideate</p>
+        <p className="text-sm font-medium">{t("pwa.install")}</p>
         <p className="text-xs text-muted-foreground">
-          Add to your home screen for quick access
+          {t("pwa.installDesc")}
         </p>
       </div>
       <Button size="sm" onClick={handleInstall}>
         <Download className="mr-1 h-3 w-3" />
-        Install
+        {t("pwa.installButton")}
       </Button>
       <Button
         variant="ghost"

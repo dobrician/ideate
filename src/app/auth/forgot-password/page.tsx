@@ -12,11 +12,13 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { useLocale } from "@/lib/use-locale";
 
 /**
  * Forgot password page - request a password reset link
  */
 export default function ForgotPasswordPage() {
+  const { t } = useLocale();
   const [email, setEmail] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
@@ -42,7 +44,7 @@ export default function ForgotPasswordPage() {
 
       setSuccess(true);
     } catch {
-      setError("An error occurred. Please try again.");
+      setError(t("common.errorOccurred"));
     } finally {
       setIsLoading(false);
     }
@@ -54,16 +56,16 @@ export default function ForgotPasswordPage() {
         <Card className="w-full max-w-md">
           <CardHeader className="space-y-1">
             <CardTitle className="text-2xl font-bold">
-              Check your email
+              {t("auth.checkEmailTitle")}
             </CardTitle>
             <CardDescription>
-              If an account exists for {email}, we sent a password reset link.
+              {t("auth.checkEmailResetDesc", { email })}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="rounded-md bg-green-50 p-4 dark:bg-green-950">
               <p className="text-sm text-green-800 dark:text-green-200">
-                The reset link expires in 1 hour.
+                {t("auth.resetExpiry")}
               </p>
             </div>
             <Button
@@ -71,11 +73,11 @@ export default function ForgotPasswordPage() {
               onClick={() => setSuccess(false)}
               className="w-full"
             >
-              Send Another Link
+              {t("auth.sendAnother")}
             </Button>
             <Link href="/auth/login">
               <Button variant="ghost" className="w-full">
-                Back to Sign In
+                {t("auth.backToLogin")}
               </Button>
             </Link>
           </CardContent>
@@ -89,16 +91,16 @@ export default function ForgotPasswordPage() {
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-1">
           <CardTitle className="text-2xl font-bold">
-            Reset your password
+            {t("auth.forgotPasswordTitle")}
           </CardTitle>
           <CardDescription>
-            Enter your email and we&apos;ll send you a reset link
+            {t("auth.forgotPasswordDesc")}
           </CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="email">{t("auth.email")}</Label>
               <Input
                 id="email"
                 type="email"
@@ -121,7 +123,7 @@ export default function ForgotPasswordPage() {
             )}
 
             <Button type="submit" className="w-full" disabled={isLoading}>
-              {isLoading ? "Sending..." : "Send Reset Link"}
+              {isLoading ? t("auth.sendingReset") : t("auth.sendResetLink")}
             </Button>
 
             <p className="text-center text-sm text-muted-foreground">
@@ -129,7 +131,7 @@ export default function ForgotPasswordPage() {
                 href="/auth/login"
                 className="font-medium text-primary hover:underline"
               >
-                Back to Sign In
+                {t("auth.backToLogin")}
               </Link>
             </p>
           </form>

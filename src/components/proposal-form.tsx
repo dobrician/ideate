@@ -9,6 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { createProposal } from "@/app/projects/[id]/proposals/actions";
 import { ThumbsUp, ThumbsDown } from "lucide-react";
 import { toast } from "sonner";
+import { useLocale } from "@/lib/use-locale";
 
 interface ProposalFormProps {
   projectId: string;
@@ -18,6 +19,7 @@ interface ProposalFormProps {
  * Form for creating a new proposal with initial vote and toast feedback
  */
 export function ProposalForm({ projectId }: ProposalFormProps) {
+  const { t } = useLocale();
   const [isOpen, setIsOpen] = useState(false);
   const [initialVote, setInitialVote] = useState<"1" | "-1">("1");
   const [state, formAction, isPending] = useActionState(createProposal, null);
@@ -25,19 +27,19 @@ export function ProposalForm({ projectId }: ProposalFormProps) {
   useEffect(() => {
     if (!state) return;
     if (state.success) {
-      toast.success("Proposal created successfully");
+      toast.success(t("proposalForm.created"));
       // Use requestAnimationFrame to avoid direct setState in effect
       requestAnimationFrame(() => setIsOpen(false));
     }
     if (state.error) {
       toast.error(state.error);
     }
-  }, [state]);
+  }, [state, t]);
 
   if (!isOpen) {
     return (
       <Button onClick={() => setIsOpen(true)} className="w-full sm:w-auto">
-        + New Proposal
+        {t("proposalForm.newProposal")}
       </Button>
     );
   }
@@ -45,7 +47,7 @@ export function ProposalForm({ projectId }: ProposalFormProps) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-lg">New Proposal</CardTitle>
+        <CardTitle className="text-lg">{t("proposalForm.title")}</CardTitle>
       </CardHeader>
       <CardContent>
         <form action={formAction} className="space-y-4">
@@ -53,11 +55,11 @@ export function ProposalForm({ projectId }: ProposalFormProps) {
           <input type="hidden" name="initialVote" value={initialVote} />
 
           <div className="space-y-2">
-            <Label htmlFor="proposal-title">Title</Label>
+            <Label htmlFor="proposal-title">{t("proposalForm.titleLabel")}</Label>
             <Input
               id="proposal-title"
               name="title"
-              placeholder="What do you propose?"
+              placeholder={t("proposalForm.titlePlaceholder")}
               required
               minLength={5}
               maxLength={200}
@@ -67,12 +69,12 @@ export function ProposalForm({ projectId }: ProposalFormProps) {
 
           <div className="space-y-2">
             <Label htmlFor="proposal-description">
-              Description (optional)
+              {t("proposalForm.description")}
             </Label>
             <Textarea
               id="proposal-description"
               name="description"
-              placeholder="Explain your proposal in detail..."
+              placeholder={t("proposalForm.descriptionPlaceholder")}
               rows={4}
               maxLength={5000}
               disabled={isPending}
@@ -80,7 +82,7 @@ export function ProposalForm({ projectId }: ProposalFormProps) {
           </div>
 
           <div className="space-y-2">
-            <Label>Your initial vote</Label>
+            <Label>{t("proposalForm.initialVote")}</Label>
             <div className="flex gap-2">
               <Button
                 type="button"
@@ -92,7 +94,7 @@ export function ProposalForm({ projectId }: ProposalFormProps) {
                 }
               >
                 <ThumbsUp className="mr-1 h-4 w-4" />
-                Pro
+                {t("vote.pro")}
               </Button>
               <Button
                 type="button"
@@ -104,7 +106,7 @@ export function ProposalForm({ projectId }: ProposalFormProps) {
                 }
               >
                 <ThumbsDown className="mr-1 h-4 w-4" />
-                Contra
+                {t("vote.contra")}
               </Button>
             </div>
           </div>
@@ -119,7 +121,7 @@ export function ProposalForm({ projectId }: ProposalFormProps) {
 
           <div className="flex gap-2">
             <Button type="submit" disabled={isPending}>
-              {isPending ? "Creating..." : "Submit Proposal"}
+              {isPending ? t("proposalForm.submitting") : t("proposalForm.submit")}
             </Button>
             <Button
               type="button"
@@ -127,7 +129,7 @@ export function ProposalForm({ projectId }: ProposalFormProps) {
               onClick={() => setIsOpen(false)}
               disabled={isPending}
             >
-              Cancel
+              {t("common.cancel")}
             </Button>
           </div>
         </form>

@@ -3,6 +3,7 @@
 import { useCallback, useSyncExternalStore } from "react";
 import { Button } from "@/components/ui/button";
 import { Globe } from "lucide-react";
+import { useLocale } from "@/lib/use-locale";
 
 type Locale = "en" | "ro";
 
@@ -31,6 +32,7 @@ function subscribe(cb: () => void) {
  * Locale switcher button (EN/RO toggle)
  */
 export function LocaleSwitcher() {
+  const { t } = useLocale();
   const locale = useSyncExternalStore(subscribe, getLocale, () => "en" as Locale);
 
   const toggle = useCallback(() => {
@@ -45,7 +47,7 @@ export function LocaleSwitcher() {
       size="sm"
       onClick={toggle}
       className="gap-1 text-xs font-medium"
-      title={locale === "en" ? "Switch to Romanian" : "Switch to English"}
+      title={locale === "en" ? t("locale.switchToRo") : t("locale.switchToEn")}
     >
       <Globe className="h-3.5 w-3.5" />
       {locale.toUpperCase()}

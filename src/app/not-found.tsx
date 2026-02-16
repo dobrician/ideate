@@ -1,11 +1,14 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { getTranslations } from "@/lib/i18n-server";
 
 /**
  * Global 404 page
  */
-export default function NotFound() {
+export default async function NotFound() {
+  const { t } = await getTranslations();
+
   return (
     <div className="flex min-h-[60vh] items-center justify-center px-4">
       <Card className="w-full max-w-md text-center">
@@ -16,15 +19,14 @@ export default function NotFound() {
         </CardHeader>
         <CardContent className="space-y-4">
           <p className="text-muted-foreground">
-            The page you&apos;re looking for doesn&apos;t exist or has been
-            moved.
+            {t("common.notFoundDesc")}
           </p>
           <div className="flex justify-center gap-2">
             <Button asChild>
-              <Link href="/">Go Home</Link>
+              <Link href="/">{t("common.goHome")}</Link>
             </Button>
             <Button asChild variant="outline">
-              <Link href="/projects">View Projects</Link>
+              <Link href="/projects">{t("common.viewProjects")}</Link>
             </Button>
           </div>
         </CardContent>

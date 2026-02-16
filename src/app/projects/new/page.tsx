@@ -9,6 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { createProject } from "../actions";
 import { toast } from "sonner";
+import { useLocale } from "@/lib/use-locale";
 
 /**
  * New project page
@@ -16,6 +17,7 @@ import { toast } from "sonner";
  */
 export default function NewProjectPage() {
   const router = useRouter();
+  const { t } = useLocale();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -38,8 +40,8 @@ export default function NewProjectPage() {
       }
       // If successful, createProject redirects automatically
     } catch {
-      setError("An error occurred. Please try again.");
-      toast.error("An error occurred. Please try again.");
+      setError(t("common.errorOccurred"));
+      toast.error(t("common.errorOccurred"));
       setIsLoading(false);
     }
   }
@@ -48,15 +50,15 @@ export default function NewProjectPage() {
     <div className="container mx-auto max-w-2xl px-4 py-8">
       <Card>
         <CardHeader>
-          <CardTitle>Create New Project</CardTitle>
+          <CardTitle>{t("projectForm.createTitle")}</CardTitle>
           <CardDescription>
-            Set up a new idea prioritization project for your team
+            {t("projectForm.createDesc")}
           </CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="space-y-2">
-              <Label htmlFor="title">Project Title *</Label>
+              <Label htmlFor="title">{t("projectForm.titleRequired")}</Label>
               <Input
                 id="title"
                 name="title"
@@ -68,27 +70,27 @@ export default function NewProjectPage() {
                 disabled={isLoading}
               />
               <p className="text-xs text-muted-foreground">
-                A clear, descriptive title for your project
+                {t("projectForm.titleHint")}
               </p>
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="description">Description</Label>
+              <Label htmlFor="description">{t("projectForm.description")}</Label>
               <Textarea
                 id="description"
                 name="description"
-                placeholder="Describe what this project is about, what ideas you're collecting, and any guidelines for participants..."
+                placeholder={t("projectForm.descriptionPlaceholder")}
                 rows={6}
                 maxLength={5000}
                 disabled={isLoading}
               />
               <p className="text-xs text-muted-foreground">
-                Optional: Provide context and guidelines for participants
+                {t("projectForm.descriptionHint")}
               </p>
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="deadline">Deadline *</Label>
+              <Label htmlFor="deadline">{t("projectForm.deadlineRequired")}</Label>
               <Input
                 id="deadline"
                 name="deadline"
@@ -98,12 +100,12 @@ export default function NewProjectPage() {
                 disabled={isLoading}
               />
               <p className="text-xs text-muted-foreground">
-                When should voting and submissions close?
+                {t("projectForm.deadlineHint")}
               </p>
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="status">Status</Label>
+              <Label htmlFor="status">{t("projectForm.status")}</Label>
               <select
                 id="status"
                 name="status"
@@ -111,12 +113,12 @@ export default function NewProjectPage() {
                 disabled={isLoading}
                 defaultValue="active"
               >
-                <option value="active">Active</option>
-                <option value="draft">Draft</option>
-                <option value="archived">Archived</option>
+                <option value="active">{t("projects.status.active")}</option>
+                <option value="draft">{t("projects.status.draft")}</option>
+                <option value="archived">{t("projects.status.archived")}</option>
               </select>
               <p className="text-xs text-muted-foreground">
-                Draft projects are not visible to participants
+                {t("projectForm.statusHint")}
               </p>
             </div>
 
@@ -128,7 +130,7 @@ export default function NewProjectPage() {
 
             <div className="flex gap-4">
               <Button type="submit" disabled={isLoading} className="flex-1">
-                {isLoading ? "Creating..." : "Create Project"}
+                {isLoading ? t("projectForm.creating") : t("projectForm.create")}
               </Button>
               <Button
                 type="button"
@@ -136,7 +138,7 @@ export default function NewProjectPage() {
                 onClick={() => router.back()}
                 disabled={isLoading}
               >
-                Cancel
+                {t("common.cancel")}
               </Button>
             </div>
           </form>

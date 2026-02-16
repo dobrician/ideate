@@ -15,6 +15,7 @@ import { deleteProposal } from "@/app/projects/[id]/proposals/actions";
 import { useVoteStream } from "@/lib/use-vote-stream";
 import { Trash2 } from "lucide-react";
 import { toast } from "sonner";
+import { useLocale } from "@/lib/use-locale";
 
 interface Comment {
   id: string;
@@ -57,12 +58,13 @@ export function ProposalList({
   currentUserId,
   isAdmin,
 }: ProposalListProps) {
+  const { t } = useLocale();
   const voteUpdates = useVoteStream(projectId);
 
   if (proposals.length === 0) {
     return (
       <p className="py-4 text-center text-sm text-muted-foreground">
-        No proposals yet. Be the first to submit one!
+        {t("proposals.noProposals")}
       </p>
     );
   }
@@ -102,6 +104,7 @@ function ProposalItem({
   liveUpvotes?: number;
   liveDownvotes?: number;
 }) {
+  const { t } = useLocale();
   const [showFull, setShowFull] = useState(false);
   const canDelete = proposal.userId === currentUserId || isAdmin;
 
@@ -109,12 +112,12 @@ function ProposalItem({
   const downvotes = liveDownvotes ?? proposal.downvotes;
 
   async function handleDelete() {
-    if (!confirm("Delete this proposal? This cannot be undone.")) return;
+    if (!confirm(t("proposals.deleteConfirm"))) return;
     const result = await deleteProposal(proposal.id, projectId);
     if (result?.error) {
       toast.error(result.error);
     } else {
-      toast.success("Proposal deleted");
+      toast.success(t("proposals.deleted"));
     }
   }
 
@@ -175,7 +178,7 @@ function ProposalItem({
                 className="h-auto p-0 text-xs"
                 onClick={() => setShowFull(!showFull)}
               >
-                {showFull ? "Show summary" : "Show full description"}
+                {showFull ? t("proposals.showSummary") : t("proposals.showFull")}
               </Button>
             )}
 
@@ -197,7 +200,7 @@ function ProposalItem({
                 onClick={handleDelete}
               >
                 <Trash2 className="mr-1 h-3 w-3" />
-                Delete
+                {t("proposals.delete")}
               </Button>
             )}
           </div>

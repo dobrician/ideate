@@ -15,6 +15,7 @@ import {
 import { Users, FolderOpen, Lightbulb, ThumbsUp } from "lucide-react";
 import { UserRoleManager } from "./user-role-manager";
 import { StatCard } from "@/components/stat-card";
+import { getTranslations } from "@/lib/i18n-server";
 
 /**
  * Admin panel — user management, system stats, audit log
@@ -26,6 +27,7 @@ export default async function AdminPage() {
   if (!hasPermission(user.role as Role, "user:manage")) {
     redirect("/dashboard");
   }
+  const { t } = await getTranslations();
 
   const [allUsers, stats, recentAudit] = await Promise.all([
     db
@@ -71,31 +73,31 @@ export default async function AdminPage() {
   return (
     <div className="container mx-auto max-w-6xl px-4 py-8">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold">Admin Panel</h1>
+        <h1 className="text-3xl font-bold">{t("admin.title")}</h1>
         <p className="text-muted-foreground">
-          System overview and user management
+          {t("admin.subtitle")}
         </p>
       </div>
 
       {/* Stats */}
       <div className="mb-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <StatCard
-          title="Users"
+          title={t("admin.users")}
           value={Number(s?.userCount ?? 0)}
           icon={<Users className="h-4 w-4 text-muted-foreground" />}
         />
         <StatCard
-          title="Projects"
+          title={t("admin.projects")}
           value={Number(s?.projectCount ?? 0)}
           icon={<FolderOpen className="h-4 w-4 text-muted-foreground" />}
         />
         <StatCard
-          title="Proposals"
+          title={t("admin.proposals")}
           value={Number(s?.proposalCount ?? 0)}
           icon={<Lightbulb className="h-4 w-4 text-muted-foreground" />}
         />
         <StatCard
-          title="Votes"
+          title={t("admin.votes")}
           value={Number(s?.voteCount ?? 0)}
           icon={<ThumbsUp className="h-4 w-4 text-muted-foreground" />}
         />
@@ -105,9 +107,9 @@ export default async function AdminPage() {
         {/* User Management */}
         <Card className="lg:col-span-2">
           <CardHeader>
-            <CardTitle>User Management</CardTitle>
+            <CardTitle>{t("admin.userManagement")}</CardTitle>
             <CardDescription>
-              {allUsers.length} registered user{allUsers.length !== 1 ? "s" : ""}
+              {t("admin.registeredUsers", { count: allUsers.length })}
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -118,12 +120,12 @@ export default async function AdminPage() {
         {/* Audit Log */}
         <Card className="lg:col-span-2">
           <CardHeader>
-            <CardTitle>Recent Activity</CardTitle>
-            <CardDescription>Last 20 audit log entries</CardDescription>
+            <CardTitle>{t("admin.recentActivity")}</CardTitle>
+            <CardDescription>{t("admin.auditEntries")}</CardDescription>
           </CardHeader>
           <CardContent>
             {recentAudit.length === 0 ? (
-              <p className="text-sm text-muted-foreground">No activity yet.</p>
+              <p className="text-sm text-muted-foreground">{t("admin.noActivity")}</p>
             ) : (
               <div className="space-y-2">
                 {recentAudit.map((entry) => (

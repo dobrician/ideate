@@ -1,3 +1,7 @@
+"use client";
+
+import { useLocale } from "@/lib/use-locale";
+
 interface VoteBarProps {
   upvotes: number;
   downvotes: number;
@@ -8,13 +12,14 @@ interface VoteBarProps {
  * Pure CSS/Tailwind — no chart library needed.
  */
 export function VoteBar({ upvotes, downvotes }: VoteBarProps) {
+  const { t } = useLocale();
   const total = upvotes + downvotes;
 
   if (total === 0) {
     return (
       <div className="flex items-center gap-2 text-xs text-muted-foreground">
         <div className="h-2 flex-1 rounded-full bg-muted" />
-        <span>No votes yet</span>
+        <span>{t("vote.noVotes")}</span>
       </div>
     );
   }
@@ -40,10 +45,10 @@ export function VoteBar({ upvotes, downvotes }: VoteBarProps) {
       </div>
       <div className="flex justify-between text-xs text-muted-foreground">
         <span className="text-green-600 dark:text-green-400">
-          {proPercent}% pro ({upvotes})
+          {proPercent}% {t("vote.pro").toLowerCase()} ({upvotes})
         </span>
         <span className="text-red-600 dark:text-red-400">
-          {conPercent}% contra ({downvotes})
+          {conPercent}% {t("vote.contra").toLowerCase()} ({downvotes})
         </span>
       </div>
     </div>

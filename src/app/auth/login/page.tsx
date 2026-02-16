@@ -6,6 +6,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useLocale } from "@/lib/use-locale";
 import {
   Card,
   CardContent,
@@ -20,6 +21,7 @@ type AuthMode = "magic-link" | "password";
  * Login page with dual authentication: magic link + email/password
  */
 export default function LoginPage() {
+  const { t } = useLocale();
   const searchParams = useSearchParams();
   const verified = searchParams.get("verified") === "true";
   const errorParam = searchParams.get("error");
@@ -52,7 +54,7 @@ export default function LoginPage() {
       setSuccess(true);
       setEmail("");
     } catch {
-      setError("An error occurred. Please try again.");
+      setError(t("common.errorOccurred"));
     } finally {
       setIsLoading(false);
     }
@@ -76,7 +78,7 @@ export default function LoginPage() {
       }
       window.location.href = searchParams.get("redirect") || "/";
     } catch {
-      setError("An error occurred. Please try again.");
+      setError(t("common.errorOccurred"));
     } finally {
       setIsLoading(false);
     }
@@ -87,25 +89,25 @@ export default function LoginPage() {
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-1">
           <CardTitle className="text-2xl font-bold">
-            Sign in to Ideate
+            {t("auth.signIn")}
           </CardTitle>
           <CardDescription>
             {mode === "magic-link"
-              ? "Enter your email and we'll send you a magic link"
-              : "Sign in with your email and password"}
+              ? t("auth.signInMagicDesc")
+              : t("auth.signInDesc")}
           </CardDescription>
         </CardHeader>
         <CardContent>
           {verifiedBanner && (
             <div className="mb-4 rounded-md bg-green-50 p-3 dark:bg-green-950">
               <p className="text-sm text-green-800 dark:text-green-200">
-                Email verified! You can now sign in.
+                {t("auth.emailVerified")}
               </p>
               <button
                 onClick={() => setVerifiedBanner(false)}
                 className="mt-1 text-xs text-green-600 underline dark:text-green-400"
               >
-                Dismiss
+                {t("auth.dismiss")}
               </button>
             </div>
           )}
@@ -114,7 +116,7 @@ export default function LoginPage() {
             <div className="space-y-4">
               <div className="rounded-md bg-green-50 p-4 dark:bg-green-950">
                 <p className="text-sm text-green-800 dark:text-green-200">
-                  Check your email! We sent you a magic link to sign in.
+                  {t("auth.magicLinkSent")}
                 </p>
               </div>
               <Button
@@ -122,13 +124,13 @@ export default function LoginPage() {
                 onClick={() => setSuccess(false)}
                 className="w-full"
               >
-                Send Another Link
+                {t("auth.sendAnother")}
               </Button>
             </div>
           ) : mode === "password" ? (
             <form onSubmit={handlePasswordLogin} className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
+                <Label htmlFor="email">{t("auth.email")}</Label>
                 <Input
                   id="email"
                   type="email"
@@ -143,12 +145,12 @@ export default function LoginPage() {
               </div>
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
-                  <Label htmlFor="password">Password</Label>
+                  <Label htmlFor="password">{t("auth.password")}</Label>
                   <Link
                     href="/auth/forgot-password"
                     className="text-xs text-muted-foreground hover:underline"
                   >
-                    Forgot password?
+                    {t("auth.forgotPassword")}
                   </Link>
                 </div>
                 <Input
@@ -172,7 +174,7 @@ export default function LoginPage() {
               )}
 
               <Button type="submit" className="w-full" disabled={isLoading}>
-                {isLoading ? "Signing in..." : "Sign In with Password"}
+                {isLoading ? t("auth.signingIn") : t("auth.signInWithPassword")}
               </Button>
 
               <div className="relative my-4">
@@ -181,7 +183,7 @@ export default function LoginPage() {
                 </div>
                 <div className="relative flex justify-center text-xs uppercase">
                   <span className="bg-background px-2 text-muted-foreground">
-                    or
+                    {t("auth.or")}
                   </span>
                 </div>
               </div>
@@ -195,23 +197,23 @@ export default function LoginPage() {
                   setError("");
                 }}
               >
-                Sign in with Magic Link
+                {t("auth.signInWithMagicLink")}
               </Button>
 
               <p className="text-center text-sm text-muted-foreground">
-                Don&apos;t have an account?{" "}
+                {t("auth.noAccount")}{" "}
                 <Link
                   href="/auth/register"
                   className="font-medium text-primary hover:underline"
                 >
-                  Create Account
+                  {t("auth.register")}
                 </Link>
               </p>
             </form>
           ) : (
             <form onSubmit={handleMagicLink} className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="email-magic">Email</Label>
+                <Label htmlFor="email-magic">{t("auth.email")}</Label>
                 <Input
                   id="email-magic"
                   type="email"
@@ -234,11 +236,11 @@ export default function LoginPage() {
               )}
 
               <Button type="submit" className="w-full" disabled={isLoading}>
-                {isLoading ? "Sending..." : "Send Magic Link"}
+                {isLoading ? t("auth.sending") : t("auth.sendLink")}
               </Button>
 
               <p className="text-center text-xs text-muted-foreground">
-                We&apos;ll send you a secure link that expires in 15 minutes
+                {t("auth.magicLinkExpiry")}
               </p>
 
               <div className="relative my-4">
@@ -247,7 +249,7 @@ export default function LoginPage() {
                 </div>
                 <div className="relative flex justify-center text-xs uppercase">
                   <span className="bg-background px-2 text-muted-foreground">
-                    or
+                    {t("auth.or")}
                   </span>
                 </div>
               </div>
@@ -261,16 +263,16 @@ export default function LoginPage() {
                   setError("");
                 }}
               >
-                Sign in with Password
+                {t("auth.signInWithPassword")}
               </Button>
 
               <p className="text-center text-sm text-muted-foreground">
-                Don&apos;t have an account?{" "}
+                {t("auth.noAccount")}{" "}
                 <Link
                   href="/auth/register"
                   className="font-medium text-primary hover:underline"
                 >
-                  Create Account
+                  {t("auth.register")}
                 </Link>
               </p>
             </form>

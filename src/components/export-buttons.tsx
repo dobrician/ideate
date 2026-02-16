@@ -3,6 +3,7 @@
 import { Button } from "@/components/ui/button";
 import { Download } from "lucide-react";
 import { toast } from "sonner";
+import { useLocale } from "@/lib/use-locale";
 
 interface ExportButtonsProps {
   projectId: string;
@@ -12,12 +13,14 @@ interface ExportButtonsProps {
  * Export buttons for downloading project reports as PDF/CSV
  */
 export function ExportButtons({ projectId }: ExportButtonsProps) {
+  const { t } = useLocale();
+
   function handleExport(format: "pdf" | "csv") {
     try {
       const url = `/api/projects/${projectId}/export?format=${format}`;
       window.open(url, "_blank");
     } catch {
-      toast.error("Failed to export report");
+      toast.error(t("export.failed"));
     }
   }
 
@@ -30,7 +33,7 @@ export function ExportButtons({ projectId }: ExportButtonsProps) {
         title="Download HTML report"
       >
         <Download className="mr-1 h-3 w-3" />
-        PDF
+        {t("export.pdf")}
       </Button>
       <Button
         variant="outline"
@@ -39,7 +42,7 @@ export function ExportButtons({ projectId }: ExportButtonsProps) {
         title="Download CSV"
       >
         <Download className="mr-1 h-3 w-3" />
-        CSV
+        {t("export.csv")}
       </Button>
     </div>
   );

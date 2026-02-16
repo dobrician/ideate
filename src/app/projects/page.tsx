@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/card";
 import { Pagination } from "@/components/pagination";
 import { desc, count } from "drizzle-orm";
+import { getTranslations } from "@/lib/i18n-server";
 
 const PAGE_SIZE = 12;
 
@@ -26,6 +27,7 @@ interface ProjectsPageProps {
 export default async function ProjectsPage({ searchParams }: ProjectsPageProps) {
   const user = await getCurrentUser();
   if (!user) redirect("/auth/login");
+  const { t } = await getTranslations();
 
   const params = await searchParams;
   const page = Math.max(1, parseInt(params.page || "1", 10) || 1);
@@ -48,27 +50,27 @@ export default async function ProjectsPage({ searchParams }: ProjectsPageProps) 
     <div className="container mx-auto px-4 py-8">
       <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-3xl font-bold">Projects</h1>
+          <h1 className="text-3xl font-bold">{t("projects.title")}</h1>
           <p className="text-muted-foreground">
-            {total} project{total !== 1 ? "s" : ""} total
+            {t("projects.total", { count: total })}
           </p>
         </div>
         <Button asChild>
-          <Link href="/projects/new">Create Project</Link>
+          <Link href="/projects/new">{t("projects.createProject")}</Link>
         </Button>
       </div>
 
       {allProjects.length === 0 && page === 1 ? (
         <Card>
           <CardHeader>
-            <CardTitle>No projects yet</CardTitle>
+            <CardTitle>{t("projects.noProjects")}</CardTitle>
             <CardDescription>
-              Get started by creating your first project
+              {t("projects.noProjectsDesc")}
             </CardDescription>
           </CardHeader>
           <CardContent>
             <Button asChild>
-              <Link href="/projects/new">Create Your First Project</Link>
+              <Link href="/projects/new">{t("projects.createFirst")}</Link>
             </Button>
           </CardContent>
         </Card>
@@ -104,16 +106,16 @@ export default async function ProjectsPage({ searchParams }: ProjectsPageProps) 
                   <CardContent>
                     <div className="text-sm text-muted-foreground">
                       <p>
-                        Deadline:{" "}
+                        {t("projects.deadline")}:{" "}
                         {project.deadline
                           ? new Date(project.deadline).toLocaleDateString()
-                          : "Not set"}
+                          : t("projects.deadlineNotSet")}
                       </p>
                       <p>
-                        Created:{" "}
+                        {t("projects.created")}:{" "}
                         {project.createdAt
                           ? new Date(project.createdAt).toLocaleDateString()
-                          : "Unknown"}
+                          : t("projects.unknown")}
                       </p>
                     </div>
                   </CardContent>

@@ -12,11 +12,13 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { useLocale } from "@/lib/use-locale";
 
 /**
  * Registration page with email and password
  */
 export default function RegisterPage() {
+  const { t } = useLocale();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -30,7 +32,7 @@ export default function RegisterPage() {
     setError("");
 
     if (password !== confirmPassword) {
-      setError("Passwords do not match");
+      setError(t("auth.passwordMismatch"));
       setIsLoading(false);
       return;
     }
@@ -50,7 +52,7 @@ export default function RegisterPage() {
 
       setSuccess(true);
     } catch {
-      setError("An error occurred. Please try again.");
+      setError(t("common.errorOccurred"));
     } finally {
       setIsLoading(false);
     }
@@ -62,23 +64,22 @@ export default function RegisterPage() {
         <Card className="w-full max-w-md">
           <CardHeader className="space-y-1">
             <CardTitle className="text-2xl font-bold">
-              Check your inbox
+              {t("auth.verifyEmailTitle")}
             </CardTitle>
             <CardDescription>
-              We sent a verification link to{" "}
+              {t("auth.verifyEmailDesc")}{" "}
               <span className="font-medium">{email}</span>
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="rounded-md bg-green-50 p-4 dark:bg-green-950">
               <p className="text-sm text-green-800 dark:text-green-200">
-                Please click the link in the email to verify your account.
-                The link expires in 24 hours.
+                {t("auth.verifyEmailNote")}
               </p>
             </div>
             <Link href="/auth/login">
               <Button variant="outline" className="w-full">
-                Back to Sign In
+                {t("auth.backToLogin")}
               </Button>
             </Link>
           </CardContent>
@@ -92,16 +93,16 @@ export default function RegisterPage() {
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-1">
           <CardTitle className="text-2xl font-bold">
-            Create your account
+            {t("auth.registerTitle")}
           </CardTitle>
           <CardDescription>
-            Enter your details to create a new account
+            {t("auth.registerDesc")}
           </CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="email">{t("auth.email")}</Label>
               <Input
                 id="email"
                 type="email"
@@ -115,11 +116,11 @@ export default function RegisterPage() {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
+              <Label htmlFor="password">{t("auth.password")}</Label>
               <Input
                 id="password"
                 type="password"
-                placeholder="Create a password"
+                placeholder={t("auth.createPassword")}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
@@ -128,15 +129,15 @@ export default function RegisterPage() {
                 minLength={8}
               />
               <p className="text-xs text-muted-foreground">
-                Min 8 characters with uppercase, lowercase, and number
+                {t("auth.passwordRequirements")}
               </p>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="confirmPassword">Confirm Password</Label>
+              <Label htmlFor="confirmPassword">{t("auth.confirmPassword")}</Label>
               <Input
                 id="confirmPassword"
                 type="password"
-                placeholder="Confirm your password"
+                placeholder={t("auth.confirmNewPassword")}
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 required
@@ -155,16 +156,16 @@ export default function RegisterPage() {
             )}
 
             <Button type="submit" className="w-full" disabled={isLoading}>
-              {isLoading ? "Creating account..." : "Create Account"}
+              {isLoading ? t("auth.registering") : t("auth.register")}
             </Button>
 
             <p className="text-center text-sm text-muted-foreground">
-              Already have an account?{" "}
+              {t("auth.haveAccount")}{" "}
               <Link
                 href="/auth/login"
                 className="font-medium text-primary hover:underline"
               >
-                Sign In
+                {t("auth.login")}
               </Link>
             </p>
           </form>
