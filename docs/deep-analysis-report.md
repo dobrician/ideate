@@ -325,4 +325,64 @@ Add Sprint 20 entry to `docs/wiki/Sprint-Log.md`. Create `docs/wiki/Sprint-20.md
 
 ---
 
-*Report updated for Sprint 20 planning at commit 01162e5 on main branch.*
+## Sprint 23 Goals
+
+**Snapshot (2026-02-16):** All tests passing. `tsc --noEmit` clean. Coverage: 98.4% stmt / 93.0% branch / 99.2% func / 99.2% line. 8 open issues (6 are future sprint plans, #40 logo, #13 Cloudflare). Sprint 22 completed all 11 goals (auth hardening, CSRF on auth routes, password toggle, modal proposal form).
+
+**Theme: Dashboard — complete redesign, professional look (Issue #44)**
+
+The current dashboard is functional but basic: four stat cards in a grid, four equal-weight list cards (projects, proposals, votes, activity). No visual hierarchy, no quick actions, no progress indicators, no charts/sparklines. The layout is identical on desktop and mobile. `StatCard` is a plain number-in-a-box with no trend data.
+
+### Goal 1: Dashboard layout redesign — visual hierarchy and sections
+**Priority: High | Effort: 2-3h**
+Restructure `dashboard/page.tsx` into clear sections: hero/welcome area with quick actions at top, stats row, then a 2-column layout with primary content (projects, activity) given more weight than secondary (proposals, votes). Add section headings. Use spacing and card elevation to establish hierarchy.
+
+### Goal 2: Quick actions bar — create project, browse projects, view profile
+**Priority: High | Effort: 1-2h**
+Add a quick actions section near the top of the dashboard with buttons/links for common tasks: "New Project", "Browse Projects", "My Profile". These should be prominent and reduce clicks to key flows.
+
+### Goal 3: Enhanced StatCard — trend indicators, better visual design
+**Priority: High | Effort: 2-3h**
+Redesign `stat-card.tsx` to look professional: add subtle background gradients or color accents per metric, larger typography, and optional description/subtitle text. Consider adding "Your contributions" vs "Platform totals" distinction. Keep it accessible.
+
+### Goal 4: Improve activity feed — icons per action type, timestamps, richer context
+**Priority: Medium | Effort: 2-3h**
+The activity feed currently only shows comments. Extend `queries.ts` to include recent proposals and votes in the feed as well (union query or separate queries merged client-side). Add distinct icons per action type (comment, proposal, vote). Show relative timestamps consistently.
+
+### Goal 5: Mobile-first responsive polish
+**Priority: High | Effort: 1-2h**
+Audit every dashboard section at 320px, 375px, and 768px breakpoints. Stat cards should stack to 2x2 on small screens. Quick actions should be full-width buttons on mobile. Cards should stack single-column below `lg`. Test empty states on mobile.
+
+### Goal 6: Empty state improvements — illustrations, clear CTAs
+**Priority: Medium | Effort: 1-2h**
+Current empty states are text-only with a muted icon. Add clearer call-to-action buttons (not just inline links) and more descriptive copy. Make the zero-data dashboard (new user) feel welcoming rather than bare.
+
+### Goal 7: Dashboard loading state and error boundary
+**Priority: Medium | Effort: 1h**
+Review `dashboard/loading.tsx` — ensure it shows skeleton cards matching the new layout. Verify `dashboard/error.tsx` handles query failures gracefully. The loading state should match the redesigned layout shape.
+
+### Goal 8: Exhaustive tests — component tests, mobile viewport E2E, accessibility
+**Priority: High | Effort: 2-3h**
+Add component tests for the redesigned dashboard (stat cards, quick actions, empty states, activity feed rendering). Add E2E tests at mobile viewport verifying layout and interactions. Run accessibility audit (axe-core) on the dashboard. All tests green before merge.
+
+| # | Goal | Priority | Effort |
+|---|------|----------|--------|
+| 1 | Dashboard layout redesign | High | 2-3h |
+| 2 | Quick actions bar | High | 1-2h |
+| 3 | Enhanced StatCard design | High | 2-3h |
+| 4 | Richer activity feed | Medium | 2-3h |
+| 5 | Mobile-first responsive polish | High | 1-2h |
+| 6 | Empty state improvements | Medium | 1-2h |
+| 7 | Loading/error state updates | Medium | 1h |
+| 8 | Exhaustive tests + accessibility | High | 2-3h |
+
+**Total estimated effort:** ~12-19 hours
+
+**Out of scope:**
+- Real-time updates / WebSocket (Sprint 26+)
+- Charts/sparklines with historical data (no time-series data stored yet)
+- PostgreSQL migration, Cloudflare (#13), Redis rate limiter, JWT revocation
+
+---
+
+*Report updated for Sprint 23 planning at commit 3de0469 on main branch.*
