@@ -34,16 +34,3 @@ export function sanitizeInput(input: string): string {
   return stripHtml(input).trim();
 }
 
-/**
- * Sanitize an object's string values recursively
- */
-export function sanitizeObject<T extends Record<string, unknown>>(obj: T): T {
-  const result = { ...obj };
-  for (const key of Object.keys(result)) {
-    const value = result[key];
-    if (typeof value === "string") {
-      (result as Record<string, unknown>)[key] = sanitizeInput(value);
-    }
-  }
-  return result;
-}

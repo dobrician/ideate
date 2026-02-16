@@ -13,7 +13,7 @@
 - [x] E2E test for CSRF rejection (submit without token → verify rejection)
 
 **Cleanup & Infrastructure:**
-- [ ] Clean up dead code: unused i18n.ts, unused exports (buildProjectSummary, getAiUsageStats, etc.)
+- [x] Clean up dead code: unused i18n.ts, unused exports (buildProjectSummary, getAiUsageStats, etc.)
 - [ ] SQLite backup automation: cron/systemd timer, daily with 7-day rotation, WAL checkpoint
 - [ ] Update Known-Issues.md and Sprint-Log docs to reflect current state
 

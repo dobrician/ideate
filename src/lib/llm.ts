@@ -90,28 +90,6 @@ function trackUsage(provider: string, tokensUsed: number): void {
   }
 }
 
-/**
- * Get current usage stats (for monitoring/dashboard)
- */
-export function getAiUsageStats(): {
-  requests: number;
-  tokens: number;
-  costUsd: number;
-  maxRequests: number;
-  maxTokens: number;
-  windowStart: number;
-} {
-  resetWindowIfStale();
-  return {
-    requests: usage.requests,
-    tokens: usage.tokens,
-    costUsd: Math.round(usage.costUsd * 10000) / 10000,
-    maxRequests: MAX_REQUESTS_PER_HOUR,
-    maxTokens: MAX_TOKENS_PER_HOUR,
-    windowStart: usage.windowStart,
-  };
-}
-
 function isThrottled(modelKey: string): boolean {
   const until = throttleUntil[modelKey];
   return typeof until === "number" && until > Date.now();

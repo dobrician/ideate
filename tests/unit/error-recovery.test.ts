@@ -36,11 +36,11 @@ describe("Error Recovery", () => {
       const originalFetch = global.fetch;
       global.fetch = vi.fn().mockRejectedValue(new Error("ETIMEDOUT"));
 
-      const { buildProjectSummary } = await import("@/lib/ai");
+      const { buildProposalSummary } = await import("@/lib/ai");
 
-      const result = await buildProjectSummary(
-        "Test Project",
-        "A test project description that is long enough"
+      const result = await buildProposalSummary(
+        "Test Proposal",
+        "A test proposal description that is long enough"
       );
 
       // Should either return a fallback summary or null, not crash
@@ -77,11 +77,11 @@ describe("Error Recovery", () => {
         text: () => Promise.resolve("Internal Server Error"),
       });
 
-      const { buildProjectSummary } = await import("@/lib/ai");
+      const { buildProposalSummary } = await import("@/lib/ai");
 
-      const result = await buildProjectSummary(
-        "Test Project",
-        "Description of the project"
+      const result = await buildProposalSummary(
+        "Test Proposal",
+        "Description of the proposal"
       );
 
       expect(result === null || typeof result === "string").toBe(true);

@@ -89,31 +89,3 @@ export async function buildProposalSummary(
   );
 }
 
-const PROJECT_SUMMARY_WORD_LIMIT = 48;
-const PROJECT_SUMMARY_CHAR_LIMIT = 320;
-
-/**
- * Build an AI summary for a project
- */
-export async function buildProjectSummary(
-  title: string,
-  description: string | null | undefined
-): Promise<string | null> {
-  const promptSource = [
-    "Summarize the goal and scope of this project in one sentence.",
-    "Assume the title is shown separately; do not restate or paraphrase it.",
-    `Title: ${title}`,
-    `Description:\n${description ?? ""}`,
-  ].join("\n\n");
-
-  const generated = await generateSummaryFromText(
-    promptSource,
-    PROJECT_SUMMARY_WORD_LIMIT,
-    PROJECT_SUMMARY_CHAR_LIMIT
-  );
-
-  return (
-    fallbackSummary(generated, PROJECT_SUMMARY_CHAR_LIMIT) ??
-    fallbackSummary(description || title, PROJECT_SUMMARY_CHAR_LIMIT)
-  );
-}

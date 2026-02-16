@@ -3,7 +3,6 @@ import {
   escapeHtml,
   stripHtml,
   sanitizeInput,
-  sanitizeObject,
 } from "@/lib/sanitize";
 
 describe("Sanitize", () => {
@@ -57,15 +56,4 @@ describe("Sanitize", () => {
     });
   });
 
-  describe("sanitizeObject", () => {
-    it("should sanitize string values in an object", () => {
-      const obj = {
-        name: "<script>bad</script>John",
-        age: 30,
-      };
-      const result = sanitizeObject(obj);
-      expect(result.name).toBe("badJohn");
-      expect(result.age).toBe(30);
-    });
-  });
 });

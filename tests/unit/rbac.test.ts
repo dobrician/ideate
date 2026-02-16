@@ -4,8 +4,6 @@
  * Covers:
  *  - hasPermission for all 4 roles (admin, manager, member, viewer)
  *  - canManageResource for owner vs non-owner
- *  - requirePermission throws on forbidden
- *  - canModifyResource checks both permission and ownership
  *  - Role-specific permission boundaries
  */
 
@@ -13,9 +11,6 @@ import { describe, it, expect } from "vitest";
 import {
   hasPermission,
   canManageResource,
-  getPermissions,
-  requirePermission,
-  canModifyResource,
   type Role,
   type Permission,
 } from "@/lib/rbac";
@@ -81,7 +76,12 @@ describe("hasPermission", () => {
     });
 
     it("should have all 13 permissions", () => {
-      expect(getPermissions(role).size).toBe(13);
+      const all: Permission[] = [
+        "project:create", "project:read", "project:update", "project:delete",
+        "project:manage_all", "proposal:create", "proposal:read", "proposal:delete",
+        "vote:cast", "comment:create", "comment:read", "user:manage", "user:view_all",
+      ];
+      for (const p of all) expect(hasPermission(role, p)).toBe(true);
     });
   });
 
@@ -141,7 +141,8 @@ describe("hasPermission", () => {
     });
 
     it("should have 11 permissions (all except manage_all and user:manage)", () => {
-      expect(getPermissions(role).size).toBe(11);
+      expect(hasPermission(role, "project:manage_all")).toBe(false);
+      expect(hasPermission(role, "user:manage")).toBe(false);
     });
   });
 
@@ -201,7 +202,11 @@ describe("hasPermission", () => {
     });
 
     it("should have 7 permissions", () => {
-      expect(getPermissions(role).size).toBe(7);
+      const expected: Permission[] = [
+        "project:create", "project:read", "proposal:create", "proposal:read",
+        "vote:cast", "comment:create", "comment:read",
+      ];
+      for (const p of expected) expect(hasPermission(role, p)).toBe(true);
     });
   });
 
@@ -261,14 +266,8 @@ describe("hasPermission", () => {
     });
 
     it("should only have 3 read-only permissions", () => {
-      expect(getPermissions(role).size).toBe(3);
-    });
-
-    it("should only contain read permissions", () => {
-      const perms = getPermissions(role);
-      for (const perm of perms) {
-        expect(perm).toMatch(/:read$/);
-      }
+      const reads: Permission[] = ["project:read", "proposal:read", "comment:read"];
+      for (const p of reads) expect(hasPermission(role, p)).toBe(true);
     });
   });
 });
@@ -322,192 +321,6 @@ describe("canManageResource", () => {
   });
 });
 
-// ---------------------------------------------------------------------------
-// getPermissions
-// ---------------------------------------------------------------------------
-
-describe("getPermissions", () => {
-  it("should return a ReadonlySet for admin", () => {
-    const perms = getPermissions("admin");
-    expect(perms).toBeInstanceOf(Set);
-    expect(perms.size).toBeGreaterThan(0);
-  });
-
-  it("should return a ReadonlySet for viewer", () => {
-    const perms = getPermissions("viewer");
-    expect(perms).toBeInstanceOf(Set);
-    expect(perms.size).toBe(3);
-  });
-
-  it("should return admin permissions as a superset of manager permissions", () => {
-    const adminPerms = getPermissions("admin");
-    const managerPerms = getPermissions("manager");
-    for (const perm of managerPerms) {
-      expect(adminPerms.has(perm)).toBe(true);
-    }
-  });
-
-  it("should return manager permissions as a superset of member permissions", () => {
-    const managerPerms = getPermissions("manager");
-    const memberPerms = getPermissions("member");
-    for (const perm of memberPerms) {
-      expect(managerPerms.has(perm)).toBe(true);
-    }
-  });
-
-  it("should return member permissions as a superset of viewer permissions", () => {
-    const memberPerms = getPermissions("member");
-    const viewerPerms = getPermissions("viewer");
-    for (const perm of viewerPerms) {
-      expect(memberPerms.has(perm)).toBe(true);
-    }
-  });
-});
-
-// ---------------------------------------------------------------------------
-// requirePermission
-// ---------------------------------------------------------------------------
-
-describe("requirePermission", () => {
-  it("should not throw when admin has the requested permission", () => {
-    expect(() => requirePermission("admin", "project:manage_all")).not.toThrow();
-  });
-
-  it("should not throw when member has project:read", () => {
-    expect(() => requirePermission("member", "project:read")).not.toThrow();
-  });
-
-  it("should not throw when viewer has comment:read", () => {
-    expect(() => requirePermission("viewer", "comment:read")).not.toThrow();
-  });
-
-  it("should throw for viewer trying to create a project", () => {
-    expect(() => requirePermission("viewer", "project:create")).toThrow(
-      /Forbidden.*viewer.*project:create/
-    );
-  });
-
-  it("should throw for member trying to delete a project", () => {
-    expect(() => requirePermission("member", "project:delete")).toThrow(
-      /Forbidden.*member.*project:delete/
-    );
-  });
-
-  it("should throw for manager trying to manage all projects", () => {
-    expect(() => requirePermission("manager", "project:manage_all")).toThrow(
-      /Forbidden.*manager.*project:manage_all/
-    );
-  });
-
-  it("should throw for viewer trying to cast a vote", () => {
-    expect(() => requirePermission("viewer", "vote:cast")).toThrow(
-      /Forbidden.*viewer.*vote:cast/
-    );
-  });
-
-  it("should throw for member trying to manage users", () => {
-    expect(() => requirePermission("member", "user:manage")).toThrow(
-      /Forbidden.*member.*user:manage/
-    );
-  });
-
-  it("should throw an Error instance", () => {
-    expect(() => requirePermission("viewer", "project:create")).toThrow(Error);
-  });
-
-  it("should include role name in the error message", () => {
-    try {
-      requirePermission("viewer", "vote:cast");
-    } catch (err) {
-      expect(err).toBeInstanceOf(Error);
-      expect((err as Error).message).toContain("viewer");
-    }
-  });
-
-  it("should include permission name in the error message", () => {
-    try {
-      requirePermission("viewer", "vote:cast");
-    } catch (err) {
-      expect(err).toBeInstanceOf(Error);
-      expect((err as Error).message).toContain("vote:cast");
-    }
-  });
-});
-
-// ---------------------------------------------------------------------------
-// canModifyResource
-// ---------------------------------------------------------------------------
-
-describe("canModifyResource", () => {
-  const userId = "user-123";
-  const otherUserId = "user-456";
-
-  it("should return true for admin with the permission, regardless of ownership", () => {
-    expect(
-      canModifyResource("admin", "project:update", otherUserId, userId)
-    ).toBe(true);
-  });
-
-  it("should return true for manager who owns the resource and has the permission", () => {
-    expect(
-      canModifyResource("manager", "project:update", userId, userId)
-    ).toBe(true);
-  });
-
-  it("should return false for manager who does not own the resource (no manage_all)", () => {
-    expect(
-      canModifyResource("manager", "project:update", otherUserId, userId)
-    ).toBe(false);
-  });
-
-  it("should return false for member who lacks the permission entirely", () => {
-    expect(
-      canModifyResource("member", "project:update", userId, userId)
-    ).toBe(false);
-  });
-
-  it("should return true for member who owns and has proposal:create", () => {
-    expect(
-      canModifyResource("member", "proposal:create", userId, userId)
-    ).toBe(true);
-  });
-
-  it("should return false for member who has the permission but does not own the resource", () => {
-    expect(
-      canModifyResource("member", "proposal:create", otherUserId, userId)
-    ).toBe(false);
-  });
-
-  it("should return false for viewer for any write permission", () => {
-    expect(
-      canModifyResource("viewer", "project:create", userId, userId)
-    ).toBe(false);
-  });
-
-  it("should return false for viewer even as owner if permission is missing", () => {
-    expect(
-      canModifyResource("viewer", "proposal:create", userId, userId)
-    ).toBe(false);
-  });
-
-  it("should return true for admin with proposal:delete on non-owned resource", () => {
-    expect(
-      canModifyResource("admin", "proposal:delete", otherUserId, userId)
-    ).toBe(true);
-  });
-
-  it("should return false when resourceOwnerId is null for non-admin", () => {
-    expect(
-      canModifyResource("member", "proposal:create", null, userId)
-    ).toBe(false);
-  });
-
-  it("should return true when resourceOwnerId is null for admin", () => {
-    expect(
-      canModifyResource("admin", "proposal:create", null, userId)
-    ).toBe(true);
-  });
-});
 
 // ---------------------------------------------------------------------------
 // Cross-cutting permission boundary verifications

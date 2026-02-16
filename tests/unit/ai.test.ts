@@ -21,7 +21,6 @@ import {
   generateSummaryFromText,
   fallbackSummary,
   buildProposalSummary,
-  buildProjectSummary,
 } from "@/lib/ai";
 import { completeWithFallback } from "@/lib/llm";
 
@@ -250,77 +249,6 @@ describe("buildProposalSummary", () => {
 
     expect(result).not.toBeNull();
     expect(result!.length).toBeLessThanOrEqual(260);
-  });
-});
-
-// ---------------------------------------------------------------------------
-// buildProjectSummary
-// ---------------------------------------------------------------------------
-
-describe("buildProjectSummary", () => {
-  beforeEach(() => {
-    mockedComplete.mockReset();
-  });
-
-  it("should return AI-generated summary when LLM succeeds", async () => {
-    mockedComplete.mockResolvedValue({
-      text: "This project delivers a real-time dashboard for metrics.",
-      modelUsed: "openai",
-    });
-
-    const result = await buildProjectSummary(
-      "Metrics Dashboard",
-      "Build a real-time dashboard for team metrics."
-    );
-
-    expect(result).toBe("This project delivers a real-time dashboard for metrics.");
-    expect(mockedComplete).toHaveBeenCalledOnce();
-  });
-
-  it("should include title and description in the prompt sent to LLM", async () => {
-    mockedComplete.mockResolvedValue({ text: "summary", modelUsed: "gemini" });
-
-    await buildProjectSummary("Project Alpha", "Alpha description");
-
-    const prompt = mockedComplete.mock.calls[0][0];
-    expect(prompt).toContain("Project Alpha");
-    expect(prompt).toContain("Alpha description");
-  });
-
-  it("should fall back to truncated description when LLM returns null", async () => {
-    mockedComplete.mockResolvedValue({ text: null, modelUsed: null });
-
-    const description = "A short project description.";
-    const result = await buildProjectSummary("Title", description);
-
-    expect(result).toBe(description);
-  });
-
-  it("should fall back to truncated title when LLM and description are unavailable", async () => {
-    mockedComplete.mockResolvedValue({ text: null, modelUsed: null });
-
-    const result = await buildProjectSummary("Fallback Title", null);
-
-    expect(result).toBe("Fallback Title");
-  });
-
-  it("should truncate the AI summary to project char limit (320)", async () => {
-    const longSummary = "Y".repeat(400);
-    mockedComplete.mockResolvedValue({ text: longSummary, modelUsed: "gemini" });
-
-    const result = await buildProjectSummary("Title", "Desc");
-
-    expect(result).not.toBeNull();
-    expect(result!.length).toBeLessThanOrEqual(320);
-  });
-
-  it("should use project-specific word limit (48) in the prompt", async () => {
-    mockedComplete.mockResolvedValue({ text: "ok", modelUsed: "gemini" });
-
-    await buildProjectSummary("Title", "Desc");
-
-    const prompt = mockedComplete.mock.calls[0][0];
-    expect(prompt).toContain("48 words");
   });
 });
 

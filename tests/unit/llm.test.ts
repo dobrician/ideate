@@ -1,10 +1,8 @@
 /**
- * Unit tests for LLM rate limiting and usage tracking (src/lib/llm.ts).
+ * Unit tests for LLM rate limiting (src/lib/llm.ts).
  *
  * Covers:
- *  - getAiUsageStats returns current usage statistics
  *  - completeWithFallback returns null when rate limited
- *  - Usage tracking increments requests and tokens
  *  - Sliding window resets after an hour
  *  - Rate limits respect both request count and token count
  *
@@ -45,7 +43,6 @@ async function loadLLM(envOverrides: Record<string, string | undefined> = {}) {
   vi.resetModules();
   const mod = await import("@/lib/llm");
   return {
-    getAiUsageStats: mod.getAiUsageStats,
     completeWithFallback: mod.completeWithFallback,
   };
 }
@@ -87,121 +84,6 @@ function openaiResponse(text: string, totalTokens = 50) {
     usage: { total_tokens: totalTokens },
   });
 }
-
-// ---------------------------------------------------------------------------
-// getAiUsageStats
-// ---------------------------------------------------------------------------
-
-describe("getAiUsageStats", () => {
-  it("should return initial stats with zero usage", async () => {
-    const { getAiUsageStats } = await loadLLM({
-      GEMINI_API_KEY: undefined,
-      OPENAI_API_KEY: undefined,
-      AI_MAX_REQUESTS_PER_HOUR: "60",
-      AI_MAX_TOKENS_PER_HOUR: "100000",
-    });
-
-    const stats = getAiUsageStats();
-
-    expect(stats.requests).toBe(0);
-    expect(stats.tokens).toBe(0);
-    expect(stats.costUsd).toBe(0);
-    expect(stats.maxRequests).toBe(60);
-    expect(stats.maxTokens).toBe(100000);
-    expect(typeof stats.windowStart).toBe("number");
-  });
-
-  it("should reflect custom max values from environment variables", async () => {
-    const { getAiUsageStats } = await loadLLM({
-      GEMINI_API_KEY: undefined,
-      OPENAI_API_KEY: undefined,
-      AI_MAX_REQUESTS_PER_HOUR: "30",
-      AI_MAX_TOKENS_PER_HOUR: "50000",
-    });
-
-    const stats = getAiUsageStats();
-
-    expect(stats.maxRequests).toBe(30);
-    expect(stats.maxTokens).toBe(50000);
-  });
-
-  it("should increment requests and tokens after a successful call", async () => {
-    const fetchMock = vi.fn<(input: string | URL | Request, init?: RequestInit) => Promise<Response>>();
-    fetchMock.mockResolvedValue(geminiResponse("Hello world", 5000));
-    globalThis.fetch = fetchMock;
-
-    const { getAiUsageStats, completeWithFallback } = await loadLLM({
-      GEMINI_API_KEY: "test-key",
-      OPENAI_API_KEY: undefined,
-      AI_MAX_REQUESTS_PER_HOUR: "60",
-      AI_MAX_TOKENS_PER_HOUR: "100000",
-    });
-
-    await completeWithFallback("test prompt");
-
-    const stats = getAiUsageStats();
-    expect(stats.requests).toBe(1);
-    expect(stats.tokens).toBe(5000);
-    // Gemini output cost: (5000/1000) * 0.0003 = 0.0015
-    expect(stats.costUsd).toBeGreaterThan(0);
-  });
-
-  it("should accumulate usage across multiple calls", async () => {
-    const fetchMock = vi.fn<(input: string | URL | Request, init?: RequestInit) => Promise<Response>>();
-    fetchMock.mockResolvedValue(geminiResponse("response", 100));
-    globalThis.fetch = fetchMock;
-
-    const { getAiUsageStats, completeWithFallback } = await loadLLM({
-      GEMINI_API_KEY: "test-key",
-      OPENAI_API_KEY: undefined,
-      AI_MAX_REQUESTS_PER_HOUR: "60",
-      AI_MAX_TOKENS_PER_HOUR: "100000",
-    });
-
-    await completeWithFallback("prompt 1");
-    await completeWithFallback("prompt 2");
-    await completeWithFallback("prompt 3");
-
-    const stats = getAiUsageStats();
-    expect(stats.requests).toBe(3);
-    expect(stats.tokens).toBe(300);
-  });
-
-  it("should round costUsd to 4 decimal places", async () => {
-    const fetchMock = vi.fn<(input: string | URL | Request, init?: RequestInit) => Promise<Response>>();
-    fetchMock.mockResolvedValue(geminiResponse("text", 1));
-    globalThis.fetch = fetchMock;
-
-    const { getAiUsageStats, completeWithFallback } = await loadLLM({
-      GEMINI_API_KEY: "test-key",
-      OPENAI_API_KEY: undefined,
-      AI_MAX_REQUESTS_PER_HOUR: "60",
-      AI_MAX_TOKENS_PER_HOUR: "100000",
-    });
-
-    await completeWithFallback("prompt");
-
-    const stats = getAiUsageStats();
-    // costUsd should be rounded to 4 decimal places
-    const decimalParts = stats.costUsd.toString().split(".");
-    if (decimalParts.length > 1) {
-      expect(decimalParts[1].length).toBeLessThanOrEqual(4);
-    }
-  });
-
-  it("should have a windowStart that is a recent timestamp", async () => {
-    const before = Date.now();
-    const { getAiUsageStats } = await loadLLM({
-      GEMINI_API_KEY: undefined,
-      OPENAI_API_KEY: undefined,
-    });
-    const after = Date.now();
-
-    const stats = getAiUsageStats();
-    expect(stats.windowStart).toBeGreaterThanOrEqual(before);
-    expect(stats.windowStart).toBeLessThanOrEqual(after);
-  });
-});
 
 // ---------------------------------------------------------------------------
 // completeWithFallback - rate limiting behavior
@@ -268,10 +150,10 @@ describe("completeWithFallback rate limiting", () => {
     fetchMock.mockResolvedValue(geminiResponse("success", 10));
     globalThis.fetch = fetchMock;
 
-    const { getAiUsageStats, completeWithFallback } = await loadLLM({
+    const { completeWithFallback } = await loadLLM({
       GEMINI_API_KEY: "test-key",
       OPENAI_API_KEY: undefined,
-      AI_MAX_REQUESTS_PER_HOUR: "60",
+      AI_MAX_REQUESTS_PER_HOUR: "2",
       AI_MAX_TOKENS_PER_HOUR: "100000",
     });
 
@@ -279,9 +161,11 @@ describe("completeWithFallback rate limiting", () => {
     const failedResult = await completeWithFallback("prompt");
     expect(failedResult.text).toBeNull();
 
-    const stats = getAiUsageStats();
-    expect(stats.requests).toBe(0);
-    expect(stats.tokens).toBe(0);
+    // Two more successful calls should work (limit = 2)
+    const r1 = await completeWithFallback("prompt 1");
+    expect(r1.text).toBe("success");
+    const r2 = await completeWithFallback("prompt 2");
+    expect(r2.text).toBe("success");
   });
 
   it("should return null for both text and modelUsed when rate limited", async () => {
@@ -304,26 +188,32 @@ describe("completeWithFallback rate limiting", () => {
     expect(result).toEqual({ text: null, modelUsed: null });
   });
 
-  it("should track usage from OpenAI fallback calls", async () => {
+  it("should track usage from OpenAI fallback calls against rate limit", async () => {
     const fetchMock = vi.fn<(input: string | URL | Request, init?: RequestInit) => Promise<Response>>();
-    // Gemini fails, OpenAI succeeds
+    // Gemini fails, OpenAI succeeds (each call uses 600 tokens)
     fetchMock.mockResolvedValueOnce(mockResponse({ error: "error" }, 500));
-    fetchMock.mockResolvedValueOnce(openaiResponse("openai result", 200));
+    fetchMock.mockResolvedValueOnce(openaiResponse("openai result", 600));
+    // Second call: Gemini fails, OpenAI succeeds again
+    fetchMock.mockResolvedValueOnce(mockResponse({ error: "error" }, 500));
+    fetchMock.mockResolvedValueOnce(openaiResponse("openai result 2", 600));
     globalThis.fetch = fetchMock;
 
-    const { getAiUsageStats, completeWithFallback } = await loadLLM({
+    const { completeWithFallback } = await loadLLM({
       GEMINI_API_KEY: "test-key",
       OPENAI_API_KEY: "test-openai-key",
-      AI_MAX_REQUESTS_PER_HOUR: "60",
-      AI_MAX_TOKENS_PER_HOUR: "100000",
+      AI_MAX_REQUESTS_PER_HOUR: "100",
+      AI_MAX_TOKENS_PER_HOUR: "1000",
     });
 
     const result = await completeWithFallback("prompt");
     expect(result.modelUsed).toBe("openai");
 
-    const stats = getAiUsageStats();
-    expect(stats.requests).toBe(1);
-    expect(stats.tokens).toBe(200);
+    // Second call pushes tokens over limit (1200 > 1000)
+    await completeWithFallback("prompt 2");
+
+    // Third call should be rate limited
+    const blocked = await completeWithFallback("prompt 3");
+    expect(blocked.text).toBeNull();
   });
 });
 
@@ -407,34 +297,34 @@ describe("completeWithFallback basic behavior", () => {
 // ---------------------------------------------------------------------------
 
 describe("sliding window reset", () => {
-  it("should reset usage stats when the window has expired", async () => {
+  it("should reset usage when the window has expired", async () => {
     const fetchMock = vi.fn<(input: string | URL | Request, init?: RequestInit) => Promise<Response>>();
     fetchMock.mockResolvedValue(geminiResponse("ok", 50));
     globalThis.fetch = fetchMock;
 
-    const { getAiUsageStats, completeWithFallback } = await loadLLM({
+    const { completeWithFallback } = await loadLLM({
       GEMINI_API_KEY: "test-key",
       OPENAI_API_KEY: undefined,
-      AI_MAX_REQUESTS_PER_HOUR: "60",
+      AI_MAX_REQUESTS_PER_HOUR: "2",
       AI_MAX_TOKENS_PER_HOUR: "100000",
     });
 
-    // Make a request to build up usage
-    await completeWithFallback("prompt");
+    // Exhaust the limit (2 requests)
+    await completeWithFallback("prompt 1");
+    await completeWithFallback("prompt 2");
 
-    let stats = getAiUsageStats();
-    expect(stats.requests).toBe(1);
-    expect(stats.tokens).toBe(50);
+    // Should be rate limited
+    const blocked = await completeWithFallback("prompt 3");
+    expect(blocked.text).toBeNull();
 
     // Simulate window expiry by advancing time by more than 1 hour
     vi.useFakeTimers();
     vi.advanceTimersByTime(61 * 60 * 1000); // 61 minutes
 
-    stats = getAiUsageStats();
-    // After window reset, stats should be back to zero
-    expect(stats.requests).toBe(0);
-    expect(stats.tokens).toBe(0);
-    expect(stats.costUsd).toBe(0);
+    // After window reset, requests should work again
+    const result = await completeWithFallback("prompt 4");
+    expect(result.text).toBe("ok");
+    expect(result.modelUsed).toBe("gemini");
 
     vi.useRealTimers();
   });
