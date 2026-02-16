@@ -10,5 +10,5 @@
 - [x] Goal 2: Real-time comment updates (SSE or polling)
 - [x] Goal 3: Enter to submit, Shift+Enter for newline
 - [x] Goal 4: Scroll-to-bottom and auto-scroll behavior
-- [ ] Goal 5: Mobile responsive messenger UX
+- [x] Goal 5: Mobile responsive messenger UX
 - [ ] Goal 6: Exhaustive tests — unit, component, and E2E

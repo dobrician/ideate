@@ -89,7 +89,7 @@ function ChatBubble({
       ) : (
         <div className="w-6 shrink-0" />
       )}
-      <div className={`max-w-[75%] ${isOwn ? "items-end" : "items-start"}`}>
+      <div className={`max-w-[85%] sm:max-w-[75%] ${isOwn ? "items-end" : "items-start"}`}>
         {showAvatar && (
           <div className={`flex items-center gap-2 mb-0.5 ${isOwn ? "flex-row-reverse" : ""}`}>
             <span className="text-xs font-medium text-foreground">
@@ -238,7 +238,7 @@ export function CommentThread({ comments, hiddenFields, currentUserId }: Comment
           </button>
         )}
       </div>
-      <div className="border-t pt-3">
+      <div className="border-t pt-2 pb-[env(safe-area-inset-bottom)] sm:pt-3">
         <form ref={formRef} action={formAction}>
           {Object.entries(hiddenFields).map(([name, value]) => (
             <input key={name} type="hidden" name={name} value={value} />
