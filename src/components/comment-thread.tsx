@@ -1,6 +1,7 @@
 "use client";
 
-import { useActionState, useRef, useState } from "react";
+import { useActionState, useEffect, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -121,14 +122,19 @@ function CommentNode({
   hiddenFields: Record<string, string>;
 }) {
   const { t } = useLocale();
+  const router = useRouter();
   const [replying, setReplying] = useState(false);
   const [state, formAction, isPending] = useActionState(addComment, null);
 
-  if (state?.success && replying) {
-    toast.success(t("comments.replyPosted"));
-    setReplying(false);
-  }
-  if (state?.error) toast.error(state.error);
+  useEffect(() => {
+    if (state?.success) {
+      toast.success(t("comments.replyPosted"));
+      setReplying(false);
+      router.refresh();
+    }
+    if (state?.error) toast.error(state.error);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [state]);
 
   const displayName = comment.userName || comment.userEmail || "Anonymous";
   const timeAgo = comment.createdAt ? formatTimeAgo(comment.createdAt, t) : "";
@@ -177,9 +183,17 @@ interface CommentThreadProps {
 
 export function CommentThread({ comments, hiddenFields }: CommentThreadProps) {
   const { t } = useLocale();
+  const router = useRouter();
   const [state, formAction, isPending] = useActionState(addComment, null);
   const formRef = useRef<HTMLFormElement>(null);
   const tree = buildCommentTree(comments);
+
+  useEffect(() => {
+    if (state?.success) {
+      formRef.current?.reset();
+      router.refresh();
+    }
+  }, [state, router]);
 
   function handleKeyDown(e: React.KeyboardEvent<HTMLTextAreaElement>) {
     if (e.key === "Enter" && !e.shiftKey && !e.ctrlKey) {
