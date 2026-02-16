@@ -28,6 +28,7 @@ import { ProjectComments } from "@/components/project-comments";
 import { getTranslations } from "@/lib/i18n-server";
 import { statusBadgeClass, statusLabel } from "@/lib/status-utils";
 import { RegenerateSummaryButton } from "@/components/regenerate-summary-button";
+import { SuggestProposalsButton } from "@/components/suggest-proposals";
 
 interface ProjectPageProps {
   params: Promise<{ id: string }>;
@@ -201,7 +202,21 @@ export default async function ProjectPage({ params, searchParams }: ProjectPageP
               <h2 className="text-lg font-semibold">
                 {t("proposals.count", { count: proposalTotal })}
               </h2>
-              {canCreateProposal && <ProposalForm projectId={id} />}
+              {canCreateProposal && (
+                <div className="flex gap-2">
+                  <SuggestProposalsButton
+                    projectId={id}
+                    projectTitle={projectData.title}
+                    projectDescription={projectData.description || ""}
+                    existingProposals={proposalsWithStats.map((p) => ({
+                      title: p.title,
+                      description: p.description ?? undefined,
+                      summary: p.summary ?? undefined,
+                    }))}
+                  />
+                  <ProposalForm projectId={id} />
+                </div>
+              )}
             </div>
             <ProposalList
               proposals={proposalsWithStats}
