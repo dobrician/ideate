@@ -3,6 +3,7 @@ import { db } from "@/db";
 import { projects } from "@/db/schema";
 import { getCurrentUser } from "@/lib/auth";
 import { eq } from "drizzle-orm";
+import { logger } from "@/lib/logger";
 
 interface RouteParams {
   params: Promise<{ id: string }>;
@@ -42,7 +43,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
 
     return NextResponse.json(project[0]);
   } catch (error) {
-    console.error("Fetch project error:", error);
+    logger.error({ err: error }, "Fetch project error");
     return NextResponse.json(
       { error: "Failed to fetch project" },
       { status: 500 }

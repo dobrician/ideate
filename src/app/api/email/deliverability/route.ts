@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/auth";
 import { hasPermission, type Role } from "@/lib/rbac";
 import { checkDeliverability } from "@/lib/email-deliverability";
+import { logger } from "@/lib/logger";
 
 export const dynamic = "force-dynamic";
 
@@ -33,7 +34,7 @@ export async function GET() {
     const report = await checkDeliverability(domain);
     return NextResponse.json(report);
   } catch (error) {
-    console.error("Deliverability check error:", error);
+    logger.error({ err: error }, "Deliverability check error");
     return NextResponse.json(
       { error: "Failed to check deliverability" },
       { status: 500 }

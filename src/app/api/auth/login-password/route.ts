@@ -3,6 +3,7 @@ import { authenticateWithPassword } from "@/lib/password";
 import { setSessionCookie } from "@/lib/auth";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { getClientIp } from "@/lib/request-utils";
+import { logger } from "@/lib/logger";
 import { z } from "zod";
 
 const WINDOW_MS = 15 * 60 * 1000; // 15 minutes
@@ -97,7 +98,7 @@ export async function POST(request: NextRequest) {
       message: "Signed in successfully",
     });
   } catch (error) {
-    console.error("Login error:", error);
+    logger.error({ err: error }, "Login error");
     return NextResponse.json(
       { error: "An error occurred. Please try again." },
       { status: 500 }

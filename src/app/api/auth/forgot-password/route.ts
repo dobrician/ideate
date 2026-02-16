@@ -3,6 +3,7 @@ import { generatePasswordResetToken } from "@/lib/password";
 import { sendPasswordResetEmail } from "@/lib/mail";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { getClientIp } from "@/lib/request-utils";
+import { logger } from "@/lib/logger";
 import { z } from "zod";
 
 const APP_URL = process.env.APP_URL || "http://localhost:3000";
@@ -74,7 +75,7 @@ export async function POST(request: NextRequest) {
       try {
         await sendPasswordResetEmail(email, resetLink);
       } catch (error) {
-        console.error("Failed to send reset email:", error);
+        logger.error({ err: error }, "Failed to send reset email");
         if (process.env.NODE_ENV === "development") {
           return NextResponse.json(
             { error: "Failed to send email. Check SMTP configuration." },
@@ -90,7 +91,7 @@ export async function POST(request: NextRequest) {
       message: "If an account exists, a reset link has been sent.",
     });
   } catch (error) {
-    console.error("Forgot password error:", error);
+    logger.error({ err: error }, "Forgot password error");
     return NextResponse.json(
       { error: "An error occurred. Please try again." },
       { status: 500 }

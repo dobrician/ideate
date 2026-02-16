@@ -2,6 +2,7 @@ import nodemailer from "nodemailer";
 import type { Transporter } from "nodemailer";
 import { appendFileSync, mkdirSync } from "fs";
 import { dirname } from "path";
+import { logger } from "@/lib/logger";
 
 const SMTP_HOST = process.env.SMTP_HOST || "";
 const SMTP_PORT = parseInt(process.env.SMTP_PORT || "587", 10);
@@ -104,7 +105,7 @@ export async function sendMagicLinkEmail(
     });
     logMail(email, "magic-link", magicLink);
   } catch (error) {
-    console.error("Failed to send magic link email:", error);
+    logger.error({ err: error }, "Failed to send magic link email");
     throw new Error("Failed to send email");
   }
 }
@@ -148,7 +149,7 @@ export async function sendVerificationEmail(
     await transport.sendMail({ from: SMTP_FROM, to: email, subject, text, html });
     logMail(email, "verification", verifyLink);
   } catch (error) {
-    console.error("Failed to send verification email:", error);
+    logger.error({ err: error }, "Failed to send verification email");
     throw new Error("Failed to send verification email");
   }
 }
@@ -192,7 +193,7 @@ export async function sendPasswordResetEmail(
     await transport.sendMail({ from: SMTP_FROM, to: email, subject, text, html });
     logMail(email, "reset", resetLink);
   } catch (error) {
-    console.error("Failed to send password reset email:", error);
+    logger.error({ err: error }, "Failed to send password reset email");
     throw new Error("Failed to send password reset email");
   }
 }
@@ -207,7 +208,7 @@ export async function verifySmtpConnection(): Promise<boolean> {
     await transport.verify();
     return true;
   } catch (error) {
-    console.error("SMTP connection failed:", error);
+    logger.error({ err: error }, "SMTP connection failed");
     return false;
   }
 }

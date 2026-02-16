@@ -3,6 +3,7 @@ import { generateMagicLink } from "@/lib/auth";
 import { sendMagicLinkEmail } from "@/lib/mail";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { getClientIp } from "@/lib/request-utils";
+import { logger } from "@/lib/logger";
 import { z } from "zod";
 
 const WINDOW_MS = 15 * 60 * 1000; // 15 minutes
@@ -75,7 +76,7 @@ export async function POST(request: NextRequest) {
     try {
       await sendMagicLinkEmail(email, magicLink);
     } catch (error) {
-      console.error("Failed to send magic link:", error);
+      logger.error({ err: error }, "Failed to send magic link");
       if (process.env.NODE_ENV === "development") {
         return NextResponse.json(
           { error: "Failed to send email. Check SMTP configuration." },
@@ -91,7 +92,7 @@ export async function POST(request: NextRequest) {
         "If an account exists with this email, a magic link has been sent.",
     });
   } catch (error) {
-    console.error("Magic link request error:", error);
+    logger.error({ err: error }, "Magic link request error");
     return NextResponse.json(
       { error: "An error occurred. Please try again." },
       { status: 500 }

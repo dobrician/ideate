@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { verifyMagicLinkToken, findOrCreateUser, setSessionCookie } from "@/lib/auth";
+import { logger } from "@/lib/logger";
 
 const APP_URL = process.env.APP_URL || "http://localhost:3000";
 
@@ -32,7 +33,7 @@ export async function GET(request: NextRequest) {
     const destination = redirectTo && redirectTo.startsWith("/") ? redirectTo : "/";
     return NextResponse.redirect(appUrl(destination));
   } catch (error) {
-    console.error("Verification error:", error);
+    logger.error({ err: error }, "Verification error");
     return NextResponse.redirect(appUrl("/auth/login?error=verification_failed"));
   }
 }

@@ -3,6 +3,7 @@ import { regenerateVerificationToken } from "@/lib/password";
 import { sendVerificationEmail } from "@/lib/mail";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { getClientIp } from "@/lib/request-utils";
+import { logger } from "@/lib/logger";
 import { z } from "zod";
 
 const APP_URL = process.env.APP_URL || "http://localhost:3000";
@@ -71,7 +72,7 @@ export async function POST(request: NextRequest) {
       try {
         await sendVerificationEmail(email, verifyLink);
       } catch (error) {
-        console.error("Failed to send verification email:", error);
+        logger.error({ err: error }, "Failed to send verification email");
         if (process.env.NODE_ENV === "development") {
           return NextResponse.json(
             { error: "Failed to send email. Check SMTP config." },
@@ -86,7 +87,7 @@ export async function POST(request: NextRequest) {
       message: "If the account exists, a verification email has been sent.",
     });
   } catch (error) {
-    console.error("Resend verification error:", error);
+    logger.error({ err: error }, "Resend verification error");
     return NextResponse.json(
       { error: "An error occurred. Please try again." },
       { status: 500 }

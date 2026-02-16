@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { verifyEmailToken } from "@/lib/password";
+import { logger } from "@/lib/logger";
 
 const APP_URL = process.env.APP_URL || "http://localhost:3000";
 
@@ -34,7 +35,7 @@ export async function GET(request: NextRequest) {
       appUrl("/auth/login?verified=true")
     );
   } catch (error) {
-    console.error("Email verification error:", error);
+    logger.error({ err: error }, "Email verification error");
     return NextResponse.redirect(
       appUrl("/auth/login?error=verification_failed")
     );

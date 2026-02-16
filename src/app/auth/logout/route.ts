@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { clearSession } from "@/lib/auth";
+import { logger } from "@/lib/logger";
 
 /**
  * POST /auth/logout
@@ -25,7 +26,7 @@ export async function POST(request: NextRequest) {
     response.cookies.delete("csrf_token");
     return response;
   } catch (error) {
-    console.error("Logout error:", error);
+    logger.error({ err: error }, "Logout error");
     return NextResponse.json(
       { error: "An error occurred during logout" },
       { status: 500 }

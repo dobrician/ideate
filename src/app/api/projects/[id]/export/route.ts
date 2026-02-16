@@ -4,6 +4,7 @@ import { projects, proposals, votes, comments, users } from "@/db/schema";
 import { getCurrentUser } from "@/lib/auth";
 import { eq, sql } from "drizzle-orm";
 import { generateCsv, generateReportHtml } from "@/lib/export";
+import { logger } from "@/lib/logger";
 
 interface RouteParams {
   params: Promise<{ id: string }>;
@@ -145,7 +146,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
       },
     });
   } catch (error) {
-    console.error("Export error:", error);
+    logger.error({ err: error }, "Export error");
     return NextResponse.json(
       { error: "Failed to generate export" },
       { status: 500 }

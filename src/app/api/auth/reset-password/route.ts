@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { resetPasswordWithToken, validatePassword } from "@/lib/password";
+import { logger } from "@/lib/logger";
 import { z } from "zod";
 
 const resetSchema = z.object({
@@ -55,7 +56,7 @@ export async function POST(request: NextRequest) {
       message: "Password reset successfully. You can now sign in.",
     });
   } catch (error) {
-    console.error("Reset password error:", error);
+    logger.error({ err: error }, "Reset password error");
     return NextResponse.json(
       { error: "An error occurred. Please try again." },
       { status: 500 }
