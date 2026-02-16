@@ -282,8 +282,15 @@ export const ro: Record<string, string> = {
   "auth.invalidLinkDesc":
     "Acest link de resetare este invalid sau a expirat.",
   "auth.requestNewLink": "Solicită un Link Nou de Resetare",
+  "auth.magicLinkExplainer":
+    "Un link magic îți permite autentificarea fără parolă. Trimitem un link unic pe email — apasă pe el pentru a te conecta în siguranță.",
   "auth.magicLinkSent":
     "Verifică email-ul! Ți-am trimis un link magic de autentificare.",
+  "auth.magicLinkCheckTitle": "Verifică inbox-ul",
+  "auth.magicLinkCheckDesc":
+    "Am trimis un link de autentificare la adresa ta de email. Apasă pe link pentru a te conecta. Poate dura un minut.",
+  "auth.magicLinkCheckSpam":
+    "Nu-l vezi? Verifică folderul de spam.",
   "auth.magicLinkExpiry":
     "Îți trimitem un link securizat care expiră în 15 minute",
   "auth.emailVerified":

@@ -265,8 +265,15 @@ export const en: Record<string, string> = {
   "auth.invalidLink": "Invalid Link",
   "auth.invalidLinkDesc": "This reset link is invalid or has expired.",
   "auth.requestNewLink": "Request a New Reset Link",
+  "auth.magicLinkExplainer":
+    "A magic link lets you sign in without a password. We send a one-time link to your email — just click it to log in securely.",
   "auth.magicLinkSent":
     "Check your email! We sent you a magic link to sign in.",
+  "auth.magicLinkCheckTitle": "Check your inbox",
+  "auth.magicLinkCheckDesc":
+    "We sent a sign-in link to your email. Click the link to log in. It may take a minute to arrive.",
+  "auth.magicLinkCheckSpam":
+    "Don't see it? Check your spam folder.",
   "auth.magicLinkExpiry":
     "We'll send you a secure link that expires in 15 minutes",
   "auth.emailVerified": "Email verified! You can now sign in.",

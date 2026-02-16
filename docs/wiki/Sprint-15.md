@@ -10,7 +10,7 @@
 **UX Bug Fixes:**
 - [x] Fix registration form inline validation errors (#30)
 - [x] Add admin link to navigation for admin users (#28)
-- [ ] Improve magic link login UX — explanation text + "check your email" screen (#29)
+- [x] Improve magic link login UX — explanation text + "check your email" screen (#29)
 
 **Navigation Polish:**
 - [ ] Replace hand-rolled header dropdown with shadcn DropdownMenu (ARIA, keyboard nav)

@@ -114,12 +114,17 @@ export default function LoginPage() {
           )}
 
           {success ? (
-            <div className="space-y-4">
-              <div className="rounded-md bg-green-50 p-4 dark:bg-green-950">
-                <p className="text-sm text-green-800 dark:text-green-200">
-                  {t("auth.magicLinkSent")}
-                </p>
+            <div className="space-y-4 text-center">
+              <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-green-100 dark:bg-green-900">
+                <svg className="h-6 w-6 text-green-600 dark:text-green-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
               </div>
+              <h3 className="text-lg font-semibold">{t("auth.magicLinkCheckTitle")}</h3>
+              <p className="text-sm text-muted-foreground">
+                {t("auth.magicLinkCheckDesc")}
+              </p>
+              <p className="text-xs text-muted-foreground">
+                {t("auth.magicLinkCheckSpam")}
+              </p>
               <Button
                 variant="outline"
                 onClick={() => setSuccess(false)}
@@ -213,6 +218,9 @@ export default function LoginPage() {
             </form>
           ) : (
             <form onSubmit={handleMagicLink} className="space-y-4">
+              <p className="text-sm text-muted-foreground">
+                {t("auth.magicLinkExplainer")}
+              </p>
               <div className="space-y-2">
                 <Label htmlFor="email-magic">{t("auth.email")}</Label>
                 <Input
