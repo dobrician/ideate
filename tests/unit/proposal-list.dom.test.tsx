@@ -140,13 +140,18 @@ describe("ProposalList", () => {
     const { container } = render(
       <ProposalList proposals={proposals} projectId="proj1" currentUserId="u1" isAdmin={false} />
     );
-    // The bar chart overlay divs have aria-hidden="true" and use inline width style
-    const bars = container.querySelectorAll('[aria-hidden="true"][style]');
-    const widths = Array.from(bars).map((el) => (el as HTMLElement).style.width);
-    // max upvotes = 10: A=100%, B=50%, C has 0 upvotes so no bar
+    // The bar container has aria-hidden="true"; individual fills have style widths
+    const barContainers = container.querySelectorAll('[aria-hidden="true"]');
+    const widths: string[] = [];
+    barContainers.forEach((c) => {
+      c.querySelectorAll("[style]").forEach((el) => {
+        widths.push((el as HTMLElement).style.width);
+      });
+    });
+    // max upvotes = 10: A=100%, B=50%, C has 0 upvotes so no green bar
     expect(widths).toContain("100%");
     expect(widths).toContain("50%");
-    // No bar for 0 upvotes
+    // No 0% width bar should be rendered
     expect(widths).not.toContain("0%");
   });
 
