@@ -1,8 +1,8 @@
 # Ideate Deep Analysis Report
 
 **Date:** 2026-02-16
-**Prepared for:** Sprint 15 Planning
-**Scope:** Full codebase audit post-Sprint 14 (diagnostics, UI overhaul review, security, production readiness)
+**Prepared for:** Sprint 16 Planning
+**Scope:** Full codebase audit post-Sprint 15 (diagnostics, security review, tech debt, production readiness)
 
 ---
 
@@ -10,21 +10,22 @@
 
 | Check | Result |
 |-------|--------|
-| `tsc --noEmit` | **Clean** -- zero errors, zero warnings |
-| `npm audit` | **4 moderate** -- esbuild via drizzle-kit (dev dependency only, not production) |
-| `vitest --coverage` | **562 tests, 32 files, all passing** |
-| Statement coverage | **97.25%** (up from 95.3% in Sprint 13) |
-| Branch coverage | **89.11%** (up from 85.7%) |
-| Function coverage | **99.18%** (up from 96.7%) |
-| Line coverage | **98.61%** |
+| `tsc --noEmit` | **Clean** — zero errors, zero warnings |
+| `npm audit` | **4 moderate** — esbuild via drizzle-kit (dev dependency only, not in production bundle) |
+| `vitest --coverage` | **579 tests, 33 files, all passing** |
+| Statement coverage | **96.53%** |
+| Branch coverage | **88.44%** |
+| Function coverage | **98.38%** |
+| Line coverage | **97.95%** |
 
-### Coverage Gaps Remaining
+### Coverage Gaps
 
 | File | Stmts | Branch | Notes |
 |------|-------|--------|-------|
+| `csrf-client.ts` | 0% | 0% | Client-side cookie reader — no JSDOM cookie support in tests |
 | `stat-card.tsx` | 92.3% | 71.4% | Conditional rendering branches |
-| `proposals/actions.ts` | 92.9% | 90.3% | A few error paths |
-| `db/index.ts` | 91.7% | 50% | Migration bootstrap paths |
+| `proposals/actions.ts` | 93.2% | 90.3% | Some error paths uncovered |
+| `db/index.ts` | 84.6% | 50% | Migration bootstrap paths |
 | `mail.ts` | 96.4% | 76.7% | SMTP config fallback paths |
 | `notifications.ts` | 92.7% | 83.3% | Debounce edge cases |
 
@@ -34,164 +35,182 @@
 
 | # | Title | Label |
 |---|-------|-------|
-| 30 | Registration form lacks inline validation errors | bug |
-| 29 | Magic link login needs explanation | enhancement |
-| 28 | Add admin link to navigation for admin users | enhancement |
 | 19 | Project-level comments/discussions | enhancement |
 | 13 | Cloudflare deployment (Pages + D1) | nice-to-have |
 
-5 issues remain. Issues 28-30 are small UX fixes from Sprint 14 triage. Issue 19 is a feature request. Issue 13 is a deployment option.
+2 issues remain. Issue 19 has a completed design spike. Issue 13 is a deployment option (not blocking).
 
 ---
 
-## UI Overhaul Review (Sidebar Removed, Top Nav)
+## Sprint 13-15 Review: Regressions & Tech Debt
 
-The sidebar-to-top-nav migration from Sprint 14 is **functionally complete**. No broken tests. All 562 tests pass.
+### What Went Well
+- **32 commits** across 3 sprints, 16 issues closed (#16-31)
+- Test count grew from 562 to 579; 32/32 smoke tests passed throughout
+- CSRF fully wired into all 10 server actions (was dead code before Sprint 15)
+- Structured logging with pino replaced bare `console.error`
+- Migration errors now fail-fast with `process.exit(1)`
+- Sidebar removal completed cleanly: dead CSS/translations removed
 
-### Dead Code to Clean Up
+### One Regression (Introduced & Fixed)
+- Proposal bar chart scaling bug introduced in Sprint 14, fixed in Sprint 15 (`b05b359`). Bar width was calculated as upvotes/total instead of upvotes/max. Root cause: no component tests for `proposal-list.tsx`.
 
-| Item | Location |
-|------|----------|
-| 16 `--sidebar-*` CSS custom properties | `src/app/globals.css` (lines 26-33, 63-70, 98-105) |
-| `nav.toggleSidebar` translation key | `src/lib/translations/en.ts` + `ro.ts` line 11 |
-| `nav.navigation` translation key | `src/lib/translations/en.ts` + `ro.ts` line 10 |
-| Stale comment "no sidebar" | `src/app/auth/logout/route.ts` line 6 |
-
-### Navigation Concerns
-
-| Concern | Severity | Details |
-|---------|----------|---------|
-| Hand-rolled dropdown menu | Medium | Header user dropdown lacks ARIA `role="menu"`, keyboard nav, focus trap. Shadcn `DropdownMenu` component already exists in the project. |
-| Auth state fetched on every page load | Medium | Header calls `/api/me` on every mount. No caching. Potential flash of unauthenticated state on fast navigations. |
-| No component tests for Header/AppShell | Medium | E2E covers basic link presence but no mobile nav, auth-gated visibility, or dropdown behavior tests. |
+### Tech Debt Carried Forward
+1. **Component test gap** — Only `Header`/`AppShell` have component tests. `ProposalList`, `VoteButtons`, `DiscussionSheet`, `ProposalForm` have none.
+2. **In-memory rate limiter** — Resets on restart, per-process only. Ineffective for multi-instance.
+3. **Middleware skips JWT verification** — Checks cookie presence, not signature. Auth is enforced at the server action layer, so functionally safe but wasteful (requests reach server actions before rejection).
+4. **No token revocation** — Compromised JWTs valid for up to 7 days.
+5. **No backup strategy** — SQLite `data/ideate.db` has no automated backup (no litestream, no cron).
 
 ---
 
-## Security Findings (Current State)
+## Security Assessment
 
-### Resolved Since Sprint 13
-- CSRF now uses `timingSafeEqual` (fixed)
-- Vote value validation added (fixed)
-- HTML sanitization in notification emails (fixed)
-- CSP `unsafe-eval` removed (fixed)
-- Database indexes added on foreign keys (fixed)
-- Gemini API key moved to header auth (fixed)
+### CSRF: Working End-to-End
+The previous report flagged CSRF as dead code. Sprint 15 fixed this. Current state:
 
-### Still Open
+- Token generated on session creation (`setSessionCookie` in `auth.ts`)
+- Double-submit cookie pattern: `httpOnly: false`, `sameSite: strict`
+- Constant-time comparison via `timingSafeEqual`
+- All 10 mutation server actions call `requireCsrfToken()`
+- All client forms/buttons pass the token via hidden field or function argument
+- Auth endpoints correctly skip CSRF (pre-authentication)
+- 10 dedicated CSRF unit tests passing
 
-| Severity | Issue | Details |
-|----------|-------|---------|
-| **HIGH** | CSRF module is dead code | `requireCsrfToken` is never called in any Server Action. The module exists but is not wired in. `sameSite: strict` provides implicit protection only. |
-| **HIGH** | In-memory rate limiter | Resets on restart, per-process only. Ineffective in multi-instance deployments. |
-| **MEDIUM** | Middleware skips JWT verification | Only checks cookie presence, not signature. Auth is enforced at the Server Action layer, so it's safe but adds latency before rejection. |
-| **MEDIUM** | No token revocation | Compromised JWTs are valid for up to 7 days with no way to invalidate. |
-| **MEDIUM** | No structured logging | All errors go to `console.error`. No Sentry, no request IDs, no structured format. |
-| **MEDIUM** | Migration failures silently swallowed | `src/db/index.ts` catches and ignores migration errors at startup. |
-| **LOW** | No rate limiting on proposals/votes/search | Only auth endpoints are rate-limited. |
-| **LOW** | No account lockout mechanism | Rate limits reset per window; no permanent lockout after repeated failures. |
+**Verdict: No action needed.** CSRF is production-ready.
+
+### Remaining Security Items
+
+| Severity | Issue | Status |
+|----------|-------|--------|
+| Medium | In-memory rate limiter | Acceptable for single-instance; needs Redis for multi-instance |
+| Medium | No JWT revocation store | Acceptable risk at current user count |
+| Medium | Middleware doesn't verify JWT signature | Defense-in-depth gap; server actions do verify |
+| Low | No rate limiting on proposals/votes/search | Only auth endpoints rate-limited |
+| Low | No account lockout after repeated failures | Rate limits reset per window |
+
+**No critical or high security issues remain.**
+
+---
+
+## Dead Code & Unused Dependencies
+
+### Dead Code Found
+
+| Item | Location | Action |
+|------|----------|--------|
+| `src/lib/i18n.ts` (entire file) | 50 lines | Delete — replaced by `i18n-server.ts` + `use-locale.ts` |
+| `buildProjectSummary()` | `src/lib/ai.ts` | Exported but never imported anywhere |
+| `getAiUsageStats()` | `src/lib/llm.ts` | Exported but never called |
+| `getPermissions()` | `src/lib/rbac.ts` | Exported but never imported |
+| `requirePermission()` | `src/lib/rbac.ts` | Exported but never imported |
+| `canModifyResource()` | `src/lib/rbac.ts` | Exported but never imported |
+| `sanitizeObject()` | `src/lib/sanitize.ts` | Exported but never imported |
+
+### Dependencies
+- **npm audit:** 4 moderate vulnerabilities, all in `esbuild` via `drizzle-kit` (dev-only, not in production bundle). Fix requires breaking `drizzle-kit` downgrade — not recommended.
+- **No unused runtime dependencies detected.** All 17 production deps are imported.
+
+### Bundle
+- `.next` output: ~100MB (reasonable for Next.js standalone)
+- `optimizePackageImports: ["lucide-react"]` configured for tree-shaking
+- Bundle analyzer available via `ANALYZE=true`
+- No bloat concerns.
 
 ---
 
 ## Production Readiness Gaps
 
-| Area | Status | Gap |
-|------|--------|-----|
-| Auth/sessions | Good | No token revocation store |
-| CSRF | Broken | Module exists but is never called |
-| Rate limiting | Weak | In-memory, single-process only |
-| Error boundaries | Good | Per-route error boundaries exist |
-| Email | Good | Real SMTP, working templates |
-| i18n | Good | EN + RO complete and in sync |
-| Observability | Missing | No structured logging, no error tracking service |
-| Backups | Missing | No SQLite backup strategy (no litestream, no cron) |
-| File uploads | Missing | Avatar URL field exists but no upload endpoint |
-| Multi-tenancy | Missing | All users see all projects globally |
+| Area | Status | Notes |
+|------|--------|-------|
+| Auth/sessions | Good | JWT + magic link + password auth working |
+| CSRF | Good | Fully wired, double-submit with timing-safe comparison |
+| Rate limiting | Acceptable | In-memory, single-process; fine for current deployment |
+| Error boundaries | Good | Per-route error boundaries |
+| Email | Good | SMTP with templates, deliverability checks |
+| i18n | Good | EN + RO complete |
+| Observability | Improved | Pino structured logging added in Sprint 15 |
+| Backups | Missing | No automated SQLite backup |
+| Search | Good | FTS5 working, pagination |
+| Project comments | Missing | Design spike done, implementation needed (Issue #19) |
 
 ---
 
-## PostgreSQL Migration Assessment
+## Spike Documents: What Should Sprint 16 Tackle?
 
-The migration plan at `docs/postgres-migration-plan.md` is thorough and well-structured. Key facts:
+### `docs/project-comments-spike.md` (Issue #19)
+Design is complete. Schema change: add `project_id` column to `comments` table, make `proposal_id` nullable, add CHECK constraint. Estimated 5-8 hours. UI placement defined (Discussion section below proposals). Shared comment-thread component extraction needed.
 
-- **21 files affected**, 5 phases, estimated 9-14 hours total
-- Biggest risk: FTS5 to PostgreSQL `tsvector` rewrite for full-text search
-- Test environment needs rethinking (no `:memory:` in PostgreSQL)
-- Infrastructure changes: Docker Compose, backup scripts, CI services
+**Recommendation: Implement in Sprint 16.** The spike answers all design questions. This is the only open feature request.
 
-**Recommendation: Do NOT migrate in Sprint 15.** The current SQLite setup works fine for the single-instance deployment at `idea.surmont.co`. The migration is a 2-3 day effort that blocks other work and is only necessary when scaling to multiple instances. Defer to Sprint 16+ or when multi-instance deployment is actually needed. Instead, focus Sprint 15 on security fixes and UX improvements that directly affect users.
+### `docs/postgres-migration-plan.md`
+Thorough 5-phase plan, 21 files affected, estimated 9-14 hours. Biggest risk: FTS5-to-tsvector search rewrite.
+
+**Recommendation: Defer again.** SQLite works fine for current single-instance deployment. Only migrate when multi-instance or managed DB is needed. Not Sprint 16 scope.
 
 ---
 
-## Sprint 15 Goals
+## Sprint 16 Goals
 
-Focus: **Security hardening, UX bug fixes, and navigation polish.** Realistic scope for 1 developer, 1 week.
+Focus: **Implement project comments (Issue #19), clean up dead code, shore up component tests, add SQLite backup.** Realistic scope for 1 developer.
 
-### Goal 1: Wire CSRF validation into all Server Actions
+### Goal 1: Implement project-level comments — schema + migration (Issue #19)
+**Priority: High | Effort: 1-2h**
+Add `project_id` column to `comments` table, make `proposal_id` nullable, add CHECK constraint ensuring exactly one is non-null. Add index on `project_id`. Follow the schema design in `docs/project-comments-spike.md`.
+
+### Goal 2: Implement project-level comments — backend (Issue #19)
 **Priority: High | Effort: 2-3h**
-The `requireCsrfToken` function exists and is correct but is never called. Add CSRF validation to every mutation in `projects/actions.ts`, `proposals/actions.ts`, `admin/actions.ts`, and `profile/actions.ts`. This closes the biggest security gap remaining.
+Add `getProjectComments()` query. Extend `addComment` server action to accept either `proposalId` or `projectId`. Add `"project_comment"` audit action type. Add CSRF validation (already pattern-established). Write unit tests for the new paths.
 
-### Goal 2: Fix registration form inline validation errors (Issue #30)
+### Goal 3: Implement project-level comments — UI (Issue #19)
 **Priority: High | Effort: 2-3h**
-The registration form currently submits and shows errors only after server round-trip. Add client-side inline validation (required fields, email format, password strength) with error messages displayed next to each field.
+Extract shared `comment-thread.tsx` from `DiscussionSheet`. Create `ProjectComments` component. Add "Discussion" section to project detail page below proposals. Wire up the comment form with CSRF token.
 
-### Goal 3: Add admin link to navigation for admin users (Issue #28)
+### Goal 4: Add component tests for ProposalList and VoteButtons
+**Priority: High | Effort: 2-3h**
+The bar chart regression in Sprint 14 happened because `proposal-list.tsx` had zero test coverage. Add React Testing Library tests covering: bar chart width calculation, vote sorting, empty state, vote button interactions, and active vote highlighting.
+
+### Goal 5: Clean up dead code
+**Priority: Medium | Effort: 1h**
+Delete `src/lib/i18n.ts` (entirely unused). Remove unused exports: `buildProjectSummary`, `getAiUsageStats`, `getPermissions`, `requirePermission`, `canModifyResource`, `sanitizeObject`. Update any tests that import these.
+
+### Goal 6: Add SQLite backup script to cron
 **Priority: Medium | Effort: 1-2h**
-The admin link is already in the header's mobile dropdown but is reportedly missing or inconsistent. Verify the admin link renders correctly in both desktop nav and mobile nav for users with the admin role. Add E2E test coverage.
+The `scripts/backup.sh` exists but is never scheduled. Add a cron entry or systemd timer to run daily backups with rotation (keep 7 days). Verify the backup script handles WAL checkpointing before copy. Document in `docs/Deployment.md`.
 
-### Goal 4: Improve magic link login UX (Issue #29)
-**Priority: Medium | Effort: 1-2h**
-Add clear explanation text on the magic link login page: what it is, how it works, and that users should check their email. Add a "check your email" confirmation screen after submission.
+### Goal 7: Add E2E test for CSRF rejection
+**Priority: Medium | Effort: 1h**
+Current CSRF tests are unit-level with mocks. Add one smoke/E2E test that submits a server action without a valid CSRF token and verifies rejection. This ensures the end-to-end flow stays wired correctly.
 
-### Goal 5: Replace hand-rolled header dropdown with shadcn DropdownMenu
-**Priority: Medium | Effort: 2-3h**
-The current user profile dropdown in `header.tsx` is a custom `div` with no ARIA roles, no keyboard navigation, and no focus trap. Replace with the existing `src/components/ui/dropdown-menu.tsx` shadcn component for proper accessibility.
-
-### Goal 6: Add Header/AppShell component tests
-**Priority: Medium | Effort: 3-4h**
-No component-level tests exist for the navigation. Add Vitest + React Testing Library tests covering: desktop nav links render, mobile nav renders, admin link visible only for admin users, sign out visible only when authenticated, dropdown opens/closes, auth-gated routes skip navigation.
-
-### Goal 7: Clean up dead sidebar code
+### Goal 8: Update Known-Issues and Sprint-Log docs
 **Priority: Low | Effort: 30min**
-Remove the 16 `--sidebar-*` CSS variables from `globals.css`, the unused `nav.toggleSidebar` and `nav.navigation` translation keys, and the stale "no sidebar" comment.
-
-### Goal 8: Add structured error logging
-**Priority: Medium | Effort: 2-3h**
-Replace bare `console.error` calls with a lightweight structured logger (e.g., `pino`) that outputs JSON with timestamps, request IDs, and error context. This is the minimum observability needed before any production incident occurs. Wire it into Server Actions and API routes.
-
-### Goal 9: Fail fast on migration errors at startup
-**Priority: Medium | Effort: 30min**
-`src/db/index.ts` silently swallows migration failures. Change the catch block to log the error and call `process.exit(1)` so a broken migration is immediately visible instead of running against an incomplete schema.
-
-### Goal 10: Project-level comments/discussions spike (Issue #19)
-**Priority: Low | Effort: 2-3h**
-Spike only: design the schema additions (comments table already exists for proposals; extend to project-level), plan the UI placement, and document the approach. Do not implement in this sprint.
+`docs/Known-Issues.md` is stale (still says "Sprint 1 in progress" under Open). Update it to reflect current state: resolved issues, remaining risks. Update Sprint-Log with Sprint 16 goals.
 
 ---
 
-### Sprint 15 Summary
+### Sprint 16 Summary
 
-| # | Goal | Priority | Effort |
-|---|------|----------|--------|
-| 1 | Wire CSRF validation into Server Actions | High | 2-3h |
-| 2 | Fix registration inline validation (Issue #30) | High | 2-3h |
-| 3 | Admin nav link fix (Issue #28) | Medium | 1-2h |
-| 4 | Magic link login UX (Issue #29) | Medium | 1-2h |
-| 5 | Replace header dropdown with shadcn DropdownMenu | Medium | 2-3h |
-| 6 | Header/AppShell component tests | Medium | 3-4h |
-| 7 | Clean up dead sidebar code | Low | 0.5h |
-| 8 | Structured error logging | Medium | 2-3h |
-| 9 | Fail fast on migration errors | Medium | 0.5h |
-| 10 | Project comments/discussions spike (Issue #19) | Low | 2-3h |
+| # | Goal | Priority | Effort | Issue |
+|---|------|----------|--------|-------|
+| 1 | Project comments — schema + migration | High | 1-2h | #19 |
+| 2 | Project comments — backend | High | 2-3h | #19 |
+| 3 | Project comments — UI | High | 2-3h | #19 |
+| 4 | Component tests for ProposalList/VoteButtons | High | 2-3h | — |
+| 5 | Clean up dead code | Medium | 1h | — |
+| 6 | SQLite backup automation | Medium | 1-2h | — |
+| 7 | E2E test for CSRF rejection | Medium | 1h | — |
+| 8 | Update Known-Issues + Sprint-Log docs | Low | 0.5h | — |
 
-**Total estimated effort:** ~18-24 hours (fits a 1-week sprint)
+**Total estimated effort:** ~11-17 hours
 
 **What's deliberately out of scope:**
-- PostgreSQL migration (defer to Sprint 16+ -- not needed at current scale)
-- Multi-tenancy/teams (requires PostgreSQL first)
-- Redis-backed rate limiting (defer until multi-instance deployment is planned)
-- Cloudflare deployment (Issue #13 -- nice-to-have, not blocking)
+- PostgreSQL migration (defer — SQLite works fine at current scale)
+- Cloudflare deployment (Issue #13 — nice-to-have, not blocking)
+- Redis-backed rate limiting (defer until multi-instance)
+- JWT revocation store (acceptable risk at current user count)
 - File upload/avatar support (not user-requested)
+- Multi-tenancy/teams (requires PostgreSQL)
 
 ---
 
-*Report generated from automated analysis of Ideate codebase at commit 47f5692 on main branch.*
+*Report generated from automated analysis of Ideate codebase at commit 918a680 on main branch.*

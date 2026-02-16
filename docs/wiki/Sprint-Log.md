@@ -4,6 +4,12 @@ Reverse chronological. Click each sprint for full details.
 
 ---
 
+### 🏃 [Sprint 16 — Project Comments & Quality](Sprint-16) *(2026-02-16)*
+**Focus:** Project-level comments (#19), ProposalList/VoteButtons tests, dead code cleanup, SQLite backup automation, CSRF E2E test
+**Stats:** 🔧 In progress | Issue #19
+
+---
+
 ### ✅ [Sprint 15 — Security, UX Fixes & Nav Polish](Sprint-15) *(2026-02-16)*
 **Focus:** CSRF wiring, registration validation, admin nav, magic link UX, shadcn dropdown, structured logging, project comments spike
 **Stats:** 12 commits | 579 tests | 32/32 smoke | Issues #19, #28-31
