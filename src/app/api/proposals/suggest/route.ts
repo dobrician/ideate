@@ -87,14 +87,12 @@ function tryParseSuggestions(raw: string): Suggestion[] {
 export async function POST(request: Request) {
   try {
     await requireAuth();
-  } catch (err) {
-    console.error("[suggest] Auth failed:", String(err));
+  } catch {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
   try {
     const body = (await request.json()) as SuggestRequest;
-    console.log("[suggest] Request for:", body.project?.title);
     if (!body.project?.title) {
       return NextResponse.json(
         { proposals: [], error: "Project title is required" },
@@ -103,22 +101,18 @@ export async function POST(request: Request) {
     }
 
     const prompt = buildPrompt(body);
-    console.log("[suggest] Calling LLM, prompt length:", prompt.length);
-    const { text, modelUsed } = await completeWithFallback(prompt, {
+    const { text } = await completeWithFallback(prompt, {
       maxTokens: 2048,
       temperature: 0.65,
     });
-    console.log("[suggest] LLM result:", { modelUsed, hasText: !!text, textLen: text?.length ?? 0 });
 
     if (!text) {
       return NextResponse.json({ proposals: [] });
     }
 
     const proposals = tryParseSuggestions(text);
-    console.log("[suggest] Parsed", proposals.length, "suggestions");
     return NextResponse.json({ proposals });
-  } catch (err) {
-    console.error("[suggest] Error:", String(err));
+  } catch {
     return NextResponse.json(
       { proposals: [], error: "Failed to generate suggestions" },
       { status: 500 }
