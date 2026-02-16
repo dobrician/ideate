@@ -21,3 +21,15 @@
 - Commit + push after EACH fix
 - After each goal, edit this file: change `- [ ]` to `- [x]` (do NOT add new lines)
 - Lint + type check + tests + build must pass before each push
+
+## Outcomes
+- 8 commits, **595 tests** (+16 new), **32/32 smoke** (11.8s)
+- Feature: Project-level comments with schema, backend, and UI (#19)
+- Testing: ProposalList/VoteButtons component tests, CSRF E2E rejection test
+- Cleanup: 6 dead exports removed
+- Infrastructure: SQLite backup automation (systemd timer, 7-day rotation)
+- Docs: Known-Issues.md updated
+
+## Notes
+- Auto-check hook had false positives (goals 2-3 checked prematurely by #19 in goal 1 commit) — Claude Code manually reverted
+- Created issues #32-35 from UI feedback on comment drawer and vote bars
