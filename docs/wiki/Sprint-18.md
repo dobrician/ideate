@@ -21,3 +21,15 @@
 - Commit + push after EACH fix
 - After each goal, edit this file: change `- [ ]` to `- [x]` (do NOT add new lines)
 - Lint + type check + tests + build must pass before each push
+
+## Outcomes
+- 8 commits, **32/32 smoke** (10.3s)
+- Vote bar: full-width backgrounds, removed solid bars + percentage labels
+- Comments: messenger-style chat with avatars, bubbles, Enter to submit, real-time refresh
+- Test coverage: stat-card, db/index, mail.ts branch coverage improved
+- Cleanup: dead CSS + translation keys removed
+- Fix: migration 0005 idempotent (Docker build fix)
+
+## Notes
+- Docker build broke due to non-idempotent migration — fixed by removing duplicate ALTER TABLE
+- Logo added separately (not sprint goal)
