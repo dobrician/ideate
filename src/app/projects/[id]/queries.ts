@@ -1,6 +1,8 @@
 import { db } from "@/db";
 import { projects, proposals, votes, comments, users } from "@/db/schema";
-import { eq, desc, sql } from "drizzle-orm";
+import { eq, desc, sql, count } from "drizzle-orm";
+
+export const PROPOSALS_PAGE_SIZE = 20;
 
 export interface ProposalWithStats {
   id: string;
@@ -27,31 +29,41 @@ export interface ProposalWithStats {
 
 /**
  * Fetch proposals with vote counts, user votes, and comments for a project.
+ * Supports pagination via limit/offset.
  */
 export async function getProjectProposals(
   projectId: string,
-  currentUserId: string
-): Promise<ProposalWithStats[]> {
-  const proposalRows = await db
-    .select({
-      id: proposals.id,
-      title: proposals.title,
-      description: proposals.description,
-      summary: proposals.summary,
-      userId: proposals.userId,
-      createdAt: proposals.createdAt,
-      authorFirstName: users.firstName,
-      authorLastName: users.lastName,
-      authorEmail: users.email,
-      upvotes: sql<number>`COALESCE(SUM(CASE WHEN ${votes.value} = 1 THEN 1 ELSE 0 END), 0)`,
-      downvotes: sql<number>`COALESCE(SUM(CASE WHEN ${votes.value} = -1 THEN 1 ELSE 0 END), 0)`,
-    })
-    .from(proposals)
-    .leftJoin(votes, eq(proposals.id, votes.proposalId))
-    .leftJoin(users, eq(proposals.userId, users.id))
-    .where(eq(proposals.projectId, projectId))
-    .groupBy(proposals.id)
-    .orderBy(desc(proposals.createdAt));
+  currentUserId: string,
+  limit = PROPOSALS_PAGE_SIZE,
+  offset = 0
+): Promise<{ proposals: ProposalWithStats[]; total: number }> {
+  const [proposalRows, totalResult] = await Promise.all([
+    db
+      .select({
+        id: proposals.id,
+        title: proposals.title,
+        description: proposals.description,
+        summary: proposals.summary,
+        userId: proposals.userId,
+        createdAt: proposals.createdAt,
+        authorFirstName: users.firstName,
+        authorLastName: users.lastName,
+        authorEmail: users.email,
+        upvotes: sql<number>`COALESCE(SUM(CASE WHEN ${votes.value} = 1 THEN 1 ELSE 0 END), 0)`,
+        downvotes: sql<number>`COALESCE(SUM(CASE WHEN ${votes.value} = -1 THEN 1 ELSE 0 END), 0)`,
+      })
+      .from(proposals)
+      .leftJoin(votes, eq(proposals.id, votes.proposalId))
+      .leftJoin(users, eq(proposals.userId, users.id))
+      .where(eq(proposals.projectId, projectId))
+      .groupBy(proposals.id)
+      .orderBy(desc(proposals.createdAt))
+      .limit(limit)
+      .offset(offset),
+    db.select({ total: count() }).from(proposals).where(eq(proposals.projectId, projectId)),
+  ]);
+
+  const total = totalResult[0]?.total ?? 0;
 
   const userVoteRows = await db
     .select({ proposalId: votes.proposalId, value: votes.value })
@@ -101,7 +113,7 @@ export async function getProjectProposals(
     commentsByProposal.set(c.proposalId, list);
   }
 
-  return proposalRows.map((p) => {
+  return { total, proposals: proposalRows.map((p) => {
     const pComments = commentsByProposal.get(p.id) || [];
     const authorName =
       [p.authorFirstName, p.authorLastName].filter(Boolean).join(" ") ||
@@ -130,5 +142,5 @@ export async function getProjectProposals(
       })),
       authorName,
     };
-  });
+  }) };
 }

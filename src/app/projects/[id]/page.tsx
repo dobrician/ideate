@@ -21,12 +21,14 @@ import { ProposalForm } from "@/components/proposal-form";
 import { ProposalList } from "@/components/proposal-list";
 import { ExportButtons } from "@/components/export-buttons";
 import { DeadlineCountdown } from "@/components/deadline-countdown";
-import { getProjectProposals } from "./queries";
+import { getProjectProposals, PROPOSALS_PAGE_SIZE } from "./queries";
+import { Pagination } from "@/components/pagination";
 import { getTranslations } from "@/lib/i18n-server";
 import { statusBadgeClass, statusLabel } from "@/lib/status-utils";
 
 interface ProjectPageProps {
   params: Promise<{ id: string }>;
+  searchParams: Promise<{ page?: string }>;
 }
 
 /**
@@ -65,7 +67,7 @@ export async function generateMetadata({
  * Individual project page with proposals, voting, and discussions.
  * RBAC-aware: shows controls based on user permissions.
  */
-export default async function ProjectPage({ params }: ProjectPageProps) {
+export default async function ProjectPage({ params, searchParams }: ProjectPageProps) {
   const user = await getCurrentUser();
 
   if (!user) {
@@ -92,7 +94,12 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
   const canCreateProposal = hasPermission(role, "proposal:create");
   const isAdmin = hasPermission(role, "project:manage_all");
 
-  const proposalsWithStats = await getProjectProposals(id, user.id);
+  const sp = await searchParams;
+  const proposalPage = Math.max(1, parseInt(sp.page || "1", 10) || 1);
+  const proposalOffset = (proposalPage - 1) * PROPOSALS_PAGE_SIZE;
+  const { proposals: proposalsWithStats, total: proposalTotal } =
+    await getProjectProposals(id, user.id, PROPOSALS_PAGE_SIZE, proposalOffset);
+  const proposalTotalPages = Math.ceil(proposalTotal / PROPOSALS_PAGE_SIZE);
 
   return (
     <div className="container mx-auto max-w-4xl px-4 py-6 sm:py-8">
@@ -183,7 +190,7 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
           <div className="border-t pt-6">
             <div className="mb-4 grid grid-cols-[1fr_auto] items-center gap-3">
               <h2 className="text-lg font-semibold">
-                {t("proposals.count", { count: proposalsWithStats.length })}
+                {t("proposals.count", { count: proposalTotal })}
               </h2>
               {canCreateProposal && <ProposalForm projectId={id} />}
             </div>
@@ -193,6 +200,11 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
               currentUserId={user.id}
               isAdmin={isAdmin}
             />
+            {proposalTotalPages > 1 && (
+              <div className="mt-6">
+                <Pagination currentPage={proposalPage} totalPages={proposalTotalPages} />
+              </div>
+            )}
           </div>
         </CardContent>
       </Card>

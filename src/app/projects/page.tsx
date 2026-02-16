@@ -18,7 +18,7 @@ import { desc, count } from "drizzle-orm";
 import { getTranslations } from "@/lib/i18n-server";
 import { statusBadgeClass, statusLabel } from "@/lib/status-utils";
 
-const PAGE_SIZE = 12;
+const PAGE_SIZE = 20;
 
 interface ProjectsPageProps {
   searchParams: Promise<{ page?: string }>;
