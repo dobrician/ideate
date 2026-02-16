@@ -163,7 +163,7 @@ export function CommentThread({ comments, hiddenFields }: CommentThreadProps) {
           {state?.error && (
             <p className="text-xs text-red-600 dark:text-red-400">{state.error}</p>
           )}
-          <Button type="submit" size="sm" disabled={isPending}>
+          <Button type="submit" disabled={isPending}>
             {isPending ? t("comments.posting") : t("comments.submit")}
           </Button>
         </form>

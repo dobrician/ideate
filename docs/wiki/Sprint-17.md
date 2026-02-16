@@ -11,7 +11,7 @@
 
 **Comment UI Polish:**
 - [x] Comment drawer/section: textarea + button at top, not bottom (#32)
-- [ ] Style submit button as primary (rounded, colored, consistent with UI) (#33)
+- [x] Style submit button as primary (rounded, colored, consistent with UI) (#33)
 
 **Infrastructure:**
 - [ ] Fix migration runner to apply new migrations on deploy (#36)
