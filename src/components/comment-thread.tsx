@@ -146,20 +146,7 @@ export function CommentThread({ comments, hiddenFields }: CommentThreadProps) {
 
   return (
     <div className="flex flex-col gap-4">
-      <ScrollArea className="max-h-[60vh] pr-4">
-        {tree.length === 0 ? (
-          <p className="py-8 text-center text-sm text-muted-foreground">
-            {t("comments.noComments")}
-          </p>
-        ) : (
-          <div className="space-y-1">
-            {tree.map((c) => (
-              <CommentNode key={c.id} comment={c} depth={0} hiddenFields={hiddenFields} />
-            ))}
-          </div>
-        )}
-      </ScrollArea>
-      <div className="border-t pt-4">
+      <div className="border-b pb-4">
         <form action={formAction} className="space-y-2">
           {Object.entries(hiddenFields).map(([name, value]) => (
             <input key={name} type="hidden" name={name} value={value} />
@@ -181,6 +168,19 @@ export function CommentThread({ comments, hiddenFields }: CommentThreadProps) {
           </Button>
         </form>
       </div>
+      <ScrollArea className="max-h-[60vh] pr-4">
+        {tree.length === 0 ? (
+          <p className="py-8 text-center text-sm text-muted-foreground">
+            {t("comments.noComments")}
+          </p>
+        ) : (
+          <div className="space-y-1">
+            {tree.map((c) => (
+              <CommentNode key={c.id} comment={c} depth={0} hiddenFields={hiddenFields} />
+            ))}
+          </div>
+        )}
+      </ScrollArea>
     </div>
   );
 }

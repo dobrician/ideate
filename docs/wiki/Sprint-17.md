@@ -10,7 +10,7 @@
 - [x] Sort: descending by (pro - contra), tie-break ascending by negative votes (#34)
 
 **Comment UI Polish:**
-- [ ] Comment drawer/section: textarea + button at top, not bottom (#32)
+- [x] Comment drawer/section: textarea + button at top, not bottom (#32)
 - [ ] Style submit button as primary (rounded, colored, consistent with UI) (#33)
 
 **Infrastructure:**
