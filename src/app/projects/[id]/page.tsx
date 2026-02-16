@@ -214,7 +214,17 @@ export default async function ProjectPage({ params, searchParams }: ProjectPageP
                       summary: p.summary ?? undefined,
                     }))}
                   />
-                  <ProposalForm projectId={id} />
+                  <ProposalForm
+                    projectId={id}
+                    projectTitle={projectData.title}
+                    projectDescription={projectData.description || ""}
+                    existingProposals={proposalsWithStats.map((p) => ({
+                      id: p.id,
+                      title: p.title,
+                      description: p.description ?? undefined,
+                      summary: p.summary ?? undefined,
+                    }))}
+                  />
                 </div>
               )}
             </div>

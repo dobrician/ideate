@@ -1,35 +1,65 @@
 "use client";
 
-import { useActionState, useState, useEffect, useRef } from "react";
+import { useActionState, useState, useEffect, useRef, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { createProposal } from "@/app/projects/[id]/proposals/actions";
-import { ThumbsUp, ThumbsDown } from "lucide-react";
+import { ThumbsUp, ThumbsDown, AlertTriangle, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { useLocale } from "@/lib/use-locale";
 import { getCsrfTokenClient } from "@/lib/csrf-client";
 
+interface SimilarityMatch {
+  id: string;
+  similarity: number;
+  explanation: string;
+}
+
+interface ExistingProposal {
+  id: string;
+  title: string;
+  description?: string;
+  summary?: string;
+}
+
 interface ProposalFormProps {
   projectId: string;
+  projectTitle?: string;
+  projectDescription?: string;
+  existingProposals?: ExistingProposal[];
 }
 
 /**
  * Collapsible form for creating a new proposal with initial vote.
- * Button + panel layout: button stays compact, panel expands below.
+ * Includes debounced similarity check against existing proposals.
  */
-export function ProposalForm({ projectId }: ProposalFormProps) {
+export function ProposalForm({
+  projectId,
+  projectTitle,
+  projectDescription,
+  existingProposals,
+}: ProposalFormProps) {
   const { t } = useLocale();
   const [isOpen, setIsOpen] = useState(false);
   const [initialVote, setInitialVote] = useState<"1" | "-1">("1");
   const [state, formAction, isPending] = useActionState(createProposal, null);
   const formEndRef = useRef<HTMLDivElement>(null);
 
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
+  const [similarMatches, setSimilarMatches] = useState<SimilarityMatch[]>([]);
+  const [checkingSimilarity, setCheckingSimilarity] = useState(false);
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
   useEffect(() => {
     if (!state) return;
     if (state.success) {
       toast.success(t("proposalForm.created"));
+      setTitle("");
+      setDescription("");
+      setSimilarMatches([]);
       requestAnimationFrame(() => setIsOpen(false));
     }
     if (state.error) {
@@ -44,6 +74,46 @@ export function ProposalForm({ projectId }: ProposalFormProps) {
       });
     }
   }, [isOpen]);
+
+  const checkSimilarity = useCallback(
+    async (t: string, d: string) => {
+      if (!existingProposals?.length || !projectTitle || t.length < 5) {
+        setSimilarMatches([]);
+        return;
+      }
+      setCheckingSimilarity(true);
+      try {
+        const res = await fetch("/api/proposals/similarity", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            project: { title: projectTitle, description: projectDescription || "" },
+            existing: existingProposals,
+            proposal: { title: t, description: d },
+          }),
+        });
+        const data = await res.json();
+        const filtered = (data.matches || []).filter(
+          (m: SimilarityMatch) => m.similarity > 40
+        );
+        setSimilarMatches(filtered);
+      } catch {
+        setSimilarMatches([]);
+      } finally {
+        setCheckingSimilarity(false);
+      }
+    },
+    [existingProposals, projectTitle, projectDescription]
+  );
+
+  function handleFieldChange(newTitle: string, newDesc: string) {
+    if (timerRef.current) clearTimeout(timerRef.current);
+    timerRef.current = setTimeout(() => {
+      checkSimilarity(newTitle, newDesc);
+    }, 800);
+  }
+
+  const warnings = similarMatches.filter((m) => m.similarity > 40);
 
   return (
     <>
@@ -74,6 +144,11 @@ export function ProposalForm({ projectId }: ProposalFormProps) {
                 minLength={5}
                 maxLength={200}
                 disabled={isPending}
+                value={title}
+                onChange={(e) => {
+                  setTitle(e.target.value);
+                  handleFieldChange(e.target.value, description);
+                }}
               />
             </div>
 
@@ -88,8 +163,43 @@ export function ProposalForm({ projectId }: ProposalFormProps) {
                 rows={3}
                 maxLength={5000}
                 disabled={isPending}
+                value={description}
+                onChange={(e) => {
+                  setDescription(e.target.value);
+                  handleFieldChange(title, e.target.value);
+                }}
               />
             </div>
+
+            {checkingSimilarity && (
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <Loader2 className="h-3 w-3 animate-spin" />
+                {t("similarity.checking")}
+              </div>
+            )}
+
+            {warnings.length > 0 && (
+              <div className="space-y-2">
+                {warnings.map((m) => (
+                  <div
+                    key={m.id}
+                    className="flex items-start gap-2 rounded-md border border-amber-300 bg-amber-50 p-3 dark:border-amber-700 dark:bg-amber-950"
+                  >
+                    <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-amber-600 dark:text-amber-400" />
+                    <div className="text-sm">
+                      <p className="font-medium text-amber-800 dark:text-amber-200">
+                        {t("similarity.score", { score: m.similarity })}
+                      </p>
+                      {m.explanation && (
+                        <p className="text-amber-700 dark:text-amber-300">
+                          {m.explanation}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
 
             <div className="space-y-1.5">
               <Label>{t("proposalForm.initialVote")}</Label>

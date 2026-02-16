@@ -16,7 +16,7 @@
 
 **UI:**
 - [x] AI Suggestions sparkles button + modal (vote/preview/submit flow) (#40-logo can wait)
-- [ ] Proposal similarity check API + inline UI warnings on proposal form
+- [x] Proposal similarity check API + inline UI warnings on proposal form
 
 **Polish:**
 - [ ] Integration tests for AI endpoints + cleanup
