@@ -524,8 +524,8 @@
 **Status:** 🏃 IN PROGRESS
 
 ### Goals
-- [ ] Complete Romanian (RO) translations — all UI strings (#15)
-- [ ] Fix locale switcher — page content must translate, not just sidebar
+- [x] Complete Romanian (RO) translations — all UI strings (#15)
+- [x] Fix locale switcher — page content must translate, not just sidebar
 - [ ] Localize dates and numbers per locale
 - [ ] New Proposal form alignment and spacing fixes
 - [ ] Visual hierarchy improvements — badges, empty states, cards
