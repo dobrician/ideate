@@ -6,7 +6,7 @@ Reverse chronological. Click each sprint for full details.
 
 ### 🏃 [Sprint 13 — Security Hardening & Scalability](Sprint-13) *(2026-02-16)*
 **Focus:** CSRF fix, HTML sanitization in emails, vote validation, CSP hardening, DB indexes, pagination, PostgreSQL spike
-**Stats:** 🔧 In progress | 8/10 goals done
+**Stats:** 🔧 In progress | 9/10 goals done
 
 ---
 
