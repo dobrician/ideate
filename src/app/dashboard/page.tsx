@@ -1,32 +1,29 @@
 import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth";
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
+  Card, CardContent, CardDescription, CardHeader, CardTitle,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import {
-  FolderOpen,
-  Lightbulb,
-  ThumbsUp,
-  ThumbsDown,
-  MessageSquare,
-  Plus,
-  Compass,
+  FolderOpen, Lightbulb, ThumbsUp, ThumbsDown,
+  MessageSquare, Plus, Compass,
 } from "lucide-react";
 import { StatCard, formatRelativeTime } from "@/components/stat-card";
 import { getTranslations } from "@/lib/i18n-server";
 import { statusBadgeClass, statusLabel, deadlineBadge } from "@/lib/status-utils";
 import { getDashboardData } from "./queries";
 
-/**
- * Dashboard page showing user overview, recent votes, and activity feed
- */
+function EmptyState({ icon, text }: { icon: React.ReactNode; text: React.ReactNode }) {
+  return (
+    <div className="flex flex-col items-center gap-3 py-4 text-center">
+      <div className="rounded-full bg-muted p-3">{icon}</div>
+      <p className="text-sm text-muted-foreground">{text}</p>
+    </div>
+  );
+}
+
 export default async function DashboardPage() {
   const user = await getCurrentUser();
   if (!user) redirect("/auth/login");
@@ -64,44 +61,30 @@ export default async function DashboardPage() {
 
       {/* Desktop stat cards */}
       <div className="mb-8 hidden gap-4 sm:grid sm:grid-cols-2 lg:grid-cols-4" role="region" aria-label="Your statistics">
-        <StatCard
-          title={t("dashboard.stats.projects")}
-          value={userStats.projectCount}
+        <StatCard title={t("dashboard.stats.projects")} value={userStats.projectCount}
           description={t("dashboard.stats.ofTotal", { total: platformStats.projectCount })}
-          icon={<FolderOpen className="h-4 w-4 text-muted-foreground" />}
-        />
-        <StatCard
-          title={t("dashboard.stats.proposals")}
-          value={userStats.proposalCount}
+          icon={<FolderOpen className="h-4 w-4 text-muted-foreground" />} />
+        <StatCard title={t("dashboard.stats.proposals")} value={userStats.proposalCount}
           description={t("dashboard.stats.ofTotal", { total: platformStats.proposalCount })}
-          icon={<Lightbulb className="h-4 w-4 text-muted-foreground" />}
-        />
-        <StatCard
-          title={t("dashboard.stats.votes")}
-          value={userStats.voteCount}
+          icon={<Lightbulb className="h-4 w-4 text-muted-foreground" />} />
+        <StatCard title={t("dashboard.stats.votes")} value={userStats.voteCount}
           description={t("dashboard.stats.ofTotal", { total: platformStats.voteCount })}
-          icon={<ThumbsUp className="h-4 w-4 text-muted-foreground" />}
-        />
-        <StatCard
-          title={t("dashboard.stats.comments")}
-          value={userStats.commentCount}
+          icon={<ThumbsUp className="h-4 w-4 text-muted-foreground" />} />
+        <StatCard title={t("dashboard.stats.comments")} value={userStats.commentCount}
           description={t("dashboard.stats.ofTotal", { total: platformStats.commentCount })}
-          icon={<MessageSquare className="h-4 w-4 text-muted-foreground" />}
-        />
+          icon={<MessageSquare className="h-4 w-4 text-muted-foreground" />} />
       </div>
 
       {/* Quick Actions */}
       <div className="mb-8 flex flex-wrap gap-3" role="region" aria-label={t("dashboard.quickActions")}>
         <Button asChild>
           <Link href="/projects/new">
-            <Plus className="mr-2 h-4 w-4" />
-            {t("dashboard.newProject")}
+            <Plus className="mr-2 h-4 w-4" />{t("dashboard.newProject")}
           </Link>
         </Button>
         <Button variant="outline" asChild>
           <Link href="/projects">
-            <Compass className="mr-2 h-4 w-4" />
-            {t("dashboard.browseProjects")}
+            <Compass className="mr-2 h-4 w-4" />{t("dashboard.browseProjects")}
           </Link>
         </Button>
       </div>
@@ -112,9 +95,7 @@ export default async function DashboardPage() {
           <CardHeader className="flex flex-row items-start justify-between">
             <div>
               <CardTitle className="text-lg">{t("dashboard.yourProjects")}</CardTitle>
-              <CardDescription>
-                {t("projects.total", { count: userProjects.length })}
-              </CardDescription>
+              <CardDescription>{t("projects.total", { count: userProjects.length })}</CardDescription>
             </div>
             <Link href="/projects" className="text-xs font-medium text-primary hover:underline">
               {t("dashboard.viewAll")}
@@ -122,37 +103,24 @@ export default async function DashboardPage() {
           </CardHeader>
           <CardContent>
             {userProjects.length === 0 ? (
-              <div className="flex flex-col items-center gap-3 py-4 text-center">
-                <div className="rounded-full bg-muted p-3">
-                  <FolderOpen className="h-5 w-5 text-muted-foreground" />
-                </div>
-                <p className="text-sm text-muted-foreground">
-                  {t("dashboard.noProjects")}{" "}
+              <EmptyState
+                icon={<FolderOpen className="h-5 w-5 text-muted-foreground" />}
+                text={<>{t("dashboard.noProjects")}{" "}
                   <Link href="/projects/new" className="font-medium text-primary hover:underline">
                     {t("dashboard.createOne")}
-                  </Link>
-                </p>
-              </div>
+                  </Link></>}
+              />
             ) : (
               <ul className="space-y-2" role="list">
                 {userProjects.map((p) => (
                   <li key={p.id}>
-                    <Link
-                      href={`/projects/${p.id}`}
-                      className="group rounded-md px-2 py-1.5 transition-colors hover:bg-muted/50 block"
-                    >
+                    <Link href={`/projects/${p.id}`}
+                      className="group block rounded-md px-2 py-1.5 transition-colors hover:bg-muted/50">
                       <span className="flex items-center justify-between">
-                        <span className="truncate text-sm font-medium group-hover:underline">
-                          {p.title}
-                        </span>
+                        <span className="truncate text-sm font-medium group-hover:underline">{p.title}</span>
                         <span className="flex shrink-0 gap-1.5">
-                          {(() => {
-                            const dl = deadlineBadge(p.deadline, t);
-                            return dl ? <Badge className={dl.className}>{dl.label}</Badge> : null;
-                          })()}
-                          <Badge className={statusBadgeClass(p.status)}>
-                            {statusLabel(p.status, t)}
-                          </Badge>
+                          {(() => { const dl = deadlineBadge(p.deadline, t); return dl ? <Badge className={dl.className}>{dl.label}</Badge> : null; })()}
+                          <Badge className={statusBadgeClass(p.status)}>{statusLabel(p.status, t)}</Badge>
                         </span>
                       </span>
                       <span className="mt-0.5 flex gap-3 text-xs text-muted-foreground">
@@ -172,31 +140,18 @@ export default async function DashboardPage() {
         <Card>
           <CardHeader>
             <CardTitle className="text-lg">{t("dashboard.yourProposals")}</CardTitle>
-            <CardDescription>
-              {t("proposals.count", { count: userProposals.length })}
-            </CardDescription>
+            <CardDescription>{t("proposals.count", { count: userProposals.length })}</CardDescription>
           </CardHeader>
           <CardContent>
             {userProposals.length === 0 ? (
-              <div className="flex flex-col items-center gap-3 py-4 text-center">
-                <div className="rounded-full bg-muted p-3">
-                  <Lightbulb className="h-5 w-5 text-muted-foreground" />
-                </div>
-                <p className="text-sm text-muted-foreground">
-                  {t("dashboard.noProposals")}
-                </p>
-              </div>
+              <EmptyState icon={<Lightbulb className="h-5 w-5 text-muted-foreground" />} text={t("dashboard.noProposals")} />
             ) : (
               <ul className="space-y-2" role="list">
                 {userProposals.map((p) => (
                   <li key={p.id}>
-                    <Link
-                      href={`/projects/${p.projectId}`}
-                      className="group block rounded-md px-2 py-1.5 transition-colors hover:bg-muted/50"
-                    >
-                      <span className="truncate text-sm font-medium group-hover:underline">
-                        {p.title}
-                      </span>
+                    <Link href={`/projects/${p.projectId}`}
+                      className="group block rounded-md px-2 py-1.5 transition-colors hover:bg-muted/50">
+                      <span className="truncate text-sm font-medium group-hover:underline">{p.title}</span>
                       <span className="block truncate text-xs text-muted-foreground">
                         {t("dashboard.inProject", { project: p.projectTitle ?? t("projects.unknown") })}
                       </span>
@@ -212,27 +167,16 @@ export default async function DashboardPage() {
         <Card>
           <CardHeader>
             <CardTitle className="text-lg">{t("dashboard.recentVotes")}</CardTitle>
-            <CardDescription>
-              {t("dashboard.totalVotes", { count: userVoteCount })}
-            </CardDescription>
+            <CardDescription>{t("dashboard.totalVotes", { count: userVoteCount })}</CardDescription>
           </CardHeader>
           <CardContent>
             {recentVotes.length === 0 ? (
-              <div className="flex flex-col items-center gap-3 py-4 text-center">
-                <div className="rounded-full bg-muted p-3">
-                  <ThumbsUp className="h-5 w-5 text-muted-foreground" />
-                </div>
-                <p className="text-sm text-muted-foreground">
-                  {t("dashboard.noVotes")}
-                </p>
-              </div>
+              <EmptyState icon={<ThumbsUp className="h-5 w-5 text-muted-foreground" />} text={t("dashboard.noVotes")} />
             ) : (
               <ul className="space-y-2" role="list">
                 {recentVotes.map((v) => (
-                  <li
-                    key={`${v.proposalId}-${v.createdAt?.getTime()}`}
-                    className="flex items-center gap-2 rounded-md px-2 py-1.5 transition-colors hover:bg-muted/50"
-                  >
+                  <li key={`${v.proposalId}-${v.createdAt?.getTime()}`}
+                    className="flex items-center gap-2 rounded-md px-2 py-1.5 transition-colors hover:bg-muted/50">
                     {v.value === 1 ? (
                       <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-emerald-100 dark:bg-emerald-900/50">
                         <ThumbsUp className="h-3 w-3 text-emerald-700 dark:text-emerald-300" />
@@ -242,10 +186,8 @@ export default async function DashboardPage() {
                         <ThumbsDown className="h-3 w-3 text-red-700 dark:text-red-300" />
                       </span>
                     )}
-                    <Link
-                      href={`/projects/${v.projectId}`}
-                      className="truncate text-sm transition-colors hover:underline"
-                    >
+                    <Link href={`/projects/${v.projectId}`}
+                      className="truncate text-sm transition-colors hover:underline">
                       {v.proposalTitle}
                     </Link>
                   </li>
@@ -263,41 +205,28 @@ export default async function DashboardPage() {
           </CardHeader>
           <CardContent>
             {recentActivity.length === 0 ? (
-              <div className="flex flex-col items-center gap-3 py-4 text-center">
-                <div className="rounded-full bg-muted p-3">
-                  <MessageSquare className="h-5 w-5 text-muted-foreground" />
-                </div>
-                <p className="text-sm text-muted-foreground">{t("dashboard.noActivity")}</p>
-              </div>
+              <EmptyState icon={<MessageSquare className="h-5 w-5 text-muted-foreground" />} text={t("dashboard.noActivity")} />
             ) : (
               <ul className="space-y-2" role="list">
                 {recentActivity.map((a) => (
                   <li key={a.id} className="text-sm">
-                    <Link
-                      href={a.projectId ? `/projects/${a.projectId}` : "/projects"}
-                      className="group flex gap-2 rounded-md px-2 py-1.5 transition-colors hover:bg-muted/50"
-                    >
+                    <Link href={a.projectId ? `/projects/${a.projectId}` : "/projects"}
+                      className="group flex gap-2 rounded-md px-2 py-1.5 transition-colors hover:bg-muted/50">
                       <MessageSquare className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" />
                       <div className="min-w-0">
                         <div>
                           <span className="font-medium group-hover:underline">
                             {a.userName || a.userEmail || t("common.someone")}
                           </span>
-                          <span className="text-muted-foreground">
-                            {" "}{t("dashboard.commentedOn")}{" "}
-                          </span>
-                          <span className="font-medium group-hover:underline">
-                            {a.proposalTitle}
-                          </span>
+                          <span className="text-muted-foreground"> {t("dashboard.commentedOn")} </span>
+                          <span className="font-medium group-hover:underline">{a.proposalTitle}</span>
                           {a.createdAt && (
                             <time className="ml-1 text-xs text-muted-foreground" dateTime={a.createdAt.toISOString()}>
                               {formatRelativeTime(a.createdAt, t)}
                             </time>
                           )}
                         </div>
-                        <p className="mt-0.5 line-clamp-1 text-muted-foreground">
-                          {a.content}
-                        </p>
+                        <p className="mt-0.5 line-clamp-2 text-muted-foreground sm:line-clamp-1">{a.content}</p>
                       </div>
                     </Link>
                   </li>

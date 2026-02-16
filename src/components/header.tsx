@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
-import { User, LogOut, Shield } from "lucide-react";
+import { User, LogOut, Shield, Search } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { DarkModeToggle } from "@/components/dark-mode-toggle";
 import { SearchBar } from "@/components/search-bar";
@@ -29,6 +29,7 @@ export function Header() {
   const { t } = useLocale();
   const [isAdmin, setIsAdmin] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
 
   useEffect(() => {
     fetch("/api/me")
@@ -81,6 +82,15 @@ export function Header() {
         </div>
 
         <div className="ml-auto flex items-center gap-2 md:ml-0">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="md:hidden"
+            aria-label={t("search.placeholder")}
+            onClick={() => setMobileSearchOpen((o) => !o)}
+          >
+            <Search className="h-4 w-4" />
+          </Button>
           <LocaleSwitcher />
           <DarkModeToggle />
           <DropdownMenu>
@@ -148,6 +158,12 @@ export function Header() {
           })}
         </div>
       </nav>
+
+      {mobileSearchOpen && (
+        <div className="border-t bg-background px-4 py-2 md:hidden">
+          <SearchBar />
+        </div>
+      )}
     </header>
   );
 }
