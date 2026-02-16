@@ -153,7 +153,7 @@
 - [x] 4. Missing Romanian translations — all reported strings
 - [x] 5. Admin 403 — proper Access Denied page
 - [x] 6. PWA install popup — show once per session
-- [ ] 7. Voting UX — highlight selected vote, tooltip to remove
+- [x] 7. Voting UX — highlight selected vote, tooltip to remove
 - [ ] 8. Delete confirmation — modal dialog for destructive actions
 - [ ] 9. Search — functional search with results dropdown
 - [ ] 10. Date format — localize to dd.mm.yyyy for RO
