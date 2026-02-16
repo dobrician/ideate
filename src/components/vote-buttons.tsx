@@ -52,7 +52,7 @@ export function VoteButtons({
           "transition-colors duration-150",
           userVote === 1
             ? "text-green-600 hover:text-green-700 dark:text-green-400"
-            : "text-muted-foreground hover:text-green-600"
+            : "text-muted-foreground hover:text-green-600 dark:hover:text-green-400"
         )}
       >
         <ThumbsUp className="mr-1 h-4 w-4" aria-hidden="true" />
@@ -69,7 +69,7 @@ export function VoteButtons({
           "transition-colors duration-150",
           userVote === -1
             ? "text-red-600 hover:text-red-700 dark:text-red-400"
-            : "text-muted-foreground hover:text-red-600"
+            : "text-muted-foreground hover:text-red-600 dark:hover:text-red-400"
         )}
       >
         <ThumbsDown className="mr-1 h-4 w-4" aria-hidden="true" />

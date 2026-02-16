@@ -85,7 +85,7 @@ export function UserRoleManager({
                       value={u.role}
                       onChange={(e) => handleRoleChange(u.id, e.target.value)}
                       disabled={loadingId === u.id}
-                      className="rounded border bg-background px-2 py-1 text-xs"
+                      className="rounded border border-input bg-background px-2 py-1 text-xs text-foreground"
                     >
                       {ROLES.map((r) => (
                         <option key={r} value={r}>

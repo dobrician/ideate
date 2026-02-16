@@ -125,7 +125,7 @@ function CommentNode({
               />
             </div>
             {state?.error && (
-              <p className="text-xs text-red-600">{state.error}</p>
+              <p className="text-xs text-red-600 dark:text-red-400">{state.error}</p>
             )}
             <div className="flex gap-2">
               <Button type="submit" size="sm" disabled={isPending}>
@@ -220,7 +220,7 @@ export function DiscussionSheet({
                 disabled={isPending}
               />
               {state?.error && (
-                <p className="text-xs text-red-600">{state.error}</p>
+                <p className="text-xs text-red-600 dark:text-red-400">{state.error}</p>
               )}
               <Button type="submit" size="sm" disabled={isPending}>
                 {isPending ? t("comments.posting") : t("comments.submit")}
