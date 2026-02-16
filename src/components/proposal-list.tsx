@@ -118,7 +118,7 @@ function ProposalItem({
   liveUpvotes?: number;
   liveDownvotes?: number;
 }) {
-  const { t } = useLocale();
+  const { t, locale } = useLocale();
   const [showFull, setShowFull] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -204,11 +204,10 @@ function ProposalItem({
           <div className="flex items-center justify-between text-xs text-muted-foreground">
             <span>
               {proposal.createdAt
-                ? new Date(proposal.createdAt).toLocaleDateString(undefined, {
-                    year: "numeric",
-                    month: "short",
-                    day: "numeric",
-                  })
+                ? new Date(proposal.createdAt).toLocaleDateString(
+                    locale === "ro" ? "ro-RO" : "en-US",
+                    { year: "numeric", month: "short", day: "numeric" }
+                  )
                 : ""}
             </span>
             {canDelete && (

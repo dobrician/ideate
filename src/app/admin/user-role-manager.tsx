@@ -36,7 +36,7 @@ export function UserRoleManager({
   users,
   currentUserId,
 }: UserRoleManagerProps) {
-  const { t } = useLocale();
+  const { t, locale } = useLocale();
   const [loadingId, setLoadingId] = useState<string | null>(null);
 
   async function handleRoleChange(userId: string, newRole: string) {
@@ -97,7 +97,9 @@ export function UserRoleManager({
                 </td>
                 <td className="py-2 text-muted-foreground">
                   {u.createdAt
-                    ? new Date(u.createdAt).toLocaleDateString()
+                    ? new Date(u.createdAt).toLocaleDateString(
+                        locale === "ro" ? "ro-RO" : "en-US"
+                      )
                     : "—"}
                 </td>
               </tr>
