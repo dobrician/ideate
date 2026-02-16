@@ -1,4 +1,6 @@
 import { DarkModeToggle } from "@/components/dark-mode-toggle";
+import { SearchBar } from "@/components/search-bar";
+import { LocaleSwitcher } from "@/components/locale-switcher";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { User } from "lucide-react";
@@ -45,7 +47,12 @@ export function Header({ onToggleSidebar }: HeaderProps) {
         </Link>
       </div>
 
+      <div className="hidden md:block flex-1 max-w-sm mx-4">
+        <SearchBar />
+      </div>
+
       <div className="ml-auto flex items-center gap-2">
+        <LocaleSwitcher />
         <Button asChild variant="ghost" size="icon">
           <Link href="/profile">
             <User className="h-4 w-4" />

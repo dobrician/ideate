@@ -11,6 +11,7 @@ import { buildProposalSummary } from "@/lib/ai";
 import { emitVoteChange } from "@/lib/vote-events";
 import { eq, and, sql } from "drizzle-orm";
 import { randomUUID } from "crypto";
+import { logAudit } from "@/lib/audit";
 
 /**
  * Compute upvotes/downvotes for a proposal and emit SSE event
@@ -106,6 +107,14 @@ export async function createProposal(
       value: parseInt(initialVote),
     });
 
+    await logAudit({
+      userId: user.id,
+      action: "create",
+      entity: "proposal",
+      entityId: proposalId,
+      details: JSON.stringify({ title, projectId }),
+    });
+
     revalidatePath(`/projects/${projectId}`);
     return { success: true };
   } catch (error) {
@@ -145,6 +154,15 @@ export async function deleteProposal(proposalId: string, projectId: string) {
     }
 
     await db.delete(proposals).where(eq(proposals.id, proposalId));
+
+    await logAudit({
+      userId: user.id,
+      action: "delete",
+      entity: "proposal",
+      entityId: proposalId,
+      details: JSON.stringify({ projectId }),
+    });
+
     revalidatePath(`/projects/${projectId}`);
     return { success: true };
   } catch (error) {
@@ -182,6 +200,14 @@ export async function castVote(
         set: { value },
       });
 
+    await logAudit({
+      userId: user.id,
+      action: "vote",
+      entity: "vote",
+      entityId: proposalId,
+      details: JSON.stringify({ value, projectId }),
+    });
+
     await emitVoteUpdate(proposalId, projectId);
     revalidatePath(`/projects/${projectId}`);
     return { success: true };
@@ -209,6 +235,14 @@ export async function removeVote(proposalId: string, projectId: string) {
       .where(
         and(eq(votes.proposalId, proposalId), eq(votes.userId, user.id))
       );
+
+    await logAudit({
+      userId: user.id,
+      action: "unvote",
+      entity: "vote",
+      entityId: proposalId,
+      details: JSON.stringify({ projectId }),
+    });
 
     await emitVoteUpdate(proposalId, projectId);
     revalidatePath(`/projects/${projectId}`);
@@ -255,6 +289,13 @@ export async function addComment(
       parentId: parentId || null,
       content,
       userId: user.id,
+    });
+
+    await logAudit({
+      userId: user.id,
+      action: "comment",
+      entity: "comment",
+      entityId: proposalId,
     });
 
     if (projectId) {

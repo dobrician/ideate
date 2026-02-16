@@ -1,0 +1,325 @@
+openapi: 3.1.0
+info:
+  title: Ideate API
+  description: API for the Ideate democratic idea prioritization platform
+  version: 0.5.0
+  contact:
+    name: Ideate Team
+  license:
+    name: ISC
+
+servers:
+  - url: https://idea.surmont.co
+    description: Staging
+  - url: http://localhost:3000
+    description: Development
+
+tags:
+  - name: Health
+    description: System health checks
+  - name: Projects
+    description: Project management
+  - name: Search
+    description: Full-text search
+  - name: Votes
+    description: Real-time voting
+  - name: Email
+    description: Email deliverability
+
+paths:
+  /api/health:
+    get:
+      tags: [Health]
+      summary: Health check
+      description: Returns system health status including database connectivity
+      operationId: getHealth
+      responses:
+        "200":
+          description: System healthy
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthResponse"
+        "503":
+          description: System degraded
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthResponse"
+
+  /api/projects/{id}:
+    get:
+      tags: [Projects]
+      summary: Get project by ID
+      description: Fetch a single project. Requires authentication.
+      operationId: getProject
+      security:
+        - sessionCookie: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Project UUID
+      responses:
+        "200":
+          description: Project found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Project"
+        "401":
+          description: Not authenticated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "404":
+          description: Project not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /api/search:
+    get:
+      tags: [Search]
+      summary: Full-text search
+      description: Search across projects and proposals using SQLite FTS5
+      operationId: search
+      parameters:
+        - name: q
+          in: query
+          required: true
+          schema:
+            type: string
+            minLength: 2
+          description: Search query (minimum 2 characters)
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 20
+            maximum: 50
+          description: Maximum results to return
+      responses:
+        "200":
+          description: Search results
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SearchResponse"
+
+  /api/votes/stream:
+    get:
+      tags: [Votes]
+      summary: Real-time vote stream (SSE)
+      description: Server-Sent Events endpoint for live vote count updates
+      operationId: getVoteStream
+      parameters:
+        - name: projectId
+          in: query
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Project ID to subscribe to
+      responses:
+        "200":
+          description: SSE stream opened
+          content:
+            text/event-stream:
+              schema:
+                type: string
+                description: "JSON events: { proposalId, upvotes, downvotes }"
+        "400":
+          description: Missing projectId parameter
+
+  /api/email/deliverability:
+    get:
+      tags: [Email]
+      summary: Email deliverability check
+      description: Check SPF, DKIM, and MX records for the sending domain
+      operationId: checkDeliverability
+      responses:
+        "200":
+          description: Deliverability report
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DeliverabilityReport"
+        "500":
+          description: Check failed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /auth/request:
+    post:
+      tags: [Health]
+      summary: Request magic link
+      description: Send a magic link email for authentication
+      operationId: requestMagicLink
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  format: email
+              required: [email]
+      responses:
+        "200":
+          description: Magic link sent (always returns success to prevent enumeration)
+
+  /auth/logout:
+    post:
+      tags: [Health]
+      summary: Logout
+      description: Clear session cookie and redirect to home
+      operationId: logout
+      responses:
+        "302":
+          description: Redirects to home page
+
+components:
+  securitySchemes:
+    sessionCookie:
+      type: apiKey
+      in: cookie
+      name: session
+      description: JWT session cookie (HTTP-only, secure)
+
+  schemas:
+    HealthResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [healthy, degraded]
+        timestamp:
+          type: string
+          format: date-time
+        database:
+          type: string
+          enum: [ok, error]
+        version:
+          type: string
+      required: [status, timestamp, database]
+
+    Project:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        title:
+          type: string
+        description:
+          type: string
+          nullable: true
+        summary:
+          type: string
+          nullable: true
+        deadline:
+          type: integer
+          description: Unix timestamp
+        status:
+          type: string
+          enum: [active, archived, draft]
+        userId:
+          type: string
+          nullable: true
+        createdAt:
+          type: integer
+        updatedAt:
+          type: integer
+      required: [id, title, deadline, status]
+
+    SearchResponse:
+      type: object
+      properties:
+        results:
+          type: array
+          items:
+            $ref: "#/components/schemas/SearchResult"
+        query:
+          type: string
+      required: [results, query]
+
+    SearchResult:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        title:
+          type: string
+        description:
+          type: string
+          nullable: true
+        type:
+          type: string
+          enum: [project, proposal]
+        snippet:
+          type: string
+      required: [id, title, type, snippet]
+
+    DeliverabilityReport:
+      type: object
+      properties:
+        domain:
+          type: string
+        spf:
+          type: object
+          properties:
+            exists:
+              type: boolean
+            valid:
+              type: boolean
+            records:
+              type: array
+              items:
+                type: string
+        dkim:
+          type: object
+          properties:
+            exists:
+              type: boolean
+            selector:
+              type: string
+            records:
+              type: array
+              items:
+                type: string
+        mx:
+          type: object
+          properties:
+            exists:
+              type: boolean
+            records:
+              type: array
+              items:
+                type: string
+        summary:
+          type: string
+          enum: [pass, warn, fail]
+        recommendations:
+          type: array
+          items:
+            type: string
+      required: [domain, spf, dkim, mx, summary, recommendations]
+
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+      required: [error]

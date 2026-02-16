@@ -7,12 +7,14 @@ A platform for teams to create projects, submit proposals, vote (pro/contra), an
 ## Tech Stack
 
 - **Framework:** Next.js 16 (App Router), TypeScript strict
-- **Database:** SQLite + Drizzle ORM (WAL mode)
+- **Database:** SQLite + Drizzle ORM (WAL mode, FTS5 search)
 - **Auth:** Email magic link + JWT sessions
 - **UI:** Tailwind CSS 4 + shadcn/ui
 - **Testing:** Vitest (unit) + Playwright (E2E + smoke)
 - **AI:** Pluggable LLM (Gemini / OpenAI) for summarization
 - **Deploy:** Docker multi-stage build
+- **CI/CD:** GitHub Actions (lint, typecheck, test, build)
+- **i18n:** English + Romanian with locale switcher
 
 ## Quick Start
 
@@ -47,12 +49,21 @@ docker compose up dev -d        # Start dev
 docker compose build            # Rebuild images
 ```
 
+### Backup & Restore
+
+```bash
+./scripts/backup.sh staging           # Backup staging DB
+./scripts/backup.sh dev ./my-backups  # Backup dev DB to custom dir
+./scripts/restore.sh staging ./backups/ideate-staging-20260216.db  # Restore
+```
+
 ## Testing
 
 ```bash
 npm run test          # Vitest unit tests
 npm run test:e2e      # Playwright E2E tests
 npm run test:smoke    # Smoke tests against live staging
+npm run analyze       # Bundle size analysis
 ```
 
 **Coverage target: 100%** — no exceptions.
@@ -74,20 +85,49 @@ src/
 ├── app/           # Next.js App Router pages & API routes
 ├── components/    # React components (ui/ for shadcn)
 ├── db/            # Drizzle schema & migrations
-├── lib/           # Shared utilities (auth, mail, ai)
+├── lib/           # Shared utilities (auth, mail, ai, i18n, search, audit)
+docs/
+├── openapi.yaml   # OpenAPI 3.1 API specification
+├── wiki/          # GitHub Wiki source files
+scripts/
+├── backup.sh      # Docker volume backup
+├── restore.sh     # Docker volume restore
 tests/
 ├── unit/          # Vitest unit tests
 ├── e2e/           # Playwright E2E tests
 ├── smoke/         # Post-deploy smoke tests
 ```
 
+## API Documentation
+
+See [`docs/openapi.yaml`](docs/openapi.yaml) for the full OpenAPI 3.1 specification.
+
+Key endpoints:
+- `GET /api/health` — System health check
+- `GET /api/search?q=<query>` — Full-text search
+- `GET /api/projects/:id` — Get project details
+- `GET /api/votes/stream?projectId=<id>` — Real-time vote SSE stream
+- `GET /api/email/deliverability` — SPF/DKIM/MX check
+
 ## Data Model
 
-- **Users** — email auth, roles (user/admin)
+- **Users** — email auth, roles (admin/manager/member/viewer)
 - **Projects** — title, description, AI summary, deadline
 - **Proposals** — per project, with pro/contra voting
 - **Votes** — composite PK (proposal + user), +1/-1
 - **Comments** — threaded (parentId), per proposal
+- **Audit Logs** — user action tracking (action, entity, details)
+
+## Features
+
+- **RBAC** — 4 roles with 13 granular permissions
+- **Real-time voting** — SSE-based live vote count updates
+- **AI summaries** — Gemini/OpenAI for project and proposal summaries
+- **Full-text search** — SQLite FTS5 across projects and proposals
+- **Audit logging** — track all user actions
+- **i18n** — English and Romanian with locale switcher
+- **Dashboard** — personal overview with stats and activity feed
+- **Email deliverability** — SPF/DKIM/MX verification helper
 
 ## Contributing
 

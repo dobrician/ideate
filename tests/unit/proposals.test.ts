@@ -252,8 +252,8 @@ describe("createProposal", () => {
       "A detailed description of the proposal."
     );
 
-    // Two inserts: proposal + vote
-    expect(mockInsertValues).toHaveBeenCalledTimes(2);
+    // Three inserts: proposal + vote + audit log
+    expect(mockInsertValues).toHaveBeenCalledTimes(3);
 
     // First insert: proposal
     const proposalValues = mockInsertValues.mock.calls[0][0] as ProposalInsertValues;

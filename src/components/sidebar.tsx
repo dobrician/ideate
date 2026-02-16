@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Home, FolderOpen, User, LogOut, LayoutDashboard } from "lucide-react";
+import { useLocale } from "@/lib/use-locale";
 
 interface SidebarProps {
   open: boolean;
@@ -12,14 +13,15 @@ interface SidebarProps {
 }
 
 const navItems = [
-  { href: "/", label: "Home", icon: Home },
-  { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
-  { href: "/projects", label: "Projects", icon: FolderOpen },
-  { href: "/profile", label: "Profile", icon: User },
+  { href: "/", labelKey: "nav.home", icon: Home },
+  { href: "/dashboard", labelKey: "nav.dashboard", icon: LayoutDashboard },
+  { href: "/projects", labelKey: "nav.projects", icon: FolderOpen },
+  { href: "/profile", labelKey: "nav.profile", icon: User },
 ];
 
 export function Sidebar({ open, onClose }: SidebarProps) {
   const pathname = usePathname();
+  const { t } = useLocale();
 
   return (
     <>
@@ -61,7 +63,7 @@ export function Sidebar({ open, onClose }: SidebarProps) {
                   )}
                 >
                   <Icon className="h-4 w-4" />
-                  {item.label}
+                  {t(item.labelKey)}
                 </Link>
               );
             })}
@@ -74,7 +76,7 @@ export function Sidebar({ open, onClose }: SidebarProps) {
                 className="flex w-full items-center gap-3 rounded-md px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
               >
                 <LogOut className="h-4 w-4" />
-                Sign Out
+                {t("nav.signOut")}
               </button>
             </form>
           </div>

@@ -1,8 +1,13 @@
 "use client";
 
 import { useState } from "react";
+import dynamic from "next/dynamic";
 import { Header } from "@/components/header";
-import { Sidebar } from "@/components/sidebar";
+
+const Sidebar = dynamic(
+  () => import("@/components/sidebar").then((m) => ({ default: m.Sidebar })),
+  { ssr: false }
+);
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);

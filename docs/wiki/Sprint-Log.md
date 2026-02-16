@@ -209,17 +209,58 @@
 ---
 
 ## Sprint 5 — CI/CD & Infrastructure (2026-02-16)
-**Status:** 🔄 IN PROGRESS
+**Status:** ✅ COMPLETE
 
 ### Goals
-- [ ] GitHub Actions CI/CD pipeline — lint, typecheck, test, build on PR (#11)
-- [ ] Full-text search for projects and proposals (#10)
-- [ ] Audit logging — track user actions, votes, changes (#9)
-- [ ] Docker volume backup strategy (#3)
-- [ ] Email deliverability verification — SPF/DKIM headers (#2)
-- [ ] Internationalization setup (EN/RO) — from original ideator
-- [ ] API documentation (OpenAPI/Swagger for API routes)
-- [ ] Performance optimization — lazy loading, code splitting, image optimization
+- [x] GitHub Actions CI/CD pipeline — lint, typecheck, test, build on PR (#11)
+- [x] Full-text search for projects and proposals (#10)
+- [x] Audit logging — track user actions, votes, changes (#9)
+- [x] Docker volume backup strategy (#3)
+- [x] Email deliverability verification — SPF/DKIM headers (#2)
+- [x] Internationalization setup (EN/RO) — from original ideator
+- [x] API documentation (OpenAPI/Swagger for API routes)
+- [x] Performance optimization — lazy loading, code splitting, image optimization
 
 ### Outcomes
-- TBD (sprint in progress)
+- 1 conventional commit (sprint)
+- All unit tests passing (260+ tests)
+- Build clean, zero TypeScript errors
+- GitHub Actions CI/CD (fixes #11)
+  - 4 parallel jobs: lint, typecheck, test, build
+  - Build depends on all checks passing
+  - Node 22 with npm cache
+- Full-text search via SQLite FTS5 (fixes #10)
+  - FTS5 virtual tables for projects and proposals
+  - Auto-sync triggers for insert/update/delete
+  - Search API at `/api/search?q=<query>`
+  - Search bar in header with debounced input, dropdown results
+  - Fallback to LIKE queries if FTS unavailable
+- Audit logging (fixes #9)
+  - `audit_logs` table with userId, action, entity, entityId, details, ipAddress
+  - Fire-and-forget logging in all 8 server actions
+  - Auto-migration system for new DB tables
+- Docker backup/restore (fixes #3)
+  - `scripts/backup.sh` — timestamped SQLite backup via `.backup`
+  - `scripts/restore.sh` — integrity check, restore, health wait
+- Email deliverability (fixes #2)
+  - SPF/DKIM/MX DNS checker (`src/lib/email-deliverability.ts`)
+  - API endpoint `/api/email/deliverability`
+  - Full setup documentation in wiki
+- i18n — EN/RO
+  - 80+ translation keys for all UI text
+  - Server-side locale from cookie, client-side `useLocale` hook
+  - Locale switcher in header (EN/RO toggle)
+  - Sidebar navigation translated
+- OpenAPI 3.1 specification (`docs/openapi.yaml`)
+  - All API routes documented with schemas
+- Performance
+  - Bundle analyzer (`npm run analyze`)
+  - lucide-react tree-shaking via optimizePackageImports
+  - Dynamic import for sidebar (code splitting)
+  - Image optimization config (AVIF/WebP)
+  - Inter font with latin-ext for Romanian
+
+### Notes
+- GitHub issues #2, #3, #9, #10, #11 addressed
+- ESLint config fixed for Next.js 16 + ESLint 9 compatibility
+- Auto-migration system ensures seamless DB schema updates on startup

@@ -10,6 +10,7 @@ import { hasPermission, canManageResource } from "@/lib/rbac";
 import type { Role } from "@/lib/rbac";
 import { eq } from "drizzle-orm";
 import { randomUUID } from "crypto";
+import { logAudit } from "@/lib/audit";
 
 /**
  * Project validation schema
@@ -61,6 +62,14 @@ export async function createProject(formData: FormData) {
       deadline: new Date(deadline),
       status,
       userId: user.id,
+    });
+
+    await logAudit({
+      userId: user.id,
+      action: "create",
+      entity: "project",
+      entityId: projectId,
+      details: JSON.stringify({ title }),
     });
 
     revalidatePath("/projects");
@@ -127,6 +136,14 @@ export async function updateProject(projectId: string, formData: FormData) {
       })
       .where(eq(projects.id, projectId));
 
+    await logAudit({
+      userId: user.id,
+      action: "update",
+      entity: "project",
+      entityId: projectId,
+      details: JSON.stringify({ title }),
+    });
+
     revalidatePath(`/projects/${projectId}`);
     revalidatePath("/projects");
 
@@ -165,6 +182,13 @@ export async function deleteProject(projectId: string) {
     }
 
     await db.delete(projects).where(eq(projects.id, projectId));
+
+    await logAudit({
+      userId: user.id,
+      action: "delete",
+      entity: "project",
+      entityId: projectId,
+    });
 
     revalidatePath("/projects");
     redirect("/projects");

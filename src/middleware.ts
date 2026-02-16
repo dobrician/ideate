@@ -8,6 +8,8 @@ const PUBLIC_PATHS = [
   "/auth/logout",
   "/api/health",
   "/api/votes/stream",
+  "/api/search",
+  "/api/email/deliverability",
 ];
 
 /**

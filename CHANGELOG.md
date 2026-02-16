@@ -7,6 +7,53 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.5.0] - 2026-02-16
+
+### Added
+- GitHub Actions CI/CD pipeline (fixes #11)
+  - Lint, type check, unit test, and build jobs on every push/PR
+  - Node 22 with npm cache, parallel job execution
+  - Build job depends on lint + typecheck + test passing
+- Full-text search for projects and proposals using SQLite FTS5 (fixes #10)
+  - FTS5 virtual tables with automatic sync triggers
+  - Search API endpoint `GET /api/search?q=<query>`
+  - Search bar component in header with debounced input and dropdown results
+  - Falls back to LIKE queries if FTS tables unavailable
+- Audit logging for all user actions (fixes #9)
+  - `audit_logs` table: userId, action, entity, entityId, details, ipAddress
+  - Fire-and-forget logging in all server actions (create, update, delete, vote, comment)
+  - Auto-migration system for new database tables
+- Docker volume backup/restore scripts (fixes #3)
+  - `scripts/backup.sh` — consistent SQLite backup via `.backup` command
+  - `scripts/restore.sh` — restore with integrity check, container restart, health wait
+  - Support for both staging and dev environments
+- Email deliverability verification (fixes #2)
+  - `src/lib/email-deliverability.ts` — SPF, DKIM, MX record checker
+  - API endpoint `GET /api/email/deliverability` for domain verification
+  - Documentation: `docs/wiki/Email-Deliverability.md` with setup instructions
+- Internationalization (i18n) — EN/RO support
+  - Translation library (`src/lib/i18n.ts`) with 80+ keys in English and Romanian
+  - Server-side locale detection from cookie (`src/lib/i18n-server.ts`)
+  - Client-side `useLocale` hook for components
+  - Locale switcher button (EN/RO toggle) in header
+  - Sidebar navigation uses translated strings
+  - Root layout sets `<html lang>` from locale
+- API documentation (OpenAPI 3.1 specification)
+  - `docs/openapi.yaml` covering all API routes
+  - Schemas for all request/response types
+  - Authentication, search, health, SSE, email endpoints documented
+- Performance optimizations
+  - Bundle analyzer (`npm run analyze`) via `@next/bundle-analyzer`
+  - `optimizePackageImports` for lucide-react tree-shaking
+  - Dynamic import for sidebar (client-side code splitting)
+  - Next.js Image optimization config (AVIF + WebP formats)
+  - Inter font with latin-ext subset for Romanian characters
+
+### Changed
+- ESLint config updated: `eslint-config-next/core-web-vitals` native flat config (fixes ESLint 9 compatibility)
+- Lint script changed from `next lint` to `eslint src/` (Next.js 16 compatibility)
+- Database initialization now auto-applies pending migrations on startup
+
 ## [0.4.0] - 2026-02-15
 
 ### Added

@@ -6,6 +6,7 @@ import { db } from "@/db";
 import { users } from "@/db/schema";
 import { requireAuth } from "@/lib/auth";
 import { eq } from "drizzle-orm";
+import { logAudit } from "@/lib/audit";
 
 const profileSchema = z.object({
   firstName: z.string().max(100, "First name too long").optional(),
@@ -37,6 +38,13 @@ export async function updateProfile(formData: FormData) {
         updatedAt: new Date(),
       })
       .where(eq(users.id, user.id));
+
+    await logAudit({
+      userId: user.id,
+      action: "update",
+      entity: "user",
+      entityId: user.id,
+    });
 
     revalidatePath("/profile");
     return { success: true };

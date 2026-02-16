@@ -88,6 +88,25 @@ export const votes = sqliteTable(
 
 // ─── Comments ───────────────────────────────────────────────────────────────
 
+// ─── Audit Logs ────────────────────────────────────────────────────────────
+
+export const auditLogs = sqliteTable("audit_logs", {
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => randomUUID()),
+  userId: text("user_id").references(() => users.id, { onDelete: "set null" }),
+  action: text("action").notNull(),
+  entity: text("entity").notNull(),
+  entityId: text("entity_id"),
+  details: text("details"),
+  ipAddress: text("ip_address"),
+  createdAt: integer("created_at", { mode: "timestamp" }).default(
+    sql`(unixepoch())`
+  ),
+});
+
+// ─── Comments ──────────────────────────────────────────────────────────────
+
 export const comments = sqliteTable("comments", {
   id: text("id")
     .primaryKey()
