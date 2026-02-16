@@ -2,7 +2,7 @@ import { test, expect } from "@playwright/test";
 import { readFileSync } from "fs";
 
 const APP_URL = process.env.APP_URL || "https://idea.surmont.co";
-const MAIL_LOG_FILE = process.env.MAIL_LOG_FILE || "/tmp/ideate-mail.log";
+const MAIL_LOG_FILE = process.env.MAIL_LOG_FILE || "/tmp/ideate-logs/mail.log";
 const TEST_EMAIL_PREFIX = `smokepass${Date.now()}`;
 const TEST_EMAIL = `${TEST_EMAIL_PREFIX}@surcod.ro`;
 const TEST_PASSWORD = "SmokeTest123";

@@ -8,13 +8,13 @@ services:
       - "4100:3000"
     volumes:
       - ideate-data-staging:/app/data
-      - /tmp/ideate-mail.log:/tmp/ideate-mail.log
+      - /tmp/ideate-logs:/tmp/ideate-logs
     env_file:
       - .env.local
     environment:
       - NODE_ENV=production
       - DATABASE_URL=/app/data/ideate.db
-      - MAIL_LOG_FILE=/tmp/ideate-mail.log
+      - MAIL_LOG_FILE=/tmp/ideate-logs/mail.log
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "wget", "-qO-", "http://localhost:3000/api/health"]
