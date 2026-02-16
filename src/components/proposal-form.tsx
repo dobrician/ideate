@@ -23,11 +23,13 @@ export function ProposalForm({ projectId }: ProposalFormProps) {
   const [state, formAction, isPending] = useActionState(createProposal, null);
 
   useEffect(() => {
-    if (state?.success) {
+    if (!state) return;
+    if (state.success) {
       toast.success("Proposal created successfully");
-      setIsOpen(false);
+      // Use requestAnimationFrame to avoid direct setState in effect
+      requestAnimationFrame(() => setIsOpen(false));
     }
-    if (state?.error) {
+    if (state.error) {
       toast.error(state.error);
     }
   }, [state]);
