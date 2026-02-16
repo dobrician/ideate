@@ -385,4 +385,49 @@ Add component tests for the redesigned dashboard (stat cards, quick actions, emp
 
 ---
 
-*Report updated for Sprint 23 planning at commit 3de0469 on main branch.*
+## Sprint 24 Analysis
+
+**Date:** 2026-02-16 | **Focus:** Project detail page — layout, markdown, modals, forms
+
+### Current State
+
+| Check | Result |
+|-------|--------|
+| `tsc --noEmit` | **Clean** — zero errors |
+| `vitest --coverage` | **670 tests, 45 files, all passing** |
+| Statement coverage | **97.49%** |
+| Branch coverage | **89.94%** |
+| Function coverage | **98.47%** |
+| Line coverage | **98.33%** |
+
+**Open issues:** 7 (2 bugs targeted this sprint: #41, #42; 1 enhancement: #40; 1 nice-to-have: #13; 3 future sprint plans: #46–#49)
+
+### Coverage Gap
+
+| File | Stmts | Branch | Notes |
+|------|-------|--------|-------|
+| `src/app/dashboard/queries.ts` | 10% | 0% | Server queries — needs integration-style tests |
+| `src/db/index.ts` | 94.6% | 83.3% | Migration bootstrap paths |
+| `src/lib/export.ts` | 96.7% | 79.2% | Edge-case branches |
+
+### Sprint 24 Goals
+
+1. **Fix #41 — proposal form as modal dialog.** The new-proposal form currently renders inline and breaks layout. Convert to a modal/dialog consistent with the AI suggestions pattern.
+
+2. **Fix #42 — remove duplicate page content.** The project detail page renders a second instance of proposals + comments with broken (EN) translations. Diagnose the double-render/routing issue and eliminate it.
+
+3. **Markdown rendering for project descriptions and proposals.** Add a markdown renderer (e.g. react-markdown) so descriptions and proposal bodies display formatted content instead of raw text.
+
+4. **Modal dialogs for all project-detail forms.** Edit project, delete confirmation, and any other inline forms should use modal dialogs for consistent UX.
+
+5. **Layout polish and mobile responsiveness.** Clean up spacing, card wrappers, and responsive breakpoints on the project detail page so it works well on all screen sizes.
+
+6. **Improve dashboard/queries.ts test coverage.** Coverage dropped to 10% stmts / 0% branch. Write integration-style unit tests to bring it in line with the rest of the codebase (>95%).
+
+7. **Integrate new logo (#40).** Update header, favicon, and PWA manifest with the new logo asset.
+
+8. **Exhaustive E2E testing of project detail page.** Write Playwright tests covering: view project, create proposal via modal, edit/delete flows, markdown rendering, mobile viewport, and no duplicate content.
+
+---
+
+*Report updated for Sprint 24 planning on 2026-02-16.*
