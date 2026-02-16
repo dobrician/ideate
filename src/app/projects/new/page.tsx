@@ -128,7 +128,7 @@ export default function NewProjectPage() {
               </div>
             )}
 
-            <div className="flex gap-4">
+            <div className="flex gap-3">
               <Button type="submit" disabled={isLoading} className="flex-1">
                 {isLoading ? t("projectForm.creating") : t("projectForm.create")}
               </Button>

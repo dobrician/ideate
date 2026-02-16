@@ -61,7 +61,7 @@ export function DeleteProjectButton({ projectId }: DeleteProjectButtonProps) {
   }
 
   return (
-    <Button variant="destructive" onClick={() => setShowConfirm(true)}>
+    <Button variant="destructive" size="sm" onClick={() => setShowConfirm(true)}>
       {t("common.delete")}
     </Button>
   );

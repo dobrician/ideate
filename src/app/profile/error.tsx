@@ -1,6 +1,9 @@
 "use client";
 
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { useLocale } from "@/lib/use-locale";
 
 export default function ProfileError({
   error,
@@ -9,15 +12,28 @@ export default function ProfileError({
   error: Error;
   reset: () => void;
 }) {
+  const { t } = useLocale();
+
   return (
     <div className="container mx-auto max-w-3xl px-4 py-8">
-      <div className="space-y-4 text-center">
-        <h1 className="text-2xl font-bold text-destructive">Something went wrong</h1>
-        <p className="text-muted-foreground">
-          {error.message || "Failed to load profile."}
-        </p>
-        <Button onClick={reset}>Try Again</Button>
-      </div>
+      <Card className="mx-auto max-w-lg">
+        <CardHeader className="text-center">
+          <CardTitle className="text-destructive">{t("common.error")}</CardTitle>
+          <CardDescription>
+            {error.message || t("common.errorOccurred")}
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="flex gap-3">
+            <Button onClick={reset} className="flex-1">
+              {t("common.retry")}
+            </Button>
+            <Button asChild variant="outline" className="flex-1">
+              <Link href="/">{t("common.goHome")}</Link>
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }

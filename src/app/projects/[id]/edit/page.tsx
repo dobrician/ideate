@@ -187,7 +187,7 @@ export default function EditProjectPage() {
               </div>
             )}
 
-            <div className="flex gap-4">
+            <div className="flex gap-3">
               <Button type="submit" disabled={isSaving} className="flex-1">
                 {isSaving ? t("projectForm.saving") : t("projectForm.update")}
               </Button>

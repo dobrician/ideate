@@ -1,8 +1,9 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { useLocale } from "@/lib/use-locale";
 
 /**
  * Error boundary for the admin panel
@@ -14,27 +15,24 @@ export default function AdminError({
   error: Error & { digest?: string };
   reset: () => void;
 }) {
+  const { t } = useLocale();
+
   return (
     <div className="container mx-auto flex max-w-lg items-center justify-center px-4 py-16">
       <Card className="w-full">
-        <CardHeader>
-          <CardTitle className="text-destructive">
-            Failed to load admin panel
-          </CardTitle>
+        <CardHeader className="text-center">
+          <CardTitle className="text-destructive">{t("common.error")}</CardTitle>
+          <CardDescription>
+            {error.message || t("common.errorOccurred")}
+          </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <p className="text-sm text-muted-foreground">
-            {error.message || "An unexpected error occurred."}
-          </p>
-          {error.digest && (
-            <p className="text-xs text-muted-foreground">
-              Error ID: {error.digest}
-            </p>
-          )}
-          <div className="flex gap-2">
-            <Button onClick={reset}>Try again</Button>
-            <Button asChild variant="outline">
-              <Link href="/dashboard">Back to Dashboard</Link>
+        <CardContent>
+          <div className="flex gap-3">
+            <Button onClick={reset} className="flex-1">
+              {t("common.retry")}
+            </Button>
+            <Button asChild variant="outline" className="flex-1">
+              <Link href="/dashboard">{t("nav.dashboard")}</Link>
             </Button>
           </div>
         </CardContent>
