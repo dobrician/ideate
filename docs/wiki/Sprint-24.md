@@ -1,5 +1,5 @@
 # Sprint 24 — Project Detail Page (2026-02-16)
-**Status:** IN PROGRESS
+**Status:** COMPLETE
 
 ## Goals
 
@@ -21,7 +21,7 @@ Based on unified analysis from Claude + Codex (see docs/sprint24-unified-plan.md
 - [x] Goal 9: Unit tests for project CRUD actions
 - [x] Goal 10: E2E test for project detail page load
 - [x] Goal 11: E2E test for proposal creation flow
-- [ ] Goal 12: Mobile viewport E2E tests + Sprint-Log.md outcomes
+- [x] Goal 12: Mobile viewport E2E tests + Sprint-Log.md outcomes
 
 ## Constraints
 - Commit + push after EACH goal

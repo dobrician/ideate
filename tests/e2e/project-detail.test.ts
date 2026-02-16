@@ -80,7 +80,6 @@ test.describe("Mobile Viewport", () => {
     const commentSection = page.getByText("Project Discussion").first();
     await commentSection.scrollIntoViewIfNeeded();
 
-    // min(400px, 50vh) at 667px viewport = 333.5px
     const commentBox = page.locator("[class*='min(400px']");
     const box = await commentBox.boundingBox();
     if (box) {
@@ -97,5 +96,49 @@ test.describe("Mobile Viewport", () => {
     await page.waitForLoadState("domcontentloaded");
 
     await expect(page.getByText(/E2E Test Project/)).toBeVisible();
+  });
+
+  test("back link and action buttons are accessible on mobile", async ({
+    page,
+  }) => {
+    const seed = await seedTestData(page.request);
+    await loginAsTestUser(page, seed);
+
+    await page.setViewportSize({ width: 375, height: 667 });
+    await page.goto(`/projects/${seed.projectId}`);
+    await page.waitForLoadState("domcontentloaded");
+
+    const backLink = page.getByRole("link", { name: /back/i }).first();
+    await expect(backLink).toBeVisible();
+
+    // Export buttons should still be reachable
+    const exportBtns = page.getByRole("button", { name: /pdf|csv/i }).first();
+    await expect(exportBtns).toBeVisible();
+  });
+
+  test("proposals section and status badge render on mobile", async ({
+    page,
+  }) => {
+    const seed = await seedTestData(page.request);
+    await loginAsTestUser(page, seed);
+
+    await page.setViewportSize({ width: 375, height: 667 });
+    await page.goto(`/projects/${seed.projectId}`);
+    await page.waitForLoadState("domcontentloaded");
+
+    await expect(page.getByText("Active").first()).toBeVisible();
+    await expect(page.getByText(/Proposals?\s*\(\d+\)/)).toBeVisible();
+  });
+
+  test("no horizontal overflow on mobile", async ({ page }) => {
+    const seed = await seedTestData(page.request);
+    await loginAsTestUser(page, seed);
+
+    await page.setViewportSize({ width: 375, height: 667 });
+    await page.goto(`/projects/${seed.projectId}`);
+    await page.waitForLoadState("domcontentloaded");
+
+    const scrollWidth = await page.evaluate(() => document.body.scrollWidth);
+    expect(scrollWidth).toBeLessThanOrEqual(375);
   });
 });

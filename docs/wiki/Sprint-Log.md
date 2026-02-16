@@ -4,6 +4,12 @@ Reverse chronological. Click each sprint for full details.
 
 ---
 
+### ✅ [Sprint 24 — Project Detail Page](Sprint-24) *(2026-02-16)*
+**Focus:** Markdown rendering (descriptions, proposals, comments), edit project dialog, two-column layout with sticky sidebar, deadline enforcement, mobile comment height, project CRUD unit tests, E2E tests
+**Stats:** 12 commits | 702 tests | Issue #45
+
+---
+
 ### ✅ [Sprint 23 — Dashboard Redesign](Sprint-23) *(2026-02-16)*
 **Focus:** Null-safe activity links, user-scoped activity feed, personal stats, Quick Actions bar, deadline badges, project stats cards, compact mobile pills, mobile search toggle, dashboard E2E + unit tests
 **Stats:** 12 commits | 670 unit tests | Issue #44
