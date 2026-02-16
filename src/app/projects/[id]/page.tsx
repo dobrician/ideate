@@ -18,7 +18,7 @@ import {
 import Link from "next/link";
 import { DeleteProjectButton } from "./delete-button";
 import { EditProjectDialog } from "@/components/edit-project-dialog";
-import { ProposalForm } from "@/components/proposal-form";
+import { ProposalForm, ProposalFormInline } from "@/components/proposal-form";
 import { ProposalList } from "@/components/proposal-list";
 import { ExportButtons } from "@/components/export-buttons";
 import { DeadlineCountdown } from "@/components/deadline-countdown";
@@ -111,8 +111,8 @@ export default async function ProjectPage({ params, searchParams }: ProjectPageP
   const proposalTotalPages = Math.ceil(proposalTotal / PROPOSALS_PAGE_SIZE);
 
   return (
-    <div className="container mx-auto max-w-4xl px-4 py-6 sm:py-8">
-      <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+    <div className="container mx-auto max-w-4xl px-4 py-6 sm:py-8 lg:max-w-6xl lg:grid lg:grid-cols-[1.6fr_1fr] lg:items-start lg:gap-6">
+      <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between lg:col-span-2">
         <Button asChild variant="outline" size="sm">
           <Link href="/projects">&larr; {t("projects.back")}</Link>
         </Button>
@@ -216,17 +216,20 @@ export default async function ProjectPage({ params, searchParams }: ProjectPageP
                       summary: p.summary ?? undefined,
                     }))}
                   />
-                  <ProposalForm
-                    projectId={id}
-                    projectTitle={projectData.title}
-                    projectDescription={projectData.description || ""}
-                    existingProposals={proposalsWithStats.map((p) => ({
-                      id: p.id,
-                      title: p.title,
-                      description: p.description ?? undefined,
-                      summary: p.summary ?? undefined,
-                    }))}
-                  />
+                  {/* Dialog trigger visible only below lg */}
+                  <div className="lg:hidden">
+                    <ProposalForm
+                      projectId={id}
+                      projectTitle={projectData.title}
+                      projectDescription={projectData.description || ""}
+                      existingProposals={proposalsWithStats.map((p) => ({
+                        id: p.id,
+                        title: p.title,
+                        description: p.description ?? undefined,
+                        summary: p.summary ?? undefined,
+                      }))}
+                    />
+                  </div>
                 </div>
               )}
             </div>
@@ -246,6 +249,23 @@ export default async function ProjectPage({ params, searchParams }: ProjectPageP
           <ProjectComments projectId={id} comments={projectComments} currentUserId={user.id} />
         </CardContent>
       </Card>
+
+      {/* Sticky sidebar with inline proposal form — desktop only */}
+      {canCreateProposal && (
+        <aside className="hidden lg:block lg:sticky lg:top-24 lg:self-start">
+          <ProposalFormInline
+            projectId={id}
+            projectTitle={projectData.title}
+            projectDescription={projectData.description || ""}
+            existingProposals={proposalsWithStats.map((p) => ({
+              id: p.id,
+              title: p.title,
+              description: p.description ?? undefined,
+              summary: p.summary ?? undefined,
+            }))}
+          />
+        </aside>
+      )}
     </div>
   );
 }
