@@ -485,4 +485,54 @@ Carried from Sprint 24. Update header component, generate favicon set, update PW
 
 ---
 
-*Report updated for Sprint 25 planning on 2026-02-16.*
+## Sprint 26 Goals
+
+**Snapshot (2026-02-16):** 718 tests, 48 files, all green. `tsc --noEmit` clean. Coverage: 98.59% stmt / 93.15% branch / 100% func / 99.19% line. 4 open issues (#47 this sprint, #48–#49 future sprint plans, #13 Cloudflare nice-to-have).
+
+**Theme: Comments & Discussion — messenger-style, real-time (Issue #47)**
+
+Comment infrastructure exists: `comment-thread.tsx`, `project-comments.tsx`, `discussion-sheet.tsx`, comment server actions, and an SSE vote stream (`/api/votes/stream`). Sprint 26 transforms this from a basic comment form into a messenger-style real-time discussion experience.
+
+### Goal 1: Messenger-style comment bubbles with avatars
+**Priority: High | Effort: 2-3h**
+Restyle `comment-thread.tsx` and `project-comments.tsx` into chat-bubble layout: current user's messages right-aligned, others left-aligned. Add user avatar circles (initials fallback). Distinguish own vs. others via color/alignment. Timestamps inline or on hover.
+
+### Goal 2: Real-time comment updates (SSE or polling)
+**Priority: High | Effort: 2-3h**
+Comments currently require page reload to see new messages. Add real-time updates — either extend the existing SSE infrastructure (`/api/votes/stream`) to include comment events, or implement short-polling (15s interval). New comments from other users should appear without refresh. Scroll to bottom on new message arrival.
+
+### Goal 3: Enter to submit, Shift+Enter for newline
+**Priority: High | Effort: 1-2h**
+Update the comment input to behave like a messenger: Enter submits, Shift+Enter inserts a newline. Replace the single-line input with a `textarea` that auto-grows. Add a visible send button for mobile users. Optimistic UI — show the comment immediately before server confirmation.
+
+### Goal 4: Scroll-to-bottom and auto-scroll behavior
+**Priority: Medium | Effort: 1-2h**
+When opening a discussion, auto-scroll to the most recent message. When new messages arrive via real-time updates, auto-scroll only if the user is already near the bottom (within 100px). If scrolled up reading history, show a "New messages" indicator instead.
+
+### Goal 5: Mobile responsive messenger UX
+**Priority: High | Effort: 1-2h**
+Audit the messenger UI at 320px/375px/768px. Bubbles should use full width minus avatar. Input area should be sticky at the bottom. Touch targets must be 44px minimum. Discussion sheet should feel like a native mobile chat app. Test landscape orientation.
+
+### Goal 6: Exhaustive tests — unit, component, and E2E
+**Priority: High | Effort: 2-3h**
+Unit tests for real-time update logic (SSE/polling hook), messenger keyboard behavior (Enter vs Shift+Enter), auto-scroll logic. Component tests for bubble layout (own vs other alignment, avatar rendering). E2E tests: send a comment, verify it appears, test mobile viewport, test scroll behavior. All tests green.
+
+| # | Goal | Priority | Effort | Issue |
+|---|------|----------|--------|-------|
+| 1 | Messenger-style bubbles + avatars | High | 2-3h | #47 |
+| 2 | Real-time comment updates | High | 2-3h | #47 |
+| 3 | Enter-to-submit + auto-grow textarea | High | 1-2h | #47 |
+| 4 | Scroll-to-bottom + new message indicator | Medium | 1-2h | #47 |
+| 5 | Mobile responsive messenger UX | High | 1-2h | #47 |
+| 6 | Exhaustive tests (unit + E2E) | High | 2-3h | #47 |
+
+**Total estimated effort:** ~10-16 hours
+
+**Out of scope:**
+- Voting UX/animations (Sprint 27, Issue #48)
+- Mobile polish final sweep (Sprint 28, Issue #49)
+- PostgreSQL migration, Cloudflare (#13), Redis rate limiter, JWT revocation
+
+---
+
+*Report updated for Sprint 26 planning on 2026-02-16.*

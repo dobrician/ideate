@@ -97,6 +97,54 @@ test.describe("Comments E2E", () => {
     await expect(bubble.locator(".rounded-2xl")).toBeVisible();
   });
 
+  test("Shift+Enter inserts newline instead of submitting", async ({ page }) => {
+    const seed = await seedTestData(page.request);
+    await loginAsTestUser(page, seed);
+
+    await page.goto(`/projects/${seed.projectId}`);
+    await page.waitForLoadState("domcontentloaded");
+
+    const commentSection = page.locator("text=Discussion").first();
+    await commentSection.scrollIntoViewIfNeeded();
+
+    const textarea = page.locator("textarea[name='content']").last();
+    await textarea.fill("Line one");
+    await textarea.press("Shift+Enter");
+    await textarea.pressSequentially("Line two");
+
+    // Textarea should contain both lines (not submitted)
+    const value = await textarea.inputValue();
+    expect(value).toContain("Line one");
+    expect(value).toContain("Line two");
+
+    // Now submit and verify the multi-line message appears
+    await textarea.press("Enter");
+    await expect(page.getByText("Line one")).toBeVisible({ timeout: 10000 });
+  });
+
+  test("own comment shows avatar with initials", async ({ page }) => {
+    const seed = await seedTestData(page.request);
+    await loginAsTestUser(page, seed);
+
+    await page.goto(`/projects/${seed.projectId}`);
+    await page.waitForLoadState("domcontentloaded");
+
+    const commentSection = page.locator("text=Discussion").first();
+    await commentSection.scrollIntoViewIfNeeded();
+
+    const textarea = page.locator("textarea[name='content']").last();
+    await textarea.fill("Avatar test");
+    await textarea.press("Enter");
+
+    await expect(page.getByText("Avatar test")).toBeVisible({ timeout: 10000 });
+
+    // The comment bubble area should contain an avatar fallback with initials
+    const bubble = page.locator("div.flex").filter({
+      hasText: "Avatar test",
+    }).first();
+    await expect(bubble.locator("[data-slot='avatar-fallback']")).toBeVisible();
+  });
+
   test("proposal comment via discussion sheet", async ({ page }) => {
     const seed = await seedTestData(page.request);
     await loginAsTestUser(page, seed);

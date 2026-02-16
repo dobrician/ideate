@@ -11,4 +11,4 @@
 - [x] Goal 3: Enter to submit, Shift+Enter for newline
 - [x] Goal 4: Scroll-to-bottom and auto-scroll behavior
 - [x] Goal 5: Mobile responsive messenger UX
-- [ ] Goal 6: Exhaustive tests — unit, component, and E2E
+- [x] Goal 6: Exhaustive tests — unit, component, and E2E
