@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import {
   Accordion,
   AccordionContent,
@@ -58,9 +58,6 @@ interface ProposalListProps {
   isAdmin: boolean;
 }
 
-/**
- * Accordion-based proposal list with real-time voting via SSE
- */
 export function ProposalList({
   proposals,
   projectId,
@@ -69,6 +66,16 @@ export function ProposalList({
 }: ProposalListProps) {
   const { t } = useLocale();
   const voteUpdates = useVoteStream(projectId);
+
+  const sorted = useMemo(() => {
+    return [...proposals].sort((a, b) => {
+      const aLive = voteUpdates.get(a.id);
+      const bLive = voteUpdates.get(b.id);
+      const aNet = (aLive?.upvotes ?? a.upvotes) - (aLive?.downvotes ?? a.downvotes);
+      const bNet = (bLive?.upvotes ?? b.upvotes) - (bLive?.downvotes ?? b.downvotes);
+      return bNet - aNet;
+    });
+  }, [proposals, voteUpdates]);
 
   if (proposals.length === 0) {
     return (
@@ -85,7 +92,7 @@ export function ProposalList({
 
   return (
     <Accordion type="multiple" className="space-y-2">
-      {proposals.map((proposal) => {
+      {sorted.map((proposal) => {
         const live = voteUpdates.get(proposal.id);
         return (
           <ProposalItem
@@ -126,6 +133,8 @@ function ProposalItem({
 
   const upvotes = liveUpvotes ?? proposal.upvotes;
   const downvotes = liveDownvotes ?? proposal.downvotes;
+  const total = upvotes + downvotes;
+  const proPercent = total > 0 ? Math.round((upvotes / total) * 100) : 0;
 
   async function handleDelete() {
     setIsDeleting(true);
@@ -147,9 +156,16 @@ function ProposalItem({
   return (
     <AccordionItem
       value={proposal.id}
-      className="rounded-lg border bg-card px-4"
+      className="relative overflow-hidden rounded-lg border bg-card px-4"
     >
-      <AccordionTrigger className="py-3 hover:no-underline">
+      {total > 0 && (
+        <div
+          className="pointer-events-none absolute inset-y-0 left-0 bg-gradient-to-r from-green-500/20 to-green-500/5 transition-all duration-300"
+          style={{ width: `${proPercent}%` }}
+          aria-hidden="true"
+        />
+      )}
+      <AccordionTrigger className="relative z-10 py-3 hover:no-underline">
         <div className="flex w-full flex-col gap-2 pr-2 sm:flex-row sm:items-center sm:justify-between">
           <div className="min-w-0 flex-1 text-left">
             <span className="font-medium">{proposal.title}</span>
@@ -178,7 +194,7 @@ function ProposalItem({
           </div>
         </div>
       </AccordionTrigger>
-      <AccordionContent>
+      <AccordionContent className="relative z-10">
         <div className="space-y-4 pb-2">
           <VoteBar upvotes={upvotes} downvotes={downvotes} />
 

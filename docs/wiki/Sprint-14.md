@@ -8,7 +8,7 @@
 - [x] Top nav: fixed-width, centered, contains logo, nav links (Dashboard/Projects), search, locale toggle, dark mode toggle, user menu
 - [x] Homepage = Dashboard for logged-in users (#17)
 - [x] Dark mode as simple toggle button with auto-detect (#18)
-- [ ] Proposal list as bar chart: vote percentage backgrounds, sorted descending (#20)
+- [x] Proposal list as bar chart: vote percentage backgrounds, sorted descending (#20)
 - [ ] Fix duplicate plus icon on New Proposal button (#21)
 
 **Bug Fixes (from retest report):**
