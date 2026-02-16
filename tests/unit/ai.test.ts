@@ -592,7 +592,7 @@ describe("completeWithFallback", () => {
     expect(fetchMock).toHaveBeenCalledOnce();
     const init = fetchMock.mock.calls[0][1];
     expect(init?.method).toBe("POST");
-    expect(init?.headers).toEqual({ "Content-Type": "application/json" });
+    expect(init?.headers).toEqual({ "Content-Type": "application/json", "x-goog-api-key": "test-gemini-key" });
 
     const body = JSON.parse(init?.body as string) as {
       contents: Array<{ parts: Array<{ text: string }> }>;

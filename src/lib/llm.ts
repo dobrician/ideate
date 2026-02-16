@@ -132,9 +132,12 @@ async function callGemini(
   if (isThrottled("gemini")) return { text: null, status: 429 };
 
   try {
-    const response = await fetch(`${GEMINI_ENDPOINT}?key=${GEMINI_KEY}`, {
+    const response = await fetch(GEMINI_ENDPOINT, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        "x-goog-api-key": GEMINI_KEY,
+      },
       body: JSON.stringify({
         contents: [{ parts: [{ text: prompt }] }],
         generationConfig: {
