@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { clearSession } from "@/lib/auth";
+import { requireOrigin } from "@/lib/csrf";
 import { logger } from "@/lib/logger";
 
 /**
@@ -8,6 +9,10 @@ import { logger } from "@/lib/logger";
  */
 export async function POST(request: NextRequest) {
   try {
+    // CSRF defense: validate Origin header
+    const originError = requireOrigin(request);
+    if (originError) return originError;
+
     await clearSession();
 
     const acceptHeader = request.headers.get("accept") || "";

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { registerUser, validatePassword } from "@/lib/password";
 import { sendVerificationEmail } from "@/lib/mail";
+import { requireOrigin } from "@/lib/csrf";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { getClientIp } from "@/lib/request-utils";
 import { logger } from "@/lib/logger";
@@ -23,6 +24,10 @@ const registerSchema = z.object({
  */
 export async function POST(request: NextRequest) {
   try {
+    // CSRF defense: validate Origin header
+    const originError = requireOrigin(request);
+    if (originError) return originError;
+
     const clientIp = getClientIp(request);
 
     // IP-level rate limit

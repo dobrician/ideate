@@ -41,6 +41,10 @@ vi.mock("@/lib/rate-limit", () => ({
   checkRateLimit: (...args: unknown[]) => mockCheckRateLimit(...args),
 }));
 
+vi.mock("@/lib/csrf", () => ({
+  requireOrigin: () => null, // Allow all requests in tests
+}));
+
 // ── Import route handlers ────────────────────────────────────────────────────
 
 import { POST as registerPOST } from "@/app/api/auth/register/route";

@@ -5,8 +5,6 @@ import { users } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { randomUUID } from "crypto";
 
-const JWT_SECRET = process.env.JWT_SECRET || "";
-const APP_URL = process.env.APP_URL || "http://localhost:3000";
 const SESSION_COOKIE_NAME = "session";
 const CSRF_COOKIE_NAME = "csrf_token";
 const MAGIC_LINK_EXPIRY = "15m"; // 15 minutes
@@ -14,16 +12,25 @@ const SESSION_EXPIRY = "7d"; // 7 days
 const SESSION_ROTATION_THRESHOLD = 60 * 60 * 24 * 3; // Rotate token if less than 3 days remain
 
 /**
- * Validate JWT_SECRET at runtime (not build time)
+ * Read JWT_SECRET fresh from process.env on every call (not cached at module load).
+ * This ensures hot-reloads and env changes take effect without restart.
  */
 function getJwtSecret(): string {
-  if (!JWT_SECRET) {
+  const secret = process.env.JWT_SECRET || "";
+  if (!secret) {
     throw new Error("JWT_SECRET environment variable is required");
   }
-  if (JWT_SECRET.length < 32) {
+  if (secret.length < 32) {
     throw new Error("JWT_SECRET must be at least 32 characters for security");
   }
-  return JWT_SECRET;
+  return secret;
+}
+
+/**
+ * Read APP_URL fresh from process.env on every call.
+ */
+function getAppUrl(): string {
+  return process.env.APP_URL || "http://localhost:3000";
 }
 
 /**
@@ -60,7 +67,7 @@ export function generateMagicLinkToken(email: string): string {
 
   return jwt.sign(payload, getJwtSecret(), {
     expiresIn: MAGIC_LINK_EXPIRY,
-    issuer: APP_URL,
+    issuer: getAppUrl(),
   });
 }
 
@@ -72,7 +79,7 @@ export function generateMagicLinkToken(email: string): string {
 export function verifyMagicLinkToken(token: string): string | null {
   try {
     const payload = jwt.verify(token, getJwtSecret(), {
-      issuer: APP_URL,
+      issuer: getAppUrl(),
     }) as MagicLinkPayload;
 
     if (payload.type !== "magic-link") {
@@ -92,7 +99,7 @@ export function verifyMagicLinkToken(token: string): string | null {
  */
 export function generateMagicLink(email: string): string {
   const token = generateMagicLinkToken(email);
-  return `${APP_URL}/auth/verify?token=${encodeURIComponent(token)}`;
+  return `${getAppUrl()}/auth/verify?token=${encodeURIComponent(token)}`;
 }
 
 /**
@@ -141,8 +148,8 @@ export function createSessionToken(userId: string, email: string): string {
 
   return jwt.sign(payload, getJwtSecret(), {
     expiresIn: SESSION_EXPIRY,
-    issuer: APP_URL,
-    audience: APP_URL,
+    issuer: getAppUrl(),
+    audience: getAppUrl(),
     notBefore: "0s", // Token valid immediately (same as iat)
   });
 }
@@ -157,8 +164,8 @@ export function verifySessionToken(
 ): SessionPayload | null {
   try {
     const payload = jwt.verify(token, getJwtSecret(), {
-      issuer: APP_URL,
-      audience: APP_URL,
+      issuer: getAppUrl(),
+      audience: getAppUrl(),
       clockTolerance: 30, // Allow 30 seconds clock skew
     }) as SessionPayload;
 
@@ -185,20 +192,22 @@ export async function setSessionCookie(
   const csrfToken = randomUUID();
   const cookieStore = await cookies();
 
-  // Set session cookie with strict security settings
+  // Set session cookie — sameSite "lax" prevents CSRF on POST requests
+  // while allowing the cookie to be sent on cross-site GET navigations
+  // (required for magic link flow: clicking link in email → our app).
   cookieStore.set(SESSION_COOKIE_NAME, token, {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
-    sameSite: "strict", // Changed from "lax" for better CSRF protection
+    sameSite: "lax",
     maxAge: 60 * 60 * 24 * 7, // 7 days in seconds
     path: "/",
   });
 
-  // Set CSRF token cookie (readable by JavaScript for form submission)
+  // CSRF token cookie (readable by JavaScript for form submission)
   cookieStore.set(CSRF_COOKIE_NAME, csrfToken, {
     httpOnly: false, // Must be readable by client-side JavaScript
     secure: process.env.NODE_ENV === "production",
-    sameSite: "strict",
+    sameSite: "lax",
     maxAge: 60 * 60 * 24 * 7, // Same expiry as session
     path: "/",
   });

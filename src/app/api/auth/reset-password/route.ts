@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { resetPasswordWithToken, validatePassword } from "@/lib/password";
+import { requireOrigin } from "@/lib/csrf";
 import { logger } from "@/lib/logger";
 import { z } from "zod";
 
@@ -15,6 +16,10 @@ const resetSchema = z.object({
  */
 export async function POST(request: NextRequest) {
   try {
+    // CSRF defense: validate Origin header
+    const originError = requireOrigin(request);
+    if (originError) return originError;
+
     const body = await request.json();
     const result = resetSchema.safeParse(body);
 

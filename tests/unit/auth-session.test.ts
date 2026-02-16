@@ -58,14 +58,14 @@ describe("Auth Session Functions", () => {
       expect(mockCookies.set.mock.calls[0][0]).toBe("session");
       expect(mockCookies.set.mock.calls[0][2]).toMatchObject({
         httpOnly: true,
-        sameSite: "strict",
+        sameSite: "lax",
         path: "/",
       });
       // Second call: CSRF cookie
       expect(mockCookies.set.mock.calls[1][0]).toBe("csrf_token");
       expect(mockCookies.set.mock.calls[1][2]).toMatchObject({
         httpOnly: false,
-        sameSite: "strict",
+        sameSite: "lax",
         path: "/",
       });
     });
