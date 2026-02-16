@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { regenerateVerificationToken } from "@/lib/password";
 import { sendVerificationEmail } from "@/lib/mail";
 import { checkRateLimit } from "@/lib/rate-limit";
+import { getClientIp } from "@/lib/request-utils";
 import { z } from "zod";
 
 const APP_URL = process.env.APP_URL || "http://localhost:3000";
@@ -12,14 +13,6 @@ const MAX_PER_EMAIL = 2;
 const resendSchema = z.object({
   email: z.string().email("Please enter a valid email address"),
 });
-
-function getClientIp(request: NextRequest): string {
-  return (
-    request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
-    request.headers.get("x-real-ip") ||
-    "unknown"
-  );
-}
 
 /**
  * POST /api/auth/resend-verification

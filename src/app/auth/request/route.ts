@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { generateMagicLink } from "@/lib/auth";
 import { sendMagicLinkEmail } from "@/lib/mail";
 import { checkRateLimit } from "@/lib/rate-limit";
+import { getClientIp } from "@/lib/request-utils";
 import { z } from "zod";
 
 const WINDOW_MS = 15 * 60 * 1000; // 15 minutes
@@ -14,17 +15,6 @@ const MAX_PER_IP = 20;
 const emailSchema = z.object({
   email: z.string().email("Please enter a valid email address").toLowerCase().trim(),
 });
-
-/**
- * Extract client IP from request headers
- */
-function getClientIp(request: NextRequest): string {
-  return (
-    request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
-    request.headers.get("x-real-ip") ||
-    "unknown"
-  );
-}
 
 /**
  * POST /auth/request

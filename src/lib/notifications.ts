@@ -6,34 +6,15 @@
 import { db } from "@/db";
 import { proposals, users } from "@/db/schema";
 import { eq } from "drizzle-orm";
-import nodemailer from "nodemailer";
 import { escapeHtml } from "@/lib/sanitize";
+import { getSmtpTransporter } from "@/lib/mail";
 
-const SMTP_HOST = process.env.SMTP_HOST || "";
-const SMTP_PORT = parseInt(process.env.SMTP_PORT || "587", 10);
-const SMTP_USER = process.env.SMTP_USER || "";
-const SMTP_PASS = process.env.SMTP_PASS || "";
 const SMTP_FROM = process.env.SMTP_FROM || "idea@surcod.ro";
 const APP_URL = process.env.APP_URL || "http://localhost:3000";
 
 // Debounce: track last notification time per proposal
 const lastNotification = new Map<string, number>();
 const DEBOUNCE_MS = 15 * 60 * 1000; // 15 minutes
-
-let transporter: nodemailer.Transporter | null = null;
-
-function getTransporter(): nodemailer.Transporter | null {
-  if (!SMTP_HOST || !SMTP_USER || !SMTP_PASS) return null;
-  if (!transporter) {
-    transporter = nodemailer.createTransport({
-      host: SMTP_HOST,
-      port: SMTP_PORT,
-      secure: SMTP_PORT === 465,
-      auth: { user: SMTP_USER, pass: SMTP_PASS },
-    });
-  }
-  return transporter;
-}
 
 /**
  * Check if notification should be sent (debounce check)
@@ -61,7 +42,7 @@ export async function notifyVote(
   try {
     if (!shouldNotify(proposalId, "vote")) return;
 
-    const transport = getTransporter();
+    const transport = getSmtpTransporter();
     if (!transport) return;
 
     const proposal = await db
@@ -115,7 +96,7 @@ export async function notifyComment(
   try {
     if (!shouldNotify(proposalId, "comment")) return;
 
-    const transport = getTransporter();
+    const transport = getSmtpTransporter();
     if (!transport) return;
 
     const proposal = await db

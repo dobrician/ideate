@@ -33,24 +33,30 @@ function validateSmtpConfig(): void {
 let transporter: Transporter | null = null;
 
 /**
- * Get or create SMTP transporter singleton
- * @returns Nodemailer transporter
+ * Get or create SMTP transporter singleton (returns null if not configured).
+ * Use for optional sends like notifications where missing SMTP is acceptable.
  */
-function getTransporter(): Transporter {
-  validateSmtpConfig();
+export function getSmtpTransporter(): Transporter | null {
+  if (!SMTP_HOST || !SMTP_USER || !SMTP_PASS) return null;
   if (!transporter) {
     transporter = nodemailer.createTransport({
       host: SMTP_HOST,
       port: SMTP_PORT,
       secure: SMTP_PORT === 465,
-      auth: {
-        user: SMTP_USER,
-        pass: SMTP_PASS,
-      },
+      auth: { user: SMTP_USER, pass: SMTP_PASS },
     });
   }
-
   return transporter;
+}
+
+/**
+ * Get or create SMTP transporter singleton (throws if not configured).
+ * Use for required sends like auth emails.
+ * @returns Nodemailer transporter
+ */
+function getTransporter(): Transporter {
+  validateSmtpConfig();
+  return getSmtpTransporter()!;
 }
 
 /**

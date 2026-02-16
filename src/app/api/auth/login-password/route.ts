@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { authenticateWithPassword } from "@/lib/password";
 import { setSessionCookie } from "@/lib/auth";
 import { checkRateLimit } from "@/lib/rate-limit";
+import { getClientIp } from "@/lib/request-utils";
 import { z } from "zod";
 
 const WINDOW_MS = 15 * 60 * 1000; // 15 minutes
@@ -12,17 +13,6 @@ const loginSchema = z.object({
   email: z.string().email("Please enter a valid email address"),
   password: z.string().min(1, "Password is required"),
 });
-
-/**
- * Extract client IP from request headers
- */
-function getClientIp(request: NextRequest): string {
-  return (
-    request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
-    request.headers.get("x-real-ip") ||
-    "unknown"
-  );
-}
 
 /**
  * POST /auth/login-password

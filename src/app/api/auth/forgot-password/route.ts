@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { generatePasswordResetToken } from "@/lib/password";
 import { sendPasswordResetEmail } from "@/lib/mail";
 import { checkRateLimit } from "@/lib/rate-limit";
+import { getClientIp } from "@/lib/request-utils";
 import { z } from "zod";
 
 const APP_URL = process.env.APP_URL || "http://localhost:3000";
@@ -12,17 +13,6 @@ const MAX_PER_IP = 10;
 const forgotSchema = z.object({
   email: z.string().email("Please enter a valid email address"),
 });
-
-/**
- * Extract client IP from request headers
- */
-function getClientIp(request: NextRequest): string {
-  return (
-    request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
-    request.headers.get("x-real-ip") ||
-    "unknown"
-  );
-}
 
 /**
  * POST /auth/forgot-password
