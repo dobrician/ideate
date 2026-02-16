@@ -16,6 +16,7 @@ import {
 import { updateProject } from "../../actions";
 import { toast } from "sonner";
 import { useLocale } from "@/lib/use-locale";
+import { getCsrfTokenClient } from "@/lib/csrf-client";
 
 interface ProjectData {
   id: string;
@@ -121,6 +122,7 @@ export default function EditProjectPage() {
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-6">
+            <input type="hidden" name="csrfToken" value={getCsrfTokenClient()} />
             <div className="space-y-2">
               <Label htmlFor="title">{t("projectForm.titleRequired")}</Label>
               <Input

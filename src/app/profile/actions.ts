@@ -7,6 +7,7 @@ import { users } from "@/db/schema";
 import { requireAuth } from "@/lib/auth";
 import { eq } from "drizzle-orm";
 import { logAudit } from "@/lib/audit";
+import { requireCsrfToken } from "@/lib/csrf";
 
 const profileSchema = z.object({
   firstName: z.string().max(100, "First name too long").optional(),
@@ -18,6 +19,7 @@ const profileSchema = z.object({
  */
 export async function updateProfile(formData: FormData) {
   try {
+    await requireCsrfToken(formData.get("csrfToken") as string);
     const user = await requireAuth();
 
     const data = {

@@ -11,6 +11,7 @@ import type { Role } from "@/lib/rbac";
 import { eq } from "drizzle-orm";
 import { randomUUID } from "crypto";
 import { logAudit } from "@/lib/audit";
+import { requireCsrfToken } from "@/lib/csrf";
 
 /**
  * Project validation schema
@@ -33,6 +34,7 @@ const projectSchema = z.object({
  */
 export async function createProject(formData: FormData) {
   try {
+    await requireCsrfToken(formData.get("csrfToken") as string);
     const user = await requireAuth();
 
     if (!hasPermission(user.role as Role, "project:create")) {
@@ -90,6 +92,7 @@ export async function createProject(formData: FormData) {
  */
 export async function updateProject(projectId: string, formData: FormData) {
   try {
+    await requireCsrfToken(formData.get("csrfToken") as string);
     const user = await requireAuth();
 
     if (!hasPermission(user.role as Role, "project:update")) {
@@ -159,8 +162,9 @@ export async function updateProject(projectId: string, formData: FormData) {
 /**
  * Delete a project
  */
-export async function deleteProject(projectId: string) {
+export async function deleteProject(projectId: string, csrfToken: string) {
   try {
+    await requireCsrfToken(csrfToken);
     const user = await requireAuth();
 
     if (!hasPermission(user.role as Role, "project:delete")) {

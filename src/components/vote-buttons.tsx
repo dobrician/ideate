@@ -7,6 +7,7 @@ import { castVote, removeVote } from "@/app/projects/[id]/proposals/actions";
 import { ThumbsUp, ThumbsDown } from "lucide-react";
 import { toast } from "sonner";
 import { useLocale } from "@/lib/use-locale";
+import { getCsrfTokenClient } from "@/lib/csrf-client";
 
 interface VoteButtonsProps {
   proposalId: string;
@@ -32,10 +33,11 @@ export function VoteButtons({
 
   function handleVote(value: number) {
     startTransition(async () => {
+      const token = getCsrfTokenClient();
       const result =
         userVote === value
-          ? await removeVote(proposalId, projectId)
-          : await castVote(proposalId, value, projectId);
+          ? await removeVote(proposalId, projectId, token)
+          : await castVote(proposalId, value, projectId, token);
       if (result?.error) {
         toast.error(result.error);
       }

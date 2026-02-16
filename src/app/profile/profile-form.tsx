@@ -8,6 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { updateProfile } from "./actions";
 import { toast } from "sonner";
 import { useLocale } from "@/lib/use-locale";
+import { getCsrfTokenClient } from "@/lib/csrf-client";
 
 interface ProfileFormProps {
   firstName: string;
@@ -42,6 +43,7 @@ export function ProfileForm({ firstName, lastName }: ProfileFormProps) {
       </CardHeader>
       <CardContent>
         <form action={handleSubmit} className="space-y-4">
+          <input type="hidden" name="csrfToken" value={getCsrfTokenClient()} />
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="space-y-2">
               <Label htmlFor="firstName">{t("profile.firstName")}</Label>

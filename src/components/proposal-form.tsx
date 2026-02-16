@@ -9,6 +9,7 @@ import { createProposal } from "@/app/projects/[id]/proposals/actions";
 import { ThumbsUp, ThumbsDown } from "lucide-react";
 import { toast } from "sonner";
 import { useLocale } from "@/lib/use-locale";
+import { getCsrfTokenClient } from "@/lib/csrf-client";
 
 interface ProposalFormProps {
   projectId: string;
@@ -59,6 +60,7 @@ export function ProposalForm({ projectId }: ProposalFormProps) {
           <form action={formAction} className="space-y-4">
             <input type="hidden" name="projectId" value={projectId} />
             <input type="hidden" name="initialVote" value={initialVote} />
+            <input type="hidden" name="csrfToken" value={getCsrfTokenClient()} />
 
             <div className="space-y-1.5">
               <Label htmlFor="proposal-title">

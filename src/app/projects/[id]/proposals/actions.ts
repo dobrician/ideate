@@ -13,6 +13,7 @@ import { eq, and, sql } from "drizzle-orm";
 import { randomUUID } from "crypto";
 import { logAudit } from "@/lib/audit";
 import { notifyVote, notifyComment } from "@/lib/notifications";
+import { requireCsrfToken } from "@/lib/csrf";
 
 /**
  * Check if a project's deadline has passed
@@ -84,6 +85,7 @@ export async function createProposal(
   formData: FormData
 ): Promise<{ error?: string; success?: boolean }> {
   try {
+    await requireCsrfToken(formData.get("csrfToken") as string);
     const user = await requireAuth();
 
     if (!hasPermission(user.role as Role, "proposal:create")) {
@@ -146,8 +148,9 @@ export async function createProposal(
 /**
  * Delete a proposal (owner or admin/manager only)
  */
-export async function deleteProposal(proposalId: string, projectId: string) {
+export async function deleteProposal(proposalId: string, projectId: string, csrfToken: string) {
   try {
+    await requireCsrfToken(csrfToken);
     const user = await requireAuth();
 
     if (!hasPermission(user.role as Role, "proposal:delete")) {
@@ -194,9 +197,11 @@ export async function deleteProposal(proposalId: string, projectId: string) {
 export async function castVote(
   proposalId: string,
   value: number,
-  projectId: string
+  projectId: string,
+  csrfToken: string
 ) {
   try {
+    await requireCsrfToken(csrfToken);
     const user = await requireAuth();
 
     if (!hasPermission(user.role as Role, "vote:cast")) {
@@ -246,8 +251,9 @@ export async function castVote(
 /**
  * Remove a vote
  */
-export async function removeVote(proposalId: string, projectId: string) {
+export async function removeVote(proposalId: string, projectId: string, csrfToken: string) {
   try {
+    await requireCsrfToken(csrfToken);
     const user = await requireAuth();
 
     if (!hasPermission(user.role as Role, "vote:cast")) {
@@ -291,6 +297,7 @@ export async function addComment(
   formData: FormData
 ): Promise<{ error?: string; success?: boolean }> {
   try {
+    await requireCsrfToken(formData.get("csrfToken") as string);
     const user = await requireAuth();
 
     if (!hasPermission(user.role as Role, "comment:create")) {

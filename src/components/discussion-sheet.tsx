@@ -9,6 +9,7 @@ import { addComment } from "@/app/projects/[id]/proposals/actions";
 import { MessageSquare, Reply, CornerDownRight } from "lucide-react";
 import { toast } from "sonner";
 import { useLocale } from "@/lib/use-locale";
+import { getCsrfTokenClient } from "@/lib/csrf-client";
 
 interface Comment {
   id: string;
@@ -112,6 +113,7 @@ function CommentNode({
             <input type="hidden" name="proposalId" value={proposalId} />
             <input type="hidden" name="projectId" value={projectId} />
             <input type="hidden" name="parentId" value={comment.id} />
+            <input type="hidden" name="csrfToken" value={getCsrfTokenClient()} />
             <div className="flex items-start gap-2">
               <CornerDownRight className="mt-2 h-4 w-4 shrink-0 text-muted-foreground" />
               <Textarea
@@ -211,6 +213,7 @@ export function DiscussionSheet({
             <form action={formAction} className="space-y-2">
               <input type="hidden" name="proposalId" value={proposalId} />
               <input type="hidden" name="projectId" value={projectId} />
+              <input type="hidden" name="csrfToken" value={getCsrfTokenClient()} />
               <Textarea
                 name="content"
                 placeholder={t("comments.placeholder")}

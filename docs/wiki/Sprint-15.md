@@ -4,7 +4,7 @@
 ## Goals
 
 **Security:**
-- [ ] Wire CSRF validation into all Server Actions (projects, proposals, admin, profile)
+- [x] Wire CSRF validation into all Server Actions (projects, proposals, admin, profile)
 - [ ] Fail fast on migration errors at startup — process.exit(1) instead of swallowing (#19-spike)
 
 **UX Bug Fixes:**

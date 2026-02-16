@@ -10,6 +10,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { createProject } from "../actions";
 import { toast } from "sonner";
 import { useLocale } from "@/lib/use-locale";
+import { getCsrfTokenClient } from "@/lib/csrf-client";
 
 /**
  * New project page
@@ -57,6 +58,7 @@ export default function NewProjectPage() {
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-6">
+            <input type="hidden" name="csrfToken" value={getCsrfTokenClient()} />
             <div className="space-y-2">
               <Label htmlFor="title">{t("projectForm.titleRequired")}</Label>
               <Input

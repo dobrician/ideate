@@ -5,6 +5,7 @@ import { updateUserRole } from "./actions";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { useLocale } from "@/lib/use-locale";
+import { getCsrfTokenClient } from "@/lib/csrf-client";
 
 interface UserData {
   id: string;
@@ -41,7 +42,7 @@ export function UserRoleManager({
 
   async function handleRoleChange(userId: string, newRole: string) {
     setLoadingId(userId);
-    const result = await updateUserRole(userId, newRole);
+    const result = await updateUserRole(userId, newRole, getCsrfTokenClient());
     setLoadingId(null);
 
     if (result.error) {

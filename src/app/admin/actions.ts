@@ -8,6 +8,7 @@ import { hasPermission } from "@/lib/rbac";
 import type { Role } from "@/lib/rbac";
 import { eq } from "drizzle-orm";
 import { logAudit } from "@/lib/audit";
+import { requireCsrfToken } from "@/lib/csrf";
 
 const VALID_ROLES: Role[] = ["admin", "manager", "member", "viewer"];
 
@@ -16,9 +17,11 @@ const VALID_ROLES: Role[] = ["admin", "manager", "member", "viewer"];
  */
 export async function updateUserRole(
   targetUserId: string,
-  newRole: string
+  newRole: string,
+  csrfToken: string
 ): Promise<{ error?: string; success?: boolean }> {
   try {
+    await requireCsrfToken(csrfToken);
     const user = await requireAuth();
 
     if (!hasPermission(user.role as Role, "user:manage")) {

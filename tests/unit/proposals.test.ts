@@ -52,6 +52,10 @@ vi.mock("@/lib/auth", () => ({
   requireAuth: (...args: unknown[]) => mockRequireAuth(...args),
 }));
 
+vi.mock("@/lib/csrf", () => ({
+  requireCsrfToken: vi.fn().mockResolvedValue(undefined),
+}));
+
 const mockBuildProposalSummary = vi.fn<(title: string, description: string | null | undefined) => Promise<string | null>>();
 vi.mock("@/lib/ai", () => ({
   buildProposalSummary: (...args: [string, string | null | undefined]) => mockBuildProposalSummary(...args),
@@ -336,7 +340,7 @@ describe("deleteProposal", () => {
   it("should return error when user is not authenticated", async () => {
     mockRequireAuth.mockRejectedValue(new Error("Unauthorized"));
 
-    const result = await deleteProposal("prop-1", "proj-1");
+    const result = await deleteProposal("prop-1", "proj-1", "csrf");
 
     expect(result).toEqual({ error: "You must be logged in" });
     expect(mockDeleteWhere).not.toHaveBeenCalled();
@@ -345,7 +349,7 @@ describe("deleteProposal", () => {
   it("should return error when member tries to delete (no permission)", async () => {
     mockRequireAuth.mockResolvedValue(makeUser({ role: "member" }));
 
-    const result = await deleteProposal("prop-1", "proj-1");
+    const result = await deleteProposal("prop-1", "proj-1", "csrf");
 
     expect(result).toEqual({ error: "You don't have permission to delete proposals" });
     expect(mockDeleteWhere).not.toHaveBeenCalled();
@@ -355,7 +359,7 @@ describe("deleteProposal", () => {
     mockRequireAuth.mockResolvedValue(makeUser({ role: "manager" }));
     mockSelectLimit.mockReturnValue(Promise.resolve([]));
 
-    const result = await deleteProposal("nonexistent", "proj-1");
+    const result = await deleteProposal("nonexistent", "proj-1", "csrf");
 
     expect(result).toEqual({ error: "Proposal not found" });
     expect(mockDeleteWhere).not.toHaveBeenCalled();
@@ -367,7 +371,7 @@ describe("deleteProposal", () => {
       Promise.resolve([{ id: "prop-1", userId: "other-user" }])
     );
 
-    const result = await deleteProposal("prop-1", "proj-1");
+    const result = await deleteProposal("prop-1", "proj-1", "csrf");
 
     expect(result).toEqual({ error: "You don't have permission to delete this proposal" });
     expect(mockDeleteWhere).not.toHaveBeenCalled();
@@ -379,7 +383,7 @@ describe("deleteProposal", () => {
       Promise.resolve([{ id: "prop-1", userId: "user-1" }])
     );
 
-    const result = await deleteProposal("prop-1", "proj-1");
+    const result = await deleteProposal("prop-1", "proj-1", "csrf");
 
     expect(result).toEqual({ success: true });
     expect(mockDeleteWhere).toHaveBeenCalled();
@@ -392,7 +396,7 @@ describe("deleteProposal", () => {
       Promise.resolve([{ id: "prop-1", userId: "other-user" }])
     );
 
-    const result = await deleteProposal("prop-1", "proj-1");
+    const result = await deleteProposal("prop-1", "proj-1", "csrf");
 
     expect(result).toEqual({ success: true });
     expect(mockDeleteWhere).toHaveBeenCalled();
@@ -406,7 +410,7 @@ describe("castVote", () => {
   it("should return error when user is not authenticated", async () => {
     mockRequireAuth.mockRejectedValue(new Error("Unauthorized"));
 
-    const result = await castVote("prop-1", 1, "proj-1");
+    const result = await castVote("prop-1", 1, "proj-1", "csrf");
 
     expect(result).toEqual({ error: "You must be logged in to vote" });
     expect(mockInsertValues).not.toHaveBeenCalled();
@@ -415,14 +419,14 @@ describe("castVote", () => {
   it("should return error when viewer tries to vote", async () => {
     mockRequireAuth.mockResolvedValue(makeUser({ role: "viewer" }));
 
-    const result = await castVote("prop-1", 1, "proj-1");
+    const result = await castVote("prop-1", 1, "proj-1", "csrf");
 
     expect(result).toEqual({ error: "You don't have permission to vote" });
     expect(mockInsertValues).not.toHaveBeenCalled();
   });
 
   it("should upsert a positive vote", async () => {
-    const result = await castVote("prop-1", 1, "proj-1");
+    const result = await castVote("prop-1", 1, "proj-1", "csrf");
 
     expect(result).toEqual({ success: true });
 
@@ -441,7 +445,7 @@ describe("castVote", () => {
   });
 
   it("should upsert a negative vote", async () => {
-    const result = await castVote("prop-1", -1, "proj-1");
+    const result = await castVote("prop-1", -1, "proj-1", "csrf");
 
     expect(result).toEqual({ success: true });
 
@@ -461,7 +465,7 @@ describe("castVote", () => {
       throw new Error("DB constraint violation");
     });
 
-    const result = await castVote("prop-1", 1, "proj-1");
+    const result = await castVote("prop-1", 1, "proj-1", "csrf");
 
     expect(result).toEqual({ error: "Failed to cast vote" });
   });
@@ -473,7 +477,7 @@ describe("removeVote", () => {
   it("should return error when user is not authenticated", async () => {
     mockRequireAuth.mockRejectedValue(new Error("Unauthorized"));
 
-    const result = await removeVote("prop-1", "proj-1");
+    const result = await removeVote("prop-1", "proj-1", "csrf");
 
     expect(result).toEqual({ error: "You must be logged in" });
     expect(mockDeleteWhere).not.toHaveBeenCalled();
@@ -482,14 +486,14 @@ describe("removeVote", () => {
   it("should return error when viewer tries to remove vote", async () => {
     mockRequireAuth.mockResolvedValue(makeUser({ role: "viewer" }));
 
-    const result = await removeVote("prop-1", "proj-1");
+    const result = await removeVote("prop-1", "proj-1", "csrf");
 
     expect(result).toEqual({ error: "You don't have permission to vote" });
     expect(mockDeleteWhere).not.toHaveBeenCalled();
   });
 
   it("should delete the vote for the authenticated user", async () => {
-    const result = await removeVote("prop-1", "proj-1");
+    const result = await removeVote("prop-1", "proj-1", "csrf");
 
     expect(result).toEqual({ success: true });
     expect(mockDeleteWhere).toHaveBeenCalled();
@@ -501,7 +505,7 @@ describe("removeVote", () => {
       throw new Error("DB error");
     });
 
-    const result = await removeVote("prop-1", "proj-1");
+    const result = await removeVote("prop-1", "proj-1", "csrf");
 
     expect(result).toEqual({ error: "Failed to remove vote" });
   });

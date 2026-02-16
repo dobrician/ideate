@@ -33,6 +33,10 @@ vi.mock("@/lib/auth", () => ({
   requireAuth: (...args: unknown[]) => mockRequireAuth(...args),
 }));
 
+vi.mock("@/lib/csrf", () => ({
+  requireCsrfToken: vi.fn().mockResolvedValue(undefined),
+}));
+
 const mockUpdateSet = vi.fn();
 const mockUpdateWhere = vi.fn<() => Promise<void>>();
 

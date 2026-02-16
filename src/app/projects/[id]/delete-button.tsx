@@ -14,6 +14,7 @@ import {
 import { deleteProject } from "../actions";
 import { toast } from "sonner";
 import { useLocale } from "@/lib/use-locale";
+import { getCsrfTokenClient } from "@/lib/csrf-client";
 import { Trash2 } from "lucide-react";
 
 interface DeleteProjectButtonProps {
@@ -32,7 +33,7 @@ export function DeleteProjectButton({ projectId }: DeleteProjectButtonProps) {
     setIsDeleting(true);
 
     try {
-      const result = await deleteProject(projectId);
+      const result = await deleteProject(projectId, getCsrfTokenClient());
 
       if (result?.error) {
         toast.error(result.error);

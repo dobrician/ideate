@@ -25,6 +25,7 @@ import { useVoteStream } from "@/lib/use-vote-stream";
 import { Trash2, Lightbulb } from "lucide-react";
 import { toast } from "sonner";
 import { useLocale } from "@/lib/use-locale";
+import { getCsrfTokenClient } from "@/lib/csrf-client";
 
 interface Comment {
   id: string;
@@ -138,7 +139,7 @@ function ProposalItem({
 
   async function handleDelete() {
     setIsDeleting(true);
-    const result = await deleteProposal(proposal.id, projectId);
+    const result = await deleteProposal(proposal.id, projectId, getCsrfTokenClient());
     if (result?.error) {
       toast.error(result.error);
       setIsDeleting(false);
