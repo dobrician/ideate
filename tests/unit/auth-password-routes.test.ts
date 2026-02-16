@@ -45,6 +45,10 @@ vi.mock("@/lib/csrf", () => ({
   requireOrigin: () => null, // Allow all requests in tests
 }));
 
+vi.mock("@/lib/audit", () => ({
+  logAudit: vi.fn(),
+}));
+
 // ── Import route handlers ────────────────────────────────────────────────────
 
 import { POST as registerPOST } from "@/app/api/auth/register/route";

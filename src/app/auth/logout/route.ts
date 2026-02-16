@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
-import { clearSession } from "@/lib/auth";
+import { clearSession, getSession } from "@/lib/auth";
 import { requireOrigin } from "@/lib/csrf";
+import { logAudit } from "@/lib/audit";
+import { getClientIp } from "@/lib/request-utils";
 import { logger } from "@/lib/logger";
 
 /**
@@ -13,7 +15,10 @@ export async function POST(request: NextRequest) {
     const originError = requireOrigin(request);
     if (originError) return originError;
 
+    const session = await getSession();
+    const clientIp = getClientIp(request);
     await clearSession();
+    logAudit({ userId: session?.userId ?? null, action: "logout", entity: "session", ipAddress: clientIp });
 
     const acceptHeader = request.headers.get("accept") || "";
     if (acceptHeader.includes("application/json")) {

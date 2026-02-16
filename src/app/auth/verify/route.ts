@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { verifyMagicLinkToken, findOrCreateUser, setSessionCookie } from "@/lib/auth";
+import { logAudit } from "@/lib/audit";
+import { getClientIp } from "@/lib/request-utils";
 import { logger } from "@/lib/logger";
 
 const APP_URL = process.env.APP_URL || "http://localhost:3000";
@@ -29,6 +31,7 @@ export async function GET(request: NextRequest) {
 
     const userId = await findOrCreateUser(email);
     await setSessionCookie(userId, email);
+    logAudit({ userId, action: "magic_link_verify", entity: "session", ipAddress: getClientIp(request) });
 
     const destination = redirectTo && redirectTo.startsWith("/") ? redirectTo : "/";
     return NextResponse.redirect(appUrl(destination));

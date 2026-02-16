@@ -11,7 +11,7 @@ Based on unified analysis from both Claude and Codex (see docs/sprint22-unified-
 - [x] Goal 3: Fix reset-password raw Zod error exposure — return user-friendly messages
 - [x] Goal 4: Add rate limiting to reset-password endpoint
 - [x] Goal 5: Hash reset/verification tokens before storing in DB (SHA-256)
-- [ ] Goal 6: Add audit logging to all auth events (login, register, reset, verify, logout)
+- [x] Goal 6: Add audit logging to all auth events (login, register, reset, verify, logout)
 
 **UX (user-visible):**
 - [ ] Goal 7: Create missing verify pages + surface resend-verification on EMAIL_NOT_VERIFIED

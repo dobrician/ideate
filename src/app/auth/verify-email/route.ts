@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { verifyEmailToken } from "@/lib/password";
+import { logAudit } from "@/lib/audit";
+import { getClientIp } from "@/lib/request-utils";
 import { logger } from "@/lib/logger";
 
 const APP_URL = process.env.APP_URL || "http://localhost:3000";
@@ -30,6 +32,8 @@ export async function GET(request: NextRequest) {
         appUrl("/auth/login?error=invalid_or_expired_token")
       );
     }
+
+    logAudit({ userId: null, action: "verify_email", entity: "user", details: `email=${email}`, ipAddress: getClientIp(request) });
 
     return NextResponse.redirect(
       appUrl("/auth/login?verified=true")

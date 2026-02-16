@@ -4,6 +4,7 @@ import { sendVerificationEmail } from "@/lib/mail";
 import { requireOrigin } from "@/lib/csrf";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { getClientIp } from "@/lib/request-utils";
+import { logAudit } from "@/lib/audit";
 import { logger } from "@/lib/logger";
 import { z } from "zod";
 
@@ -86,6 +87,8 @@ export async function POST(request: NextRequest) {
         }
       }
     }
+
+    logAudit({ userId: null, action: "resend_verification", entity: "user", details: `email=${email}`, ipAddress: clientIp });
 
     return NextResponse.json({
       success: true,

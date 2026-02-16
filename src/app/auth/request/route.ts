@@ -4,6 +4,7 @@ import { sendMagicLinkEmail } from "@/lib/mail";
 import { requireOrigin } from "@/lib/csrf";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { getClientIp } from "@/lib/request-utils";
+import { logAudit } from "@/lib/audit";
 import { logger } from "@/lib/logger";
 import { z } from "zod";
 
@@ -89,6 +90,8 @@ export async function POST(request: NextRequest) {
         );
       }
     }
+
+    logAudit({ userId: null, action: "magic_link_request", entity: "session", details: `email=${email}`, ipAddress: clientIp });
 
     // Always return success to prevent email enumeration attacks
     return NextResponse.json({
