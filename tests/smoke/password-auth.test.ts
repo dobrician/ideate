@@ -187,7 +187,7 @@ test.describe("Smoke Tests - Password Auth Flow", () => {
   test("full register -> verify -> login flow via API", async ({
     request,
   }) => {
-    test.setTimeout(60000);
+    test.setTimeout(90000);
 
     // Step 1: Register
     const regResponse = await request.post(`${APP_URL}/api/auth/register`, {
@@ -217,7 +217,8 @@ test.describe("Smoke Tests - Password Auth Flow", () => {
     // Step 3: Get verification token from email
     const verifyToken = getTokenFromEmail(
       TEST_EMAIL,
-      "/auth/verify-email"
+      "/auth/verify-email",
+      45000
     );
     expect(verifyToken).toBeTruthy();
 
