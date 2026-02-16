@@ -21,6 +21,7 @@ const PUBLIC_PATHS = [
   "/api/email/deliverability",
   "/api/me",
   "/api/cron/project-summaries",
+  "/api/test/seed",
   "/sitemap.xml",
   "/robots.txt",
   "/manifest.json",

@@ -1,5 +1,5 @@
 # Sprint 21 — Migration Reliability & AI Feature Testing (2026-02-16)
-**Status:** IN PROGRESS
+**Status:** COMPLETE (2/8 goals — Playwright E2E deferred, will be done per-feature in focused sprints #43-#49)
 
 ## Goals
 
