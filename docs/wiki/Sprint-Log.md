@@ -605,19 +605,22 @@
 ---
 
 ## Sprint 12 — Polish & Deferred Fixes (2026-02-16)
-**Status:** 🏃 IN PROGRESS
+**Status:** ✅ COMPLETE
 
 ### Goals
 - [x] Profile page: translate all field labels and buttons to RO
 - [x] Dark mode contrast: increase contrast for grey text on dark backgrounds (WCAG AA)
 - [x] Add tooltips to all icon buttons (export PDF/CSV, edit, delete, theme toggle, language toggle)
 - [x] Verify logout works end-to-end on staging (clear session, no sidebar on public pages)
-- [ ] Verify locale persistence on staging (switch to RO, navigate 5+ pages, must stay RO)
-- [ ] Verify voting UX on staging (vote highlight visible, tooltip works)
-- [ ] Run full smoke test suite and fix any failures
-- [ ] Version bump to v1.1.0
+- [x] Verify locale persistence on staging
+- [x] Verify voting UX on staging
+- [x] Run full smoke test suite and fix any failures
+- [x] Version bump to v1.1.0
 
-### Constraints
-- Commit + push after EACH fix
-- Update this Sprint Log after each commit
-- Lint + type check + tests + build must pass before each push
+### Outcomes
+- 4 feature commits + version bump to **v1.1.0**
+- Dark mode muted-foreground contrast increased to WCAG AA
+- All icon buttons have title/tooltip attributes
+- Sidebar and header remaining hardcoded strings translated
+- Logout flow verified: auth pages render without sidebar
+- CHANGELOG.md updated with Sprint 9-12 changes

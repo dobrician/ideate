@@ -1,4 +1,41 @@
 # Changelog
+## [1.1.0] — 2026-02-16
+
+### Sprint 9 — Email/Password Authentication
+- Email/password registration with bcrypt hashing
+- Dual-auth login (magic link + password)
+- Email verification flow with resend capability
+- Password recovery (forgot → reset via email)
+- Rate limiting on all auth endpoints
+- Mail log system for fast smoke testing
+
+### Sprint 10 — UI/UX Polish
+- Complete Romanian (RO) translations (150+ i18n keys)
+- Locale switcher with full page content translation
+- Date/number localization per locale
+- Proposal form layout improvements
+- Visual hierarchy: semantic badges, consistent empty states
+- Dark/light mode consistency
+- Mobile responsive fixes (320px+)
+- Auth pages and dashboard visual polish
+
+### Sprint 11 — Critical UX Fixes (from user review)
+- Logout properly clears session, no sidebar on public pages
+- Auth pages use minimal centered layout
+- Locale persists across navigation via cookie
+- Admin 403 Access Denied page
+- PWA install popup: once per session
+- Voting UX: filled icons, highlight, remove tooltip
+- Delete confirmation modals
+- Search functional with correct linking
+- Date format localized (dd.mm.yyyy for RO)
+
+### Sprint 12 — Final Polish
+- Profile page translations
+- Dark mode WCAG AA contrast improvements
+- Tooltips on all icon buttons
+- Sidebar/header remaining translations
+- Logout flow verification
 
 All notable changes to this project will be documented in this file.
 
