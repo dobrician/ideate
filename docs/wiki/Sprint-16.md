@@ -4,9 +4,9 @@
 ## Goals
 
 **Feature — Project Comments (#19):**
-- [ ] Project comments schema + migration: project_id column, nullable proposal_id, CHECK constraint (#19)
-- [ ] Project comments backend: getProjectComments, extend addComment, audit action, CSRF, unit tests (#19)
-- [ ] Project comments UI: shared comment-thread.tsx, ProjectComments component, Discussion section on project page (#19)
+- [x] Project comments schema + migration: project_id column, nullable proposal_id, CHECK constraint (#19)
+- [x] Project comments backend: getProjectComments, extend addComment, audit action, CSRF, unit tests (#19)
+- [x] Project comments UI: shared comment-thread.tsx, ProjectComments component, Discussion section on project page (#19)
 
 **Testing & Quality:**
 - [ ] Component tests for ProposalList and VoteButtons (bar chart width, vote sorting, empty state)

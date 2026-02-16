@@ -74,7 +74,7 @@ export async function getProjectProposals(
   const proposalIds = proposalRows.map((p) => p.id);
   let allComments: {
     id: string;
-    proposalId: string;
+    proposalId: string | null;
     parentId: string | null;
     content: string;
     userId: string | null;
@@ -108,6 +108,7 @@ export async function getProjectProposals(
 
   const commentsByProposal = new Map<string, typeof allComments>();
   for (const c of allComments) {
+    if (!c.proposalId) continue;
     const list = commentsByProposal.get(c.proposalId) || [];
     list.push(c);
     commentsByProposal.set(c.proposalId, list);

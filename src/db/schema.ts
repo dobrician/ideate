@@ -96,8 +96,6 @@ export const votes = sqliteTable(
   (table) => [primaryKey({ columns: [table.proposalId, table.userId] })]
 );
 
-// ─── Comments ───────────────────────────────────────────────────────────────
-
 // ─── Audit Logs ────────────────────────────────────────────────────────────
 
 export const auditLogs = sqliteTable("audit_logs", {
@@ -121,9 +119,12 @@ export const comments = sqliteTable("comments", {
   id: text("id")
     .primaryKey()
     .$defaultFn(() => randomUUID()),
-  proposalId: text("proposal_id")
-    .notNull()
-    .references(() => proposals.id, { onDelete: "cascade" }),
+  proposalId: text("proposal_id").references(() => proposals.id, {
+    onDelete: "cascade",
+  }),
+  projectId: text("project_id").references(() => projects.id, {
+    onDelete: "cascade",
+  }),
   parentId: text("parent_id"),
   content: text("content").notNull(),
   createdAt: integer("created_at", { mode: "timestamp" }).default(

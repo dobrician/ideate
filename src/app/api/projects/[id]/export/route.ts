@@ -65,7 +65,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
 
     const proposalIds = proposalRows.map((p) => p.id);
     let allComments: {
-      proposalId: string;
+      proposalId: string | null;
       content: string;
       createdAt: Date | null;
       userName: string | null;
@@ -93,6 +93,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
 
     const commentsByProposal = new Map<string, typeof allComments>();
     for (const c of allComments) {
+      if (!c.proposalId) continue;
       const list = commentsByProposal.get(c.proposalId) || [];
       list.push(c);
       commentsByProposal.set(c.proposalId, list);
