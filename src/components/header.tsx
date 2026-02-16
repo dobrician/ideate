@@ -1,72 +1,156 @@
 "use client";
 
+import { useState, useEffect, useRef } from "react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { User, LogOut, Shield } from "lucide-react";
+import { cn } from "@/lib/utils";
 import { DarkModeToggle } from "@/components/dark-mode-toggle";
 import { SearchBar } from "@/components/search-bar";
 import { LocaleSwitcher } from "@/components/locale-switcher";
 import { Button } from "@/components/ui/button";
-import Link from "next/link";
-import { User } from "lucide-react";
 import { useLocale } from "@/lib/use-locale";
 
-function MenuIcon({ className }: { className?: string }) {
-  return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      className={className}
-    >
-      <line x1="4" x2="20" y1="12" y2="12" />
-      <line x1="4" x2="20" y1="6" y2="6" />
-      <line x1="4" x2="20" y1="18" y2="18" />
-    </svg>
-  );
-}
+const NAV_ITEMS = [
+  { href: "/dashboard", labelKey: "nav.dashboard" },
+  { href: "/projects", labelKey: "nav.projects" },
+];
 
-interface HeaderProps {
-  onToggleSidebar?: () => void;
-}
-
-export function Header({ onToggleSidebar }: HeaderProps) {
+export function Header() {
+  const pathname = usePathname();
   const { t } = useLocale();
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    fetch("/api/me")
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data) => {
+        if (data?.role === "admin") setIsAdmin(true);
+      })
+      .catch(() => {});
+  }, []);
+
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        setMenuOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const allNavItems = [
+    ...NAV_ITEMS,
+    ...(isAdmin ? [{ href: "/admin", labelKey: "nav.admin" }] : []),
+  ];
 
   return (
-    <header role="banner" className="sticky top-0 z-50 flex h-14 items-center gap-4 border-b bg-background px-4 lg:px-6">
-      <Button
-        variant="ghost"
-        size="icon"
-        className="lg:hidden"
-        onClick={onToggleSidebar}
-        title={t("nav.toggleSidebar")}
-      >
-        <MenuIcon className="h-5 w-5" />
-        <span className="sr-only">{t("nav.toggleSidebar")}</span>
-      </Button>
-
-      <div className="flex items-center gap-2">
+    <header role="banner" className="sticky top-0 z-50 border-b bg-background">
+      <div className="mx-auto flex h-14 max-w-7xl items-center gap-4 px-4 lg:px-6">
         <Link href="/" className="text-lg font-semibold hover:opacity-80">
           Ideate
         </Link>
+
+        <nav className="hidden items-center gap-1 md:flex" aria-label="Main navigation">
+          {allNavItems.map((item) => {
+            const isActive = pathname.startsWith(item.href);
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                aria-current={isActive ? "page" : undefined}
+                className={cn(
+                  "rounded-md px-3 py-1.5 text-sm font-medium transition-colors duration-150",
+                  isActive
+                    ? "bg-accent text-accent-foreground"
+                    : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+                )}
+              >
+                {t(item.labelKey)}
+              </Link>
+            );
+          })}
+        </nav>
+
+        <div className="hidden flex-1 justify-center md:flex">
+          <div className="w-full max-w-sm">
+            <SearchBar />
+          </div>
+        </div>
+
+        <div className="ml-auto flex items-center gap-2 md:ml-0">
+          <LocaleSwitcher />
+          <DarkModeToggle />
+          <div ref={menuRef} className="relative">
+            <Button
+              variant="ghost"
+              size="icon"
+              title={t("nav.profile")}
+              onClick={() => setMenuOpen((prev) => !prev)}
+            >
+              <User className="h-4 w-4" />
+              <span className="sr-only">{t("nav.profile")}</span>
+            </Button>
+            {menuOpen && (
+              <div className="absolute right-0 top-full mt-1 w-48 rounded-md border bg-popover py-1 shadow-lg">
+                <Link
+                  href="/profile"
+                  onClick={() => setMenuOpen(false)}
+                  className="flex items-center gap-2 px-3 py-2 text-sm hover:bg-accent"
+                >
+                  <User className="h-4 w-4" />
+                  {t("nav.profile")}
+                </Link>
+                {isAdmin && (
+                  <Link
+                    href="/admin"
+                    onClick={() => setMenuOpen(false)}
+                    className="flex items-center gap-2 px-3 py-2 text-sm hover:bg-accent md:hidden"
+                  >
+                    <Shield className="h-4 w-4" />
+                    {t("nav.admin")}
+                  </Link>
+                )}
+                <form action="/auth/logout" method="POST">
+                  <button
+                    type="submit"
+                    className="flex w-full items-center gap-2 px-3 py-2 text-sm hover:bg-accent"
+                  >
+                    <LogOut className="h-4 w-4" />
+                    {t("nav.signOut")}
+                  </button>
+                </form>
+              </div>
+            )}
+          </div>
+        </div>
       </div>
 
-      <div className="hidden md:block flex-1 max-w-sm mx-4">
-        <SearchBar />
-      </div>
-
-      <div className="ml-auto flex items-center gap-2">
-        <LocaleSwitcher />
-        <Button asChild variant="ghost" size="icon" title={t("nav.profile")}>
-          <Link href="/profile">
-            <User className="h-4 w-4" />
-            <span className="sr-only">{t("nav.profile")}</span>
-          </Link>
-        </Button>
-        <DarkModeToggle />
-      </div>
+      <nav className="border-t md:hidden" aria-label="Mobile navigation">
+        <div className="mx-auto flex max-w-7xl items-center gap-1 px-4 py-1">
+          {allNavItems.map((item) => {
+            const isActive = pathname.startsWith(item.href);
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                aria-current={isActive ? "page" : undefined}
+                className={cn(
+                  "rounded-md px-3 py-1.5 text-sm font-medium transition-colors duration-150",
+                  isActive
+                    ? "bg-accent text-accent-foreground"
+                    : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+                )}
+              >
+                {t(item.labelKey)}
+              </Link>
+            );
+          })}
+        </div>
+      </nav>
     </header>
   );
 }
