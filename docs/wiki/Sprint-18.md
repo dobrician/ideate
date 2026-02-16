@@ -5,7 +5,7 @@
 
 **Vote Bar Polish:**
 - [x] Fix background padding — extend to full card width, edge-to-edge (#37)
-- [ ] Remove solid vote bars and percentage labels — keep only title background + vote count icons (#38)
+- [x] Remove solid vote bars and percentage labels — keep only title background + vote count icons (#38)
 
 **Chat/Comments Redesign (#39):**
 - [ ] Add proper padding throughout comment drawer and project comments section (#39)

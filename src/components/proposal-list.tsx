@@ -18,7 +18,6 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { VoteButtons } from "@/components/vote-buttons";
-import { VoteBar } from "@/components/vote-bar";
 import { DiscussionSheet } from "@/components/discussion-sheet";
 import { deleteProposal } from "@/app/projects/[id]/proposals/actions";
 import { useVoteStream } from "@/lib/use-vote-stream";
@@ -221,8 +220,6 @@ function ProposalItem({
       </AccordionTrigger>
       <AccordionContent>
         <div className="space-y-4 px-4 pb-2">
-          <VoteBar upvotes={upvotes} downvotes={downvotes} />
-
           {displayText && (
             <div className="whitespace-pre-wrap text-sm text-muted-foreground">
               {displayText}
