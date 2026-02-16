@@ -10,6 +10,7 @@ import { addComment } from "@/app/projects/[id]/proposals/comment-actions";
 import { Send } from "lucide-react";
 import { useLocale } from "@/lib/use-locale";
 import { getCsrfTokenClient } from "@/lib/csrf-client";
+import { MarkdownRenderer } from "@/components/markdown-renderer";
 
 export interface Comment {
   id: string;
@@ -74,13 +75,13 @@ function ChatBubble({
           {timeAgo && <span className="text-xs text-muted-foreground">{timeAgo}</span>}
         </div>
         <div
-          className={`rounded-2xl px-3 py-2 text-sm whitespace-pre-wrap ${
+          className={`rounded-2xl px-3 py-2 text-sm ${
             isOwn
               ? "bg-primary text-primary-foreground"
               : "bg-muted text-foreground"
           }`}
         >
-          {comment.content}
+          <MarkdownRenderer content={comment.content} simple />
         </div>
       </div>
     </div>

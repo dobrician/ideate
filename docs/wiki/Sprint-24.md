@@ -9,7 +9,7 @@ Based on unified analysis from Claude + Codex (see docs/sprint24-unified-plan.md
 - [x] Goal 1: Markdown rendering for project descriptions
 - [x] Goal 2: Markdown rendering for proposal content
 - [x] Goal 3: Add simple mode to MarkdownRenderer
-- [ ] Goal 4: Markdown rendering for comments (simple mode)
+- [x] Goal 4: Markdown rendering for comments (simple mode)
 
 **Layout & forms:**
 - [ ] Goal 5: Convert edit project to a dialog
