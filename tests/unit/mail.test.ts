@@ -202,4 +202,63 @@ describe("Mail", () => {
       }
     });
   });
+
+  describe("getSmtpTransporter", () => {
+    it("should return null when SMTP is not configured", async () => {
+      const origHost = process.env.SMTP_HOST;
+      const origUser = process.env.SMTP_USER;
+      const origPass = process.env.SMTP_PASS;
+      process.env.SMTP_HOST = "";
+      process.env.SMTP_USER = "";
+      process.env.SMTP_PASS = "";
+      vi.resetModules();
+
+      vi.doMock("nodemailer", () => ({
+        default: {
+          createTransport: vi.fn(() => ({
+            sendMail: mockSendMail,
+            verify: mockVerify,
+          })),
+        },
+      }));
+
+      try {
+        const { getSmtpTransporter } = await import("@/lib/mail");
+        expect(getSmtpTransporter()).toBeNull();
+      } finally {
+        process.env.SMTP_HOST = origHost;
+        process.env.SMTP_USER = origUser;
+        process.env.SMTP_PASS = origPass;
+      }
+    });
+
+    it("should return transporter when SMTP is configured", async () => {
+      const { getSmtpTransporter } = await import("@/lib/mail");
+      const transporter = getSmtpTransporter();
+      expect(transporter).not.toBeNull();
+    });
+
+    it("should use port 465 as secure", async () => {
+      const origPort = process.env.SMTP_PORT;
+      process.env.SMTP_PORT = "465";
+      vi.resetModules();
+
+      vi.doMock("nodemailer", () => ({
+        default: {
+          createTransport: vi.fn(() => ({
+            sendMail: mockSendMail,
+            verify: mockVerify,
+          })),
+        },
+      }));
+
+      try {
+        const { getSmtpTransporter } = await import("@/lib/mail");
+        const transporter = getSmtpTransporter();
+        expect(transporter).not.toBeNull();
+      } finally {
+        process.env.SMTP_PORT = origPort;
+      }
+    });
+  });
 });

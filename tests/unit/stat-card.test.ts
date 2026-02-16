@@ -38,4 +38,36 @@ describe("StatCard utilities", () => {
       expect(formatRelativeTime(date)).toBe("1d ago");
     });
   });
+
+  describe("formatRelativeTime with t() function", () => {
+    const t = (key: string, vars?: Record<string, string | number>) => {
+      const map: Record<string, string> = {
+        "time.justNow": "just now",
+        "time.minutesAgo": `${vars?.count}m ago`,
+        "time.hoursAgo": `${vars?.count}h ago`,
+        "time.daysAgo": `${vars?.count}d ago`,
+      };
+      return map[key] ?? key;
+    };
+
+    it("should use t() for just now", () => {
+      const date = new Date(Date.now() - 30000);
+      expect(formatRelativeTime(date, t)).toBe("just now");
+    });
+
+    it("should use t() for minutes", () => {
+      const date = new Date(Date.now() - 5 * 60000);
+      expect(formatRelativeTime(date, t)).toBe("5m ago");
+    });
+
+    it("should use t() for hours", () => {
+      const date = new Date(Date.now() - 3 * 3600000);
+      expect(formatRelativeTime(date, t)).toBe("3h ago");
+    });
+
+    it("should use t() for days", () => {
+      const date = new Date(Date.now() - 2 * 86400000);
+      expect(formatRelativeTime(date, t)).toBe("2d ago");
+    });
+  });
 });

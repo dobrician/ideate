@@ -14,7 +14,7 @@
 - [x] Messenger layout: chat box at bottom, messages scroll up, user avatars, chat bubbles, timestamps (#39)
 
 **From Analysis:**
-- [ ] Increase test coverage: stat-card branches, db/index migration paths, mail.ts SMTP fallbacks
+- [x] Increase test coverage: stat-card branches, db/index migration paths, mail.ts SMTP fallbacks
 - [ ] Remove unused CSS classes and dead translation keys from Sprint 14-17 refactors
 
 ## Constraints
