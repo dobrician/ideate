@@ -535,9 +535,23 @@
 - [x] Dashboard layout improvements
 - [x] Consistent button styles and spacing across all pages
 
-### Constraints
-- Do NOT break existing functionality
-- All files < 300 lines
-- Lint + type check + build must pass
-- Commit + push after EACH completed goal (not bulk at end)
-- Update this Sprint Log after each commit
+### Outcomes
+- 16 commits (10 feature/fix + 6 docs), all incremental with wiki auto-sync
+- **541 unit tests, all passing** — no regressions
+- **32/32 smoke tests pass** (17.3s)
+- CI green on all commits
+- Complete RO translations: 150+ i18n keys covering all UI strings
+- Locale switcher: full page content translates (not just sidebar)
+- Date/number localization: relative times ("acum 2h"), formatted numbers per locale
+- Proposal form: removed nested card, fixed alignment and spacing
+- Visual hierarchy: semantic status badges (colored), consistent empty states with icons, card polish
+- Dark mode: added text-foreground to selects, dark variants for colored text, verified all pages
+- Mobile responsive (320px+): responsive headings, flex-wrap on audit log, stacked proposal triggers
+- Auth pages: added branding, centered headers, card shadows
+- Dashboard: "view all" links, activity icons, formatted numbers
+- Consistent button styles and spacing across all pages
+
+### Notes
+- First sprint with incremental commits working correctly — wiki updated in real-time via GitHub Actions
+- Claude Code completed all 10 goals within 120 turns (2 sessions: goals 1-4, then 5-10)
+- No smoke test regressions despite significant UI changes
