@@ -376,12 +376,18 @@ export const ro: Record<string, string> = {
   "suggestions.close": "Închide",
   "suggestions.addSelected": "Adaugă selectate",
   "suggestions.submitting": "Se adaugă...",
+  "suggestions.rateLimited": "AI limitat — încearcă din nou în câteva minute",
+  "suggestions.noKeys": "AI nu este configurat pe acest server",
+  "suggestions.unavailable": "AI temporar indisponibil — încearcă din nou mai târziu",
 
   // Project Summary
   "projectSummary.regenerate": "Regenerează rezumatul",
   "projectSummary.regenerating": "Se generează...",
   "projectSummary.success": "Rezumat actualizat",
   "projectSummary.error": "Nu s-a putut genera rezumatul",
+  "projectSummary.rateLimited": "AI limitat — încearcă din nou în câteva minute",
+  "projectSummary.noKeys": "AI nu este configurat pe acest server",
+  "projectSummary.unavailable": "AI temporar indisponibil — încearcă din nou mai târziu",
 
   // Similarity Check
   "similarity.checking": "Se verifică propunerile similare...",

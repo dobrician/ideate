@@ -26,6 +26,12 @@ export function RegenerateSummaryButton({ projectId }: Props) {
       if (res.ok && data.summary) {
         toast.success(t("projectSummary.success"));
         router.refresh();
+      } else if (data.code === "RATE_LIMITED") {
+        toast.error(t("projectSummary.rateLimited"));
+      } else if (data.code === "NO_KEYS") {
+        toast.error(t("projectSummary.noKeys"));
+      } else if (data.code === "AI_UNAVAILABLE") {
+        toast.error(t("projectSummary.unavailable"));
       } else {
         toast.error(data.error || t("projectSummary.error"));
       }

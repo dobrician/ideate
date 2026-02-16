@@ -133,3 +133,47 @@ describe("LLM structured logging", () => {
     expect(result.text).toBeNull();
   });
 });
+
+describe("isAiConfigured", () => {
+  it("returns true when GEMINI_API_KEY is set", async () => {
+    const { isAiConfigured } = await loadLLM({ GEMINI_API_KEY: "key", OPENAI_API_KEY: undefined });
+    expect(isAiConfigured()).toBe(true);
+  });
+
+  it("returns true when OPENAI_API_KEY is set", async () => {
+    const { isAiConfigured } = await loadLLM({ GEMINI_API_KEY: undefined, OPENAI_API_KEY: "key" });
+    expect(isAiConfigured()).toBe(true);
+  });
+
+  it("returns false when no keys are set", async () => {
+    const { isAiConfigured } = await loadLLM({ GEMINI_API_KEY: undefined, OPENAI_API_KEY: undefined });
+    expect(isAiConfigured()).toBe(false);
+  });
+});
+
+describe("isAiRateLimited", () => {
+  it("returns false when under limits", async () => {
+    const { isAiRateLimited } = await loadLLM({
+      GEMINI_API_KEY: "key",
+      AI_MAX_REQUESTS_PER_HOUR: "60",
+      AI_MAX_TOKENS_PER_HOUR: "100000",
+    });
+    expect(isAiRateLimited()).toBe(false);
+  });
+
+  it("returns true after exhausting request limit", async () => {
+    const fetchMock = vi.fn<(input: string | URL | Request, init?: RequestInit) => Promise<Response>>();
+    fetchMock.mockResolvedValue(geminiResponse("ok", 10));
+    globalThis.fetch = fetchMock;
+
+    const { completeWithFallback, isAiRateLimited } = await loadLLM({
+      GEMINI_API_KEY: "key",
+      OPENAI_API_KEY: undefined,
+      AI_MAX_REQUESTS_PER_HOUR: "1",
+      AI_MAX_TOKENS_PER_HOUR: "100000",
+    });
+
+    await completeWithFallback("p1");
+    expect(isAiRateLimited()).toBe(true);
+  });
+});

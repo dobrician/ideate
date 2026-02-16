@@ -357,12 +357,18 @@ export const en: Record<string, string> = {
   "suggestions.close": "Close",
   "suggestions.addSelected": "Add selected",
   "suggestions.submitting": "Adding...",
+  "suggestions.rateLimited": "AI rate limited — try again in a few minutes",
+  "suggestions.noKeys": "AI is not configured on this server",
+  "suggestions.unavailable": "AI is temporarily unavailable — please try again later",
 
   // Project Summary
   "projectSummary.regenerate": "Regenerate Summary",
   "projectSummary.regenerating": "Generating...",
   "projectSummary.success": "Summary updated",
   "projectSummary.error": "Could not generate summary",
+  "projectSummary.rateLimited": "AI rate limited — try again in a few minutes",
+  "projectSummary.noKeys": "AI is not configured on this server",
+  "projectSummary.unavailable": "AI is temporarily unavailable — please try again later",
 
   // Similarity Check
   "similarity.checking": "Checking for similar proposals...",

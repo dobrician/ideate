@@ -85,6 +85,16 @@ function isRateLimited(): boolean {
   );
 }
 
+/** Check if any AI API key is configured. */
+export function isAiConfigured(): boolean {
+  return !!(GEMINI_KEY || OPENAI_KEY);
+}
+
+/** Check if AI requests are currently rate-limited. */
+export function isAiRateLimited(): boolean {
+  return isRateLimited();
+}
+
 function trackUsage(provider: string, tokensUsed: number): void {
   resetWindowIfStale();
   usage.requests += 1;

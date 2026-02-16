@@ -1,18 +1,5 @@
-/**
- * Tests for AI suggestion route (POST /api/proposals/suggest).
- *
- * Strategy:
- *  - Mock `@/lib/auth` (requireAuth) to control auth state
- *  - Mock `@/lib/llm` (completeWithFallback) to control AI responses
- *  - Test the actual route handler: auth checks, input validation,
- *    prompt construction, response parsing, error handling
- */
-
+/** Tests for AI suggestion route (POST /api/proposals/suggest). */
 import { describe, it, expect, vi, beforeEach } from "vitest";
-
-// ---------------------------------------------------------------------------
-// Mocks
-// ---------------------------------------------------------------------------
 
 vi.mock("@/lib/auth", () => ({
   requireAuth: vi.fn(),
@@ -20,14 +7,18 @@ vi.mock("@/lib/auth", () => ({
 
 vi.mock("@/lib/llm", () => ({
   completeWithFallback: vi.fn(),
+  isAiConfigured: vi.fn().mockReturnValue(true),
+  isAiRateLimited: vi.fn().mockReturnValue(false),
 }));
 
 import { POST } from "@/app/api/proposals/suggest/route";
 import { requireAuth } from "@/lib/auth";
-import { completeWithFallback } from "@/lib/llm";
+import { completeWithFallback, isAiConfigured, isAiRateLimited } from "@/lib/llm";
 
 const mockedAuth = vi.mocked(requireAuth);
 const mockedLLM = vi.mocked(completeWithFallback);
+const mockedConfigured = vi.mocked(isAiConfigured);
+const mockedRateLimited = vi.mocked(isAiRateLimited);
 
 function makeRequest(body: unknown): Request {
   return new Request("http://localhost/api/proposals/suggest", {
@@ -42,10 +33,6 @@ const validBody = {
   proposals: [{ title: "Existing idea", description: "Already proposed" }],
   locale: "ro",
 };
-
-// ---------------------------------------------------------------------------
-// Auth
-// ---------------------------------------------------------------------------
 
 describe("POST /api/proposals/suggest", () => {
   beforeEach(() => {
@@ -70,10 +57,6 @@ describe("POST /api/proposals/suggest", () => {
     });
   });
 
-  // ---------------------------------------------------------------------------
-  // Input validation
-  // ---------------------------------------------------------------------------
-
   describe("input validation", () => {
     it("returns 400 when project title is missing", async () => {
       const res = await POST(
@@ -89,10 +72,6 @@ describe("POST /api/proposals/suggest", () => {
       expect(res.status).toBe(400);
     });
   });
-
-  // ---------------------------------------------------------------------------
-  // LLM integration
-  // ---------------------------------------------------------------------------
 
   describe("LLM call", () => {
     it("calls completeWithFallback with correct options", async () => {
@@ -132,10 +111,6 @@ describe("POST /api/proposals/suggest", () => {
       expect(prompt).toContain("(none)");
     });
   });
-
-  // ---------------------------------------------------------------------------
-  // Response parsing — valid LLM outputs
-  // ---------------------------------------------------------------------------
 
   describe("successful suggestions", () => {
     it("returns parsed suggestions from clean JSON", async () => {
@@ -220,37 +195,44 @@ describe("POST /api/proposals/suggest", () => {
     });
   });
 
-  // ---------------------------------------------------------------------------
-  // Error handling — LLM failures
-  // ---------------------------------------------------------------------------
-
-  describe("LLM failure handling", () => {
-    it("returns empty proposals when LLM returns null text", async () => {
-      mockedLLM.mockResolvedValue({ text: null, modelUsed: null });
-
+  describe("graceful degradation", () => {
+    it("returns 503 with NO_KEYS code when AI is not configured", async () => {
+      mockedConfigured.mockReturnValue(false);
       const res = await POST(makeRequest(validBody));
-      expect(res.status).toBe(200);
+      expect(res.status).toBe(503);
       const data = await res.json();
-      expect(data.proposals).toEqual([]);
+      expect(data.code).toBe("NO_KEYS");
+      mockedConfigured.mockReturnValue(true);
     });
 
-    it("returns empty proposals when LLM returns non-JSON", async () => {
-      mockedLLM.mockResolvedValue({
-        text: "I cannot generate suggestions right now.",
-        modelUsed: "gemini",
-      });
+    it("returns 429 with RATE_LIMITED code when AI is rate limited", async () => {
+      mockedRateLimited.mockReturnValue(true);
+      const res = await POST(makeRequest(validBody));
+      expect(res.status).toBe(429);
+      const data = await res.json();
+      expect(data.code).toBe("RATE_LIMITED");
+      mockedRateLimited.mockReturnValue(false);
+    });
 
+    it("returns 503 with AI_UNAVAILABLE when LLM returns null text", async () => {
+      mockedLLM.mockResolvedValue({ text: null, modelUsed: null });
+      const res = await POST(makeRequest(validBody));
+      expect(res.status).toBe(503);
+      const data = await res.json();
+      expect(data.code).toBe("AI_UNAVAILABLE");
+    });
+  });
+
+  describe("LLM failure handling", () => {
+    it("returns empty proposals when LLM returns non-JSON", async () => {
+      mockedLLM.mockResolvedValue({ text: "I cannot generate suggestions right now.", modelUsed: "gemini" });
       const res = await POST(makeRequest(validBody));
       const data = await res.json();
       expect(data.proposals).toEqual([]);
     });
 
     it("returns empty proposals when LLM returns malformed JSON", async () => {
-      mockedLLM.mockResolvedValue({
-        text: "[{invalid json",
-        modelUsed: "gemini",
-      });
-
+      mockedLLM.mockResolvedValue({ text: "[{invalid json", modelUsed: "gemini" });
       const res = await POST(makeRequest(validBody));
       const data = await res.json();
       expect(data.proposals).toEqual([]);
@@ -258,26 +240,18 @@ describe("POST /api/proposals/suggest", () => {
 
     it("returns 500 when LLM throws an exception", async () => {
       mockedLLM.mockRejectedValue(new Error("Network timeout"));
-
       const res = await POST(makeRequest(validBody));
       expect(res.status).toBe(500);
       const data = await res.json();
       expect(data.error).toBe("Failed to generate suggestions");
     });
 
-    it("returns empty proposals when LLM returns empty string", async () => {
+    it("returns 503 when LLM returns empty string", async () => {
       mockedLLM.mockResolvedValue({ text: "", modelUsed: "gemini" });
-
       const res = await POST(makeRequest(validBody));
-      const data = await res.json();
-      // empty string is falsy, so route returns { proposals: [] }
-      expect(data.proposals).toEqual([]);
+      expect(res.status).toBe(503);
     });
   });
-
-  // ---------------------------------------------------------------------------
-  // Edge cases
-  // ---------------------------------------------------------------------------
 
   describe("edge cases", () => {
     it("handles LLM output with extra text around JSON", async () => {
@@ -285,7 +259,6 @@ describe("POST /api/proposals/suggest", () => {
         text: 'Here are my suggestions:\n[{"title":"A","details":"B","summary":"C"}]\nHope this helps!',
         modelUsed: "openai",
       });
-
       const res = await POST(makeRequest(validBody));
       const data = await res.json();
       expect(data.proposals).toHaveLength(1);
@@ -297,13 +270,10 @@ describe("POST /api/proposals/suggest", () => {
         text: '[{"title":"A","details":"B","summary":"C"}]',
         modelUsed: "gemini",
       });
-
-      const res = await POST(
-        makeRequest({
-          project: { title: "Test", description: "D".repeat(10000) },
-          proposals: [],
-        })
-      );
+      const res = await POST(makeRequest({
+        project: { title: "Test", description: "D".repeat(10000) },
+        proposals: [],
+      }));
       expect(res.status).toBe(200);
       const [prompt] = mockedLLM.mock.calls[0];
       expect(prompt).toContain("D".repeat(100));

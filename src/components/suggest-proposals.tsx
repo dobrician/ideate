@@ -77,7 +77,13 @@ export function SuggestProposalsButton({
 
       const data = await res.json();
       if (!res.ok || !data.proposals?.length) {
-        setError(data.error || t("suggestions.none"));
+        const codeMap: Record<string, string> = {
+          RATE_LIMITED: "suggestions.rateLimited",
+          NO_KEYS: "suggestions.noKeys",
+          AI_UNAVAILABLE: "suggestions.unavailable",
+        };
+        const key = codeMap[data.code as string];
+        setError(key ? t(key) : (data.error || t("suggestions.none")));
         return;
       }
 

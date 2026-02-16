@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { requireAuth } from "@/lib/auth";
-import { completeWithFallback } from "@/lib/llm";
+import { completeWithFallback, isAiConfigured, isAiRateLimited } from "@/lib/llm";
 
 const LOCALE = process.env.LOCALE || "en";
 
@@ -100,6 +100,20 @@ export async function POST(request: Request) {
       );
     }
 
+    if (!isAiConfigured()) {
+      return NextResponse.json(
+        { proposals: [], error: "no_api_keys", code: "NO_KEYS" },
+        { status: 503 }
+      );
+    }
+
+    if (isAiRateLimited()) {
+      return NextResponse.json(
+        { proposals: [], error: "Rate limited — try again later", code: "RATE_LIMITED" },
+        { status: 429 }
+      );
+    }
+
     const prompt = buildPrompt(body);
     const { text } = await completeWithFallback(prompt, {
       maxTokens: 2048,
@@ -107,7 +121,10 @@ export async function POST(request: Request) {
     });
 
     if (!text) {
-      return NextResponse.json({ proposals: [] });
+      return NextResponse.json(
+        { proposals: [], error: "AI temporarily unavailable", code: "AI_UNAVAILABLE" },
+        { status: 503 }
+      );
     }
 
     const proposals = tryParseSuggestions(text);

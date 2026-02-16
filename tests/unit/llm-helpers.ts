@@ -28,7 +28,11 @@ export async function loadLLM(envOverrides: Record<string, string | undefined> =
   }
   vi.resetModules();
   const mod = await import("@/lib/llm");
-  return { completeWithFallback: mod.completeWithFallback };
+  return {
+    completeWithFallback: mod.completeWithFallback,
+    isAiConfigured: mod.isAiConfigured,
+    isAiRateLimited: mod.isAiRateLimited,
+  };
 }
 
 /** Create a mock Response matching the fetch Response interface. */

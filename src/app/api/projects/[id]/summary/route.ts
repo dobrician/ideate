@@ -6,6 +6,7 @@ import { db } from "@/db";
 import { projects } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { generateProjectSummary } from "@/lib/project-summary";
+import { isAiConfigured, isAiRateLimited } from "@/lib/llm";
 
 /**
  * POST /api/projects/[id]/summary
@@ -37,12 +38,26 @@ export async function POST(
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
+    if (!isAiConfigured()) {
+      return NextResponse.json(
+        { error: "AI not configured", code: "NO_KEYS" },
+        { status: 503 }
+      );
+    }
+
+    if (isAiRateLimited()) {
+      return NextResponse.json(
+        { error: "Rate limited — try again later", code: "RATE_LIMITED" },
+        { status: 429 }
+      );
+    }
+
     const summary = await generateProjectSummary(id, { force: true });
 
     if (!summary) {
       return NextResponse.json(
-        { error: "Could not generate summary" },
-        { status: 500 }
+        { error: "AI temporarily unavailable", code: "AI_UNAVAILABLE" },
+        { status: 503 }
       );
     }
 

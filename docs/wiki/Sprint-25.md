@@ -8,7 +8,7 @@
 
 ## Goals
 
-- [ ] **Goal 1:** Structured LLM logging — request/response/latency/errors
+- [x] **Goal 1:** Structured LLM logging — request/response/latency/errors
 - [ ] **Goal 2:** Graceful degradation — user-facing error states when AI is unavailable
 - [ ] **Goal 3:** AI suggestion reliability — retry logic and response validation
 - [ ] **Goal 4:** Cover dashboard/queries.ts (10% stmt / 0% branch)
