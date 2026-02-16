@@ -17,7 +17,7 @@ export default defineConfig({
     timeout: 10000, // 10 seconds for assertions
   },
   use: {
-    baseURL: process.env.APP_URL || "http://idea.surmont.co/",
+    baseURL: process.env.APP_URL || "https://idea.surmont.co",
     trace: "on-first-retry",
     screenshot: "only-on-failure",
     video: "retain-on-failure",

@@ -55,6 +55,7 @@ function getLatestMagicLinkToken(email: string, maxWaitMs = 15000): string {
 
 test.describe("Smoke Tests - Full Auth Flow", () => {
   test("complete magic link authentication flow", async ({ page, request }) => {
+    test.setTimeout(60000); // 60s for email polling
     // Step 1: Request magic link
     const requestResponse = await request.post(`${APP_URL}/auth/request`, {
       data: { email: TEST_EMAIL },
