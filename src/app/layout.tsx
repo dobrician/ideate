@@ -19,6 +19,13 @@ export const metadata: Metadata = {
     "Enterprise-grade democratic idea prioritization platform for teams. Create projects, submit proposals, vote, and discuss.",
   manifest: "/manifest.json",
   applicationName: "Ideate",
+  icons: {
+    icon: [
+      { url: "/favicon.ico", sizes: "any" },
+      { url: "/icons/icon.svg", type: "image/svg+xml" },
+    ],
+    apple: "/apple-touch-icon.png",
+  },
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
@@ -53,10 +60,7 @@ export default async function RootLayout({
 
   return (
     <html lang={locale} suppressHydrationWarning>
-      <head>
-        <link rel="icon" href="/favicon.ico" sizes="any" />
-        <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
-      </head>
+      <head />
       <body className={`${inter.className} antialiased`}>
         <ThemeProvider>
           <AppShell>{children}</AppShell>
