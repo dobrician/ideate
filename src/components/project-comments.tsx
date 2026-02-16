@@ -23,7 +23,7 @@ export function ProjectComments({ projectId, comments, currentUserId }: ProjectC
           ({comments.length})
         </span>
       </h2>
-      <div className="h-[400px]">
+      <div className="h-[min(400px,50vh)]">
         <CommentThread
           comments={comments}
           hiddenFields={{ projectId }}

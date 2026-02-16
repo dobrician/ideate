@@ -15,7 +15,7 @@ Based on unified analysis from Claude + Codex (see docs/sprint24-unified-plan.md
 - [x] Goal 5: Convert edit project to a dialog
 - [x] Goal 6: Two-column layout with sticky proposal form
 - [x] Goal 7: Fix proposal-comment deadline bypass
-- [ ] Goal 8: Fix mobile comment section height
+- [x] Goal 8: Fix mobile comment section height
 
 **Testing:**
 - [ ] Goal 9: Unit tests for project CRUD actions
