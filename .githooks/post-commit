@@ -1,0 +1,26 @@
+#!/bin/bash
+# Auto-check sprint wiki after each commit
+# If source files changed but sprint doc wasn't updated, warn
+
+# Find current sprint number from docs/wiki/Sprint-Log.md
+SPRINT_FILE=$(ls docs/wiki/Sprint-*.md 2>/dev/null | grep -v "Sprint-Log" | sort -t- -k2 -n | tail -1)
+
+if [ -z "$SPRINT_FILE" ]; then
+  exit 0
+fi
+
+# Check if this commit has source changes (not just docs)
+SRC_CHANGED=$(git diff-tree --no-commit-id --name-only -r HEAD | grep -E "^src/|^tests/" | head -1)
+SPRINT_CHANGED=$(git diff-tree --no-commit-id --name-only -r HEAD | grep "docs/wiki/Sprint-" | head -1)
+
+if [ -n "$SRC_CHANGED" ] && [ -z "$SPRINT_CHANGED" ]; then
+  # Check if there are unchecked items
+  UNCHECKED=$(grep -c "\- \[ \]" "$SPRINT_FILE" 2>/dev/null || echo 0)
+  if [ "$UNCHECKED" -gt 0 ]; then
+    echo ""
+    echo "⚠️  WARNING: Source files changed but $SPRINT_FILE was not updated."
+    echo "   $UNCHECKED unchecked goals remain. Did you forget to check off a completed goal?"
+    echo "   Edit $SPRINT_FILE: change '- [ ]' to '- [x]' for the completed goal."
+    echo ""
+  fi
+fi
