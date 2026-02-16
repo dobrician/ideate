@@ -624,3 +624,25 @@
 - Sidebar and header remaining hardcoded strings translated
 - Logout flow verified: auth pages render without sidebar
 - CHANGELOG.md updated with Sprint 9-12 changes
+
+---
+
+## Sprint 13 — Security Hardening & Scalability Foundations (2026-02-16)
+**Status:** 🏃 IN PROGRESS
+
+### Goals (from deep analysis report)
+- [ ] Fix CSRF timing-safe comparison — use crypto.timingSafeEqual instead of ===
+- [ ] Sanitize HTML in notification email templates (escapeHtml on proposal titles, user names)
+- [ ] Validate vote value is 1 or -1 in castVote action
+- [ ] Remove unsafe-eval from CSP in middleware.ts
+- [ ] Add database indexes on foreign keys and frequent query columns
+- [ ] Extract shared getClientIp utility + deduplicate SMTP transporter
+- [ ] Add pagination to project list and proposal list (limit 20)
+- [ ] Move Gemini API key from URL param to request header
+- [ ] Add tests for status-utils.ts + improve email-deliverability branch coverage
+- [ ] Spike: evaluate PostgreSQL migration path (Drizzle dialect swap)
+
+### Constraints
+- Commit + push after EACH fix
+- Update this Sprint Log after each commit
+- Lint + type check + tests + build must pass before each push
