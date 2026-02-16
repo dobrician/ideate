@@ -1,7 +1,7 @@
 import { test, expect } from "@playwright/test";
 import { execSync } from "child_process";
 
-const APP_URL = process.env.APP_URL || "http://idea.surmont.co/";
+const APP_URL = process.env.APP_URL || "https://idea.surmont.co";
 const TEST_EMAIL = process.env.TEST_EMAIL || "smoketest@surcod.ro";
 
 /**
@@ -107,9 +107,15 @@ test.describe("Smoke Tests - Full Auth Flow", () => {
     const meData = await meResponse.json();
     expect(meData.email).toBe(TEST_EMAIL);
 
-    // Step 7: Logout
-    await page.goto(`${APP_URL}/auth/logout`);
-    await page.waitForURL(/\/(auth\/login|$)/, { timeout: 10000 });
+    // Step 7: Logout (POST request)
+    const logoutResponse = await request.post(`${APP_URL}/auth/logout`, {
+      headers: {
+        Cookie: `session=${sessionCookie!.value}`,
+      },
+    });
+    expect(logoutResponse.status()).toBe(200);
+    const logoutData = await logoutResponse.json();
+    expect(logoutData.success).toBe(true);
   });
 
   test("expired/invalid token shows error gracefully", async ({ page }) => {

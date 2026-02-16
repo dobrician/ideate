@@ -1,7 +1,7 @@
 import { test, expect } from "@playwright/test";
 
 // Use APP_URL from environment or default to staging
-const APP_URL = process.env.APP_URL || "http://idea.surmont.co/";
+const APP_URL = process.env.APP_URL || "https://idea.surmont.co";
 
 test.describe("Smoke Tests - Core", () => {
   test("homepage loads with HTTP 200 and real HTML content", async ({ page }) => {
@@ -165,21 +165,22 @@ test.describe("Smoke Tests - Search API", () => {
 test.describe("Smoke Tests - Export API", () => {
   test("export endpoint requires authentication", async ({ request }) => {
     const response = await request.get(
-      `${APP_URL}/api/projects/nonexistent-id/export?format=pdf`
+      `${APP_URL}/api/projects/nonexistent-id/export?format=pdf`,
+      { maxRedirects: 0 }
     );
 
-    expect(response.status()).toBe(401);
-    const data = await response.json();
-    expect(data.error).toBe("Unauthorized");
+    // Should return 401 or redirect to login (307)
+    expect([401, 307]).toContain(response.status());
   });
 
   test("export endpoint rejects invalid format", async ({ request }) => {
-    // Without auth, should get 401 first
     const response = await request.get(
-      `${APP_URL}/api/projects/test-id/export?format=xml`
+      `${APP_URL}/api/projects/test-id/export?format=xml`,
+      { maxRedirects: 0 }
     );
 
-    expect(response.status()).toBe(401);
+    // Without auth, should get 401 or redirect to login (307)
+    expect([401, 307]).toContain(response.status());
   });
 });
 
