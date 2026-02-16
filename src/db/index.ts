@@ -3,6 +3,7 @@ import { drizzle } from "drizzle-orm/better-sqlite3";
 import * as schema from "./schema";
 import { resolve } from "path";
 import { readFileSync, existsSync } from "fs";
+import { logger } from "@/lib/logger";
 
 const DB_PATH = process.env.DATABASE_URL ?? resolve("data/ideate.db");
 
@@ -54,8 +55,9 @@ function applyMigrations(): void {
 
 try {
   applyMigrations();
-} catch {
-  // Migration errors logged but don't prevent startup
+} catch (error) {
+  logger.fatal({ err: error }, "Migration failed — aborting startup");
+  process.exit(1);
 }
 
 export const db = drizzle(sqlite, { schema });

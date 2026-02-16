@@ -5,7 +5,7 @@
 
 **Security:**
 - [x] Wire CSRF validation into all Server Actions (projects, proposals, admin, profile)
-- [ ] Fail fast on migration errors at startup — process.exit(1) instead of swallowing (#19-spike)
+- [x] Fail fast on migration errors at startup — process.exit(1) instead of swallowing (#19-spike)
 
 **UX Bug Fixes:**
 - [x] Fix registration form inline validation errors (#30)
@@ -19,7 +19,7 @@
 
 **Infrastructure:**
 - [x] Add structured error logging with pino (JSON, timestamps, request IDs)
-- [ ] Project-level comments/discussions spike — schema + UI design doc (#19)
+- [x] Project-level comments/discussions spike — schema + UI design doc (#19)
 
 **Hot Fix:**
 - [ ] Proposal bar chart backgrounds must scale proportionally to votes, not full width (#31)
