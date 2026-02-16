@@ -150,7 +150,7 @@
 - [x] 1. Fix logout — clear session properly, redirect to clean page with no sidebar
 - [x] 2. Auth pages minimal layout — no sidebar, no logged-in nav
 - [x] 3. Locale persistence — persist in cookie, survive navigation
-- [ ] 4. Missing Romanian translations — all reported strings
+- [x] 4. Missing Romanian translations — all reported strings
 - [ ] 5. Admin 403 — proper Access Denied page
 - [ ] 6. PWA install popup — show once per session
 - [ ] 7. Voting UX — highlight selected vote, tooltip to remove
