@@ -8,6 +8,15 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { VoteButtons } from "@/components/vote-buttons";
 import { VoteBar } from "@/components/vote-bar";
 import { DiscussionSheet } from "@/components/discussion-sheet";
@@ -111,18 +120,23 @@ function ProposalItem({
 }) {
   const { t } = useLocale();
   const [showFull, setShowFull] = useState(false);
+  const [deleteOpen, setDeleteOpen] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
   const canDelete = proposal.userId === currentUserId || isAdmin;
 
   const upvotes = liveUpvotes ?? proposal.upvotes;
   const downvotes = liveDownvotes ?? proposal.downvotes;
 
   async function handleDelete() {
-    if (!confirm(t("proposals.deleteConfirm"))) return;
+    setIsDeleting(true);
     const result = await deleteProposal(proposal.id, projectId);
     if (result?.error) {
       toast.error(result.error);
+      setIsDeleting(false);
+      setDeleteOpen(false);
     } else {
       toast.success(t("proposals.deleted"));
+      setDeleteOpen(false);
     }
   }
 
@@ -198,15 +212,33 @@ function ProposalItem({
                 : ""}
             </span>
             {canDelete && (
-              <Button
-                variant="ghost"
-                size="sm"
-                className="h-6 px-2 text-xs text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300"
-                onClick={handleDelete}
-              >
-                <Trash2 className="mr-1 h-3 w-3" />
-                {t("proposals.delete")}
-              </Button>
+              <Dialog open={deleteOpen} onOpenChange={setDeleteOpen}>
+                <DialogTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-6 px-2 text-xs text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300"
+                    title={t("proposals.delete")}
+                  >
+                    <Trash2 className="mr-1 h-3 w-3" />
+                    {t("proposals.delete")}
+                  </Button>
+                </DialogTrigger>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>{t("proposals.delete")}</DialogTitle>
+                    <DialogDescription>{t("proposals.deleteConfirm")}</DialogDescription>
+                  </DialogHeader>
+                  <DialogFooter className="gap-2 sm:gap-0">
+                    <Button variant="outline" onClick={() => setDeleteOpen(false)} disabled={isDeleting}>
+                      {t("common.cancel")}
+                    </Button>
+                    <Button variant="destructive" onClick={handleDelete} disabled={isDeleting}>
+                      {isDeleting ? t("deleteProject.deleting") : t("common.delete")}
+                    </Button>
+                  </DialogFooter>
+                </DialogContent>
+              </Dialog>
             )}
           </div>
         </div>
