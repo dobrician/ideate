@@ -20,7 +20,7 @@ Based on unified analysis from Claude + Codex (see docs/sprint23-unified-plan.md
 - [x] Goal 8: Improve mobile activity and search access
 
 **Testing:**
-- [ ] Goal 9: Dashboard E2E tests
+- [x] Goal 9: Dashboard E2E tests
 - [ ] Goal 10: Unit tests for dashboard queries and components
 
 **Polish (if time permits):**
