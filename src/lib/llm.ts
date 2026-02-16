@@ -3,7 +3,12 @@
  * Uses direct REST API calls (no SDK dependency).
  * Per-provider throttling for 15 min on 429 responses.
  * Token/request rate limiting and cost tracking (fixes #4).
+ * Structured pino logging for every LLM call (#46).
  */
+
+import { logger } from "@/lib/logger";
+
+const llmLog = logger.child({ module: "llm" });
 
 const GEMINI_MODEL = process.env.GEMINI_MODEL || "gemini-2.5-flash-lite";
 const GEMINI_ENDPOINT = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent`;
@@ -107,8 +112,12 @@ async function callGemini(
   opts: LLMOptions
 ): Promise<LLMResult> {
   if (!GEMINI_KEY) return { text: null };
-  if (isThrottled("gemini")) return { text: null, status: 429 };
+  if (isThrottled("gemini")) {
+    llmLog.warn({ provider: "gemini", reason: "throttled" }, "LLM skipped (throttled)");
+    return { text: null, status: 429 };
+  }
 
+  const start = Date.now();
   try {
     const response = await fetch(GEMINI_ENDPOINT, {
       method: "POST",
@@ -126,8 +135,11 @@ async function callGemini(
       }),
     });
 
+    const latencyMs = Date.now() - start;
+
     if (!response.ok) {
       if (response.status === 429) throttle("gemini");
+      llmLog.error({ provider: "gemini", model: GEMINI_MODEL, status: response.status, latencyMs }, "LLM request failed");
       return { text: null, status: response.status };
     }
 
@@ -141,8 +153,15 @@ async function callGemini(
       data?.usageMetadata?.totalTokenCount ??
       data?.usageMetadata?.candidatesTokenCount ??
       (text ? Math.ceil(text.length / 4) : 0);
+    llmLog.info({
+      provider: "gemini", model: GEMINI_MODEL, latencyMs,
+      promptLen: prompt.length, responseLen: text?.length ?? 0,
+      tokensUsed, costUsd: (tokensUsed / 1000) * (COST_PER_1K.gemini?.output ?? 0),
+    }, "LLM request completed");
     return { text, tokensUsed };
   } catch (error) {
+    const latencyMs = Date.now() - start;
+    llmLog.error({ provider: "gemini", model: GEMINI_MODEL, latencyMs, err: error }, "LLM request error");
     return { text: null, error };
   }
 }
@@ -155,8 +174,12 @@ async function callOpenAI(
   opts: LLMOptions
 ): Promise<LLMResult> {
   if (!OPENAI_KEY) return { text: null };
-  if (isThrottled("openai")) return { text: null, status: 429 };
+  if (isThrottled("openai")) {
+    llmLog.warn({ provider: "openai", reason: "throttled" }, "LLM skipped (throttled)");
+    return { text: null, status: 429 };
+  }
 
+  const start = Date.now();
   try {
     const response = await fetch(OPENAI_ENDPOINT, {
       method: "POST",
@@ -173,8 +196,11 @@ async function callOpenAI(
       }),
     });
 
+    const latencyMs = Date.now() - start;
+
     if (!response.ok) {
       if (response.status === 429) throttle("openai");
+      llmLog.error({ provider: "openai", model: OPENAI_MODEL, status: response.status, latencyMs }, "LLM request failed");
       return { text: null, status: response.status };
     }
 
@@ -183,8 +209,15 @@ async function callOpenAI(
     const tokensUsed =
       data?.usage?.total_tokens ??
       (text ? Math.ceil(text.length / 4) : 0);
+    llmLog.info({
+      provider: "openai", model: OPENAI_MODEL, latencyMs,
+      promptLen: prompt.length, responseLen: text?.length ?? 0,
+      tokensUsed, costUsd: (tokensUsed / 1000) * (COST_PER_1K.openai?.output ?? 0),
+    }, "LLM request completed");
     return { text, tokensUsed };
   } catch (error) {
+    const latencyMs = Date.now() - start;
+    llmLog.error({ provider: "openai", model: OPENAI_MODEL, latencyMs, err: error }, "LLM request error");
     return { text: null, error };
   }
 }
@@ -198,6 +231,7 @@ export async function completeWithFallback(
   opts: LLMOptions = {}
 ): Promise<{ text: string | null; modelUsed: string | null }> {
   if (isRateLimited()) {
+    llmLog.warn({ requests: usage.requests, tokens: usage.tokens }, "LLM rate limited");
     return { text: null, modelUsed: null };
   }
 
@@ -216,7 +250,11 @@ export async function completeWithFallback(
       trackUsage(candidate.key, result.tokensUsed ?? 0);
       return { text: result.text, modelUsed: candidate.key };
     }
+    if (candidate.key !== candidates[candidates.length - 1]?.key) {
+      llmLog.warn({ failed: candidate.key }, "LLM primary failed, falling back");
+    }
   }
 
+  llmLog.error({ providers: candidates.map((c) => c.key) }, "All LLM providers failed");
   return { text: null, modelUsed: null };
 }
