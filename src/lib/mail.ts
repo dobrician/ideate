@@ -1,11 +1,26 @@
 import nodemailer from "nodemailer";
 import type { Transporter } from "nodemailer";
+import { appendFileSync, mkdirSync } from "fs";
+import { dirname } from "path";
 
 const SMTP_HOST = process.env.SMTP_HOST || "";
 const SMTP_PORT = parseInt(process.env.SMTP_PORT || "587", 10);
 const SMTP_USER = process.env.SMTP_USER || "";
 const SMTP_PASS = process.env.SMTP_PASS || "";
 const SMTP_FROM = process.env.SMTP_FROM || "idea@surcod.ro";
+const MAIL_LOG_FILE = process.env.MAIL_LOG_FILE || "";
+
+function logMail(to: string, type: string, url: string): void {
+  const logFile = MAIL_LOG_FILE || (process.env.NODE_ENV !== "production" ? "/tmp/ideate-mail.log" : "");
+  if (!logFile) return;
+  try {
+    mkdirSync(dirname(logFile), { recursive: true });
+    const entry = JSON.stringify({ to, type, url, timestamp: new Date().toISOString() });
+    appendFileSync(logFile, entry + "\n");
+  } catch {
+    // Non-critical: don't break email sending if logging fails
+  }
+}
 
 function validateSmtpConfig(): void {
   if (!SMTP_HOST || !SMTP_USER || !SMTP_PASS) {
@@ -81,6 +96,7 @@ export async function sendMagicLinkEmail(
       text,
       html,
     });
+    logMail(email, "magic-link", magicLink);
   } catch (error) {
     console.error("Failed to send magic link email:", error);
     throw new Error("Failed to send email");
@@ -124,6 +140,7 @@ export async function sendVerificationEmail(
 
   try {
     await transport.sendMail({ from: SMTP_FROM, to: email, subject, text, html });
+    logMail(email, "verification", verifyLink);
   } catch (error) {
     console.error("Failed to send verification email:", error);
     throw new Error("Failed to send verification email");
@@ -167,6 +184,7 @@ export async function sendPasswordResetEmail(
 
   try {
     await transport.sendMail({ from: SMTP_FROM, to: email, subject, text, html });
+    logMail(email, "reset", resetLink);
   } catch (error) {
     console.error("Failed to send password reset email:", error);
     throw new Error("Failed to send password reset email");
