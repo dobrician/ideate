@@ -29,7 +29,7 @@ export function ProfileForm({ firstName, lastName }: ProfileFormProps) {
     if (result.success) {
       toast.success(t("profile.updated"));
     } else {
-      toast.error(result.error || "Failed to update profile");
+      toast.error(result.error || t("profile.updateFailed"));
     }
 
     setIsLoading(false);
@@ -49,7 +49,7 @@ export function ProfileForm({ firstName, lastName }: ProfileFormProps) {
                 id="firstName"
                 name="firstName"
                 defaultValue={firstName}
-                placeholder="First name"
+                placeholder={t("profile.firstName")}
                 maxLength={100}
                 disabled={isLoading}
               />
@@ -60,7 +60,7 @@ export function ProfileForm({ firstName, lastName }: ProfileFormProps) {
                 id="lastName"
                 name="lastName"
                 defaultValue={lastName}
-                placeholder="Last name"
+                placeholder={t("profile.lastName")}
                 maxLength={100}
                 disabled={isLoading}
               />

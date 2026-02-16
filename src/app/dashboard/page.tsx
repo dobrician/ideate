@@ -72,7 +72,7 @@ export default async function DashboardPage() {
             <div>
               <CardTitle className="text-lg">{t("dashboard.yourProjects")}</CardTitle>
               <CardDescription>
-                {userProjects.length} project{userProjects.length !== 1 ? "s" : ""}
+                {t("projects.total", { count: userProjects.length })}
               </CardDescription>
             </div>
             <Link href="/projects" className="text-xs font-medium text-primary hover:underline">
@@ -119,7 +119,7 @@ export default async function DashboardPage() {
           <CardHeader>
             <CardTitle className="text-lg">{t("dashboard.yourProposals")}</CardTitle>
             <CardDescription>
-              {userProposals.length} recent proposal{userProposals.length !== 1 ? "s" : ""}
+              {t("proposals.count", { count: userProposals.length })}
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -227,7 +227,7 @@ export default async function DashboardPage() {
                       <div className="min-w-0">
                         <div>
                           <span className="font-medium group-hover:underline">
-                            {a.userName || a.userEmail || "Someone"}
+                            {a.userName || a.userEmail || t("common.someone")}
                           </span>
                           <span className="text-muted-foreground">
                             {" "}{t("dashboard.commentedOn")}{" "}

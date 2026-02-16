@@ -49,8 +49,8 @@ export default function EditProjectPage() {
         const data = await response.json();
         setProject(data);
       } catch {
-        setError("Failed to load project");
-        toast.error("Failed to load project");
+        setError(t("projectForm.loadError"));
+        toast.error(t("projectForm.loadError"));
       } finally {
         setIsLoading(false);
       }

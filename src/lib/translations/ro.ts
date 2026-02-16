@@ -90,6 +90,8 @@ export const ro: Record<string, string> = {
   "projectForm.loading": "Se incarca proiectul...",
   "projectForm.goBack": "Inapoi",
   "projectForm.projectUpdated": "Proiect actualizat!",
+  "projectForm.titlePlaceholder": "Foaie de parcurs produse T1 2026",
+  "projectForm.loadError": "Nu s-a putut incarca proiectul",
 
   // Proposals
   "proposals.title": "Propuneri",
@@ -182,6 +184,7 @@ export const ro: Record<string, string> = {
   "profile.yourProposals": "Propunerile Tale ({count})",
   "profile.noProjects": "Niciun proiect inca.",
   "profile.noProposals": "Nicio propunere inca.",
+  "profile.updateFailed": "Actualizarea profilului a esuat",
 
   // Admin
   "admin.title": "Panou de Administrare",
@@ -296,6 +299,10 @@ export const ro: Record<string, string> = {
   "common.goHome": "Mergi Acasa",
   "common.viewProjects": "Vezi Proiecte",
   "common.errorId": "ID Eroare: {id}",
+  "common.someone": "Cineva",
+  "common.accessDenied": "Acces Interzis",
+  "common.accessDeniedDesc": "Nu ai permisiunea de a accesa aceasta pagina. Sunt necesare privilegii de administrator.",
+  "common.goToDashboard": "Mergi la Dashboard",
 
   // Theme
   "theme.toggle": "Schimba tema",

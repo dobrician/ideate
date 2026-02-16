@@ -63,7 +63,7 @@ export default function NewProjectPage() {
                 id="title"
                 name="title"
                 type="text"
-                placeholder="Q1 2026 Product Roadmap"
+                placeholder={t("projectForm.titlePlaceholder")}
                 required
                 minLength={3}
                 maxLength={200}

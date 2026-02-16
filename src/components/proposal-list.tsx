@@ -140,7 +140,7 @@ function ProposalItem({
           <div className="min-w-0 flex-1 text-left">
             <span className="font-medium">{proposal.title}</span>
             <span className="ml-2 text-xs text-muted-foreground">
-              by {proposal.authorName}
+              {t("proposals.by")} {proposal.authorName}
             </span>
           </div>
           <div

@@ -87,6 +87,8 @@ export const en: Record<string, string> = {
   "projectForm.loading": "Loading project...",
   "projectForm.goBack": "Go Back",
   "projectForm.projectUpdated": "Project updated!",
+  "projectForm.titlePlaceholder": "Q1 2026 Product Roadmap",
+  "projectForm.loadError": "Failed to load project",
 
   // Proposals
   "proposals.title": "Proposals",
@@ -172,6 +174,7 @@ export const en: Record<string, string> = {
   "profile.yourProposals": "Your Proposals ({count})",
   "profile.noProjects": "No projects yet.",
   "profile.noProposals": "No proposals yet.",
+  "profile.updateFailed": "Failed to update profile",
 
   // Admin
   "admin.title": "Admin Panel",
@@ -277,6 +280,10 @@ export const en: Record<string, string> = {
   "common.goHome": "Go Home",
   "common.viewProjects": "View Projects",
   "common.errorId": "Error ID: {id}",
+  "common.someone": "Someone",
+  "common.accessDenied": "Access Denied",
+  "common.accessDeniedDesc": "You do not have permission to access this page. Admin privileges are required.",
+  "common.goToDashboard": "Go to Dashboard",
 
   // Theme
   "theme.toggle": "Toggle theme",
