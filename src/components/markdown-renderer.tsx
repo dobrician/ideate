@@ -1,12 +1,18 @@
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 
-type Props = { content: string; className?: string };
+const SIMPLE_ALLOWED = new Set(["p", "strong", "em", "code", "a", "del"]);
 
-export function MarkdownRenderer({ content, className }: Props) {
+type Props = { content: string; className?: string; simple?: boolean };
+
+export function MarkdownRenderer({ content, className, simple }: Props) {
   return (
     <div className={`prose dark:prose-invert prose-sm max-w-none ${className ?? ""}`}>
-      <ReactMarkdown remarkPlugins={[remarkGfm]}>
+      <ReactMarkdown
+        remarkPlugins={[remarkGfm]}
+        allowedElements={simple ? [...SIMPLE_ALLOWED] : undefined}
+        unwrapDisallowed={simple}
+      >
         {content}
       </ReactMarkdown>
     </div>
