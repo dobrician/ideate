@@ -33,17 +33,20 @@ export function StatCard({
   );
 }
 
+type TranslateFn = (key: string, vars?: Record<string, string | number>) => string;
+
 /**
- * Format a Date into a human-readable relative time string.
+ * Format a Date into a locale-aware relative time string.
+ * Accepts an optional t() function for localized output.
  */
-export function formatRelativeTime(date: Date): string {
+export function formatRelativeTime(date: Date, t?: TranslateFn): string {
   const now = Date.now();
   const diff = now - date.getTime();
   const minutes = Math.floor(diff / 60000);
-  if (minutes < 1) return "just now";
-  if (minutes < 60) return `${minutes}m ago`;
+  if (minutes < 1) return t ? t("time.justNow") : "just now";
+  if (minutes < 60) return t ? t("time.minutesAgo", { count: minutes }) : `${minutes}m ago`;
   const hours = Math.floor(minutes / 60);
-  if (hours < 24) return `${hours}h ago`;
+  if (hours < 24) return t ? t("time.hoursAgo", { count: hours }) : `${hours}h ago`;
   const days = Math.floor(hours / 24);
-  return `${days}d ago`;
+  return t ? t("time.daysAgo", { count: days }) : `${days}d ago`;
 }

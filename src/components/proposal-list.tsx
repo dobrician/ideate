@@ -185,7 +185,7 @@ function ProposalItem({
           <div className="flex items-center justify-between text-xs text-muted-foreground">
             <span>
               {proposal.createdAt
-                ? new Date(proposal.createdAt).toLocaleDateString("en-US", {
+                ? new Date(proposal.createdAt).toLocaleDateString(undefined, {
                     year: "numeric",
                     month: "short",
                     day: "numeric",

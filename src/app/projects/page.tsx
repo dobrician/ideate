@@ -27,7 +27,8 @@ interface ProjectsPageProps {
 export default async function ProjectsPage({ searchParams }: ProjectsPageProps) {
   const user = await getCurrentUser();
   if (!user) redirect("/auth/login");
-  const { t } = await getTranslations();
+  const { t, locale } = await getTranslations();
+  const dateFmt = locale === "ro" ? "ro-RO" : "en-US";
 
   const params = await searchParams;
   const page = Math.max(1, parseInt(params.page || "1", 10) || 1);
@@ -108,13 +109,13 @@ export default async function ProjectsPage({ searchParams }: ProjectsPageProps) 
                       <p>
                         {t("projects.deadline")}:{" "}
                         {project.deadline
-                          ? new Date(project.deadline).toLocaleDateString()
+                          ? new Date(project.deadline).toLocaleDateString(dateFmt)
                           : t("projects.deadlineNotSet")}
                       </p>
                       <p>
                         {t("projects.created")}:{" "}
                         {project.createdAt
-                          ? new Date(project.createdAt).toLocaleDateString()
+                          ? new Date(project.createdAt).toLocaleDateString(dateFmt)
                           : t("projects.unknown")}
                       </p>
                     </div>

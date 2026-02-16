@@ -18,7 +18,8 @@ export default async function ProfilePage() {
     redirect("/auth/login");
   }
 
-  const { t } = await getTranslations();
+  const { t, locale } = await getTranslations();
+  const dateFmt = locale === "ro" ? "ro-RO" : "en-US";
 
   // Fetch user's projects
   const userProjects = await db
@@ -43,7 +44,7 @@ export default async function ProfilePage() {
 
   const displayName = [user.firstName, user.lastName].filter(Boolean).join(" ") || user.email;
   const memberSince = user.createdAt
-    ? new Date(user.createdAt).toLocaleDateString(undefined, {
+    ? new Date(user.createdAt).toLocaleDateString(dateFmt, {
         year: "numeric",
         month: "long",
         day: "numeric",

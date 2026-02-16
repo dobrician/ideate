@@ -71,7 +71,8 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
   }
 
   const { id } = await params;
-  const { t } = await getTranslations();
+  const { t, locale } = await getTranslations();
+  const dateFmt = locale === "ro" ? "ro-RO" : "en-US";
   const role = user.role as Role;
 
   const project = await db
@@ -164,7 +165,7 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
               <p>
                 {projectData.createdAt
                   ? new Date(projectData.createdAt).toLocaleDateString(
-                      undefined,
+                      dateFmt,
                       { year: "numeric", month: "long", day: "numeric" }
                     )
                   : t("projects.unknown")}
@@ -177,7 +178,7 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
               <p>
                 {projectData.updatedAt
                   ? new Date(projectData.updatedAt).toLocaleDateString(
-                      undefined,
+                      dateFmt,
                       { year: "numeric", month: "long", day: "numeric" }
                     )
                   : t("projects.never")}

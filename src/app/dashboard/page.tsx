@@ -275,7 +275,7 @@ export default async function DashboardPage() {
                       </span>
                       {a.createdAt && (
                         <time className="ml-1 text-xs text-muted-foreground" dateTime={a.createdAt.toISOString()}>
-                          {formatRelativeTime(a.createdAt)}
+                          {formatRelativeTime(a.createdAt, t)}
                         </time>
                       )}
                     </Link>

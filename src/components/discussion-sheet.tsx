@@ -84,7 +84,7 @@ function CommentNode({
   const maxDepth = 3;
   const displayName = comment.userName || comment.userEmail || "Anonymous";
   const timeAgo = comment.createdAt
-    ? formatTimeAgo(comment.createdAt)
+    ? formatTimeAgo(comment.createdAt, t)
     : "";
 
   return (
@@ -233,10 +233,12 @@ export function DiscussionSheet({
   );
 }
 
+type TranslateFn = (key: string, vars?: Record<string, string | number>) => string;
+
 /**
- * Format a date as relative time (e.g., "2h ago", "3d ago")
+ * Format a date as locale-aware relative time (e.g., "2h ago" / "acum 2h")
  */
-function formatTimeAgo(date: Date): string {
+function formatTimeAgo(date: Date, t: TranslateFn): string {
   const now = new Date();
   const diffMs = now.getTime() - date.getTime();
   const diffSec = Math.floor(diffMs / 1000);
@@ -244,8 +246,8 @@ function formatTimeAgo(date: Date): string {
   const diffHr = Math.floor(diffMin / 60);
   const diffDay = Math.floor(diffHr / 24);
 
-  if (diffDay > 0) return `${diffDay}d ago`;
-  if (diffHr > 0) return `${diffHr}h ago`;
-  if (diffMin > 0) return `${diffMin}m ago`;
-  return "just now";
+  if (diffDay > 0) return t("time.daysAgo", { count: diffDay });
+  if (diffHr > 0) return t("time.hoursAgo", { count: diffHr });
+  if (diffMin > 0) return t("time.minutesAgo", { count: diffMin });
+  return t("time.justNow");
 }

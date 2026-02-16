@@ -27,7 +27,8 @@ export default async function AdminPage() {
   if (!hasPermission(user.role as Role, "user:manage")) {
     redirect("/dashboard");
   }
-  const { t } = await getTranslations();
+  const { t, locale } = await getTranslations();
+  const dateFmt = locale === "ro" ? "ro-RO" : "en-US";
 
   const [allUsers, stats, recentAudit] = await Promise.all([
     db
@@ -145,7 +146,7 @@ export default async function AdminPage() {
                     </span>
                     <span className="ml-auto shrink-0 text-xs text-muted-foreground">
                       {entry.createdAt
-                        ? new Date(entry.createdAt).toLocaleString()
+                        ? new Date(entry.createdAt).toLocaleString(dateFmt)
                         : ""}
                     </span>
                   </div>
