@@ -15,6 +15,34 @@
       "when": 1771269600000,
       "tag": "0001_sprint5_audit_search",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1771270000000,
+      "tag": "0002_sprint7_indexes",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "6",
+      "when": 1771270400000,
+      "tag": "0003_sprint9_password_auth",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "6",
+      "when": 1771270800000,
+      "tag": "0004_sprint13_indexes",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "6",
+      "when": 1771271200000,
+      "tag": "0005_project_comments",
+      "breakpoints": true
     }
   ]
 }
