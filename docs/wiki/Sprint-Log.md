@@ -411,3 +411,20 @@
 - Build clean, zero errors
 - Coverage at 96.35% lines for server-side code
 - Remaining uncovered lines are edge cases in error catch blocks and time-dependent cleanup
+
+---
+
+## Sprint 8 — Integration Testing & Stability (2026-02-16)
+**Status:** 🔄 IN PROGRESS
+
+### Goals
+- [ ] End-to-end integration tests — complete user journeys through all features
+- [ ] Fix any remaining build/TypeScript errors across all sprint features
+- [ ] Smoke test suite expansion — cover new features (search, export, SSE, i18n)
+- [ ] Error recovery testing — what happens when DB is down, SMTP fails, AI API errors
+- [ ] Load testing prep — identify bottlenecks with concurrent users
+- [ ] Documentation review — ensure README, wiki, API docs all accurate
+- [ ] Version bump to v1.0.0-rc1 if all tests pass
+
+### Outcomes
+- TBD (sprint in progress)
