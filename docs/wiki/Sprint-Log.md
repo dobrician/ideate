@@ -4,9 +4,15 @@ Reverse chronological. Click each sprint for full details.
 
 ---
 
-### 🔄 [Sprint 20 — Coverage Gaps, Dead Code & Hardening](Sprint-20) *(2026-02-16)*
-**Focus:** New logo (#40), csrf-client/proposals/auth/notifications/export coverage, dead code removal
-**Stats:** In progress
+### ✅ [Sprint 21 — Migration Reliability & AI Feature Testing](Sprint-21) *(2026-02-16)*
+**Focus:** Idempotent migrations (IF NOT EXISTS), Docker build race condition fix, retry logic, E2E test scaffolding
+**Stats:** 2 commits | Migrations fixed | Docker builds reliable | E2E test files created (AI suggestions, comments, voting)
+
+---
+
+### ✅ [Sprint 20 — Coverage Gaps, Dead Code & Hardening](Sprint-20) *(2026-02-16)*
+**Focus:** New logo (#40), csrf-client/proposals/auth/notifications coverage gaps closed
+**Stats:** 5/8 goals | 616 tests | Logo updated with ballot-box icon
 
 ---
 
