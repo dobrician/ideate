@@ -74,7 +74,10 @@ export function ProposalList({
       const bLive = voteUpdates.get(b.id);
       const aNet = (aLive?.upvotes ?? a.upvotes) - (aLive?.downvotes ?? a.downvotes);
       const bNet = (bLive?.upvotes ?? b.upvotes) - (bLive?.downvotes ?? b.downvotes);
-      return bNet - aNet;
+      if (bNet !== aNet) return bNet - aNet;
+      const aContra = aLive?.downvotes ?? a.downvotes;
+      const bContra = bLive?.downvotes ?? b.downvotes;
+      return aContra - bContra;
     });
   }, [proposals, voteUpdates]);
 

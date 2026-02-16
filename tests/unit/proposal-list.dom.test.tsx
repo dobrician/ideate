@@ -118,17 +118,27 @@ describe("ProposalList", () => {
     expect(screen.getByText("Feature Y")).toBeInTheDocument();
   });
 
-  it("sorts proposals by net votes (highest first)", () => {
+  it("sorts proposals by net votes (highest first), tie-break by contra ascending", () => {
     const proposals = [
       makeProposal({ id: "low", title: "Low Priority", upvotes: 1, downvotes: 3 }),
       makeProposal({ id: "high", title: "High Priority", upvotes: 10, downvotes: 0 }),
       makeProposal({ id: "mid", title: "Mid Priority", upvotes: 5, downvotes: 2 }),
+      makeProposal({ id: "tie1", title: "Tie Fewer Contra", upvotes: 3, downvotes: 1 }),
+      makeProposal({ id: "tie2", title: "Tie More Contra", upvotes: 5, downvotes: 3 }),
     ];
     render(
       <ProposalList proposals={proposals} projectId="proj1" currentUserId="u1" isAdmin={false} />
     );
-    const titles = screen.getAllByText(/Priority/).map((el) => el.textContent);
-    expect(titles).toEqual(["High Priority", "Mid Priority", "Low Priority"]);
+    const titles = screen.getAllByText(/Priority|Tie/).map((el) => el.textContent);
+    // net: High=10, Mid=3, Tie Fewer=2, Tie More=2, Low=-2
+    // Tie-break (net=2): Fewer Contra (1) before More Contra (3)
+    expect(titles).toEqual([
+      "High Priority",
+      "Mid Priority",
+      "Tie Fewer Contra",
+      "Tie More Contra",
+      "Low Priority",
+    ]);
   });
 
   it("scales bar chart width proportionally to max total votes", () => {
