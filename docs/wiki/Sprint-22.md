@@ -1,5 +1,5 @@
 # Sprint 22 — Auth & Security Deep Dive (2026-02-16)
-**Status:** IN PROGRESS
+**Status:** COMPLETE
 
 ## Goals
 
@@ -20,7 +20,7 @@ Based on unified analysis from both Claude and Codex (see docs/sprint22-unified-
 
 **Tests:**
 - [x] Goal 10: Fix stale E2E auth tests + add mobile viewport auth tests
-- [ ] Goal 11: Sprint 22 log + outcomes in Sprint-Log.md
+- [x] Goal 11: Sprint 22 log + outcomes in Sprint-Log.md
 
 ## Constraints
 - Commit + push after EACH goal

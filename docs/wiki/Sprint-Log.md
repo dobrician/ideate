@@ -4,6 +4,12 @@ Reverse chronological. Click each sprint for full details.
 
 ---
 
+### ✅ [Sprint 22 — Auth & Security Deep Dive](Sprint-22) *(2026-02-16)*
+**Focus:** CSRF enforcement, JWT middleware validation, Zod error fix, rate limiting, token hashing (SHA-256), audit logging, verify-email UX, password visibility toggle, proposal form modal, E2E auth tests
+**Stats:** 13 commits | 649 unit + 52 E2E = 701 tests | Issues #41, #42, #43
+
+---
+
 ### ✅ [Sprint 21 — Migration Reliability & AI Feature Testing](Sprint-21) *(2026-02-16)*
 **Focus:** Idempotent migrations (IF NOT EXISTS), Docker build race condition fix, retry logic, E2E test scaffolding
 **Stats:** 2 commits | Migrations fixed | Docker builds reliable | E2E test files created (AI suggestions, comments, voting)
