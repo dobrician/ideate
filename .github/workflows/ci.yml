@@ -54,6 +54,7 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
+      - run: mkdir -p data
       - run: npm run build
         env:
           DATABASE_URL: data/ideate.db
