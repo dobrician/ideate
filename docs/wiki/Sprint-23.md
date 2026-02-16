@@ -17,7 +17,7 @@ Based on unified analysis from Claude + Codex (see docs/sprint23-unified-plan.md
 
 **Mobile optimization:**
 - [x] Goal 7: Compact mobile stat display
-- [ ] Goal 8: Improve mobile activity and search access
+- [x] Goal 8: Improve mobile activity and search access
 
 **Testing:**
 - [ ] Goal 9: Dashboard E2E tests
