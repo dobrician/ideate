@@ -9,6 +9,7 @@ import Link from "next/link";
 import { FolderOpen, Lightbulb } from "lucide-react";
 import { ProfileForm } from "./profile-form";
 import { ChangePasswordForm } from "./change-password-form";
+import { NotificationSettings } from "./notification-settings";
 import { useLocale } from "@/lib/use-locale";
 import { statusBadgeClass, statusLabel } from "@/lib/status-utils";
 
@@ -38,6 +39,11 @@ interface ProfileTabsProps {
   };
   projects: ProfileProject[];
   proposals: ProfileProposal[];
+  notificationPrefs: {
+    emailNewProposal: boolean;
+    emailVoteOnMine: boolean;
+    emailCommentReply: boolean;
+  };
 }
 
 function CollapsibleList<T extends { id: string }>({
@@ -92,7 +98,7 @@ function getInitials(firstName: string, lastName: string, email: string): string
   return email[0].toUpperCase();
 }
 
-export function ProfileTabs({ user, projects, proposals }: ProfileTabsProps) {
+export function ProfileTabs({ user, projects, proposals, notificationPrefs }: ProfileTabsProps) {
   const { t } = useLocale();
 
   return (
@@ -100,6 +106,7 @@ export function ProfileTabs({ user, projects, proposals }: ProfileTabsProps) {
       <TabsList className="w-full">
         <TabsTrigger value="account">{t("profile.tabAccount")}</TabsTrigger>
         <TabsTrigger value="security">{t("profile.tabSecurity")}</TabsTrigger>
+        <TabsTrigger value="notifications">{t("profile.tabNotifications")}</TabsTrigger>
         <TabsTrigger value="projects">{t("profile.tabProjects")}</TabsTrigger>
         <TabsTrigger value="proposals">{t("profile.tabProposals")}</TabsTrigger>
       </TabsList>
@@ -152,6 +159,10 @@ export function ProfileTabs({ user, projects, proposals }: ProfileTabsProps) {
             </CardContent>
           </Card>
         )}
+      </TabsContent>
+
+      <TabsContent value="notifications">
+        <NotificationSettings prefs={notificationPrefs} />
       </TabsContent>
 
       <TabsContent value="projects">

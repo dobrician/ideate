@@ -153,6 +153,26 @@ export const attachments = sqliteTable("attachments", {
   ),
 });
 
+// ─── Notification Preferences ──────────────────────────────────────────────
+
+export const notificationPreferences = sqliteTable("notification_preferences", {
+  userId: text("user_id")
+    .primaryKey()
+    .references(() => users.id, { onDelete: "cascade" }),
+  emailNewProposal: integer("email_new_proposal", { mode: "boolean" })
+    .notNull()
+    .default(true),
+  emailVoteOnMine: integer("email_vote_on_mine", { mode: "boolean" })
+    .notNull()
+    .default(true),
+  emailCommentReply: integer("email_comment_reply", { mode: "boolean" })
+    .notNull()
+    .default(true),
+  updatedAt: integer("updated_at", { mode: "timestamp" }).default(
+    sql`(unixepoch())`
+  ),
+});
+
 // ─── Comments ──────────────────────────────────────────────────────────────
 
 export const comments = sqliteTable("comments", {

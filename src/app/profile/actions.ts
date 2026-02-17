@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { db } from "@/db";
-import { users } from "@/db/schema";
+import { users, notificationPreferences } from "@/db/schema";
 import { requireAuth } from "@/lib/auth";
 import { eq } from "drizzle-orm";
 import { logAudit } from "@/lib/audit";
@@ -127,5 +127,49 @@ export async function changePassword(formData: FormData) {
       return { error: "You must be logged in" };
     }
     return { error: "Failed to change password" };
+  }
+}
+
+/**
+ * Update notification preferences
+ */
+export async function updateNotificationPreferences(
+  prefs: {
+    emailNewProposal: boolean;
+    emailVoteOnMine: boolean;
+    emailCommentReply: boolean;
+  },
+  csrfToken: string
+): Promise<{ error?: string; success?: boolean }> {
+  try {
+    await requireCsrfToken(csrfToken);
+    const user = await requireAuth();
+
+    await db
+      .insert(notificationPreferences)
+      .values({
+        userId: user.id,
+        emailNewProposal: prefs.emailNewProposal,
+        emailVoteOnMine: prefs.emailVoteOnMine,
+        emailCommentReply: prefs.emailCommentReply,
+        updatedAt: new Date(),
+      })
+      .onConflictDoUpdate({
+        target: notificationPreferences.userId,
+        set: {
+          emailNewProposal: prefs.emailNewProposal,
+          emailVoteOnMine: prefs.emailVoteOnMine,
+          emailCommentReply: prefs.emailCommentReply,
+          updatedAt: new Date(),
+        },
+      });
+
+    revalidatePath("/profile");
+    return { success: true };
+  } catch (error) {
+    if (error instanceof Error && error.message === "Unauthorized") {
+      return { error: "You must be logged in" };
+    }
+    return { error: "Failed to update notification preferences" };
   }
 }

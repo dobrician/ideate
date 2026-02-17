@@ -64,6 +64,13 @@
       "when": 1771272400000,
       "tag": "0008_sprint36_attachments",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "6",
+      "when": 1771272800000,
+      "tag": "0009_notification_preferences",
+      "breakpoints": true
     }
   ]
 }

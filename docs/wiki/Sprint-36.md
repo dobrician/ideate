@@ -12,7 +12,7 @@
 
 - [x] **Goal 3: Bulk operations for admin** — Add checkboxes to admin user table for bulk role change and bulk delete. Add checkboxes to projects list for bulk archive/delete. Confirmation dialog before destructive bulk operations. Add tests.
 
-- [ ] **Goal 4: Notification preferences** — Add a notifications settings section to user profile. Options: email on new proposal in my projects, email on vote on my proposals, email on comment reply. Store preferences in a `notification_preferences` table. Respect preferences when sending emails. Add tests.
+- [x] **Goal 4: Notification preferences** — Add a notifications settings section to user profile. Options: email on new proposal in my projects, email on vote on my proposals, email on comment reply. Store preferences in a `notification_preferences` table. Respect preferences when sending emails. Add tests.
 
 - [ ] **Goal 5: Advanced proposal sorting** — Add sort options to proposal list: by votes (most popular), by date (newest/oldest), by comments (most discussed), by controversy (closest pro/contra ratio). Persist sort preference in URL params. Add tests.
 

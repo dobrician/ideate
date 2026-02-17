@@ -555,6 +555,20 @@ export const ro: Record<string, string> = {
   "attachments.limit": "Max 5MB per fișier, 3 fișiere per propunere",
   "attachments.count": "{count} atașament(e)",
 
+  // Notifications
+  "notifications.title": "Notificări Email",
+  "notifications.description": "Alege ce notificări email dorești să primești.",
+  "notifications.newProposal": "Propuneri noi în proiectele mele",
+  "notifications.newProposalDesc": "Primește notificări când cineva depune o propunere într-un proiect pe care îl deții.",
+  "notifications.voteOnMine": "Voturi pe propunerile mele",
+  "notifications.voteOnMineDesc": "Primește notificări când cineva votează propunerile tale.",
+  "notifications.commentReply": "Răspunsuri la comentarii",
+  "notifications.commentReplyDesc": "Primește notificări când cineva comentează la propunerile tale.",
+  "notifications.save": "Salvează Preferințele",
+  "notifications.saving": "Se salvează...",
+  "notifications.saved": "Preferințe de notificare salvate",
+  "profile.tabNotifications": "Notificări",
+
   // Archive
   "archive.banner": "Acest proiect este arhivat și doar pentru citire.",
   "archive.unarchive": "Dezarhivează",

@@ -1,10 +1,11 @@
 /**
  * Email notification system for proposal owners.
  * Debounces notifications to avoid spam (max 1 per proposal per 15 min).
+ * Respects user notification preferences.
  */
 
 import { db } from "@/db";
-import { proposals, users } from "@/db/schema";
+import { proposals, users, notificationPreferences } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { escapeHtml } from "@/lib/sanitize";
 import { getSmtpTransporter } from "@/lib/mail";
@@ -28,6 +29,24 @@ function shouldNotify(proposalId: string, type: string): boolean {
 
   lastNotification.set(key, now);
   return true;
+}
+
+/**
+ * Get user's notification preference for a specific type.
+ * Defaults to true if no preference is set.
+ */
+export async function getUserNotificationPref(
+  userId: string,
+  type: "emailNewProposal" | "emailVoteOnMine" | "emailCommentReply"
+): Promise<boolean> {
+  const prefs = await db
+    .select()
+    .from(notificationPreferences)
+    .where(eq(notificationPreferences.userId, userId))
+    .limit(1);
+
+  if (prefs.length === 0) return true; // default: all enabled
+  return Boolean(prefs[0][type]);
 }
 
 /**
@@ -55,6 +74,10 @@ export async function notifyVote(
       .limit(1);
 
     if (!proposal[0]?.userId || proposal[0].userId === voterUserId) return;
+
+    // Check notification preference
+    const wantsEmail = await getUserNotificationPref(proposal[0].userId, "emailVoteOnMine");
+    if (!wantsEmail) return;
 
     const owner = await db
       .select({ email: users.email, firstName: users.firstName })
@@ -109,6 +132,10 @@ export async function notifyComment(
       .limit(1);
 
     if (!proposal[0]?.userId || proposal[0].userId === commenterUserId) return;
+
+    // Check notification preference
+    const wantsEmail = await getUserNotificationPref(proposal[0].userId, "emailCommentReply");
+    if (!wantsEmail) return;
 
     const owner = await db
       .select({ email: users.email, firstName: users.firstName })

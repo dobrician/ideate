@@ -537,6 +537,20 @@ export const en: Record<string, string> = {
   "attachments.count": "{count} attachment(s)",
 
   // Archive
+  // Notifications
+  "notifications.title": "Email Notifications",
+  "notifications.description": "Choose which email notifications you'd like to receive.",
+  "notifications.newProposal": "New proposals in my projects",
+  "notifications.newProposalDesc": "Get notified when someone submits a proposal in a project you own.",
+  "notifications.voteOnMine": "Votes on my proposals",
+  "notifications.voteOnMineDesc": "Get notified when someone votes on your proposals.",
+  "notifications.commentReply": "Comment replies",
+  "notifications.commentReplyDesc": "Get notified when someone comments on your proposals.",
+  "notifications.save": "Save Preferences",
+  "notifications.saving": "Saving...",
+  "notifications.saved": "Notification preferences saved",
+  "profile.tabNotifications": "Notifications",
+
   "archive.banner": "This project is archived and read-only.",
   "archive.unarchive": "Unarchive",
   "archive.unarchiving": "Unarchiving...",

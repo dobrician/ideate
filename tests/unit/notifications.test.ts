@@ -27,6 +27,7 @@ vi.mock("@/db", () => ({
 vi.mock("@/db/schema", () => ({
   proposals: { id: "id", title: "title", userId: "userId" },
   users: { id: "id", email: "email", firstName: "firstName" },
+  notificationPreferences: { userId: "userId" },
 }));
 
 // Mock mail module
@@ -46,10 +47,10 @@ describe("Notifications", () => {
 
   describe("notifyVote", () => {
     it("should send email when conditions are met", async () => {
-      // First call: fetch proposal
       mockDbLimit
         .mockResolvedValueOnce([{ title: "Test Proposal", userId: "owner-123" }])
-        // Second call: fetch owner
+        // Notification prefs lookup → none (defaults to true)
+        .mockResolvedValueOnce([])
         .mockResolvedValueOnce([{ email: "owner@example.com", firstName: "John" }]);
 
       mockSendMail.mockResolvedValue({ messageId: "test" });
@@ -97,6 +98,7 @@ describe("Notifications", () => {
     it("should not send email when owner not found", async () => {
       mockDbLimit
         .mockResolvedValueOnce([{ title: "Test Proposal", userId: "owner-123" }])
+        .mockResolvedValueOnce([]) // prefs lookup
         .mockResolvedValueOnce([]);
 
       const { notifyVote } = await import("@/lib/notifications");
@@ -108,6 +110,7 @@ describe("Notifications", () => {
     it("should use downvoted for negative votes", async () => {
       mockDbLimit
         .mockResolvedValueOnce([{ title: "Test Proposal", userId: "owner-123" }])
+        .mockResolvedValueOnce([]) // prefs lookup
         .mockResolvedValueOnce([{ email: "owner@example.com", firstName: "John" }]);
 
       mockSendMail.mockResolvedValue({ messageId: "test" });
@@ -122,6 +125,7 @@ describe("Notifications", () => {
     it("should not throw on sendMail failure", async () => {
       mockDbLimit
         .mockResolvedValueOnce([{ title: "Test Proposal", userId: "owner-123" }])
+        .mockResolvedValueOnce([]) // prefs lookup
         .mockResolvedValueOnce([{ email: "owner@example.com", firstName: "John" }]);
 
       mockSendMail.mockRejectedValue(new Error("SMTP failure"));
@@ -136,6 +140,7 @@ describe("Notifications", () => {
     it("should debounce repeated notifications for same proposal", async () => {
       mockDbLimit
         .mockResolvedValueOnce([{ title: "Test Proposal", userId: "owner-123" }])
+        .mockResolvedValueOnce([]) // prefs lookup
         .mockResolvedValueOnce([{ email: "owner@example.com", firstName: "John" }]);
       mockSendMail.mockResolvedValue({ messageId: "test" });
 
@@ -160,6 +165,7 @@ describe("Notifications", () => {
     it("should use 'there' when owner firstName is null", async () => {
       mockDbLimit
         .mockResolvedValueOnce([{ title: "Test Proposal", userId: "owner-123" }])
+        .mockResolvedValueOnce([]) // prefs lookup
         .mockResolvedValueOnce([{ email: "owner@example.com", firstName: null }]);
       mockSendMail.mockResolvedValue({ messageId: "test" });
 
@@ -175,6 +181,7 @@ describe("Notifications", () => {
     it("should send email for new comment", async () => {
       mockDbLimit
         .mockResolvedValueOnce([{ title: "Test Proposal", userId: "owner-123" }])
+        .mockResolvedValueOnce([]) // prefs lookup
         .mockResolvedValueOnce([{ email: "owner@example.com", firstName: "Jane" }]);
 
       mockSendMail.mockResolvedValue({ messageId: "test" });
@@ -191,6 +198,7 @@ describe("Notifications", () => {
     it("should truncate long comment content", async () => {
       mockDbLimit
         .mockResolvedValueOnce([{ title: "Test Proposal", userId: "owner-123" }])
+        .mockResolvedValueOnce([]) // prefs lookup
         .mockResolvedValueOnce([{ email: "owner@example.com", firstName: null }]);
 
       mockSendMail.mockResolvedValue({ messageId: "test" });
@@ -217,6 +225,7 @@ describe("Notifications", () => {
     it("should not throw on failure", async () => {
       mockDbLimit
         .mockResolvedValueOnce([{ title: "Test Proposal", userId: "owner-123" }])
+        .mockResolvedValueOnce([]) // prefs lookup
         .mockResolvedValueOnce([{ email: "owner@example.com", firstName: "Jane" }]);
 
       mockSendMail.mockRejectedValue(new Error("Connection failed"));
@@ -239,6 +248,7 @@ describe("Notifications", () => {
     it("should skip when owner user not found in db", async () => {
       mockDbLimit
         .mockResolvedValueOnce([{ title: "Test Proposal", userId: "owner-123" }])
+        .mockResolvedValueOnce([]) // prefs lookup
         .mockResolvedValueOnce([]);
       const { notifyComment } = await import("@/lib/notifications");
       await notifyComment("prop-c-no-owner", "proj-1", "commenter-456", "Test");
