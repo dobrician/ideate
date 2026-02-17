@@ -594,4 +594,63 @@ Add Sprint 27 entry to `docs/wiki/Sprint-Log.md`. Create `docs/wiki/Sprint-27.md
 
 ---
 
-*Report updated for Sprint 27 planning on 2026-02-17.*
+## Sprint 28 Goals
+
+**Snapshot (2026-02-17):** 792 tests, 53 files, all green. `tsc --noEmit` clean. Coverage: 98.18% stmt / 92.49% branch / 98.57% func / 98.75% line. 2 open issues (#49 this sprint, #13 Cloudflare nice-to-have).
+
+**Theme: Mobile polish & final sweep — every page, every flow (Issue #49)**
+
+Sprint 27 delivered voting animations, optimistic feedback, proposal sorting/filtering, expand/collapse cards, mobile touch targets, and SSE vote streams. The app is feature-complete. Sprint 28 is about fit and finish: audit every page at every breakpoint, fix every rough edge, run Lighthouse/accessibility, and ensure zero regressions.
+
+### Goal 1: Full mobile audit — every page at 320px, 375px, 768px
+**Priority: High | Effort: 2-3h**
+Walk every route (login, register, forgot-password, dashboard, projects list, project detail, profile, search) at iPhone SE (320px), iPhone 14 (375px), and tablet (768px). Document and fix: overflow, truncation, font sizing, touch target violations (<44px), and z-index conflicts. Pay special attention to modals and sheets on small screens.
+
+### Goal 2: Lighthouse performance audit — target 90+ on all four metrics
+**Priority: High | Effort: 2-3h**
+Run Lighthouse on dashboard, project detail, and landing pages (mobile preset). Target 90+ Performance, Accessibility, Best Practices, SEO. Fix: image optimization (next/image where missing), render-blocking resources, CLS from skeleton loaders, missing meta tags, contrast issues.
+
+### Goal 3: Accessibility audit — axe-core sweep + keyboard navigation
+**Priority: High | Effort: 2-3h**
+Run axe-core on every page. Fix: missing ARIA labels, insufficient color contrast, focus trapping in modals, skip-to-content link, heading hierarchy gaps. Test full keyboard-only navigation flow: login → dashboard → create project → add proposal → vote → comment. All interactive elements must be keyboard-reachable.
+
+### Goal 4: Cross-browser testing — Chrome, Firefox, Safari
+**Priority: Medium | Effort: 1-2h**
+Test in Chrome, Firefox, and Safari (WebKit via Playwright). Focus areas: CSS grid/flex rendering, backdrop-filter support, dialog/sheet behavior, SSE stream reliability, PWA install prompt. Fix any browser-specific issues.
+
+### Goal 5: Cover `vote-update.ts` (0% coverage)
+**Priority: High | Effort: 1h**
+`src/lib/vote-update.ts` is at 0% stmt/branch/func/line (lines 14-22). This was extracted in Sprint 27 but never tested. Add unit tests covering the shared `emitVoteUpdate` helper to close this gap.
+
+### Goal 6: Cover remaining branch gaps — `export.ts` (81%), `llm.ts` (85%)
+**Priority: Medium | Effort: 1-2h**
+`export.ts` has uncovered line 59, 167; `llm.ts` has uncovered lines 188-189. Add targeted tests for these specific branches to push overall branch coverage above 93%.
+
+### Goal 7: Final Playwright E2E suite — every user flow end-to-end
+**Priority: High | Effort: 2-3h**
+Write/extend E2E tests covering the complete happy path: register → login → create project → add proposal → vote → comment → search → export → profile update → logout. Run at both desktop and mobile viewports. This is the exit-criteria gate — all flows must work perfectly.
+
+### Goal 8: PWA install flow validation
+**Priority: Medium | Effort: 1h**
+Verify the PWA manifest, service worker registration, and install prompt work correctly on Chrome Android and Safari iOS. Check offline behavior — the app should show a meaningful offline page, not a browser error. Verify icons at all required sizes.
+
+| # | Goal | Priority | Effort | Issue |
+|---|------|----------|--------|-------|
+| 1 | Full mobile audit (320/375/768px) | High | 2-3h | #49 |
+| 2 | Lighthouse audit — 90+ targets | High | 2-3h | #49 |
+| 3 | Accessibility audit + keyboard nav | High | 2-3h | #49 |
+| 4 | Cross-browser testing | Medium | 1-2h | #49 |
+| 5 | Cover vote-update.ts (0%) | High | 1h | — |
+| 6 | Cover export.ts + llm.ts branches | Medium | 1-2h | — |
+| 7 | Full E2E suite — every flow | High | 2-3h | #49 |
+| 8 | PWA install flow validation | Medium | 1h | #49 |
+
+**Total estimated effort:** ~12-18 hours
+
+**Out of scope:**
+- Cloudflare deployment (#13) — nice-to-have, not blocking production readiness
+- PostgreSQL migration, Redis rate limiter, JWT revocation, multi-tenancy
+
+---
+
+*Report updated for Sprint 28 planning on 2026-02-17.*
