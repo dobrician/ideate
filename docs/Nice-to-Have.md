@@ -3,34 +3,34 @@
 Future improvements and feature ideas. Prioritize during sprint planning.
 
 ## Features
-- [ ] **Real-time voting updates** — WebSocket or SSE for live vote counts
-- [ ] **PDF/CSV export** — Export project reports
-- [ ] **Email notifications** — Notify on new proposals, votes, deadlines
-- [ ] **Role-based access** — Admin, manager, member, viewer
-- [ ] **Audit logging** — Track all changes for compliance
-- [ ] **API rate limiting** — Prevent abuse
-- [ ] **Multi-tenant** — Organization-level isolation
-- [ ] **Keyboard shortcuts** — Power user navigation
-- [ ] **Search** — Full-text search across proposals and comments
+- [x] **Real-time voting updates** — SSE-powered live vote counts *(Sprint 4)*
+- [x] **PDF/CSV export** — Export project reports with jsPDF *(Sprint 6, fixed Sprint 29)*
+- [x] **Email notifications** — Notify on new proposals, votes, deadlines *(Sprint 6)*
+- [x] **Role-based access** — Admin, manager, member, viewer with 13 permissions *(Sprint 4)*
+- [x] **Audit logging** — Track all changes for compliance *(Sprint 5)*
+- [x] **API rate limiting** — Auth endpoints + mutations + search *(Sprints 4, 18)*
+- [ ] **Multi-tenant** — Organization-level isolation (requires PostgreSQL)
+- [x] **Keyboard shortcuts** — Power user navigation *(Sprint 22)*
+- [x] **Search** — FTS5 full-text search across proposals and comments *(Sprint 5)*
 - [ ] **Tags/categories** — Organize proposals by topic
-- [ ] **Deadline reminders** — Email reminders before project deadline
+- [x] **Deadline reminders** — Email reminders before project deadline *(Sprint 6)*
 - [ ] **Anonymous voting mode** — Optional hide voter identity
 - [ ] **Delegation** — Delegate your vote to another user
-- [ ] **Mobile app** — PWA for native-like experience
-- [ ] **Cloudflare deployment** — Pages + D1 + Workers (free tier)
+- [x] **Mobile app** — PWA with install prompt and offline page *(Sprint 6)*
+- [ ] **Cloudflare deployment** — Pages + D1 + Workers (Issue #13, spike in progress)
 
 ## Technical
-- [ ] **GitHub Actions CI** — Automated testing on PR
-- [ ] **Structured logging** — JSON logs for observability
+- [x] **GitHub Actions CI** — Automated testing on PR *(Sprint 5)*
+- [x] **Structured logging** — Pino JSON logs for observability *(Sprint 15)*
 - [ ] **Error tracking** — Sentry or similar
 - [ ] **Performance monitoring** — Core Web Vitals
-- [ ] **Database backups** — Automated SQLite snapshots
+- [x] **Database backups** — Automated SQLite snapshots with WAL checkpoint + 7-day rotation *(Sprint 16)*
 - [ ] **MCP integrations** — Research useful Model Context Protocols
 - [ ] **OpenTelemetry** — Distributed tracing
 
 ## UX
 - [ ] **Onboarding flow** — First-time user guide
 - [ ] **Proposal templates** — Pre-fill structure
-- [ ] **Rich markdown editor** — WYSIWYG with preview
+- [x] **Rich markdown editor** — Markdown rendering for descriptions/proposals/comments *(Sprint 24)*
 - [ ] **Drag-and-drop reorder** — Manual priority override for admins
 - [ ] **Reaction emojis** — Quick feedback beyond +1/-1
