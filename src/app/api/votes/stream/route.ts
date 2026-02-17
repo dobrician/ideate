@@ -31,6 +31,8 @@ export async function GET(request: NextRequest) {
     const encoder = new TextEncoder();
     let unsubscribe: (() => void) | null = null;
 
+    let keepaliveId: ReturnType<typeof setInterval> | null = null;
+
     const stream = new ReadableStream({
       start(controller) {
         controller.enqueue(encoder.encode(": keepalive\n\n"));
@@ -48,20 +50,21 @@ export async function GET(request: NextRequest) {
           }
         });
 
-        const keepalive = setInterval(() => {
+        keepaliveId = setInterval(() => {
           try {
             controller.enqueue(encoder.encode(": keepalive\n\n"));
           } catch {
-            clearInterval(keepalive);
+            if (keepaliveId) clearInterval(keepaliveId);
           }
         }, 30000);
 
         request.signal.addEventListener("abort", () => {
-          clearInterval(keepalive);
+          if (keepaliveId) clearInterval(keepaliveId);
           unsubscribe?.();
         });
       },
       cancel() {
+        if (keepaliveId) clearInterval(keepaliveId);
         unsubscribe?.();
       },
     });

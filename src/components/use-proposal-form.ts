@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useState, useRef, useCallback } from "react";
+import { useActionState, useState, useRef, useCallback, useEffect } from "react";
 import { createProposal } from "@/app/projects/[id]/proposals/actions";
 import { useLocale } from "@/lib/use-locale";
 
@@ -82,6 +82,13 @@ export function useProposalForm({
     setDescription("");
     setSimilarMatches([]);
   }
+
+  // Clear debounce timer on unmount to prevent leaked setTimeout
+  useEffect(() => {
+    return () => {
+      if (timerRef.current) clearTimeout(timerRef.current);
+    };
+  }, []);
 
   const warnings = similarMatches.filter((m) => m.similarity > 40);
 
