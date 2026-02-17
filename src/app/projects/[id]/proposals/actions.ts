@@ -15,6 +15,7 @@ import { logAudit } from "@/lib/audit";
 import { notifyVote } from "@/lib/notifications";
 import { requireCsrfToken } from "@/lib/csrf";
 import { isDeadlinePassed, isProjectArchived } from "@/lib/project-utils";
+import { fireWebhookEvent } from "@/lib/webhooks";
 
 async function resolveProposalProject(
   proposalId: string
@@ -96,6 +97,8 @@ export async function createProposal(
       entityId: proposalId,
       details: JSON.stringify({ title, projectId }),
     });
+
+    fireWebhookEvent("proposal.created", { proposalId, title, projectId, userId: user.id }).catch(() => {});
 
     revalidatePath(`/projects/${projectId}`);
     return { success: true };
@@ -206,6 +209,7 @@ export async function castVote(
 
     await emitVoteUpdate(proposalId, projectId);
     notifyVote(proposalId, projectId, user.id, value);
+    fireWebhookEvent("vote.cast", { proposalId, projectId, userId: user.id, value }).catch(() => {});
     revalidatePath(`/projects/${projectId}`);
     return { success: true };
   } catch (error) {

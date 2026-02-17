@@ -607,4 +607,22 @@ export const ro: Record<string, string> = {
   "archive.unarchiving": "Se dezarhivează...",
   "archive.unarchived": "Proiect dezarhivat",
   "archive.unarchiveFailed": "Dezarhivarea proiectului a eșuat",
+
+  // Webhooks
+  "webhooks.title": "Webhook-uri",
+  "webhooks.description": "Configurează URL-uri webhook pentru notificări de evenimente",
+  "webhooks.urlPlaceholder": "https://exemplu.com/webhook",
+  "webhooks.add": "Adaugă Webhook",
+  "webhooks.creating": "Se creează...",
+  "webhooks.created": "Webhook creat",
+  "webhooks.createFailed": "Crearea webhook-ului a eșuat",
+  "webhooks.deleted": "Webhook șters",
+  "webhooks.deleteFailed": "Ștergerea webhook-ului a eșuat",
+  "webhooks.updateFailed": "Actualizarea webhook-ului a eșuat",
+  "webhooks.delete": "Șterge webhook",
+  "webhooks.enable": "Activează webhook",
+  "webhooks.disable": "Dezactivează webhook",
+  "webhooks.none": "Niciun webhook configurat",
+  "webhooks.secretReveal": "Salvează acest secret — nu va mai fi afișat:",
+  "webhooks.dismissSecret": "Închide",
 };

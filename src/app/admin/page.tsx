@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { db } from "@/db";
-import { users, projects, proposals, votes, comments, auditLogs, invitations, tags } from "@/db/schema";
+import { users, projects, proposals, votes, comments, auditLogs, invitations, tags, webhooks } from "@/db/schema";
 import { getCurrentUser } from "@/lib/auth";
 import { hasPermission } from "@/lib/rbac";
 import type { Role } from "@/lib/rbac";
@@ -20,6 +20,7 @@ import { AuditLog } from "./audit-log";
 import { InvitationPanel } from "./invitation-panel";
 import { ProjectManager } from "./project-manager";
 import { TagManager } from "./tag-manager";
+import { WebhookManager } from "./webhook-manager";
 import { StatCard } from "@/components/stat-card";
 import { getTranslations } from "@/lib/i18n-server";
 
@@ -48,7 +49,7 @@ export default async function AdminPage() {
   }
   // locale used for date formatting via formatDateTime
 
-  const [allUsers, stats, recentAudit, pendingInvitations, allProjects, allTags] = await Promise.all([
+  const [allUsers, stats, recentAudit, pendingInvitations, allProjects, allTags, allWebhooks] = await Promise.all([
     db
       .select({
         id: users.id,
@@ -113,6 +114,11 @@ export default async function AdminPage() {
       .select({ id: tags.id, name: tags.name })
       .from(tags)
       .orderBy(asc(tags.name)),
+
+    db
+      .select()
+      .from(webhooks)
+      .orderBy(desc(webhooks.createdAt)),
   ]);
 
   const s = stats[0];
@@ -187,6 +193,25 @@ export default async function AdminPage() {
           </CardHeader>
           <CardContent>
             <TagManager initialTags={allTags} />
+          </CardContent>
+        </Card>
+
+        {/* Webhooks */}
+        <Card className="lg:col-span-2">
+          <CardHeader>
+            <CardTitle>{t("webhooks.title")}</CardTitle>
+            <CardDescription>{t("webhooks.description")}</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <WebhookManager
+              initialWebhooks={allWebhooks.map((wh) => ({
+                ...wh,
+                events: JSON.parse(wh.events) as string[],
+                secret: wh.secret.slice(0, 8) + "...",
+                active: Boolean(wh.active),
+                createdAt: wh.createdAt?.toISOString() ?? null,
+              }))}
+            />
           </CardContent>
         </Card>
 

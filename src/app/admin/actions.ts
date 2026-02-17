@@ -9,6 +9,7 @@ import type { Role } from "@/lib/rbac";
 import { eq, inArray, and } from "drizzle-orm";
 import { logAudit } from "@/lib/audit";
 import { requireCsrfToken } from "@/lib/csrf";
+import { fireWebhookEvent } from "@/lib/webhooks";
 
 const VALID_ROLES: Role[] = ["admin", "manager", "member", "viewer"];
 
@@ -197,6 +198,10 @@ export async function bulkArchiveProjects(
       entity: "project",
       details: JSON.stringify({ projectIds }),
     });
+
+    for (const pid of projectIds) {
+      fireWebhookEvent("project.archived", { projectId: pid, userId: user.id }).catch(() => {});
+    }
 
     revalidatePath("/admin");
     revalidatePath("/projects");

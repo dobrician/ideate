@@ -12,6 +12,7 @@ import { eq } from "drizzle-orm";
 import { randomUUID } from "crypto";
 import { logAudit } from "@/lib/audit";
 import { requireCsrfToken } from "@/lib/csrf";
+import { fireWebhookEvent } from "@/lib/webhooks";
 
 /**
  * Project validation schema
@@ -73,6 +74,8 @@ export async function createProject(formData: FormData) {
       entityId: projectId,
       details: JSON.stringify({ title }),
     });
+
+    fireWebhookEvent("project.created", { projectId, title, userId: user.id }).catch(() => {});
 
     revalidatePath("/projects");
     redirect(`/projects/${projectId}`);
@@ -146,6 +149,10 @@ export async function updateProject(projectId: string, formData: FormData) {
       entityId: projectId,
       details: JSON.stringify({ title }),
     });
+
+    if (status === "archived" && existingProject[0].status !== "archived") {
+      fireWebhookEvent("project.archived", { projectId, title, userId: user.id }).catch(() => {});
+    }
 
     revalidatePath(`/projects/${projectId}`);
     revalidatePath("/projects");

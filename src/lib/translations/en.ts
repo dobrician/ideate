@@ -588,4 +588,22 @@ export const en: Record<string, string> = {
   "archive.unarchiving": "Unarchiving...",
   "archive.unarchived": "Project unarchived",
   "archive.unarchiveFailed": "Failed to unarchive project",
+
+  // Webhooks
+  "webhooks.title": "Webhooks",
+  "webhooks.description": "Configure webhook URLs to receive event notifications",
+  "webhooks.urlPlaceholder": "https://example.com/webhook",
+  "webhooks.add": "Add Webhook",
+  "webhooks.creating": "Creating...",
+  "webhooks.created": "Webhook created",
+  "webhooks.createFailed": "Failed to create webhook",
+  "webhooks.deleted": "Webhook deleted",
+  "webhooks.deleteFailed": "Failed to delete webhook",
+  "webhooks.updateFailed": "Failed to update webhook",
+  "webhooks.delete": "Delete webhook",
+  "webhooks.enable": "Enable webhook",
+  "webhooks.disable": "Disable webhook",
+  "webhooks.none": "No webhooks configured",
+  "webhooks.secretReveal": "Save this secret — it will not be shown again:",
+  "webhooks.dismissSecret": "Dismiss",
 };
