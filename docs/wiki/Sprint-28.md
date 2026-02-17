@@ -16,7 +16,7 @@ Based on unified analysis from Claude + Codex (see docs/sprint28-unified-plan.md
 - [x] Goal 8: Mobile nav overflow resilience
 
 **Testing:**
-- [ ] Goal 9: Playwright mobile device projects
+- [x] Goal 9: Playwright mobile device projects
 - [ ] Goal 10: Mobile E2E test cases
 
 ## Constraints
