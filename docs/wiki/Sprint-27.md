@@ -14,7 +14,7 @@ Based on unified analysis from Claude + Codex (see docs/sprint27-unified-plan.md
 - [x] Goal 4: Accessibility fixes (vote buttons, suggestion cards, similarity warnings)
 - [x] Goal 5: Vote animation: instant optimistic feedback
 - [x] Goal 6: Center-anchored vote bar with smooth transitions
-- [ ] Goal 7: Proposal card polish: expand/collapse animation
+- [x] Goal 7: Proposal card polish: expand/collapse animation
 - [ ] Goal 8: Mobile touch UX hardening
 
 **Testing & Cleanup:**

@@ -174,7 +174,7 @@ function ProposalItem({
   return (
     <AccordionItem
       value={proposal.id}
-      className="rounded-lg border bg-card"
+      className="rounded-lg border bg-card transition-shadow duration-200 data-[state=open]:shadow-md"
     >
       <AccordionTrigger className="relative overflow-hidden py-3 hover:no-underline">
         <div className="pointer-events-none absolute inset-0" aria-hidden="true">
