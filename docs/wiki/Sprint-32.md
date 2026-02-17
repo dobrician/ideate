@@ -12,7 +12,7 @@
 
 - [x] **Goal 3: Profile page restructure with tabs** — Profile page is too long (5 sections stacked). Split into tabbed sections: Account, Security, My Projects, My Proposals. Use shadcn/ui Tabs component. Add "Show more" with default limit of 3-5 items for project/proposal lists. File: `src/app/profile/page.tsx`.
 
-- [ ] **Goal 4: Admin panel mobile responsiveness** — User table is illegible on mobile (truncated emails, "--" for names). Use responsive card layout for mobile showing Email prominently, Role as badge, hide Name when empty. Show "Not set" in muted text instead of "--". Audit log entries: use relative timestamps ("2h ago"), truncate descriptions with expand. File: `src/app/admin/page.tsx`, `src/app/admin/user-role-manager.tsx`.
+- [x] **Goal 4: Admin panel mobile responsiveness** — User table is illegible on mobile (truncated emails, "--" for names). Use responsive card layout for mobile showing Email prominently, Role as badge, hide Name when empty. Show "Not set" in muted text instead of "--". Audit log entries: use relative timestamps ("2h ago"), truncate descriptions with expand. File: `src/app/admin/page.tsx`, `src/app/admin/user-role-manager.tsx`.
 
 - [ ] **Goal 5: Navbar and form consistency** — Increase spacing between navbar icons for 44px minimum tap targets on mobile. Standardize all form inputs to bordered box style (not underline). Apply consistent `truncate` + `text-overflow: ellipsis` + `title` attributes on all project/proposal name displays. Add "Ideate" brand text to forgot-password card header for consistency with login/register.
 

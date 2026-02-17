@@ -237,6 +237,7 @@ export const en: Record<string, string> = {
   "admin.searchUsers": "Search users...",
   "admin.allRoles": "All roles",
   "admin.showingUsers": "{from}–{to} of {total} users",
+  "admin.nameNotSet": "Not set",
 
   // Auth
   "auth.signIn": "Sign in to Ideate",

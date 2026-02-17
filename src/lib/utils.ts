@@ -38,3 +38,27 @@ export function formatDateTime(
   const dateFmt = locale === "ro" ? "ro-RO" : "en-US";
   return new Date(date).toLocaleString(dateFmt);
 }
+
+/**
+ * Format a date as a relative time string ("2h ago", "3d ago").
+ * Falls back to short date for anything older than 30 days.
+ */
+export function formatRelativeTime(
+  date: string | number | Date | null | undefined,
+  locale: string,
+  t: (key: string, vars?: Record<string, string | number>) => string,
+): string {
+  if (!date) return "";
+  const now = Date.now();
+  const then = new Date(date).getTime();
+  const diffMs = now - then;
+  const diffMins = Math.floor(diffMs / 60000);
+  const diffHours = Math.floor(diffMs / 3600000);
+  const diffDays = Math.floor(diffMs / 86400000);
+
+  if (diffMins < 1) return t("time.minutesAgo", { count: 1 });
+  if (diffMins < 60) return t("time.minutesAgo", { count: diffMins });
+  if (diffHours < 24) return t("time.hoursAgo", { count: diffHours });
+  if (diffDays <= 30) return t("time.daysAgo", { count: diffDays });
+  return formatDate(date, locale, "short");
+}

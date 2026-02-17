@@ -36,7 +36,7 @@ const ROLE_COLORS: Record<string, string> = {
 };
 
 /**
- * User role management table with inline role editing, search, and pagination
+ * User role management with responsive card layout (mobile) and table (desktop)
  */
 export function UserRoleManager({
   users,
@@ -80,6 +80,37 @@ export function UserRoleManager({
     }
   }
 
+  function getUserName(u: UserData): string | null {
+    const name = [u.firstName, u.lastName].filter(Boolean).join(" ");
+    return name || null;
+  }
+
+  function renderRoleControl(u: UserData) {
+    const isSelf = u.id === currentUserId;
+    if (isSelf) {
+      return (
+        <Badge className={ROLE_COLORS[u.role] || ""} variant="outline">
+          {t(`role.${u.role}`)} {t("admin.you")}
+        </Badge>
+      );
+    }
+    return (
+      <select
+        value={u.role}
+        onChange={(e) => handleRoleChange(u.id, e.target.value)}
+        disabled={loadingId === u.id}
+        aria-label={t("a11y.changeRoleFor", { email: u.email })}
+        className="rounded border border-input bg-background px-2 py-2 text-base text-foreground md:text-xs"
+      >
+        {ROLES.map((r) => (
+          <option key={r} value={r}>
+            {t(`role.${r}`)}
+          </option>
+        ))}
+      </select>
+    );
+  }
+
   return (
     <div className="space-y-4">
       {/* Search & filter bar */}
@@ -106,70 +137,73 @@ export function UserRoleManager({
         </select>
       </div>
 
-      {/* Table */}
-      <div className="overflow-x-auto">
-        <table className="w-full text-sm">
-          <thead>
-            <tr className="border-b text-left">
-              <th className="pb-2 font-medium">{t("admin.email")}</th>
-              <th className="pb-2 font-medium">{t("admin.name")}</th>
-              <th className="pb-2 font-medium">{t("admin.role")}</th>
-              <th className="pb-2 font-medium">{t("admin.joined")}</th>
-            </tr>
-          </thead>
-          <tbody>
-            {paginated.length === 0 ? (
-              <tr>
-                <td colSpan={4} className="py-8 text-center text-muted-foreground">
-                  {t("search.noResults")}
-                </td>
-              </tr>
-            ) : (
-              paginated.map((u) => {
-                const isSelf = u.id === currentUserId;
-                const name =
-                  [u.firstName, u.lastName].filter(Boolean).join(" ") || "\u2014";
+      {paginated.length === 0 ? (
+        <p className="py-8 text-center text-sm text-muted-foreground">
+          {t("search.noResults")}
+        </p>
+      ) : (
+        <>
+          {/* Mobile card layout */}
+          <div className="space-y-3 md:hidden">
+            {paginated.map((u) => {
+              const name = getUserName(u);
+              return (
+                <div key={u.id} className="rounded-lg border p-3 space-y-2">
+                  <div className="flex items-start justify-between gap-2">
+                    <p className="min-w-0 break-all text-sm font-medium">{u.email}</p>
+                    {renderRoleControl(u)}
+                  </div>
+                  {name && (
+                    <p className="text-xs text-muted-foreground">{name}</p>
+                  )}
+                  <p className="text-xs text-muted-foreground">
+                    {u.createdAt ? formatDate(u.createdAt, locale, "short") : ""}
+                  </p>
+                </div>
+              );
+            })}
+          </div>
 
-                return (
-                  <tr key={u.id} className="border-b last:border-0">
-                    <td className="max-w-[150px] truncate py-2 pr-4">{u.email}</td>
-                    <td className="py-2 pr-4">{name}</td>
-                    <td className="py-2 pr-4">
-                      {isSelf ? (
-                        <Badge
-                          className={ROLE_COLORS[u.role] || ""}
-                          variant="outline"
-                        >
-                          {t(`role.${u.role}`)} {t("admin.you")}
-                        </Badge>
-                      ) : (
-                        <select
-                          value={u.role}
-                          onChange={(e) => handleRoleChange(u.id, e.target.value)}
-                          disabled={loadingId === u.id}
-                          aria-label={t("a11y.changeRoleFor", { email: u.email })}
-                          className="rounded border border-input bg-background px-2 py-2 text-base text-foreground md:text-xs"
-                        >
-                          {ROLES.map((r) => (
-                            <option key={r} value={r}>
-                              {t(`role.${r}`)}
-                            </option>
-                          ))}
-                        </select>
-                      )}
-                    </td>
-                    <td className="py-2 text-muted-foreground">
-                      {u.createdAt
-                        ? formatDate(u.createdAt, locale, "short")
-                        : "\u2014"}
-                    </td>
-                  </tr>
-                );
-              })
-            )}
-          </tbody>
-        </table>
-      </div>
+          {/* Desktop table layout */}
+          <div className="hidden md:block overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b text-left">
+                  <th className="pb-2 font-medium">{t("admin.email")}</th>
+                  <th className="pb-2 font-medium">{t("admin.name")}</th>
+                  <th className="pb-2 font-medium">{t("admin.role")}</th>
+                  <th className="pb-2 font-medium">{t("admin.joined")}</th>
+                </tr>
+              </thead>
+              <tbody>
+                {paginated.map((u) => {
+                  const name = getUserName(u);
+                  return (
+                    <tr key={u.id} className="border-b last:border-0">
+                      <td className="max-w-[200px] truncate py-2 pr-4" title={u.email}>
+                        {u.email}
+                      </td>
+                      <td className="py-2 pr-4">
+                        {name || (
+                          <span className="text-muted-foreground">{t("admin.nameNotSet")}</span>
+                        )}
+                      </td>
+                      <td className="py-2 pr-4">
+                        {renderRoleControl(u)}
+                      </td>
+                      <td className="py-2 text-muted-foreground">
+                        {u.createdAt
+                          ? formatDate(u.createdAt, locale, "short")
+                          : ""}
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        </>
+      )}
 
       {/* Pagination */}
       {totalPages > 1 && (

@@ -18,7 +18,7 @@ import { Users, FolderOpen, Lightbulb, ThumbsUp, ShieldX } from "lucide-react";
 import { UserRoleManager } from "./user-role-manager";
 import { StatCard } from "@/components/stat-card";
 import { getTranslations } from "@/lib/i18n-server";
-import { formatDateTime } from "@/lib/utils";
+import { formatRelativeTime } from "@/lib/utils";
 
 /**
  * Admin panel — user management, system stats, audit log
@@ -96,7 +96,7 @@ export default async function AdminPage() {
       </div>
 
       {/* Stats */}
-      <div className="mb-6 grid gap-3 grid-cols-2 sm:mb-8 sm:gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="mb-6 grid grid-cols-2 gap-3 sm:mb-8 sm:gap-4 lg:grid-cols-4">
         <StatCard
           title={t("admin.users")}
           value={Number(s?.userCount ?? 0)}
@@ -161,7 +161,7 @@ export default async function AdminPage() {
                     </span>
                     <span className="ml-auto shrink-0 text-xs text-muted-foreground">
                       {entry.createdAt
-                        ? formatDateTime(entry.createdAt, locale)
+                        ? formatRelativeTime(entry.createdAt, locale, t)
                         : ""}
                     </span>
                   </div>
