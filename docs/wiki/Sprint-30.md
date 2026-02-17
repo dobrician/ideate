@@ -9,7 +9,7 @@
 
 - [x] **Goal 2: Update Nice-to-Have.md** — Check off completed items: PDF/CSV export, real-time voting (SSE), email notifications, role-based access, audit logging, API rate limiting, search, structured logging, database backups, PWA, keyboard shortcuts.
 
-- [ ] **Goal 3: Cover vote-update.ts (0% coverage)** — Add unit tests for `emitVoteUpdate` helper with mocked DB and `emitVoteChange`. Small file (28 lines).
+- [x] **Goal 3: Cover vote-update.ts (0% coverage)** — Add unit tests for `emitVoteUpdate` helper with mocked DB and `emitVoteChange`. Small file (28 lines).
 
 - [ ] **Goal 4: Cover export.ts branch gaps (79% branch)** — Add targeted tests for uncovered lines at 59, 113-114, 391. Push branch coverage above 90%.
 
