@@ -1,0 +1,45 @@
+# Cloudflare Pages + D1 deployment configuration for Ideate
+# Usage:
+#   1. Create D1 database:  wrangler d1 create ideate-db
+#   2. Create R2 bucket:    wrangler r2 bucket create ideate-uploads
+#   3. Create KV namespace: wrangler kv namespace create RATE_LIMIT
+#   4. Apply migrations:    wrangler d1 migrations apply ideate-db --local
+#   5. Deploy:              npx @cloudflare/next-on-pages
+#
+# See scripts/cf-deploy.sh for automated deployment.
+
+name = "ideate"
+compatibility_date = "2026-02-17"
+compatibility_flags = ["nodejs_compat"]
+pages_build_output_dir = ".vercel/output/static"
+
+# ─── D1 Database (SQLite at the edge) ──────────────────────────────────
+[[d1_databases]]
+binding = "DB"
+database_name = "ideate-db"
+database_id = "REPLACE_WITH_YOUR_D1_DATABASE_ID"
+migrations_dir = "drizzle"
+
+# ─── R2 Object Storage (file attachments) ─────────────────────────────
+[[r2_buckets]]
+binding = "UPLOADS"
+bucket_name = "ideate-uploads"
+
+# ─── KV Namespace (rate limiting, sessions) ────────────────────────────
+[[kv_namespaces]]
+binding = "RATE_LIMIT"
+id = "REPLACE_WITH_YOUR_KV_NAMESPACE_ID"
+
+# ─── Environment Variables ─────────────────────────────────────────────
+# Set these in the Cloudflare Pages dashboard (Settings > Environment variables):
+#   JWT_SECRET          - JWT signing secret (min 32 chars)
+#   APP_URL             - Production URL (e.g., https://ideate.pages.dev)
+#   NEXT_PUBLIC_APP_URL - Same as APP_URL (exposed to client)
+#   GEMINI_API_KEY      - Google Gemini API key
+#   OPENAI_API_KEY      - OpenAI API key
+#   CRON_SECRET         - Cron endpoint auth secret
+#   RESEND_API_KEY      - Resend email API key (replaces SMTP)
+#   SENTRY_DSN          - Sentry error tracking DSN (optional)
+
+[vars]
+DEPLOY_TARGET = "cloudflare"

@@ -5,7 +5,7 @@
 
 ## Goals
 
-- [ ] **Goal 1: Cloudflare deployment** — Pages + D1 migration, wrangler config, deploy pipeline. Moves from Docker-only to edge deployment.
+- [x] **Goal 1: Cloudflare deployment** — Pages + D1 migration, wrangler config, deploy pipeline. Moves from Docker-only to edge deployment.
 
 - [ ] **Goal 2: Close coverage gap on `lib/digest.ts`** — Add unit tests for digest aggregation, HTML generation, and cron endpoint (currently 50% stmts).
 
