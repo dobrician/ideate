@@ -18,6 +18,8 @@ const mockDbFrom = vi.fn();
 const mockDbWhere = vi.fn();
 const mockDbLimit = vi.fn();
 const mockDbValues = vi.fn();
+const mockDbDeleteWhere = vi.fn();
+const mockDbOnConflict = vi.fn();
 
 vi.mock("@/db", () => ({
   db: {
@@ -29,13 +31,20 @@ vi.mock("@/db", () => ({
       }),
     }),
     insert: () => ({
-      values: (data: unknown) => mockDbValues(data),
+      values: (data: unknown) => {
+        mockDbValues(data);
+        return { onConflictDoNothing: () => mockDbOnConflict() };
+      },
+    }),
+    delete: () => ({
+      where: (cond: unknown) => mockDbDeleteWhere(cond),
     }),
   },
 }));
 
 vi.mock("@/db/schema", () => ({
   users: { id: "id", email: "email" },
+  revokedTokens: { jti: "jti", expiresAt: "expires_at" },
 }));
 
 describe("Auth Session Functions", () => {
@@ -46,6 +55,8 @@ describe("Auth Session Functions", () => {
     mockCookies.delete.mockReset();
     mockDbLimit.mockReset();
     mockDbValues.mockReset();
+    mockDbDeleteWhere.mockReset();
+    mockDbOnConflict.mockReset();
   });
 
   describe("setSessionCookie", () => {
@@ -90,6 +101,7 @@ describe("Auth Session Functions", () => {
       const { createSessionToken, getSession } = await import("@/lib/auth");
       const token = createSessionToken("user-123", "test@example.com");
       mockCookies.get.mockReturnValue({ value: token });
+      mockDbLimit.mockResolvedValue([]); // not revoked
 
       const session = await getSession();
       expect(session).not.toBeNull();
@@ -98,21 +110,19 @@ describe("Auth Session Functions", () => {
     });
 
     it("should rotate token when expiry is within 3 days", async () => {
-      const { createSessionToken, getSession } = await import("@/lib/auth");
       const jwt = await import("jsonwebtoken");
       const secret = process.env.JWT_SECRET!;
-      const now = Math.floor(Date.now() / 1000);
-      // Create a token that expires in 2 days (below 3-day rotation threshold)
       const token = jwt.default.sign(
         { userId: "user-123", email: "test@example.com", type: "session", jti: "rot-jti" },
         secret,
         { expiresIn: 60 * 60 * 24 * 2, issuer: process.env.APP_URL, audience: process.env.APP_URL }
       );
       mockCookies.get.mockReturnValue({ value: token });
+      mockDbLimit.mockResolvedValue([]); // not revoked
 
+      const { getSession } = await import("@/lib/auth");
       const session = await getSession();
       expect(session?.userId).toBe("user-123");
-      // setSessionCookie sets 2 cookies (session + csrf) during rotation
       expect(mockCookies.set).toHaveBeenCalledTimes(2);
     });
   });
@@ -129,9 +139,10 @@ describe("Auth Session Functions", () => {
       const { createSessionToken, getCurrentUser } = await import("@/lib/auth");
       const token = createSessionToken("user-123", "test@example.com");
       mockCookies.get.mockReturnValue({ value: token });
-      mockDbLimit.mockResolvedValue([
-        { id: "user-123", email: "test@example.com", role: "member" },
-      ]);
+      // First call: isTokenRevoked → not revoked; Second: user query
+      mockDbLimit
+        .mockResolvedValueOnce([])
+        .mockResolvedValueOnce([{ id: "user-123", email: "test@example.com", role: "member" }]);
 
       const user = await getCurrentUser();
       expect(user).toBeTruthy();
@@ -142,6 +153,7 @@ describe("Auth Session Functions", () => {
       const { createSessionToken, getCurrentUser } = await import("@/lib/auth");
       const token = createSessionToken("user-123", "test@example.com");
       mockCookies.get.mockReturnValue({ value: token });
+      // First: isTokenRevoked → not revoked; Second: user not found
       mockDbLimit.mockResolvedValue([]);
 
       const user = await getCurrentUser();
@@ -151,11 +163,61 @@ describe("Auth Session Functions", () => {
 
   describe("clearSession", () => {
     it("should delete session and CSRF cookies", async () => {
+      mockCookies.get.mockReturnValue(undefined);
       const { clearSession } = await import("@/lib/auth");
       await clearSession();
 
       expect(mockCookies.delete).toHaveBeenCalledWith("session");
       expect(mockCookies.delete).toHaveBeenCalledWith("csrf_token");
+    });
+
+    it("should revoke the JWT jti on logout", async () => {
+      const { createSessionToken, clearSession } = await import("@/lib/auth");
+      const token = createSessionToken("user-1", "a@b.com");
+      mockCookies.get.mockReturnValue({ value: token });
+
+      await clearSession();
+
+      expect(mockDbValues).toHaveBeenCalledWith(
+        expect.objectContaining({ jti: expect.any(String) })
+      );
+      expect(mockCookies.delete).toHaveBeenCalledWith("session");
+    });
+  });
+
+  describe("token revocation", () => {
+    it("should reject a revoked token in getSession", async () => {
+      const { createSessionToken, getSession } = await import("@/lib/auth");
+      const token = createSessionToken("user-1", "a@b.com");
+      mockCookies.get.mockReturnValue({ value: token });
+      // isTokenRevoked returns a match → token is revoked
+      mockDbLimit.mockResolvedValue([{ jti: "revoked" }]);
+
+      const session = await getSession();
+      expect(session).toBeNull();
+    });
+
+    it("should allow a non-revoked token in getSession", async () => {
+      const { createSessionToken, getSession } = await import("@/lib/auth");
+      const token = createSessionToken("user-1", "a@b.com");
+      mockCookies.get.mockReturnValue({ value: token });
+      // isTokenRevoked returns no match → token is valid
+      mockDbLimit.mockResolvedValue([]);
+
+      const session = await getSession();
+      expect(session).not.toBeNull();
+      expect(session?.userId).toBe("user-1");
+    });
+
+    it("revokeToken prunes expired entries and inserts", async () => {
+      const { revokeToken } = await import("@/lib/auth");
+      const futureExp = Math.floor(Date.now() / 1000) + 3600;
+      await revokeToken("test-jti", futureExp);
+
+      expect(mockDbDeleteWhere).toHaveBeenCalled();
+      expect(mockDbValues).toHaveBeenCalledWith(
+        expect.objectContaining({ jti: "test-jti" })
+      );
     });
   });
 
@@ -170,9 +232,9 @@ describe("Auth Session Functions", () => {
       const { createSessionToken, requireAuth } = await import("@/lib/auth");
       const token = createSessionToken("user-123", "test@example.com");
       mockCookies.get.mockReturnValue({ value: token });
-      mockDbLimit.mockResolvedValue([
-        { id: "user-123", email: "test@example.com", role: "member" },
-      ]);
+      mockDbLimit
+        .mockResolvedValueOnce([])
+        .mockResolvedValueOnce([{ id: "user-123", email: "test@example.com", role: "member" }]);
 
       const user = await requireAuth();
       expect(user.id).toBe("user-123");

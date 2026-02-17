@@ -120,6 +120,13 @@
       "when": 1771275600000,
       "tag": "0016_sprint38_oidc",
       "breakpoints": true
+    },
+    {
+      "idx": 17,
+      "version": "6",
+      "when": 1771276000000,
+      "tag": "0017_sprint40_revoked_tokens",
+      "breakpoints": true
     }
   ]
 }

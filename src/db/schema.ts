@@ -261,6 +261,14 @@ export const oauthAccounts = sqliteTable("oauth_accounts", {
   createdAt: integer("created_at", { mode: "timestamp" }).default(sql`(unixepoch())`),
 });
 
+// ─── Revoked Tokens ──────────────────────────────────────────────────────
+
+export const revokedTokens = sqliteTable("revoked_tokens", {
+  jti: text("jti").primaryKey(),
+  expiresAt: integer("expires_at", { mode: "timestamp" }).notNull(),
+  revokedAt: integer("revoked_at", { mode: "timestamp" }).default(sql`(unixepoch())`),
+});
+
 // ─── LLM Cache ────────────────────────────────────────────────────────────
 
 export const llmCache = sqliteTable("llm_cache", {
@@ -277,18 +285,12 @@ export const llmCache = sqliteTable("llm_cache", {
 // ─── Project Templates ───────────────────────────────────────────────────
 
 export const projectTemplates = sqliteTable("project_templates", {
-  id: text("id")
-    .primaryKey()
-    .$defaultFn(() => randomUUID()),
+  id: text("id").primaryKey().$defaultFn(() => randomUUID()),
   name: text("name").notNull(),
   description: text("description"),
   titlePrefix: text("title_prefix"),
-  deadlineOffset: integer("deadline_offset"), // days
-  defaultTags: text("default_tags"), // JSON array of tag IDs
-  createdAt: integer("created_at", { mode: "timestamp" }).default(
-    sql`(unixepoch())`
-  ),
-  updatedAt: integer("updated_at", { mode: "timestamp" }).default(
-    sql`(unixepoch())`
-  ),
+  deadlineOffset: integer("deadline_offset"),
+  defaultTags: text("default_tags"),
+  createdAt: integer("created_at", { mode: "timestamp" }).default(sql`(unixepoch())`),
+  updatedAt: integer("updated_at", { mode: "timestamp" }).default(sql`(unixepoch())`),
 });

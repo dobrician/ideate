@@ -1,8 +1,8 @@
 import jwt from "jsonwebtoken";
 import { cookies } from "next/headers";
 import { db } from "@/db";
-import { users } from "@/db/schema";
-import { eq } from "drizzle-orm";
+import { users, revokedTokens } from "@/db/schema";
+import { eq, lt } from "drizzle-orm";
 import { randomUUID } from "crypto";
 
 const SESSION_COOKIE_NAME = "session";
@@ -11,10 +11,7 @@ const MAGIC_LINK_EXPIRY = "15m"; // 15 minutes
 const SESSION_EXPIRY = "7d"; // 7 days
 const SESSION_ROTATION_THRESHOLD = 60 * 60 * 24 * 3; // Rotate token if less than 3 days remain
 
-/**
- * Read JWT_SECRET fresh from process.env on every call (not cached at module load).
- * This ensures hot-reloads and env changes take effect without restart.
- */
+/** Read JWT_SECRET fresh from process.env on every call. */
 function getJwtSecret(): string {
   const secret = process.env.JWT_SECRET || "";
   if (!secret) {
@@ -26,24 +23,16 @@ function getJwtSecret(): string {
   return secret;
 }
 
-/**
- * Read APP_URL fresh from process.env on every call.
- */
+/** Read APP_URL fresh from process.env on every call. */
 function getAppUrl(): string {
   return process.env.APP_URL || "http://localhost:3000";
 }
 
-/**
- * Payload for magic link JWT token
- */
 interface MagicLinkPayload {
   email: string;
   type: "magic-link";
 }
 
-/**
- * Payload for session JWT token
- */
 interface SessionPayload {
   userId: string;
   email: string;
@@ -54,11 +43,6 @@ interface SessionPayload {
   nbf?: number; // Not before
 }
 
-/**
- * Generate a magic link token for email authentication
- * @param email - User's email address
- * @returns JWT token string
- */
 export function generateMagicLinkToken(email: string): string {
   const payload: MagicLinkPayload = {
     email: email.toLowerCase().trim(),
@@ -71,11 +55,6 @@ export function generateMagicLinkToken(email: string): string {
   });
 }
 
-/**
- * Verify a magic link token
- * @param token - JWT token from magic link
- * @returns Email address if valid, null if invalid/expired
- */
 export function verifyMagicLinkToken(token: string): string | null {
   try {
     const payload = jwt.verify(token, getJwtSecret(), {
@@ -92,21 +71,11 @@ export function verifyMagicLinkToken(token: string): string | null {
   }
 }
 
-/**
- * Generate magic link URL
- * @param email - User's email address
- * @returns Full magic link URL
- */
 export function generateMagicLink(email: string): string {
   const token = generateMagicLinkToken(email);
   return `${getAppUrl()}/auth/verify?token=${encodeURIComponent(token)}`;
 }
 
-/**
- * Create or update user and return user ID
- * @param email - User's email address
- * @returns User ID
- */
 export async function findOrCreateUser(email: string): Promise<string> {
   const normalizedEmail = email.toLowerCase().trim();
 
@@ -132,12 +101,6 @@ export async function findOrCreateUser(email: string): Promise<string> {
   return userId;
 }
 
-/**
- * Create session token with security enhancements
- * @param userId - User's ID
- * @param email - User's email
- * @returns JWT session token
- */
 export function createSessionToken(userId: string, email: string): string {
   const payload: SessionPayload = {
     userId,
@@ -154,11 +117,6 @@ export function createSessionToken(userId: string, email: string): string {
   });
 }
 
-/**
- * Verify session token with enhanced validation
- * @param token - JWT session token
- * @returns Session payload if valid, null otherwise
- */
 export function verifySessionToken(
   token: string
 ): SessionPayload | null {
@@ -179,11 +137,6 @@ export function verifySessionToken(
   }
 }
 
-/**
- * Set session cookie with enhanced security flags
- * @param userId - User's ID
- * @param email - User's email
- */
 export async function setSessionCookie(
   userId: string,
   email: string
@@ -213,10 +166,6 @@ export async function setSessionCookie(
   });
 }
 
-/**
- * Get current session from cookie with automatic rotation
- * @returns Session payload or null if not authenticated
- */
 export async function getSession(): Promise<SessionPayload | null> {
   const cookieStore = await cookies();
   const sessionCookie = cookieStore.get(SESSION_COOKIE_NAME);
@@ -228,6 +177,11 @@ export async function getSession(): Promise<SessionPayload | null> {
   const payload = verifySessionToken(sessionCookie.value);
 
   if (!payload) {
+    return null;
+  }
+
+  // Check JWT revocation blocklist
+  if (payload.jti && (await isTokenRevoked(payload.jti))) {
     return null;
   }
 
@@ -245,10 +199,6 @@ export async function getSession(): Promise<SessionPayload | null> {
   return payload;
 }
 
-/**
- * Get current user from session
- * @returns User object or null if not authenticated
- */
 export async function getCurrentUser() {
   const session = await getSession();
 
@@ -265,19 +215,38 @@ export async function getCurrentUser() {
   return user.length > 0 ? user[0] : null;
 }
 
-/**
- * Clear session and CSRF cookies (logout)
- */
+/** Revoke a JWT by jti. Prunes expired entries on each call. */
+export async function revokeToken(jti: string, exp: number): Promise<void> {
+  await db.delete(revokedTokens).where(lt(revokedTokens.expiresAt, new Date()));
+  await db
+    .insert(revokedTokens)
+    .values({ jti, expiresAt: new Date(exp * 1000) })
+    .onConflictDoNothing();
+}
+
+export async function isTokenRevoked(jti: string): Promise<boolean> {
+  const row = await db
+    .select()
+    .from(revokedTokens)
+    .where(eq(revokedTokens.jti, jti))
+    .limit(1);
+  return row.length > 0;
+}
+
+/** Clear session cookies and revoke the current JWT. */
 export async function clearSession(): Promise<void> {
   const cookieStore = await cookies();
+  const sessionCookie = cookieStore.get(SESSION_COOKIE_NAME);
+  if (sessionCookie) {
+    const payload = verifySessionToken(sessionCookie.value);
+    if (payload?.jti && payload.exp) {
+      await revokeToken(payload.jti, payload.exp);
+    }
+  }
   cookieStore.delete(SESSION_COOKIE_NAME);
   cookieStore.delete(CSRF_COOKIE_NAME);
 }
 
-/**
- * Require authentication - throws if not authenticated
- * @returns Current user
- */
 export async function requireAuth() {
   const user = await getCurrentUser();
 

@@ -7,7 +7,7 @@
 
 - [x] **Goal 1: Fix account takeover in registerUser** — `password.ts:98-108` allows setting a password on a magic-link-only account without ownership proof. Require active session or email re-verification before adding a password.
 
-- [ ] **Goal 2: Add JWT revocation blocklist** — `jti` field is generated but never checked. Add a `revokedTokens` table and check `jti` on every auth call. Logout inserts `jti` into blocklist.
+- [x] **Goal 2: Add JWT revocation blocklist** — `jti` field is generated but never checked. Add a `revokedTokens` table and check `jti` on every auth call. Logout inserts `jti` into blocklist.
 
 - [ ] **Goal 3: Add auth error logging** — `auth.ts` lines 90 and 177 silently catch JWT verification errors. Add structured pino logging to both catch blocks.
 
