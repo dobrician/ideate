@@ -55,6 +55,8 @@ export const ro: Record<string, string> = {
   "projects.delete": "Șterge",
   "projects.confirmDelete": "Ești sigur că vrei să ștergi acest proiect?",
   "projects.back": "Înapoi la Proiecte",
+  "projects.actions": "Acțiuni",
+  "projects.moreActions": "Mai multe acțiuni",
   "projects.description": "Descriere",
   "projects.lastUpdated": "Ultima actualizare",
   "projects.never": "Niciodată",

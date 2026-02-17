@@ -6,7 +6,6 @@ import { getCurrentUser } from "@/lib/auth";
 import { hasPermission, canManageResource } from "@/lib/rbac";
 import type { Role } from "@/lib/rbac";
 import { eq } from "drizzle-orm";
-import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
   Card,
@@ -111,32 +110,17 @@ export default async function ProjectPage({ params, searchParams }: ProjectPageP
   const proposalTotalPages = Math.ceil(proposalTotal / PROPOSALS_PAGE_SIZE);
 
   return (
-    <div className="container mx-auto max-w-4xl px-4 py-6 sm:py-8 lg:max-w-6xl lg:grid lg:grid-cols-[1.6fr_1fr] lg:items-start lg:gap-6">
-      <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between lg:col-span-2">
-        <Button asChild variant="outline" size="sm">
-          <Link href="/projects">&larr; {t("projects.back")}</Link>
-        </Button>
-        <div className="flex flex-wrap gap-2">
-          <ExportButtons projectId={id} />
-          {canEdit && (
-            <>
-              <EditProjectDialog
-                projectId={id}
-                title={projectData.title}
-                description={projectData.description}
-                deadline={projectData.deadline}
-                status={projectData.status}
-              />
-              <DeleteProjectButton projectId={id} />
-            </>
-          )}
-        </div>
+    <div className="container mx-auto max-w-4xl px-4 py-4 sm:py-6 lg:max-w-6xl lg:grid lg:grid-cols-[1.6fr_1fr] lg:items-start lg:gap-6">
+      <div className="mb-3 lg:col-span-2">
+        <Link href="/projects" className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground transition-colors">
+          &larr; {t("projects.back")}
+        </Link>
       </div>
 
       <Card>
         <CardHeader>
           <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-            <div className="flex-1">
+            <div className="min-w-0 flex-1">
               <CardTitle className="text-2xl sm:text-3xl">
                 {projectData.title}
               </CardTitle>
@@ -148,6 +132,21 @@ export default async function ProjectPage({ params, searchParams }: ProjectPageP
                   <DeadlineCountdown deadline={projectData.deadline} />
                 )}
               </CardDescription>
+            </div>
+            <div className="flex flex-wrap items-center gap-1.5">
+              <ExportButtons projectId={id} />
+              {canEdit && (
+                <>
+                  <EditProjectDialog
+                    projectId={id}
+                    title={projectData.title}
+                    description={projectData.description}
+                    deadline={projectData.deadline}
+                    status={projectData.status}
+                  />
+                  <DeleteProjectButton projectId={id} />
+                </>
+              )}
             </div>
           </div>
         </CardHeader>

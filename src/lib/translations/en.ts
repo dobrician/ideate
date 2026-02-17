@@ -55,6 +55,8 @@ export const en: Record<string, string> = {
   "projects.delete": "Delete",
   "projects.confirmDelete": "Are you sure you want to delete this project?",
   "projects.back": "Back to Projects",
+  "projects.actions": "Actions",
+  "projects.moreActions": "More actions",
   "projects.description": "Description",
   "projects.lastUpdated": "Last Updated",
   "projects.never": "Never",

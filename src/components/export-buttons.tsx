@@ -27,9 +27,9 @@ export function ExportButtons({ projectId }: ExportButtonsProps) {
   return (
     <div className="flex gap-1">
       <Button
-        variant="outline"
+        variant="ghost"
         size="sm"
-        className="min-h-[44px]"
+        className="h-8 px-2 text-xs"
         onClick={() => handleExport("pdf")}
         title={t("export.pdfTooltip")}
       >
@@ -37,9 +37,9 @@ export function ExportButtons({ projectId }: ExportButtonsProps) {
         {t("export.pdf")}
       </Button>
       <Button
-        variant="outline"
+        variant="ghost"
         size="sm"
-        className="min-h-[44px]"
+        className="h-8 px-2 text-xs"
         onClick={() => handleExport("csv")}
         title={t("export.csvTooltip")}
       >

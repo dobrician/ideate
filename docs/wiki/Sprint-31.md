@@ -5,7 +5,7 @@
 
 ## Goals
 
-- [ ] **Goal 1: Project detail layout restructure** — Move action buttons (PDF, CSV, Edit, Delete) inside the project card or into a compact action bar. Replace full-width "Back to Projects" button with a simple `← Back` text link. Reduce vertical spacing between nav and content. Put Delete behind a "⋯" menu or make it less prominent (muted style, not red button).
+- [x] **Goal 1: Project detail layout restructure** — Move action buttons (PDF, CSV, Edit, Delete) inside the project card or into a compact action bar. Replace full-width "Back to Projects" button with a simple `← Back` text link. Reduce vertical spacing between nav and content. Put Delete behind a "⋯" menu or make it less prominent (muted style, not red button).
 
 - [ ] **Goal 2: Fix "+ New Proposal" button truncation on mobile** — Text gets cut off ("+ New Prop..."). Either shorten to "+ Propunere" / "+ Nou" on mobile, or use icon-only "+" button on small screens. Ensure "Proposals (N)" heading and action buttons align on the same visual line.
 
