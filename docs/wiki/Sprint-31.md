@@ -9,7 +9,7 @@
 
 - [x] **Goal 2: Fix "+ New Proposal" button truncation on mobile** — Text gets cut off ("+ New Prop..."). Either shorten to "+ Propunere" / "+ Nou" on mobile, or use icon-only "+" button on small screens. Ensure "Proposals (N)" heading and action buttons align on the same visual line.
 
-- [ ] **Goal 3: Proposal card author name wrapping** — When author name is long, it wraps awkwardly (e.g., "by Ciprian" on one line, "Dobrea" alone on next). Use `truncate` or abbreviate on small screens. Ensure consistent layout across cards.
+- [x] **Goal 3: Proposal card author name wrapping** — When author name is long, it wraps awkwardly (e.g., "by Ciprian" on one line, "Dobrea" alone on next). Use `truncate` or abbreviate on small screens. Ensure consistent layout across cards.
 
 - [ ] **Goal 4: Vote bar explanation** — Add a small tooltip or legend explaining what the green vote bar means (e.g., "Approval ratio" on hover/tap). First-time users have no context for it.
 
