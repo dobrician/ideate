@@ -23,9 +23,22 @@ export default function ForgotPasswordPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
+  const [emailError, setEmailError] = useState("");
+  const [emailTouched, setEmailTouched] = useState(false);
+
+  function validateEmail(v: string) {
+    if (!v.trim()) return t("auth.emailRequired");
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)) return t("auth.emailInvalid");
+    return "";
+  }
 
   async function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
+    const err = validateEmail(email);
+    setEmailError(err);
+    setEmailTouched(true);
+    if (err) return;
+
     setIsLoading(true);
     setError("");
 
@@ -98,7 +111,7 @@ export default function ForgotPasswordPage() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-4" noValidate>
             <div className="space-y-2">
               <Label htmlFor="email">{t("auth.email")}</Label>
               <Input
@@ -107,11 +120,16 @@ export default function ForgotPasswordPage() {
                 placeholder="you@example.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                required
+                onBlur={() => { setEmailTouched(true); setEmailError(validateEmail(email)); }}
                 disabled={isLoading}
                 autoComplete="email"
                 autoFocus
+                aria-invalid={emailTouched && !!emailError}
+                aria-describedby={emailError ? "forgot-email-error" : undefined}
               />
+              {emailTouched && emailError && (
+                <p id="forgot-email-error" className="text-xs text-red-600 dark:text-red-400">{emailError}</p>
+              )}
             </div>
 
             {error && (

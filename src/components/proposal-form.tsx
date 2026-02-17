@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -29,9 +29,27 @@ function ProposalFormFields({
     title, setTitle, description, setDescription,
     checkingSimilarity, warnings, handleFieldChange, state, projectId,
   } = form;
+  const [titleTouched, setTitleTouched] = useState(false);
+  const formRef = useRef<HTMLFormElement>(null);
+  const titleError = titleTouched && title.trim().length > 0 && title.trim().length < 5
+    ? t("projectForm.proposalTitleMin")
+    : titleTouched && !title.trim()
+    ? t("projectForm.proposalTitleRequired")
+    : undefined;
 
   return (
-    <form action={formAction} className="space-y-4">
+    <form
+      ref={formRef}
+      action={(formData) => {
+        if (!title.trim() || title.trim().length < 5) {
+          setTitleTouched(true);
+          return;
+        }
+        return formAction(formData);
+      }}
+      className="space-y-4"
+      noValidate
+    >
       <input type="hidden" name="projectId" value={projectId} />
       <input type="hidden" name="initialVote" value={initialVote} />
       <input type="hidden" name="csrfToken" value={getCsrfTokenClient()} />
@@ -41,10 +59,15 @@ function ProposalFormFields({
         <Input
           id="proposal-title" name="title"
           placeholder={t("proposalForm.titlePlaceholder")}
-          required minLength={5} maxLength={200} disabled={isPending}
+          maxLength={200} disabled={isPending}
           value={title}
           onChange={(e) => { setTitle(e.target.value); handleFieldChange(e.target.value, description); }}
+          onBlur={() => setTitleTouched(true)}
+          aria-invalid={!!titleError}
         />
+        {titleError && (
+          <p className="text-xs text-red-600 dark:text-red-400">{titleError}</p>
+        )}
       </div>
 
       <div className="space-y-1.5">

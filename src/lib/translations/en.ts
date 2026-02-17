@@ -88,6 +88,11 @@ export const en: Record<string, string> = {
   "projectForm.projectUpdated": "Project updated!",
   "projectForm.titlePlaceholder": "Q1 2026 Product Roadmap",
   "projectForm.loadError": "Failed to load project",
+  "projectForm.titleMinLength": "Title must be at least 3 characters",
+  "projectForm.titleRequiredError": "Project title is required",
+  "projectForm.deadlineRequiredError": "Deadline is required",
+  "projectForm.proposalTitleMin": "Title must be at least 5 characters",
+  "projectForm.proposalTitleRequired": "Proposal title is required",
 
   // Proposals
   "proposals.title": "Proposals",

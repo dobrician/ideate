@@ -10,7 +10,7 @@
 
 - [x] **Goal 2: Fix export (PDF/CSV)** — PDF export must produce actual PDF (use server-side HTML→PDF or rename to HTML export); CSV export must produce valid CSV. Verify downloaded file types match button labels.
 
-- [ ] **Goal 3: Styled form validation across all forms** — Replace browser-default validation tooltips with styled inline error messages on: login, registration, forgot password, create project, create proposal, comments. Include: required fields, email format, password mismatch, min length. Fix the "Creeează" typo → "Creează".
+- [x] **Goal 3: Styled form validation across all forms** — Replace browser-default validation tooltips with styled inline error messages on: login, registration, forgot password, create project, create proposal, comments. Include: required fields, email format, password mismatch, min length. Fix the "Creeează" typo → "Creează".
 
 - [ ] **Goal 4: Auth flow error feedback** — Login: show styled error for wrong credentials. Registration: show error if email exists, success message + redirect on creation. Forgot password: show confirmation message regardless of email existence (security). All auth forms must have visible feedback for every outcome.
 

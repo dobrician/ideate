@@ -40,9 +40,33 @@ export function EditProjectDialog({
   const [open, setOpen] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState("");
+  const [fieldErrors, setFieldErrors] = useState<{ title?: string; deadline?: string }>({});
+  const [touched, setTouched] = useState<Record<string, boolean>>({});
+
+  function handleBlur(field: string, value: string) {
+    setTouched((prev) => ({ ...prev, [field]: true }));
+    if (field === "title") {
+      setFieldErrors((prev) => ({
+        ...prev,
+        title: !value.trim() ? t("projectForm.titleRequiredError") : value.trim().length < 3 ? t("projectForm.titleMinLength") : undefined,
+      }));
+    }
+    if (field === "deadline") {
+      setFieldErrors((prev) => ({ ...prev, deadline: !value ? t("projectForm.deadlineRequiredError") : undefined }));
+    }
+  }
 
   async function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
+    const formData = new FormData(e.currentTarget);
+    const titleVal = (formData.get("title") as string) || "";
+    const deadlineVal = (formData.get("deadline") as string) || "";
+    const tErr = !titleVal.trim() ? t("projectForm.titleRequiredError") : titleVal.trim().length < 3 ? t("projectForm.titleMinLength") : undefined;
+    const dErr = !deadlineVal ? t("projectForm.deadlineRequiredError") : undefined;
+    setFieldErrors({ title: tErr, deadline: dErr });
+    setTouched({ title: true, deadline: true });
+    if (tErr || dErr) return;
+
     setIsSaving(true);
     setError("");
 
@@ -83,7 +107,7 @@ export function EditProjectDialog({
           <DialogTitle>{t("projectForm.editTitle")}</DialogTitle>
           <DialogDescription>{t("projectForm.editDesc")}</DialogDescription>
         </DialogHeader>
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-4" noValidate>
           <input type="hidden" name="csrfToken" value={getCsrfTokenClient()} />
 
           <div className="space-y-1.5">
@@ -93,11 +117,14 @@ export function EditProjectDialog({
               name="title"
               type="text"
               defaultValue={title}
-              required
-              minLength={3}
               maxLength={200}
               disabled={isSaving}
+              onBlur={(e) => handleBlur("title", e.target.value)}
+              aria-invalid={touched.title && !!fieldErrors.title}
             />
+            {touched.title && fieldErrors.title && (
+              <p className="text-xs text-red-600 dark:text-red-400">{fieldErrors.title}</p>
+            )}
           </div>
 
           <div className="space-y-1.5">
@@ -119,10 +146,14 @@ export function EditProjectDialog({
               name="deadline"
               type="date"
               defaultValue={deadlineStr}
-              required
               min={new Date().toISOString().split("T")[0]}
               disabled={isSaving}
+              onBlur={(e) => handleBlur("deadline", e.target.value)}
+              aria-invalid={touched.deadline && !!fieldErrors.deadline}
             />
+            {touched.deadline && fieldErrors.deadline && (
+              <p className="text-xs text-red-600 dark:text-red-400">{fieldErrors.deadline}</p>
+            )}
           </div>
 
           <div className="space-y-1.5">

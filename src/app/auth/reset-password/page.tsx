@@ -29,6 +29,32 @@ export default function ResetPasswordPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
+  const [fieldErrors, setFieldErrors] = useState<{ password?: string; confirmPassword?: string }>({});
+  const [touched, setTouched] = useState<Record<string, boolean>>({});
+
+  function validatePw(v: string) {
+    if (!v) return t("auth.passwordRequired");
+    if (v.length < 8) return t("auth.passwordMinLength");
+    if (!/[A-Z]/.test(v)) return t("auth.passwordUppercase");
+    if (!/[a-z]/.test(v)) return t("auth.passwordLowercase");
+    if (!/\d/.test(v)) return t("auth.passwordNumber");
+    return undefined;
+  }
+
+  function validateConfirm(pw: string, cpw: string) {
+    if (!cpw) return t("auth.confirmPasswordRequired");
+    if (pw !== cpw) return t("auth.passwordMismatch");
+    return undefined;
+  }
+
+  function handleBlur(field: string) {
+    setTouched((prev) => ({ ...prev, [field]: true }));
+    if (field === "password") {
+      setFieldErrors((prev) => ({ ...prev, password: validatePw(password) }));
+    } else {
+      setFieldErrors((prev) => ({ ...prev, confirmPassword: validateConfirm(password, confirmPassword) }));
+    }
+  }
 
   if (!token) {
     return (
@@ -52,14 +78,14 @@ export default function ResetPasswordPage() {
 
   async function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
+    const pwErr = validatePw(password);
+    const cpErr = validateConfirm(password, confirmPassword);
+    setFieldErrors({ password: pwErr, confirmPassword: cpErr });
+    setTouched({ password: true, confirmPassword: true });
+    if (pwErr || cpErr) return;
+
     setIsLoading(true);
     setError("");
-
-    if (password !== confirmPassword) {
-      setError(t("auth.passwordMismatch"));
-      setIsLoading(false);
-      return;
-    }
 
     try {
       const response = await fetch("/api/auth/reset-password", {
@@ -123,7 +149,7 @@ export default function ResetPasswordPage() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-4" noValidate>
             <div className="space-y-2">
               <Label htmlFor="password">{t("auth.newPassword")}</Label>
               <PasswordInput
@@ -131,15 +157,19 @@ export default function ResetPasswordPage() {
                 placeholder={t("auth.createNewPassword")}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                required
+                onBlur={() => handleBlur("password")}
                 disabled={isLoading}
                 autoComplete="new-password"
                 autoFocus
-                minLength={8}
+                aria-invalid={touched.password && !!fieldErrors.password}
+                aria-describedby={touched.password && fieldErrors.password ? "reset-pw-error" : "reset-pw-hint"}
               />
-              <p className="text-xs text-muted-foreground">
+              <p id="reset-pw-hint" className="text-xs text-muted-foreground">
                 {t("auth.passwordRequirements")}
               </p>
+              {touched.password && fieldErrors.password && (
+                <p id="reset-pw-error" className="text-xs text-red-600 dark:text-red-400">{fieldErrors.password}</p>
+              )}
             </div>
             <div className="space-y-2">
               <Label htmlFor="confirmPassword">{t("auth.confirmPassword")}</Label>
@@ -148,11 +178,15 @@ export default function ResetPasswordPage() {
                 placeholder={t("auth.confirmNewPassword")}
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
-                required
+                onBlur={() => handleBlur("confirmPassword")}
                 disabled={isLoading}
                 autoComplete="new-password"
-                minLength={8}
+                aria-invalid={touched.confirmPassword && !!fieldErrors.confirmPassword}
+                aria-describedby={fieldErrors.confirmPassword ? "reset-cpw-error" : undefined}
               />
+              {touched.confirmPassword && fieldErrors.confirmPassword && (
+                <p id="reset-cpw-error" className="text-xs text-red-600 dark:text-red-400">{fieldErrors.confirmPassword}</p>
+              )}
             </div>
 
             {error && (

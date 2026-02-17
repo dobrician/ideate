@@ -91,6 +91,11 @@ export const ro: Record<string, string> = {
   "projectForm.projectUpdated": "Proiect actualizat!",
   "projectForm.titlePlaceholder": "Foaie de parcurs produse T1 2026",
   "projectForm.loadError": "Nu s-a putut încărca proiectul",
+  "projectForm.titleMinLength": "Titlul trebuie să aibă minim 3 caractere",
+  "projectForm.titleRequiredError": "Titlul proiectului este obligatoriu",
+  "projectForm.deadlineRequiredError": "Termenul limită este obligatoriu",
+  "projectForm.proposalTitleMin": "Titlul trebuie să aibă minim 5 caractere",
+  "projectForm.proposalTitleRequired": "Titlul propunerii este obligatoriu",
 
   // Proposals
   "proposals.title": "Propuneri",

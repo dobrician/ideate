@@ -251,7 +251,7 @@ export function CommentThread({ comments, hiddenFields, currentUserId }: Comment
         )}
       </div>
       <div className="border-t pt-2 pb-[max(env(safe-area-inset-bottom),0.5rem)] sm:pt-3">
-        <form ref={formRef} action={formAction}>
+        <form ref={formRef} action={formAction} noValidate>
           {Object.entries(hiddenFields).map(([name, value]) => (
             <input key={name} type="hidden" name={name} value={value} />
           ))}
@@ -262,7 +262,6 @@ export function CommentThread({ comments, hiddenFields, currentUserId }: Comment
               name="content"
               placeholder={t("comments.placeholder")}
               rows={1}
-              required
               maxLength={2000}
               disabled={isPending}
               onKeyDown={handleKeyDown}

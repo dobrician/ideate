@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, FormEvent } from "react";
+import { useState, FormEvent, useCallback } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -37,9 +37,37 @@ export default function LoginPage() {
   const [needsVerification, setNeedsVerification] = useState(false);
   const [resendLoading, setResendLoading] = useState(false);
   const [resendSuccess, setResendSuccess] = useState(false);
+  const [fieldErrors, setFieldErrors] = useState<{ email?: string; password?: string }>({});
+  const [touched, setTouched] = useState<Record<string, boolean>>({});
+
+  const validateLoginEmail = useCallback(
+    (v: string) => {
+      if (!v.trim()) return t("auth.emailRequired");
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)) return t("auth.emailInvalid");
+      return undefined;
+    },
+    [t]
+  );
+
+  function handleBlur(field: string) {
+    setTouched((prev) => ({ ...prev, [field]: true }));
+    if (field === "email") {
+      setFieldErrors((prev) => ({ ...prev, email: validateLoginEmail(email) }));
+    } else if (field === "password") {
+      setFieldErrors((prev) => ({
+        ...prev,
+        password: !password ? t("auth.passwordRequired") : undefined,
+      }));
+    }
+  }
 
   async function handleMagicLink(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
+    const emailErr = validateLoginEmail(email);
+    setFieldErrors({ email: emailErr });
+    setTouched({ email: true });
+    if (emailErr) return;
+
     setIsLoading(true);
     setError("");
     setSuccess(false);
@@ -66,6 +94,12 @@ export default function LoginPage() {
 
   async function handlePasswordLogin(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
+    const emailErr = validateLoginEmail(email);
+    const passwordErr = !password ? t("auth.passwordRequired") : undefined;
+    setFieldErrors({ email: emailErr, password: passwordErr });
+    setTouched({ email: true, password: true });
+    if (emailErr || passwordErr) return;
+
     setIsLoading(true);
     setError("");
     setNeedsVerification(false);
@@ -162,7 +196,7 @@ export default function LoginPage() {
               </Button>
             </div>
           ) : mode === "password" ? (
-            <form onSubmit={handlePasswordLogin} className="space-y-4">
+            <form onSubmit={handlePasswordLogin} className="space-y-4" noValidate>
               <div className="space-y-2">
                 <Label htmlFor="email">{t("auth.email")}</Label>
                 <Input
@@ -171,11 +205,16 @@ export default function LoginPage() {
                   placeholder="you@example.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  required
+                  onBlur={() => handleBlur("email")}
                   disabled={isLoading}
                   autoComplete="email"
                   autoFocus
+                  aria-invalid={touched.email && !!fieldErrors.email}
+                  aria-describedby={fieldErrors.email ? "login-email-error" : undefined}
                 />
+                {touched.email && fieldErrors.email && (
+                  <p id="login-email-error" className="text-xs text-red-600 dark:text-red-400">{fieldErrors.email}</p>
+                )}
               </div>
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
@@ -192,10 +231,15 @@ export default function LoginPage() {
                   placeholder="Enter your password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  required
+                  onBlur={() => handleBlur("password")}
                   disabled={isLoading}
                   autoComplete="current-password"
+                  aria-invalid={touched.password && !!fieldErrors.password}
+                  aria-describedby={fieldErrors.password ? "login-password-error" : undefined}
                 />
+                {touched.password && fieldErrors.password && (
+                  <p id="login-password-error" className="text-xs text-red-600 dark:text-red-400">{fieldErrors.password}</p>
+                )}
               </div>
 
               {error && (
@@ -260,7 +304,7 @@ export default function LoginPage() {
               </p>
             </form>
           ) : (
-            <form onSubmit={handleMagicLink} className="space-y-4">
+            <form onSubmit={handleMagicLink} className="space-y-4" noValidate>
               <p className="text-sm text-muted-foreground">
                 {t("auth.magicLinkExplainer")}
               </p>
@@ -272,11 +316,16 @@ export default function LoginPage() {
                   placeholder="you@example.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  required
+                  onBlur={() => handleBlur("email")}
                   disabled={isLoading}
                   autoComplete="email"
                   autoFocus
+                  aria-invalid={touched.email && !!fieldErrors.email}
+                  aria-describedby={fieldErrors.email ? "magic-email-error" : undefined}
                 />
+                {touched.email && fieldErrors.email && (
+                  <p id="magic-email-error" className="text-xs text-red-600 dark:text-red-400">{fieldErrors.email}</p>
+                )}
               </div>
 
               {error && (
