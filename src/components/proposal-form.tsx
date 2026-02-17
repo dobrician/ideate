@@ -110,9 +110,10 @@ function ProposalFormFields({
             rows={3} maxLength={5000} disabled={isPending}
             value={description}
             onChange={(e) => { setDescription(e.target.value); handleFieldChange(title, e.target.value); }}
+            aria-describedby={`proposal-description-hint${state?.error ? " proposal-form-error" : ""}`}
           />
         )}
-        <p className="text-xs text-muted-foreground">{t("proposalForm.markdownHint")}</p>
+        <p id="proposal-description-hint" className="text-xs text-muted-foreground">{t("proposalForm.markdownHint")}</p>
         {showPreview && <input type="hidden" name="description" value={description} />}
       </div>
 
@@ -159,7 +160,7 @@ function ProposalFormFields({
       </div>
 
       {state?.error && (
-        <div className="rounded-md bg-red-50 p-3 dark:bg-red-950" role="alert">
+        <div id="proposal-form-error" className="rounded-md bg-red-50 p-3 dark:bg-red-950" role="alert">
           <p className="text-sm text-red-800 dark:text-red-200">{state.error}</p>
         </div>
       )}
