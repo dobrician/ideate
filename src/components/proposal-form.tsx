@@ -180,16 +180,17 @@ function ProposalFormFields({
 export function ProposalForm(props: ProposalFormProps) {
   const form = useProposalForm(props);
   const [open, setOpen] = useState(false);
+  const { state, t, resetForm } = form;
 
   useEffect(() => {
-    if (!form.state) return;
-    if (form.state.success) {
-      toast.success(form.t("proposalForm.created"));
-      form.resetForm();
+    if (!state) return;
+    if (state.success) {
+      toast.success(t("proposalForm.created"));
+      resetForm();
       requestAnimationFrame(() => setOpen(false));
     }
-    if (form.state.error) toast.error(form.state.error);
-  }, [form.state, form.t, form.resetForm]);
+    if (state.error) toast.error(state.error);
+  }, [state, t, resetForm]);
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -220,12 +221,13 @@ export function ProposalForm(props: ProposalFormProps) {
  */
 export function ProposalFormInline(props: ProposalFormProps) {
   const form = useProposalForm(props);
+  const { state: inlineState, t: inlineT, resetForm: inlineResetForm } = form;
 
   useEffect(() => {
-    if (!form.state) return;
-    if (form.state.success) { toast.success(form.t("proposalForm.created")); form.resetForm(); }
-    if (form.state.error) toast.error(form.state.error);
-  }, [form.state, form.t, form.resetForm]);
+    if (!inlineState) return;
+    if (inlineState.success) { toast.success(inlineT("proposalForm.created")); inlineResetForm(); }
+    if (inlineState.error) toast.error(inlineState.error);
+  }, [inlineState, inlineT, inlineResetForm]);
 
   return (
     <div data-rsc-content className="rounded-lg border bg-card p-4">
