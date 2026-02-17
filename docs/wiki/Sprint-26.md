@@ -18,7 +18,7 @@ Based on unified analysis from Claude + Codex (see docs/sprint26-unified-plan.md
 - [ ] Goal 8: Include project comments in export
 
 **Testing:**
-- [ ] Goal 3: CommentThread + ChatBubble component render tests
+- [x] Goal 3: CommentThread + ChatBubble component render tests
 - [ ] Goal 4: Scroll and new-message indicator tests
 
 ## Constraints
