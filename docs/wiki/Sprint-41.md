@@ -5,7 +5,7 @@
 
 ## Goals
 
-- [ ] **Goal 1: Inline getProjectComments and remove db/queries.ts** — `db/queries.ts` is a lone outlier with a single function while all other queries are page-local. Move the query inline to its sole caller (`projects/[id]/page.tsx`) and delete the file.
+- [x] **Goal 1: Inline getProjectComments and remove db/queries.ts** — `db/queries.ts` is a lone outlier with a single function while all other queries are page-local. Move the query inline to its sole caller (`projects/[id]/page.tsx`) and delete the file.
 
 - [ ] **Goal 2: Replace hardcoded "en-US" fallback in export formatDate** — `lib/export-types.ts` uses `locale ?? "en-US"`. Fall back to `process.env.LOCALE || "en-US"` to match the locale strategy used in `lib/ai.ts`.
 

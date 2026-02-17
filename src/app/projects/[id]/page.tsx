@@ -1,7 +1,7 @@
 import { notFound, redirect } from "next/navigation";
 import type { Metadata } from "next";
 import { db } from "@/db";
-import { projects } from "@/db/schema";
+import { comments, projects, users } from "@/db/schema";
 import { getCurrentUser } from "@/lib/auth";
 import { hasPermission, canManageResource } from "@/lib/rbac";
 import type { Role } from "@/lib/rbac";
@@ -24,7 +24,6 @@ import { DeadlineCountdown } from "@/components/deadline-countdown";
 import { getProjectProposals, PROPOSALS_PAGE_SIZE, isValidSort } from "./queries";
 import type { ProposalSort } from "./queries";
 import { ProposalSortSelector } from "@/components/proposal-sort-selector";
-import { getProjectComments } from "@/db/queries";
 import { Pagination } from "@/components/pagination";
 import { ProjectComments } from "@/components/project-comments";
 import { getTranslations } from "@/lib/i18n-server";
@@ -107,11 +106,35 @@ export default async function ProjectPage({ params, searchParams }: ProjectPageP
   const proposalPage = Math.max(1, parseInt(sp.page || "1", 10) || 1);
   const proposalSort: ProposalSort = isValidSort(sp.sort || "") ? sp.sort as ProposalSort : "votes";
   const proposalOffset = (proposalPage - 1) * PROPOSALS_PAGE_SIZE;
-  const [{ proposals: proposalsWithStats, total: proposalTotal }, projectComments] =
+  const [{ proposals: proposalsWithStats, total: proposalTotal }, commentRows] =
     await Promise.all([
       getProjectProposals(id, user.id, PROPOSALS_PAGE_SIZE, proposalOffset, proposalSort),
-      getProjectComments(id),
+      db
+        .select({
+          id: comments.id,
+          content: comments.content,
+          parentId: comments.parentId,
+          userId: comments.userId,
+          createdAt: comments.createdAt,
+          userEmail: users.email,
+          userName: users.firstName,
+          avatarUrl: users.avatarUrl,
+        })
+        .from(comments)
+        .leftJoin(users, eq(comments.userId, users.id))
+        .where(eq(comments.projectId, id))
+        .orderBy(comments.createdAt),
     ]);
+  const projectComments = commentRows.map((r) => ({
+    id: r.id,
+    content: r.content,
+    parentId: r.parentId,
+    userId: r.userId,
+    userEmail: r.userEmail ?? undefined,
+    userName: r.userName ?? undefined,
+    avatarUrl: r.avatarUrl ?? undefined,
+    createdAt: r.createdAt,
+  }));
   const proposalTotalPages = Math.ceil(proposalTotal / PROPOSALS_PAGE_SIZE);
 
   return (
