@@ -1,715 +1,417 @@
 # Ideate Deep Analysis Report
 
-**Date:** 2026-02-16
-**Prepared for:** Sprint 16 Planning
-**Scope:** Full codebase audit post-Sprint 15 (diagnostics, security review, tech debt, production readiness)
+**Date:** 2026-02-17
+**Prepared for:** Sprint 31 Planning
+**Scope:** Full codebase audit — architecture, security, performance, testing, UX, accessibility, tech debt, DevOps
 
 ---
 
-## Diagnostic Results
+## Executive Summary
+
+Ideate is a well-structured, feature-complete Next.js 16 application with SQLite (better-sqlite3 + Drizzle ORM), JWT auth, i18n (EN/RO), AI-powered suggestions (Gemini + OpenAI), and real-time voting (SSE). The codebase is in strong shape: **zero TypeScript errors**, **808 tests (all passing)**, **99% statement / 94% branch coverage**, and **zero TODO/FIXME markers**. The Docker setup is production-ready with multi-stage builds and health checks.
+
+Key areas for improvement: 4 security findings (1 high, 3 medium), 13 accessibility gaps (3 critical WCAG violations), missing enterprise features (teams, audit export, SSO), and several code quality items (duplicated functions, missing Zod validation on AI endpoints).
+
+---
+
+## 1. Diagnostic Results
 
 | Check | Result |
 |-------|--------|
 | `tsc --noEmit` | **Clean** — zero errors, zero warnings |
-| `npm audit` | **4 moderate** — esbuild via drizzle-kit (dev dependency only, not in production bundle) |
-| `vitest --coverage` | **579 tests, 33 files, all passing** |
-| Statement coverage | **96.53%** |
-| Branch coverage | **88.44%** |
-| Function coverage | **98.38%** |
-| Line coverage | **97.95%** |
+| `npm run build` | **Clean** — Next.js 16.1.6 (Turbopack), 12s build, 36 routes |
+| `npm audit` | **4 moderate** — esbuild via drizzle-kit (dev dependency only) |
+| `npm outdated` | 3 packages: eslint 9→10 (major), lucide-react patch, shadcn patch |
+| `vitest --coverage` | **808 tests, 54 files, all passing** |
+| Statement coverage | **99.07%** |
+| Branch coverage | **93.85%** |
+| Function coverage | **100%** |
+| Line coverage | **99.50%** |
+| TODO/FIXME/HACK | **Zero** — no markers found in source |
+| Total source lines | **14,624** (src/**/*.ts + src/**/*.tsx) |
+| Total test lines | **11,435** (tests/unit/**) |
+| E2E tests | **16 files** (tests/e2e/) |
 
-### Coverage Gaps
+### Remaining Coverage Gaps
 
-| File | Stmts | Branch | Notes |
-|------|-------|--------|-------|
-| `csrf-client.ts` | 0% | 0% | Client-side cookie reader — no JSDOM cookie support in tests |
-| `stat-card.tsx` | 92.3% | 71.4% | Conditional rendering branches |
-| `proposals/actions.ts` | 93.2% | 90.3% | Some error paths uncovered |
-| `db/index.ts` | 84.6% | 50% | Migration bootstrap paths |
-| `mail.ts` | 96.4% | 76.7% | SMTP config fallback paths |
-| `notifications.ts` | 92.7% | 83.3% | Debounce edge cases |
-
----
-
-## Open GitHub Issues
-
-| # | Title | Label |
-|---|-------|-------|
-| 19 | Project-level comments/discussions | enhancement |
-| 13 | Cloudflare deployment (Pages + D1) | nice-to-have |
-
-2 issues remain. Issue 19 has a completed design spike. Issue 13 is a deployment option (not blocking).
+| File | Stmts | Branch | Uncovered Lines |
+|------|-------|--------|-----------------|
+| `middleware.ts` | 97.8% | 96.4% | 33 |
+| `db/index.ts` | 94.6% | 83.3% | 77, 86-87 |
+| `lib/export.ts` | 99.4% | 90.7% | 179, 337, 364, 407 |
+| `lib/llm.ts` | 97.9% | 87.8% | 118, 221-225, 260 |
+| `lib/mail.ts` | 98.2% | 86.7% | 8, 11, 15-16 |
+| `lib/csrf.ts` | 95.8% | 87.5% | 32, 77 |
+| `lib/password.ts` | 100% | 97.4% | 153 |
+| `app/projects/actions.ts` | 100% | 95.8% | 63, 135 |
 
 ---
 
-## Sprint 13-15 Review: Regressions & Tech Debt
+## 2. Architecture
 
-### What Went Well
-- **32 commits** across 3 sprints, 16 issues closed (#16-31)
-- Test count grew from 562 to 579; 32/32 smoke tests passed throughout
-- CSRF fully wired into all 10 server actions (was dead code before Sprint 15)
-- Structured logging with pino replaced bare `console.error`
-- Migration errors now fail-fast with `process.exit(1)`
-- Sidebar removal completed cleanly: dead CSS/translations removed
+### Folder Structure
 
-### One Regression (Introduced & Fixed)
-- Proposal bar chart scaling bug introduced in Sprint 14, fixed in Sprint 15 (`b05b359`). Bar width was calculated as upvotes/total instead of upvotes/max. Root cause: no component tests for `proposal-list.tsx`.
+```
+src/
+  app/              Next.js App Router (pages, layouts, server actions, API routes)
+    admin/          Admin panel (user management, audit logs)
+    api/            REST endpoints (auth, CRUD, SSE, AI, export, cron)
+    auth/           Auth pages (login, register, forgot-password, reset, verify)
+    dashboard/      Dashboard page + queries
+    profile/        Profile page + actions
+    projects/       Project CRUD + proposal/vote actions
+  components/       React components
+    ui/             shadcn/ui primitives (button, card, dialog, etc.)
+    *.tsx           Feature components (header, proposal-list, comment-thread, etc.)
+  db/               Drizzle ORM schema, queries, migration runner
+  lib/              Service layer (auth, mail, LLM, export, RBAC, sanitize, i18n, etc.)
+  middleware.ts     Route protection + security headers
+```
 
-### Tech Debt Carried Forward
-1. **Component test gap** — Only `Header`/`AppShell` have component tests. `ProposalList`, `VoteButtons`, `DiscussionSheet`, `ProposalForm` have none.
-2. **In-memory rate limiter** — Resets on restart, per-process only. Ineffective for multi-instance.
-3. **Middleware skips JWT verification** — Checks cookie presence, not signature. Auth is enforced at the server action layer, so functionally safe but wasteful (requests reach server actions before rejection).
-4. **No token revocation** — Compromised JWTs valid for up to 7 days.
-5. **No backup strategy** — SQLite `data/ideate.db` has no automated backup (no litestream, no cron).
+### Data Flow
 
----
+| Concern | Mechanism | Example |
+|---------|-----------|---------|
+| Page rendering | Server Components + DB queries | `projects/[id]/page.tsx` → `queries.ts` → `db` |
+| Form mutations | Server Actions + revalidation | `proposals/actions.ts` → `db` → `revalidatePath` |
+| Auth flows | REST API + JWT cookies | `api/auth/login-password/route.ts` → `setSessionCookie` |
+| Real-time votes | SSE streaming | `api/votes/stream/route.ts` → `subscribeVotes` |
+| AI features | REST API → LLM providers | `api/proposals/suggest/route.ts` → `completeWithFallback` |
 
-## Security Assessment
+**Assessment: Clean.** Server components call DB directly. Client components mutate via server actions. API routes serve stateless requests (auth, AI, export, SSE). No mixing of concerns.
 
-### CSRF: Working End-to-End
-The previous report flagged CSRF as dead code. Sprint 15 fixed this. Current state:
+### Issues Found
 
-- Token generated on session creation (`setSessionCookie` in `auth.ts`)
-- Double-submit cookie pattern: `httpOnly: false`, `sameSite: strict`
-- Constant-time comparison via `timingSafeEqual`
-- All 10 mutation server actions call `requireCsrfToken()`
-- All client forms/buttons pass the token via hidden field or function argument
-- Auth endpoints correctly skip CSRF (pre-authentication)
-- 10 dedicated CSRF unit tests passing
+1. **`isDeadlinePassed` duplicated** in `app/projects/[id]/proposals/actions.ts:18` and `comment-actions.ts:16` — identical DB query, should be extracted to `lib/project-utils.ts`.
 
-**Verdict: No action needed.** CSRF is production-ready.
+2. **`src/db/queries.ts` inconsistency** — contains only `getProjectComments`, while all other queries are page-local (`dashboard/queries.ts`, `projects/[id]/queries.ts`). Either commit to centralized queries or move the lone function.
 
-### Remaining Security Items
-
-| Severity | Issue | Status |
-|----------|-------|--------|
-| Medium | In-memory rate limiter | Acceptable for single-instance; needs Redis for multi-instance |
-| Medium | No JWT revocation store | Acceptable risk at current user count |
-| Medium | Middleware doesn't verify JWT signature | Defense-in-depth gap; server actions do verify |
-| Low | No rate limiting on proposals/votes/search | Only auth endpoints rate-limited |
-| Low | No account lockout after repeated failures | Rate limits reset per window |
-
-**No critical or high security issues remain.**
+3. **SSE is single-process only** — `vote-events.ts` uses an in-memory `Map<string, Set<VoteListener>>`. Votes on one process won't propagate to SSE subscribers on another. Acceptable for current SQLite single-instance deployment but blocks horizontal scaling.
 
 ---
 
-## Dead Code & Unused Dependencies
+## 3. Code Quality
 
-### Dead Code Found
+### Strengths
+- **Zero TODO/FIXME markers** — clean codebase
+- **Consistent naming** — camelCase for variables/functions, PascalCase for components/types
+- **Consistent patterns** — all server actions follow the same structure (auth check → validate → mutate → revalidate → return)
+- **Good separation** — UI primitives in `components/ui/`, feature components at `components/`, service logic in `lib/`
 
-| Item | Location | Action |
-|------|----------|--------|
-| `src/lib/i18n.ts` (entire file) | 50 lines | Delete — replaced by `i18n-server.ts` + `use-locale.ts` |
-| `buildProjectSummary()` | `src/lib/ai.ts` | Exported but never imported anywhere |
-| `getAiUsageStats()` | `src/lib/llm.ts` | Exported but never called |
-| `getPermissions()` | `src/lib/rbac.ts` | Exported but never imported |
-| `requirePermission()` | `src/lib/rbac.ts` | Exported but never imported |
-| `canModifyResource()` | `src/lib/rbac.ts` | Exported but never imported |
-| `sanitizeObject()` | `src/lib/sanitize.ts` | Exported but never imported |
+### Issues
+
+| Severity | Issue | Location |
+|----------|-------|----------|
+| Medium | **Duplicate `escapeHtml`** — defined in both `lib/export.ts:423` and `lib/sanitize.ts:19` | `lib/export.ts` should import from `sanitize.ts` |
+| Medium | **Duplicate `isDeadlinePassed`** — identical function in two action files | Extract to shared utility |
+| Medium | **Duplicate `Comment` type** — defined identically in `comment-thread.tsx:16` and `proposal-list.tsx:30` | Extract to `types/` |
+| Medium | **Login page has 11 `useState` calls** (lines 33-41) | Extract to `useLoginForm` custom hook |
+| Low | **`buildCommentTree` misnaming** — function sorts comments, doesn't build a tree (`comment-thread.tsx:27`) | Rename to `sortCommentsByTime` |
+| Low | **Hardcoded `"en-US"` locale** in export date formatting (`export.ts:313,400,408`) | Should respect user locale |
+| Low | **`generateReportHtml` potentially dead code** (`export.ts:324`) | Verify usage or remove |
+| Low | **Hook placement** — `use-proposal-form.ts` in `components/` instead of `lib/` | Move to `lib/` |
+
+---
+
+## 4. Security
+
+### Strengths
+- JWT with HMAC-SHA256, secret length validation (>=32 chars), `jti` included, `issuer`/`audience` validation
+- Automatic token rotation when < 3 days remain
+- bcrypt with 12 rounds for password hashing
+- SHA-256 hash stored for reset/verification tokens (raw token sent to user, hash in DB)
+- CSRF double-submit cookie with `timingSafeEqual` — all 10 server actions protected
+- CSP, X-Frame-Options: DENY, X-Content-Type-Options: nosniff
+- Parameterized queries via Drizzle ORM — no raw SQL injection vectors
+- Rate limiting on all auth endpoints (IP + email double-gate)
+- Test seed endpoint gated by `E2E_TEST_SECRET` env var — returns 404 when not set
+- `dangerouslySetInnerHTML` used only for JSON-LD (static data, safe)
+- Input sanitization via `sanitize.ts` (escapeHtml, stripHtml, sanitizeInput)
+
+### Findings
+
+| Severity | Issue | Details |
+|----------|-------|---------|
+| **HIGH** | **Open redirect in login** | `login/page.tsx:128`: `window.location.href = searchParams.get("redirect")` follows any value including `//evil.com`. Fix: validate `redirect.startsWith("/")`. |
+| **MEDIUM** | **No JWT revocation** | `jti` field generated but no blocklist exists. Logout only deletes the cookie. A stolen token remains valid for up to 7 days. |
+| **MEDIUM** | **Account takeover path** | `password.ts:98-108`: Adding a password to a magic-link-only account requires no ownership proof (no current-password check). An attacker who knows the email can set a password. |
+| **MEDIUM** | **Missing HSTS header** | No `Strict-Transport-Security` configured anywhere. Production should have HSTS with `includeSubDomains`. |
+| **MEDIUM** | **No Zod validation on AI endpoints** | `api/proposals/suggest` and `api/proposals/similarity` cast `request.json()` directly without schema validation. Oversized payloads (arrays with thousands of entries) passed directly to LLM. |
+| **LOW** | **Middleware dot-check bypass** | `middleware.ts:79`: `pathname.includes(".")` makes any path with a dot public (e.g., `/admin/export.csv`). Should check specific file extensions. |
+| **LOW** | **No rate limiting on non-auth routes** | Only auth endpoints are rate-limited. Proposals, votes, search, AI endpoints have no rate limiting. |
+| **LOW** | **IP spoofing for rate limiting** | `request-utils.ts:9`: `x-forwarded-for` first entry used for rate limiting. Spoofable without a trusted proxy configuration. |
+| **LOW** | **Silent auth error handling** | `auth.ts:90,177`: JWT verification errors caught but not logged, making debugging harder. |
+
+---
+
+## 5. Performance
+
+### Build & Bundle
+- **Build time**: 12s with Turbopack
+- **Build output**: 345MB (`.next/`) — standard for standalone Next.js
+- **Tree-shaking**: `optimizePackageImports: ["lucide-react"]` configured
+- **Bundle analyzer**: Available via `ANALYZE=true npm run build`
+- **Image optimization**: `next/image` used in header, AVIF + WebP formats configured
+
+### Database
+- **SQLite with WAL mode** — good for concurrent reads
+- **`busy_timeout = 15000`** — handles write contention gracefully
+- **`foreign_keys = ON`** — referential integrity enforced
+- **Missing indexes**: No explicit indexes on `comments.projectId`, `comments.proposalId`, `proposals.projectId`. These are implicit via foreign keys in some DBs but not SQLite — queries will scan as data grows.
+- **`comments.parentId` has no foreign key** — orphaned replies can exist after parent deletion
+
+### SSE Implementation
+- In-process pub/sub via `Map<string, Set<VoteListener>>` — lightweight and efficient for single-instance
+- Proper cleanup on client disconnect
+- No heartbeat/keepalive — long-lived connections may be silently dropped by proxies
+
+### LLM Integration
+- Gemini primary + OpenAI fallback with per-provider 15-min throttle on 429
+- Per-hour rate limits on requests and tokens
+- Cost tracking per provider
+- Structured pino logging for every LLM call
+- No response caching — identical prompts re-query the LLM
+
+### Areas for Improvement
+| Impact | Issue |
+|--------|-------|
+| Medium | Add DB indexes on `proposals.projectId`, `comments.projectId`, `comments.proposalId` |
+| Low | Add SSE heartbeat (every 30s) to prevent proxy timeouts |
+| Low | Consider LLM response caching for identical prompts (e.g., project summaries) |
+| Low | `comments.parentId` should have a self-referencing FK or at least an index |
+
+---
+
+## 6. Test Coverage & Quality
+
+### Overview
+- **808 unit tests** across 54 files — all passing
+- **16 E2E test files** (Playwright) covering auth, voting, comments, AI, CSRF, mobile, dashboard
+- **Test-to-source ratio**: 11,435 test lines / 14,624 source lines = **0.78:1** (healthy)
+- **Coverage**: 99% stmt / 94% branch / 100% func / 99.5% line
+
+### Test Quality Assessment
+
+**Strengths:**
+- Tests verify real behavior, not implementation details — e.g., auth tests check token expiry, CSRF tests verify timing-safe comparison, LLM tests mock fetch and verify fallback logic
+- DOM tests use RTL (React Testing Library) with proper user-event interactions
+- E2E tests cover full flows: register → login → create → vote → comment → export
+- Separate `*.dom.test.tsx` files for components requiring JSDOM environment
+- DB migrations tested independently (`db-migrations.test.ts`)
+
+**Gaps:**
+- Coverage config only includes specific files — `page.tsx` and `route.ts` files are largely excluded from coverage reporting
+- No visual regression testing
+- No load/stress testing for SSE connections
+- E2E tests require a running server — no fixture isolation
+
+---
+
+## 7. UX Gaps
+
+### From `docs/ui-ux-review-chatgpt.md` — Status
+
+| Original Issue | Status |
+|----------------|--------|
+| Proposal creation feedback | **RESOLVED** — toast notifications on success/error |
+| Export functionality | **RESOLVED** — PDF/CSV export working |
+| Form validation | **RESOLVED** — inline errors, `noValidate`, `aria-invalid` |
+| Language consistency | **RESOLVED** — full i18n with EN + RO |
+| Auth feedback | **RESOLVED** — error codes, resend-verification flow |
+| Sorting/filtering/pagination | **RESOLVED** — search, sort, filter, pagination on projects + admin |
+| Loading states | **RESOLVED** — loading text, disabled buttons, spinners |
+| PWA banner overlaps content | **PARTIALLY RESOLVED** — dismissible but overlaps `fixed top-16` on mobile |
+| Accessibility gaps | **PARTIALLY RESOLVED** — see Section 9 below |
+| AI suggestions UX | **PARTIALLY RESOLVED** — dialog scrolls, has description, but no AI model disclosure |
+
+### New UX Issues Found
+
+| Severity | Issue | Location |
+|----------|-------|----------|
+| Medium | Profile page has no way to change email or password | `app/profile/page.tsx` |
+| Medium | Comment threading data stored (`parentId`) but not rendered visually — flat list only | `components/comment-thread.tsx` |
+| Low | Dashboard vote icons (ThumbsUp/Down) convey direction by color only — no text for screen readers | `app/dashboard/page.tsx` |
+| Low | Search results have `role="option"` but no keyboard navigation (ArrowUp/Down) | `components/search-bar.tsx` |
+
+---
+
+## 8. Tech Debt
+
+### Deprecated APIs
+- **Next.js `middleware` convention deprecated** — build warns: "The `middleware` file convention is deprecated. Please use `proxy` instead." This will require migration to the new `proxy` convention in a future Next.js update.
 
 ### Dependencies
-- **npm audit:** 4 moderate vulnerabilities, all in `esbuild` via `drizzle-kit` (dev-only, not in production bundle). Fix requires breaking `drizzle-kit` downgrade — not recommended.
-- **No unused runtime dependencies detected.** All 17 production deps are imported.
-
-### Bundle
-- `.next` output: ~100MB (reasonable for Next.js standalone)
-- `optimizePackageImports: ["lucide-react"]` configured for tree-shaking
-- Bundle analyzer available via `ANALYZE=true`
-- No bloat concerns.
-
----
-
-## Production Readiness Gaps
-
-| Area | Status | Notes |
-|------|--------|-------|
-| Auth/sessions | Good | JWT + magic link + password auth working |
-| CSRF | Good | Fully wired, double-submit with timing-safe comparison |
-| Rate limiting | Acceptable | In-memory, single-process; fine for current deployment |
-| Error boundaries | Good | Per-route error boundaries |
-| Email | Good | SMTP with templates, deliverability checks |
-| i18n | Good | EN + RO complete |
-| Observability | Improved | Pino structured logging added in Sprint 15 |
-| Backups | Missing | No automated SQLite backup |
-| Search | Good | FTS5 working, pagination |
-| Project comments | Missing | Design spike done, implementation needed (Issue #19) |
-
----
-
-## Spike Documents: What Should Sprint 16 Tackle?
-
-### `docs/project-comments-spike.md` (Issue #19)
-Design is complete. Schema change: add `project_id` column to `comments` table, make `proposal_id` nullable, add CHECK constraint. Estimated 5-8 hours. UI placement defined (Discussion section below proposals). Shared comment-thread component extraction needed.
-
-**Recommendation: Implement in Sprint 16.** The spike answers all design questions. This is the only open feature request.
-
-### `docs/postgres-migration-plan.md`
-Thorough 5-phase plan, 21 files affected, estimated 9-14 hours. Biggest risk: FTS5-to-tsvector search rewrite.
-
-**Recommendation: Defer again.** SQLite works fine for current single-instance deployment. Only migrate when multi-instance or managed DB is needed. Not Sprint 16 scope.
-
----
-
-## Sprint 16 Goals
-
-Focus: **Implement project comments (Issue #19), clean up dead code, shore up component tests, add SQLite backup.** Realistic scope for 1 developer.
-
-### Goal 1: Implement project-level comments — schema + migration (Issue #19)
-**Priority: High | Effort: 1-2h**
-Add `project_id` column to `comments` table, make `proposal_id` nullable, add CHECK constraint ensuring exactly one is non-null. Add index on `project_id`. Follow the schema design in `docs/project-comments-spike.md`.
-
-### Goal 2: Implement project-level comments — backend (Issue #19)
-**Priority: High | Effort: 2-3h**
-Add `getProjectComments()` query. Extend `addComment` server action to accept either `proposalId` or `projectId`. Add `"project_comment"` audit action type. Add CSRF validation (already pattern-established). Write unit tests for the new paths.
-
-### Goal 3: Implement project-level comments — UI (Issue #19)
-**Priority: High | Effort: 2-3h**
-Extract shared `comment-thread.tsx` from `DiscussionSheet`. Create `ProjectComments` component. Add "Discussion" section to project detail page below proposals. Wire up the comment form with CSRF token.
-
-### Goal 4: Add component tests for ProposalList and VoteButtons
-**Priority: High | Effort: 2-3h**
-The bar chart regression in Sprint 14 happened because `proposal-list.tsx` had zero test coverage. Add React Testing Library tests covering: bar chart width calculation, vote sorting, empty state, vote button interactions, and active vote highlighting.
-
-### Goal 5: Clean up dead code
-**Priority: Medium | Effort: 1h**
-Delete `src/lib/i18n.ts` (entirely unused). Remove unused exports: `buildProjectSummary`, `getAiUsageStats`, `getPermissions`, `requirePermission`, `canModifyResource`, `sanitizeObject`. Update any tests that import these.
-
-### Goal 6: Add SQLite backup script to cron
-**Priority: Medium | Effort: 1-2h**
-The `scripts/backup.sh` exists but is never scheduled. Add a cron entry or systemd timer to run daily backups with rotation (keep 7 days). Verify the backup script handles WAL checkpointing before copy. Document in `docs/Deployment.md`.
-
-### Goal 7: Add E2E test for CSRF rejection
-**Priority: Medium | Effort: 1h**
-Current CSRF tests are unit-level with mocks. Add one smoke/E2E test that submits a server action without a valid CSRF token and verifies rejection. This ensures the end-to-end flow stays wired correctly.
-
-### Goal 8: Update Known-Issues and Sprint-Log docs
-**Priority: Low | Effort: 30min**
-`docs/Known-Issues.md` is stale (still says "Sprint 1 in progress" under Open). Update it to reflect current state: resolved issues, remaining risks. Update Sprint-Log with Sprint 16 goals.
-
----
-
-### Sprint 16 Summary
-
-| # | Goal | Priority | Effort | Issue |
-|---|------|----------|--------|-------|
-| 1 | Project comments — schema + migration | High | 1-2h | #19 |
-| 2 | Project comments — backend | High | 2-3h | #19 |
-| 3 | Project comments — UI | High | 2-3h | #19 |
-| 4 | Component tests for ProposalList/VoteButtons | High | 2-3h | — |
-| 5 | Clean up dead code | Medium | 1h | — |
-| 6 | SQLite backup automation | Medium | 1-2h | — |
-| 7 | E2E test for CSRF rejection | Medium | 1h | — |
-| 8 | Update Known-Issues + Sprint-Log docs | Low | 0.5h | — |
-
-**Total estimated effort:** ~11-17 hours
-
-**What's deliberately out of scope:**
-- PostgreSQL migration (defer — SQLite works fine at current scale)
-- Cloudflare deployment (Issue #13 — nice-to-have, not blocking)
-- Redis-backed rate limiting (defer until multi-instance)
-- JWT revocation store (acceptable risk at current user count)
-- File upload/avatar support (not user-requested)
-- Multi-tenancy/teams (requires PostgreSQL)
-
----
-
-## Sprint 18 Goals
-
-**Snapshot (2026-02-16):** 556 tests, 37 files, all green. `tsc --noEmit` clean. Coverage: 96.4% stmt / 88% branch. 1 open issue (#13 Cloudflare — nice-to-have). Sprint 17 completed all 7 goals (vote bar redesign, comment UI, migration fix).
-
-Focus: **Update stale docs, harden middleware, improve coverage gaps, tick off achievable Nice-to-Have items.**
-
-### Goal 1: Update Known-Issues.md — it's completely stale
-**Priority: High | Effort: 30min**
-`docs/Known-Issues.md` still says "Sprint 1 in progress" and "None yet" under Resolved. Rewrite Open section with current risks (in-memory rate limiter, no JWT revocation, middleware doesn't verify JWT). Move resolved items (CSRF, structured logging, backup automation) to Resolved. Remove risks that are already handled (session security, CSRF).
-
-### Goal 2: Update Nice-to-Have.md — check off completed items
-**Priority: High | Effort: 30min**
-Many items are already done: PDF/CSV export, role-based access, audit logging, API rate limiting, search, structured logging, database backups, PWA. Check them off so the list reflects reality.
-
-### Goal 3: Middleware JWT signature verification
-**Priority: High | Effort: 2-3h**
-Middleware currently checks cookie presence only (line 93-100), not signature. This is a defense-in-depth gap flagged since Sprint 16. Verify the JWT signature in middleware so unauthenticated requests are rejected early without reaching server actions. Add tests.
-
-### Goal 4: Component tests for stat-card.tsx (71% branch coverage)
-**Priority: Medium | Effort: 1-2h**
-`stat-card.tsx` has 71% branch coverage — the lowest of any non-trivial component. Add RTL tests covering all conditional rendering branches (loading, empty, error states). Target 90%+ branch.
-
-### Goal 5: Cover db/index.ts migration bootstrap paths (50% branch)
-**Priority: Medium | Effort: 1-2h**
-`src/db/index.ts` has 50% branch coverage. The uncovered paths (lines 60-61) are migration bootstrap edge cases. Add tests that exercise the missing-migration and first-run paths.
-
-### Goal 6: Cover mail.ts SMTP config fallback paths (77% branch)
-**Priority: Medium | Effort: 1h**
-`src/lib/mail.ts` has 77% branch coverage. Uncovered lines (8-11, 15-16, 41) are SMTP config fallbacks. Add tests for missing/partial SMTP env vars to push branch coverage above 90%.
-
-### Goal 7: Add rate limiting to proposals/votes/search endpoints
-**Priority: Medium | Effort: 2-3h**
-Only auth endpoints are rate-limited. Add rate limiting to mutation server actions (create/edit/delete proposals, vote, comment) and the search API. Use the existing in-memory rate limiter. This was flagged as Low severity but is easy to address now.
-
-### Goal 8: Sprint 18 log entry in Sprint-Log.md
-**Priority: Low | Effort: 15min**
-Add Sprint 18 entry to `docs/wiki/Sprint-Log.md` with goals. Create `docs/wiki/Sprint-18.md` with goal checklist. Update after completion.
-
-| # | Goal | Priority | Effort |
-|---|------|----------|--------|
-| 1 | Update Known-Issues.md | High | 30min |
-| 2 | Update Nice-to-Have.md | High | 30min |
-| 3 | Middleware JWT verification | High | 2-3h |
-| 4 | Component tests for stat-card | Medium | 1-2h |
-| 5 | Cover db/index.ts branches | Medium | 1-2h |
-| 6 | Cover mail.ts branches | Medium | 1h |
-| 7 | Rate limit proposals/votes/search | Medium | 2-3h |
-| 8 | Sprint 18 log + checklist | Low | 15min |
-
-**Total estimated effort:** ~9-13 hours
-
-**Out of scope (same as Sprint 16-17):**
-- PostgreSQL migration, Cloudflare deployment (#13), Redis rate limiter, JWT revocation, multi-tenancy
-
----
-
-## Sprint 20 Goals
-
-**Snapshot (2026-02-16):** 597 tests, 41 files, all green. `tsc --noEmit` clean. `npm audit`: 4 moderate (dev-only esbuild, unchanged). Coverage: 96.7% stmt / 90.0% branch / 98.3% func / 98.0% line. 2 open issues (#40 new logo, #13 Cloudflare). Sprint 19 ported all AI features from ideator.
-
-Focus: **New logo integration, coverage gaps, remaining dead code, and production hardening.**
-
-### Goal 1: Use new logo in header, favicon, and PWA manifest (Issue #40)
-**Priority: High | Effort: 1-2h**
-Issue #40 requests branding update. Replace current logo/icon in the header component, generate favicon set, and update `manifest.json` with new icons at required sizes.
-
-### Goal 2: Cover csrf-client.ts (0% coverage)
-**Priority: High | Effort: 1-2h**
-`csrf-client.ts` has been at 0% stmt/branch/func since Sprint 16. It's a small file (lines 8-12) that reads CSRF tokens from cookies. Add JSDOM-compatible tests with mocked `document.cookie` to cover all paths.
-
-### Goal 3: Cover proposals/actions.ts uncovered error paths (92% stmt)
-**Priority: Medium | Effort: 1-2h**
-`proposals/actions.ts` has uncovered lines at 166, 185, 189, 234 — error/validation paths. Add tests exercising these branches to push statement coverage above 97%.
-
-### Goal 4: Cover auth.ts uncovered lines (83% branch)
-**Priority: Medium | Effort: 1-2h**
-`src/lib/auth.ts` has 83% branch coverage with uncovered lines 166, 232. Add tests for these edge cases (likely token expiry or session edge paths).
-
-### Goal 5: Cover notifications.ts debounce edge cases (83% branch)
-**Priority: Medium | Effort: 1h**
-`src/lib/notifications.ts` has 83% branch coverage — uncovered lines at 25, 37, 46, 76, 100, 119. Add tests for debounce timing and notification dedup paths.
-
-### Goal 6: Remove remaining dead code identified in Sprint 16
-**Priority: Medium | Effort: 1h**
-Check if these unused exports still exist: `buildProjectSummary` (ai.ts), `getAiUsageStats` (llm.ts), `getPermissions`/`requirePermission`/`canModifyResource` (rbac.ts), `sanitizeObject` (sanitize.ts). Remove any that remain unreferenced.
-
-### Goal 7: Improve export.ts branch coverage (79% branch)
-**Priority: Low | Effort: 1h**
-`src/lib/export.ts` has 79% branch coverage with uncovered lines at 100, 127-148, 164. These are likely format-specific export paths. Add tests for all export format variations.
-
-### Goal 8: Sprint 20 log entry in Sprint-Log.md
-**Priority: Low | Effort: 15min**
-Add Sprint 20 entry to `docs/wiki/Sprint-Log.md`. Create `docs/wiki/Sprint-20.md` with goal checklist. Update after completion.
-
-| # | Goal | Priority | Effort | Issue |
-|---|------|----------|--------|-------|
-| 1 | New logo — header, favicon, PWA | High | 1-2h | #40 |
-| 2 | Cover csrf-client.ts (0%) | High | 1-2h | — |
-| 3 | Cover proposals/actions.ts errors | Medium | 1-2h | — |
-| 4 | Cover auth.ts branches | Medium | 1-2h | — |
-| 5 | Cover notifications.ts edges | Medium | 1h | — |
-| 6 | Remove remaining dead code | Medium | 1h | — |
-| 7 | Cover export.ts branches | Low | 1h | — |
-| 8 | Sprint 20 log + checklist | Low | 15min | — |
-
-**Total estimated effort:** ~8-12 hours
-
-**Out of scope (same as prior sprints):**
-- PostgreSQL migration, Cloudflare deployment (#13), Redis rate limiter, JWT revocation, multi-tenancy
-
----
-
-## Sprint 23 Goals
-
-**Snapshot (2026-02-16):** All tests passing. `tsc --noEmit` clean. Coverage: 98.4% stmt / 93.0% branch / 99.2% func / 99.2% line. 8 open issues (6 are future sprint plans, #40 logo, #13 Cloudflare). Sprint 22 completed all 11 goals (auth hardening, CSRF on auth routes, password toggle, modal proposal form).
-
-**Theme: Dashboard — complete redesign, professional look (Issue #44)**
-
-The current dashboard is functional but basic: four stat cards in a grid, four equal-weight list cards (projects, proposals, votes, activity). No visual hierarchy, no quick actions, no progress indicators, no charts/sparklines. The layout is identical on desktop and mobile. `StatCard` is a plain number-in-a-box with no trend data.
-
-### Goal 1: Dashboard layout redesign — visual hierarchy and sections
-**Priority: High | Effort: 2-3h**
-Restructure `dashboard/page.tsx` into clear sections: hero/welcome area with quick actions at top, stats row, then a 2-column layout with primary content (projects, activity) given more weight than secondary (proposals, votes). Add section headings. Use spacing and card elevation to establish hierarchy.
-
-### Goal 2: Quick actions bar — create project, browse projects, view profile
-**Priority: High | Effort: 1-2h**
-Add a quick actions section near the top of the dashboard with buttons/links for common tasks: "New Project", "Browse Projects", "My Profile". These should be prominent and reduce clicks to key flows.
-
-### Goal 3: Enhanced StatCard — trend indicators, better visual design
-**Priority: High | Effort: 2-3h**
-Redesign `stat-card.tsx` to look professional: add subtle background gradients or color accents per metric, larger typography, and optional description/subtitle text. Consider adding "Your contributions" vs "Platform totals" distinction. Keep it accessible.
-
-### Goal 4: Improve activity feed — icons per action type, timestamps, richer context
-**Priority: Medium | Effort: 2-3h**
-The activity feed currently only shows comments. Extend `queries.ts` to include recent proposals and votes in the feed as well (union query or separate queries merged client-side). Add distinct icons per action type (comment, proposal, vote). Show relative timestamps consistently.
-
-### Goal 5: Mobile-first responsive polish
-**Priority: High | Effort: 1-2h**
-Audit every dashboard section at 320px, 375px, and 768px breakpoints. Stat cards should stack to 2x2 on small screens. Quick actions should be full-width buttons on mobile. Cards should stack single-column below `lg`. Test empty states on mobile.
-
-### Goal 6: Empty state improvements — illustrations, clear CTAs
-**Priority: Medium | Effort: 1-2h**
-Current empty states are text-only with a muted icon. Add clearer call-to-action buttons (not just inline links) and more descriptive copy. Make the zero-data dashboard (new user) feel welcoming rather than bare.
-
-### Goal 7: Dashboard loading state and error boundary
-**Priority: Medium | Effort: 1h**
-Review `dashboard/loading.tsx` — ensure it shows skeleton cards matching the new layout. Verify `dashboard/error.tsx` handles query failures gracefully. The loading state should match the redesigned layout shape.
-
-### Goal 8: Exhaustive tests — component tests, mobile viewport E2E, accessibility
-**Priority: High | Effort: 2-3h**
-Add component tests for the redesigned dashboard (stat cards, quick actions, empty states, activity feed rendering). Add E2E tests at mobile viewport verifying layout and interactions. Run accessibility audit (axe-core) on the dashboard. All tests green before merge.
-
-| # | Goal | Priority | Effort |
-|---|------|----------|--------|
-| 1 | Dashboard layout redesign | High | 2-3h |
-| 2 | Quick actions bar | High | 1-2h |
-| 3 | Enhanced StatCard design | High | 2-3h |
-| 4 | Richer activity feed | Medium | 2-3h |
-| 5 | Mobile-first responsive polish | High | 1-2h |
-| 6 | Empty state improvements | Medium | 1-2h |
-| 7 | Loading/error state updates | Medium | 1h |
-| 8 | Exhaustive tests + accessibility | High | 2-3h |
-
-**Total estimated effort:** ~12-19 hours
-
-**Out of scope:**
-- Real-time updates / WebSocket (Sprint 26+)
-- Charts/sparklines with historical data (no time-series data stored yet)
-- PostgreSQL migration, Cloudflare (#13), Redis rate limiter, JWT revocation
-
----
-
-## Sprint 24 Analysis
-
-**Date:** 2026-02-16 | **Focus:** Project detail page — layout, markdown, modals, forms
-
-### Current State
-
-| Check | Result |
+| Package | Current | Latest | Notes |
+|---------|---------|--------|-------|
+| eslint | 9.39.2 | 10.0.0 | Major version — breaking changes expected |
+| lucide-react | 0.564.0 | 0.566.0 | Patch update |
+| shadcn | 3.8.4 | 3.8.5 | Patch update |
+
+### `npm audit`
+4 moderate vulnerabilities — all in `esbuild` via `drizzle-kit` (dev dependency only, not in production bundle). Fix requires breaking `drizzle-kit` downgrade — not recommended.
+
+### Dead Code / Unused Exports
+| Item | Location | Status |
+|------|----------|--------|
+| `buildProjectSummary()` | `lib/ai.ts` | Exported but never imported — verify or remove |
+| `getAiUsageStats()` | `lib/llm.ts` | Exported but never imported — verify or remove |
+| `getPermissions()`, `requirePermission()`, `canModifyResource()` | `lib/rbac.ts` | Exported but never imported |
+| `sanitizeObject()` | `lib/sanitize.ts` | Exported but never imported |
+| `generateReportHtml()` | `lib/export.ts` | Potentially unused — verify |
+
+### Schema Issues
+| Issue | Impact |
 |-------|--------|
-| `tsc --noEmit` | **Clean** — zero errors |
-| `vitest --coverage` | **670 tests, 45 files, all passing** |
-| Statement coverage | **97.49%** |
-| Branch coverage | **89.94%** |
-| Function coverage | **98.47%** |
-| Line coverage | **98.33%** |
-
-**Open issues:** 7 (2 bugs targeted this sprint: #41, #42; 1 enhancement: #40; 1 nice-to-have: #13; 3 future sprint plans: #46–#49)
-
-### Coverage Gap
-
-| File | Stmts | Branch | Notes |
-|------|-------|--------|-------|
-| `src/app/dashboard/queries.ts` | 10% | 0% | Server queries — needs integration-style tests |
-| `src/db/index.ts` | 94.6% | 83.3% | Migration bootstrap paths |
-| `src/lib/export.ts` | 96.7% | 79.2% | Edge-case branches |
-
-### Sprint 24 Goals
-
-1. **Fix #41 — proposal form as modal dialog.** The new-proposal form currently renders inline and breaks layout. Convert to a modal/dialog consistent with the AI suggestions pattern.
-
-2. **Fix #42 — remove duplicate page content.** The project detail page renders a second instance of proposals + comments with broken (EN) translations. Diagnose the double-render/routing issue and eliminate it.
-
-3. **Markdown rendering for project descriptions and proposals.** Add a markdown renderer (e.g. react-markdown) so descriptions and proposal bodies display formatted content instead of raw text.
-
-4. **Modal dialogs for all project-detail forms.** Edit project, delete confirmation, and any other inline forms should use modal dialogs for consistent UX.
-
-5. **Layout polish and mobile responsiveness.** Clean up spacing, card wrappers, and responsive breakpoints on the project detail page so it works well on all screen sizes.
-
-6. **Improve dashboard/queries.ts test coverage.** Coverage dropped to 10% stmts / 0% branch. Write integration-style unit tests to bring it in line with the rest of the codebase (>95%).
-
-7. **Integrate new logo (#40).** Update header, favicon, and PWA manifest with the new logo asset.
-
-8. **Exhaustive E2E testing of project detail page.** Write Playwright tests covering: view project, create proposal via modal, edit/delete flows, markdown rendering, mobile viewport, and no duplicate content.
+| `users.id` has no `$defaultFn(() => randomUUID())` unlike all other tables | Inconsistent — app code must always provide ID |
+| `comments.parentId` has no foreign key constraint | Orphaned replies possible |
+| No `updatedAt` on votes table | Upserted votes don't track modification time |
 
 ---
 
-## Sprint 25 Goals
+## 9. Accessibility (WCAG 2.1 Compliance)
 
-**Snapshot (2026-02-16):** 702 tests, 47 files, all green. `tsc --noEmit` clean. Coverage: 97.67% stmt / 90.45% branch / 98.51% func / 98.46% line. 6 open issues (#46-#49 future sprint plans, #40 logo, #13 Cloudflare).
+### Strengths
+- `<html lang={locale}>` dynamically set
+- Vote buttons: `role="group"`, `aria-label`, `aria-pressed`
+- Navigation: `aria-label` on desktop/mobile nav, `aria-current="page"` on active links
+- Pagination: `aria-label` on nav and page links
+- Form inputs: `aria-invalid`, `aria-describedby` on login/register forms
+- 44px minimum touch targets on interactive elements
 
-**Theme: AI features — suggestions, summarization, reliability (Issue #46)**
+### Critical Issues (WCAG Level A)
 
-AI infrastructure exists (Gemini primary + OpenAI fallback, per-provider throttling, rate limiting) but has no structured logging, no user-visible error states when AI is down, and no E2E tests with mocked LLM responses. The `dashboard/queries.ts` coverage gap (10% stmt / 0% branch) is the worst in the codebase and should be closed.
+| ID | Issue | WCAG SC | Location |
+|----|-------|---------|----------|
+| A.1 | **No skip-to-main-content link** | 2.4.1 Bypass Blocks | `components/app-shell.tsx` |
+| A.2 | **`<main>` element has no `id`** for skip link target | 2.4.1 | `components/app-shell.tsx` |
+| A.3 | **Search combobox has no keyboard navigation** — `role="listbox"` and `role="option"` declared but no ArrowUp/Down/Enter handlers | 2.1.1 Keyboard | `components/search-bar.tsx` |
 
-### Goal 1: Structured LLM logging — request/response/latency/errors
-**Priority: High | Effort: 2-3h**
-`llm.ts` has no logging. Add structured pino logs for every LLM call: provider, model, prompt length, response length, latency ms, tokens used, cost estimate, and error details. Log at `info` for success, `warn` for fallback, `error` for total failure. This is essential for debugging AI issues in production.
+### Medium Issues (WCAG Level A/AA)
 
-### Goal 2: Graceful degradation — user-facing error states when AI is unavailable
-**Priority: High | Effort: 2-3h**
-When both LLM providers fail or are rate-limited, `suggest-proposals.tsx` shows a generic error string. Improve: distinguish between rate-limited (show "try again in X minutes"), provider errors (show "AI temporarily unavailable"), and no API keys configured (hide the AI button entirely). Apply the same pattern to `regenerate-summary-button.tsx`.
+| ID | Issue | WCAG SC | Location |
+|----|-------|---------|----------|
+| A.4 | **No `<h1>` on home page** — starts at `<h2>` | 1.3.1 | `app/page.tsx` |
+| A.5 | **Login/register pages have no `<h1>`** — branding rendered as `<p>`, first heading is `<h3>` via CardTitle | 1.3.1 | `app/auth/login/page.tsx`, `register/page.tsx` |
+| A.6 | **Filter/sort `<select>` elements have no labels** | 4.1.2 | `components/project-filters.tsx`, `app/admin/user-role-manager.tsx` |
+| A.7 | **Icon-only buttons use `title` instead of `aria-label`** | 4.1.2 | `comment-thread.tsx:275`, `discussion-sheet.tsx`, `pwa-install.tsx` |
+| A.8 | **Error messages missing `role="alert"`** | 4.1.3 | `app/auth/login/page.tsx:252,338` |
+| A.9 | **`text-red-600` on white may fail AA contrast** for small text (~3.9:1) | 1.4.3 | Multiple form files |
+| A.10 | **Admin inline role `<select>` has no per-row context** for screen readers | 4.1.2 | `app/admin/user-role-manager.tsx` |
+| A.11 | **Proposal form errors not wired** — `aria-describedby` missing between input and error `<p>` | 1.3.1 | `components/proposal-form.tsx` |
 
-### Goal 3: AI suggestion reliability — retry logic and response validation
-**Priority: High | Effort: 2h**
-The `/api/proposals/suggest` route calls `completeWithFallback` once and trusts the response. Add: (a) JSON schema validation on the LLM response (reject malformed suggestions), (b) one automatic retry on parse failure with a stricter prompt, (c) `extractJson` from `similarity-api` is already tested — reuse it for robust JSON extraction from LLM output.
+### Low Issues
 
-### Goal 4: Cover dashboard/queries.ts (10% stmt / 0% branch)
-**Priority: High | Effort: 2-3h**
-Worst coverage gap in the codebase. `getDashboardData` and `getRecentActivity` need integration-style unit tests with a test DB. Cover: user with projects, user with no projects (fallback path), empty database, and platform stats aggregation. Target >90% stmt and branch.
-
-### Goal 5: Exhaustive E2E tests with mocked LLM responses
-**Priority: High | Effort: 2-3h**
-Current `tests/e2e/ai-suggestions.test.ts` exists but needs expansion. Write Playwright tests that mock the `/api/proposals/suggest` endpoint to return controlled responses. Cover: successful generation, thumbs up/down voting, submit selected proposals, error state, rate-limit state, empty results, and detail dialog. Test at mobile viewport too.
-
-### Goal 6: Mobile responsive polish on AI dialogs
-**Priority: Medium | Effort: 1-2h**
-Audit `suggest-proposals.tsx` dialog and `regenerate-summary-button.tsx` at 320px/375px viewports. Ensure: dialog doesn't overflow, suggestion cards stack properly, vote buttons are touch-friendly (min 44px tap target), detail dialog scrolls correctly. Fix any issues found.
-
-### Goal 7: Integrate new logo (#40)
-**Priority: Medium | Effort: 1h**
-Carried from Sprint 24. Update header component, generate favicon set, update PWA manifest icons. Issue #40.
-
-| # | Goal | Priority | Effort | Issue |
-|---|------|----------|--------|-------|
-| 1 | Structured LLM logging | High | 2-3h | #46 |
-| 2 | Graceful AI degradation | High | 2-3h | #46 |
-| 3 | AI suggestion reliability | High | 2h | #46 |
-| 4 | Cover dashboard/queries.ts | High | 2-3h | — |
-| 5 | E2E tests with mocked LLM | High | 2-3h | #46 |
-| 6 | Mobile polish on AI dialogs | Medium | 1-2h | #46 |
-| 7 | Integrate new logo (#40) | Medium | 1h | #40 |
-
-**Total estimated effort:** ~12-18 hours
-
-**Out of scope:**
-- Comments/discussion overhaul (Sprint 26, Issue #47)
-- Voting UX/animations (Sprint 27, Issue #48)
-- PostgreSQL migration, Cloudflare (#13), Redis rate limiter, JWT revocation
+| ID | Issue | Location |
+|----|-------|----------|
+| A.12 | `aria-selected={false}` hardcoded on all search results — misleading | `search-bar.tsx:101` |
+| A.13 | Dashboard vote icons lack sr-only text for direction | `app/dashboard/page.tsx` |
+| A.14 | Nested AI suggestion dialogs may allow focus leakage | `components/suggest-proposals.tsx` |
 
 ---
 
-## Sprint 26 Goals
+## 10. Missing Enterprise Features
 
-**Snapshot (2026-02-16):** 718 tests, 48 files, all green. `tsc --noEmit` clean. Coverage: 98.59% stmt / 93.15% branch / 100% func / 99.19% line. 4 open issues (#47 this sprint, #48–#49 future sprint plans, #13 Cloudflare nice-to-have).
+What an enterprise customer would expect that Ideate currently lacks:
 
-**Theme: Comments & Discussion — messenger-style, real-time (Issue #47)**
-
-Comment infrastructure exists: `comment-thread.tsx`, `project-comments.tsx`, `discussion-sheet.tsx`, comment server actions, and an SSE vote stream (`/api/votes/stream`). Sprint 26 transforms this from a basic comment form into a messenger-style real-time discussion experience.
-
-### Goal 1: Messenger-style comment bubbles with avatars
-**Priority: High | Effort: 2-3h**
-Restyle `comment-thread.tsx` and `project-comments.tsx` into chat-bubble layout: current user's messages right-aligned, others left-aligned. Add user avatar circles (initials fallback). Distinguish own vs. others via color/alignment. Timestamps inline or on hover.
-
-### Goal 2: Real-time comment updates (SSE or polling)
-**Priority: High | Effort: 2-3h**
-Comments currently require page reload to see new messages. Add real-time updates — either extend the existing SSE infrastructure (`/api/votes/stream`) to include comment events, or implement short-polling (15s interval). New comments from other users should appear without refresh. Scroll to bottom on new message arrival.
-
-### Goal 3: Enter to submit, Shift+Enter for newline
-**Priority: High | Effort: 1-2h**
-Update the comment input to behave like a messenger: Enter submits, Shift+Enter inserts a newline. Replace the single-line input with a `textarea` that auto-grows. Add a visible send button for mobile users. Optimistic UI — show the comment immediately before server confirmation.
-
-### Goal 4: Scroll-to-bottom and auto-scroll behavior
-**Priority: Medium | Effort: 1-2h**
-When opening a discussion, auto-scroll to the most recent message. When new messages arrive via real-time updates, auto-scroll only if the user is already near the bottom (within 100px). If scrolled up reading history, show a "New messages" indicator instead.
-
-### Goal 5: Mobile responsive messenger UX
-**Priority: High | Effort: 1-2h**
-Audit the messenger UI at 320px/375px/768px. Bubbles should use full width minus avatar. Input area should be sticky at the bottom. Touch targets must be 44px minimum. Discussion sheet should feel like a native mobile chat app. Test landscape orientation.
-
-### Goal 6: Exhaustive tests — unit, component, and E2E
-**Priority: High | Effort: 2-3h**
-Unit tests for real-time update logic (SSE/polling hook), messenger keyboard behavior (Enter vs Shift+Enter), auto-scroll logic. Component tests for bubble layout (own vs other alignment, avatar rendering). E2E tests: send a comment, verify it appears, test mobile viewport, test scroll behavior. All tests green.
-
-| # | Goal | Priority | Effort | Issue |
-|---|------|----------|--------|-------|
-| 1 | Messenger-style bubbles + avatars | High | 2-3h | #47 |
-| 2 | Real-time comment updates | High | 2-3h | #47 |
-| 3 | Enter-to-submit + auto-grow textarea | High | 1-2h | #47 |
-| 4 | Scroll-to-bottom + new message indicator | Medium | 1-2h | #47 |
-| 5 | Mobile responsive messenger UX | High | 1-2h | #47 |
-| 6 | Exhaustive tests (unit + E2E) | High | 2-3h | #47 |
-
-**Total estimated effort:** ~10-16 hours
-
-**Out of scope:**
-- Voting UX/animations (Sprint 27, Issue #48)
-- Mobile polish final sweep (Sprint 28, Issue #49)
-- PostgreSQL migration, Cloudflare (#13), Redis rate limiter, JWT revocation
+| Feature | Priority | Complexity | Notes |
+|---------|----------|------------|-------|
+| **SSO (SAML/OIDC)** | High | High | Enterprise auth standard; currently only magic link + password |
+| **Teams / Organizations** | High | High | No multi-tenancy; all users share one workspace |
+| **Audit log export** | Medium | Low | Audit logs exist but can only be viewed in admin UI — no CSV/JSON export |
+| **User invitation flow** | Medium | Medium | No way to invite users to the platform |
+| **Configurable roles** | Medium | Medium | Roles are hardcoded (admin/manager/member/viewer) — no custom roles |
+| **API rate limiting dashboard** | Medium | Low | Rate limits exist but no visibility for admins |
+| **Webhook notifications** | Medium | Medium | No way to integrate with external systems |
+| **Data retention policies** | Medium | Medium | No automated data cleanup or archival |
+| **Change password in profile** | Medium | Low | Profile page has no password change flow |
+| **Project archival with read-only mode** | Low | Low | Projects can be archived but still allow some mutations |
+| **Bulk operations** | Low | Medium | No bulk delete, archive, or export |
+| **Advanced analytics** | Low | High | No charts, trends, or usage dashboards |
+| **File attachments on proposals** | Low | Medium | Text-only proposals |
 
 ---
 
-## Sprint 27 Goals
+## 11. DevOps
 
-**Snapshot (2026-02-17):** 774 tests, 51 files, all green. `tsc --noEmit` clean. Coverage: 98.38% stmt / 93.08% branch / 99.28% func / 98.97% line. 3 open issues (#48 this sprint, #49 mobile polish final sweep, #13 Cloudflare nice-to-have).
+### Docker
+- **Multi-stage build** (deps → build → production) — clean separation
+- **Non-root user** (`nextjs:nodejs`, UID 1001)
+- **Standalone output** — minimal production image
+- **Health check** configured: `wget -qO- http://localhost:3000/api/health`
+- **Two services**: staging (port 4100) and dev (port 4101) with named volumes
 
-**Theme: Voting & Proposals — UX, animations, mobile (Issue #48)**
+### CI Pipeline (`.github/workflows/ci.yml`)
+- **4 jobs**: Lint → Typecheck → Unit Tests → Build (sequential, build depends on all three)
+- Node 22, npm cache enabled
+- Build provides env vars for DB and JWT
 
-Voting infrastructure is solid: `vote-buttons.tsx` handles upvote/downvote with SSE-powered real-time updates (`use-vote-stream.ts`), `proposal-list.tsx` sorts by vote count with bar chart visualization. But the UX is bare-bones — CSS `transition-colors duration-150` is the only animation, there's no sorting/filtering UI, no proposal detail view, no touch gestures, and no optimistic vote feedback. This sprint makes voting feel snappy and satisfying.
+### Gaps
 
-### Goal 1: Vote bar animations — smooth count transitions
-**Priority: High | Effort: 2-3h**
-Vote bars in `proposal-list.tsx` snap instantly to new widths. Add animated width transitions (CSS `transition` or framer-motion `layout` animation) so bars grow/shrink smoothly when votes change. Animate the vote count number changes too (e.g. a brief scale pulse on increment). Keep animations subtle (<300ms) and respect `prefers-reduced-motion`.
-
-### Goal 2: Instant optimistic vote feedback
-**Priority: High | Effort: 2h**
-Currently votes round-trip to the server before UI updates. Add optimistic state to `vote-buttons.tsx`: immediately toggle the button state and increment/decrement the count on click, then reconcile with the server response. Handle rollback on error. The SSE stream already provides server-confirmed counts — use that as the source of truth to correct any drift.
-
-### Goal 3: Proposal sorting and filtering controls
-**Priority: High | Effort: 2-3h**
-`proposal-list.tsx` has a hardcoded sort by net votes descending. Add a sort dropdown (most votes, newest, oldest, most discussed) and a filter option (all, my proposals, has comments). Persist the user's preference in `localStorage`. Ensure the controls are compact and mobile-friendly.
-
-### Goal 4: Proposal detail view — full content + discussion
-**Priority: High | Effort: 2-3h**
-Clicking a proposal currently does nothing beyond showing the inline content. Add a detail modal/sheet that shows: full proposal text (with markdown rendering), vote buttons, author + timestamp, and the proposal's comment thread. Reuse the existing `comment-thread.tsx` messenger UI from Sprint 26.
-
-### Goal 5: Mobile touch UX for voting
-**Priority: High | Effort: 1-2h**
-Vote buttons have no mobile-specific affordances — no touch feedback, no gesture support, no haptic hint. Add: active/pressed state on touch (scale down), ensure 44px minimum tap targets, add touch-action CSS to prevent scroll interference when tapping vote buttons. Test on 320px/375px viewports.
-
-### Goal 6: Vote confirmation micro-interaction
-**Priority: Medium | Effort: 1-2h**
-Add a brief visual confirmation when a vote is cast: a ripple/pulse effect on the button, a subtle color flash on the bar, or a small "+1" / "-1" floating animation. Keep it lightweight — CSS animations preferred over JS-driven. Respect `prefers-reduced-motion`.
-
-### Goal 7: Exhaustive tests — unit, component, E2E
-**Priority: High | Effort: 2-3h**
-Unit tests for optimistic vote logic (toggle, rollback on error, SSE reconciliation). Component tests for sort/filter controls, bar animations (verify transition classes), detail view rendering. E2E tests: cast a vote and verify count updates, change sort order, open detail view, test mobile viewport interactions. All tests green.
-
-### Goal 8: Sprint 27 docs — Sprint-Log + wiki page
-**Priority: Low | Effort: 15min**
-Add Sprint 27 entry to `docs/wiki/Sprint-Log.md`. Create `docs/wiki/Sprint-27.md` with goal checklist. Update after completion.
-
-| # | Goal | Priority | Effort | Issue |
-|---|------|----------|--------|-------|
-| 1 | Vote bar animations | High | 2-3h | #48 |
-| 2 | Optimistic vote feedback | High | 2h | #48 |
-| 3 | Proposal sorting + filtering | High | 2-3h | #48 |
-| 4 | Proposal detail view | High | 2-3h | #48 |
-| 5 | Mobile touch UX for voting | High | 1-2h | #48 |
-| 6 | Vote confirmation micro-interaction | Medium | 1-2h | #48 |
-| 7 | Exhaustive tests (unit + E2E) | High | 2-3h | #48 |
-| 8 | Sprint 27 docs | Low | 15min | — |
-
-**Total estimated effort:** ~13-19 hours
-
-**Out of scope:**
-- Mobile polish final sweep (Sprint 28, Issue #49)
-- PostgreSQL migration, Cloudflare (#13), Redis rate limiter, JWT revocation
+| Severity | Issue |
+|----------|-------|
+| Medium | **No E2E tests in CI** — only unit tests run; Playwright tests are manual |
+| Medium | **No Docker image push** — CI builds but doesn't push to a registry |
+| Medium | **No staging deployment automation** — `docker-compose up` is manual |
+| Medium | **No monitoring/alerting** — no health check polling, no error tracking (Sentry, etc.) |
+| Low | **No database backup automation in CI** — backup script exists but isn't scheduled |
+| Low | **`middleware` → `proxy` migration needed** — Next.js 16 deprecation warning |
+| Low | **Wiki sync workflow exists** but no other automation workflows |
 
 ---
 
-## Sprint 28 Goals
+## 12. Priority Recommendations for Sprint 31
 
-**Snapshot (2026-02-17):** 792 tests, 53 files, all green. `tsc --noEmit` clean. Coverage: 98.18% stmt / 92.49% branch / 98.57% func / 98.75% line. 2 open issues (#49 this sprint, #13 Cloudflare nice-to-have).
+### High Priority (Security + Accessibility)
 
-**Theme: Mobile polish & final sweep — every page, every flow (Issue #49)**
+| # | Item | Effort | Category |
+|---|------|--------|----------|
+| 1 | Fix open redirect in login (`redirect` param validation) | 15min | Security |
+| 2 | Add Zod validation to AI API endpoints (suggest, similarity) | 1h | Security |
+| 3 | Add skip-to-content link + `id="main-content"` on `<main>` | 30min | Accessibility |
+| 4 | Fix heading hierarchy (h1 on home, login, register pages) | 30min | Accessibility |
+| 5 | Replace `title` with `aria-label` on icon buttons (comment, discussion, PWA) | 30min | Accessibility |
+| 6 | Add `aria-label` to unlabeled `<select>` elements | 30min | Accessibility |
 
-Sprint 27 delivered voting animations, optimistic feedback, proposal sorting/filtering, expand/collapse cards, mobile touch targets, and SSE vote streams. The app is feature-complete. Sprint 28 is about fit and finish: audit every page at every breakpoint, fix every rough edge, run Lighthouse/accessibility, and ensure zero regressions.
+### Medium Priority (Code Quality + Performance)
 
-### Goal 1: Full mobile audit — every page at 320px, 375px, 768px
-**Priority: High | Effort: 2-3h**
-Walk every route (login, register, forgot-password, dashboard, projects list, project detail, profile, search) at iPhone SE (320px), iPhone 14 (375px), and tablet (768px). Document and fix: overflow, truncation, font sizing, touch target violations (<44px), and z-index conflicts. Pay special attention to modals and sheets on small screens.
+| # | Item | Effort | Category |
+|---|------|--------|----------|
+| 7 | Extract shared `isDeadlinePassed` to `lib/project-utils.ts` | 15min | Code Quality |
+| 8 | Remove duplicate `escapeHtml` from `export.ts` | 15min | Code Quality |
+| 9 | Add DB indexes on `proposals.projectId`, `comments.projectId`, `comments.proposalId` | 30min | Performance |
+| 10 | Add `role="alert"` to dynamic error message containers | 30min | Accessibility |
+| 11 | Add HSTS header in middleware | 15min | Security |
+| 12 | Wire `aria-describedby` on proposal form errors | 15min | Accessibility |
 
-### Goal 2: Lighthouse performance audit — target 90+ on all four metrics
-**Priority: High | Effort: 2-3h**
-Run Lighthouse on dashboard, project detail, and landing pages (mobile preset). Target 90+ Performance, Accessibility, Best Practices, SEO. Fix: image optimization (next/image where missing), render-blocking resources, CLS from skeleton loaders, missing meta tags, contrast issues.
+### Low Priority (Tech Debt + DevOps)
 
-### Goal 3: Accessibility audit — axe-core sweep + keyboard navigation
-**Priority: High | Effort: 2-3h**
-Run axe-core on every page. Fix: missing ARIA labels, insufficient color contrast, focus trapping in modals, skip-to-content link, heading hierarchy gaps. Test full keyboard-only navigation flow: login → dashboard → create project → add proposal → vote → comment. All interactive elements must be keyboard-reachable.
-
-### Goal 4: Cross-browser testing — Chrome, Firefox, Safari
-**Priority: Medium | Effort: 1-2h**
-Test in Chrome, Firefox, and Safari (WebKit via Playwright). Focus areas: CSS grid/flex rendering, backdrop-filter support, dialog/sheet behavior, SSE stream reliability, PWA install prompt. Fix any browser-specific issues.
-
-### Goal 5: Cover `vote-update.ts` (0% coverage)
-**Priority: High | Effort: 1h**
-`src/lib/vote-update.ts` is at 0% stmt/branch/func/line (lines 14-22). This was extracted in Sprint 27 but never tested. Add unit tests covering the shared `emitVoteUpdate` helper to close this gap.
-
-### Goal 6: Cover remaining branch gaps — `export.ts` (81%), `llm.ts` (85%)
-**Priority: Medium | Effort: 1-2h**
-`export.ts` has uncovered line 59, 167; `llm.ts` has uncovered lines 188-189. Add targeted tests for these specific branches to push overall branch coverage above 93%.
-
-### Goal 7: Final Playwright E2E suite — every user flow end-to-end
-**Priority: High | Effort: 2-3h**
-Write/extend E2E tests covering the complete happy path: register → login → create project → add proposal → vote → comment → search → export → profile update → logout. Run at both desktop and mobile viewports. This is the exit-criteria gate — all flows must work perfectly.
-
-### Goal 8: PWA install flow validation
-**Priority: Medium | Effort: 1h**
-Verify the PWA manifest, service worker registration, and install prompt work correctly on Chrome Android and Safari iOS. Check offline behavior — the app should show a meaningful offline page, not a browser error. Verify icons at all required sizes.
-
-| # | Goal | Priority | Effort | Issue |
-|---|------|----------|--------|-------|
-| 1 | Full mobile audit (320/375/768px) | High | 2-3h | #49 |
-| 2 | Lighthouse audit — 90+ targets | High | 2-3h | #49 |
-| 3 | Accessibility audit + keyboard nav | High | 2-3h | #49 |
-| 4 | Cross-browser testing | Medium | 1-2h | #49 |
-| 5 | Cover vote-update.ts (0%) | High | 1h | — |
-| 6 | Cover export.ts + llm.ts branches | Medium | 1-2h | — |
-| 7 | Full E2E suite — every flow | High | 2-3h | #49 |
-| 8 | PWA install flow validation | Medium | 1h | #49 |
-
-**Total estimated effort:** ~12-18 hours
-
-**Out of scope:**
-- Cloudflare deployment (#13) — nice-to-have, not blocking production readiness
-- PostgreSQL migration, Redis rate limiter, JWT revocation, multi-tenancy
+| # | Item | Effort | Category |
+|---|------|--------|----------|
+| 13 | Remove unused exports (rbac, sanitize, ai, llm) | 30min | Tech Debt |
+| 14 | Migrate `middleware.ts` to `proxy` convention | 1-2h | Tech Debt |
+| 15 | Add E2E tests to CI pipeline | 1h | DevOps |
+| 16 | Add error tracking (Sentry or similar) | 1-2h | DevOps |
+| 17 | Implement search keyboard navigation or remove misleading ARIA roles | 1-2h | Accessibility |
+| 18 | Add change-password flow to profile page | 2-3h | Feature |
 
 ---
 
-## Sprint 30 Goals
+## Appendix: Key Files Reference
 
-**Snapshot (2026-02-17):** 795 tests, 53 files, all green. `tsc --noEmit` clean. Coverage: 98.23% stmt / 91.96% branch / 98.62% func / 98.72% line. 1 open issue (#13 Cloudflare — nice-to-have). Sprint 29 completed all 8 goals (ChatGPT UI/UX review fixes: form validation, PDF export, admin panel UX, i18n consistency, projects list search/sort/filter).
-
-**Theme: Docs hygiene, coverage gaps, and production hardening**
-
-The app is feature-complete and well-tested. What remains: stale docs that haven't been updated since Sprint 1 (Known-Issues, Nice-to-Have), one file at 0% coverage (`vote-update.ts`), branch gaps in `export.ts` and `llm.ts`, and the Sprint Log is 14 sprints behind.
-
-### Goal 1: Update Known-Issues.md — completely stale since Sprint 1
-**Priority: High | Effort: 30min**
-Still says "Sprint 1 in progress" under Open and "None yet" under Resolved. Rewrite Open with current risks (in-memory rate limiter, no JWT revocation, single-instance SQLite). Move resolved items to Resolved (CSRF, structured logging, concurrent writes, AI rate limiting, session security). Remove risks already addressed.
-
-### Goal 2: Update Nice-to-Have.md — check off completed items
-**Priority: High | Effort: 30min**
-Many items are done: PDF/CSV export, real-time voting (SSE), email notifications, role-based access, audit logging, API rate limiting, search, structured logging, database backups, PWA, keyboard shortcuts. Check them off so the list reflects reality.
-
-### Goal 3: Cover vote-update.ts — 0% coverage (lines 14-22)
-**Priority: High | Effort: 1h**
-`src/lib/vote-update.ts` was extracted in Sprint 27 but never tested. It's a shared helper that queries vote counts and broadcasts via SSE. Add unit tests with mocked DB and `emitVoteChange`. Small file (28 lines) — should be straightforward.
-
-### Goal 4: Cover export.ts branch gaps (79% branch)
-**Priority: Medium | Effort: 1-2h**
-Uncovered lines at 59, 113-114, 391. These are likely format-specific or edge-case export paths. Add targeted tests to push branch coverage above 90%.
-
-### Goal 5: Cover llm.ts branch gaps (85% branch)
-**Priority: Medium | Effort: 1h**
-Uncovered lines at 188-189. Add tests for these specific error/fallback branches.
-
-### Goal 6: Update Sprint-Log.md — missing Sprints 12-29
-**Priority: High | Effort: 1-2h**
-Sprint-Log.md only has entries for Sprints 1-3 and 11. Add summary entries for Sprints 12-29 with status, theme, and key outcomes. Use git log and wiki sprint files as source.
-
-### Goal 7: Cloudflare deployment spike (Issue #13)
-**Priority: Low | Effort: 2-3h**
-The only remaining open issue. Write a concrete deployment spike: Pages for frontend, D1 for SQLite, Workers for API routes. Identify blockers (D1 compatibility with Drizzle, FTS5 support, file-based SQLite features). Update `docs/Deployment.md` with findings. Don't implement — just assess feasibility.
-
-### Goal 8: Final coverage push — target 93%+ branch overall
-**Priority: Medium | Effort: 1h**
-After Goals 3-5, review remaining branch gaps (db/index.ts at 83%, mail.ts at 87%, csrf.ts at 87%). Pick the easiest wins to push overall branch coverage from 91.96% past 93%.
-
-| # | Goal | Priority | Effort | Issue |
-|---|------|----------|--------|-------|
-| 1 | Update Known-Issues.md | High | 30min | — |
-| 2 | Update Nice-to-Have.md | High | 30min | — |
-| 3 | Cover vote-update.ts (0%) | High | 1h | — |
-| 4 | Cover export.ts branches (79%) | Medium | 1-2h | — |
-| 5 | Cover llm.ts branches (85%) | Medium | 1h | — |
-| 6 | Update Sprint-Log.md (missing 12-29) | High | 1-2h | — |
-| 7 | Cloudflare deployment spike | Low | 2-3h | #13 |
-| 8 | Final coverage push — 93%+ branch | Medium | 1h | — |
-
-**Total estimated effort:** ~8-12 hours
-
-**Out of scope:**
-- PostgreSQL migration, Redis rate limiter, JWT revocation, multi-tenancy
-- New features — the app is feature-complete; this sprint is maintenance and hardening
+| File | Lines | Purpose |
+|------|-------|---------|
+| `src/lib/auth.ts` | 292 | JWT auth, session management, magic links |
+| `src/lib/password.ts` | 299 | Password auth, registration, reset flow |
+| `src/lib/llm.ts` | 270 | LLM abstraction (Gemini + OpenAI fallback) |
+| `src/lib/export.ts` | 429 | PDF/CSV/HTML export generation |
+| `src/app/auth/login/page.tsx` | 391 | Login page (magic link + password) |
+| `src/components/suggest-proposals.tsx` | 303 | AI suggestion dialog |
+| `src/components/comment-thread.tsx` | 298 | Messenger-style comment thread |
+| `src/components/proposal-list.tsx` | 285 | Proposal cards with vote bars |
+| `src/middleware.ts` | 161 | Route protection + security headers |
+| `src/db/schema.ts` | 138 | Database schema (users, projects, proposals, votes, audit, comments) |
+| `src/db/index.ts` | 112 | SQLite connection + auto-migration runner |
 
 ---
 
-*Report updated for Sprint 30 planning on 2026-02-17.*
+*Report generated 2026-02-17 for Sprint 31 planning.*

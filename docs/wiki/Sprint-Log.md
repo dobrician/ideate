@@ -16,6 +16,12 @@ Reverse chronological. Click each sprint for full details.
 
 ---
 
+### 🔄 [Sprint 30 — Security & Accessibility Hardening](Sprint-30) *(2026-02-17)*
+**Focus:** Open redirect fix, Zod on AI endpoints, HSTS, middleware bypass fix, a11y critical (skip-link, headings, aria), code dedup, DB indexes/schema, change password in profile
+**Source:** Deep analysis report
+
+---
+
 ### ✅ [Sprint 29 — UI/UX Polish (ChatGPT Review Fixes)](Sprint-29) *(2026-02-17)*
 **Focus:** Proposal submit feedback, real PDF export, styled form validation, auth error messages, admin UX (toast+search+pagination), i18n consistency, mobile/responsive fixes, projects list search/sort/filter
 **Stats:** 8 commits | 795 tests | Source: external ChatGPT UI/UX review (score 6/10 → fixes applied)
