@@ -59,12 +59,34 @@ describe("POST /api/proposals/suggest", () => {
     it("returns 400 when project title is missing", async () => {
       const res = await POST(makeRequest({ project: { description: "no title" }, proposals: [] }));
       expect(res.status).toBe(400);
-      expect((await res.json()).error).toContain("title");
+      expect((await res.json()).error).toBeDefined();
     });
 
     it("returns 400 when project is missing entirely", async () => {
       const res = await POST(makeRequest({ proposals: [] }));
       expect(res.status).toBe(400);
+    });
+
+    it("returns 400 when project title is empty string", async () => {
+      const res = await POST(makeRequest({ project: { title: "", description: "d" }, proposals: [] }));
+      expect(res.status).toBe(400);
+    });
+
+    it("returns 400 when proposals array exceeds max length", async () => {
+      const proposals = Array.from({ length: 101 }, (_, i) => ({ title: `P${i}` }));
+      const res = await POST(makeRequest({ project: { title: "T", description: "D" }, proposals }));
+      expect(res.status).toBe(400);
+    });
+
+    it("returns 400 for non-object body", async () => {
+      const res = await POST(makeRequest("not an object"));
+      expect(res.status).toBe(400);
+    });
+
+    it("accepts valid body with defaults", async () => {
+      mockedLLM.mockResolvedValue({ text: okJson("A"), modelUsed: "gemini" });
+      const res = await POST(makeRequest({ project: { title: "T" } }));
+      expect(res.status).toBe(200);
     });
   });
 
@@ -249,11 +271,19 @@ describe("POST /api/proposals/suggest", () => {
     it("handles project with very long description", async () => {
       mockedLLM.mockResolvedValue({ text: okJson("A", "B", "C"), modelUsed: "gemini" });
       const res = await POST(makeRequest({
-        project: { title: "Test", description: "D".repeat(10000) },
+        project: { title: "Test", description: "D".repeat(5000) },
         proposals: [],
       }));
       expect(res.status).toBe(200);
       expect(mockedLLM.mock.calls[0][0]).toContain("D".repeat(100));
+    });
+
+    it("rejects description exceeding max length", async () => {
+      const res = await POST(makeRequest({
+        project: { title: "Test", description: "D".repeat(5001) },
+        proposals: [],
+      }));
+      expect(res.status).toBe(400);
     });
   });
 });

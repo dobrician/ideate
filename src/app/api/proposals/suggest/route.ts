@@ -1,14 +1,29 @@
 import { NextResponse } from "next/server";
 import { requireAuth } from "@/lib/auth";
 import { completeWithFallback, isAiConfigured, isAiRateLimited } from "@/lib/llm";
+import { z } from "zod";
 
 const LOCALE = process.env.LOCALE || "en";
 
-interface SuggestRequest {
-  project: { title: string; description: string };
-  proposals: { title: string; description?: string; summary?: string }[];
-  locale?: string;
-}
+const suggestSchema = z.object({
+  project: z.object({
+    title: z.string().min(1).max(500),
+    description: z.string().max(5000).default(""),
+  }),
+  proposals: z
+    .array(
+      z.object({
+        title: z.string().max(500),
+        description: z.string().max(2000).optional(),
+        summary: z.string().max(500).optional(),
+      })
+    )
+    .max(100)
+    .default([]),
+  locale: z.string().max(10).optional(),
+});
+
+type SuggestRequest = z.infer<typeof suggestSchema>;
 
 interface Suggestion {
   title: string;
@@ -102,13 +117,15 @@ export async function POST(request: Request) {
   }
 
   try {
-    const body = (await request.json()) as SuggestRequest;
-    if (!body.project?.title) {
+    const raw = await request.json();
+    const parsed = suggestSchema.safeParse(raw);
+    if (!parsed.success) {
       return NextResponse.json(
-        { proposals: [], error: "Project title is required" },
+        { proposals: [], error: parsed.error.issues[0]?.message || "Invalid input" },
         { status: 400 }
       );
     }
+    const body = parsed.data;
 
     if (!isAiConfigured()) {
       return NextResponse.json(

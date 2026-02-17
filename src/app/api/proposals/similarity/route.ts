@@ -1,22 +1,33 @@
 import { NextResponse } from "next/server";
 import { requireAuth } from "@/lib/auth";
 import { completeWithFallback } from "@/lib/llm";
+import { z } from "zod";
 
 const LOCALE = process.env.LOCALE || "en";
 
-interface ExistingProposal {
-  id: string;
-  title: string;
-  description?: string;
-  summary?: string;
-}
+const existingProposalSchema = z.object({
+  id: z.string().max(100),
+  title: z.string().max(500),
+  description: z.string().max(2000).optional(),
+  summary: z.string().max(500).optional(),
+});
 
-interface SimilarityRequest {
-  project: { title: string; description: string };
-  existing: ExistingProposal[];
-  proposal: { title: string; description?: string };
-  locale?: string;
-}
+const similaritySchema = z.object({
+  project: z.object({
+    title: z.string().min(1).max(500),
+    description: z.string().max(5000).default(""),
+  }),
+  existing: z.array(existingProposalSchema).max(100),
+  proposal: z.object({
+    title: z.string().min(1).max(500),
+    description: z.string().max(2000).optional(),
+  }),
+  locale: z.string().max(10).optional(),
+});
+
+type ExistingProposal = z.infer<typeof existingProposalSchema>;
+
+type SimilarityRequest = z.infer<typeof similaritySchema>;
 
 interface SimilarityMatch {
   id: string;
@@ -131,9 +142,17 @@ export async function POST(request: Request) {
   }
 
   try {
-    const body = (await request.json()) as SimilarityRequest;
+    const raw = await request.json();
+    const result = similaritySchema.safeParse(raw);
+    if (!result.success) {
+      return NextResponse.json(
+        { matches: [], error: result.error.issues[0]?.message || "Invalid input" },
+        { status: 400 }
+      );
+    }
+    const body = result.data;
 
-    if (!body.proposal?.title || !body.existing?.length) {
+    if (!body.existing.length) {
       return NextResponse.json({ matches: [] });
     }
 
