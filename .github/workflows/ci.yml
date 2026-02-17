@@ -61,3 +61,42 @@ jobs:
           JWT_SECRET: ci-test-secret-minimum-32-characters-long
           APP_URL: http://localhost:3000
           NEXT_PUBLIC_APP_URL: http://localhost:3000
+
+  smoke-tests:
+    name: Smoke Tests
+    runs-on: ubuntu-latest
+    needs: [build]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium
+      - name: Build app
+        run: mkdir -p data && npm run build
+        env:
+          DATABASE_URL: ${{ github.workspace }}/data/ideate.db
+          JWT_SECRET: ci-test-secret-minimum-32-characters-long
+          APP_URL: http://localhost:3000
+          NEXT_PUBLIC_APP_URL: http://localhost:3000
+      - name: Start server and run smoke tests
+        run: |
+          npm start &
+          npx wait-on http://localhost:3000 --timeout 30000
+          npm run test:smoke
+        env:
+          DATABASE_URL: ${{ github.workspace }}/data/ideate.db
+          JWT_SECRET: ci-test-secret-minimum-32-characters-long
+          APP_URL: http://localhost:3000
+          NEXT_PUBLIC_APP_URL: http://localhost:3000
+          NODE_ENV: production
+          MAIL_LOG_FILE: /tmp/ideate-mail.log
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: smoke-test-report
+          path: playwright-report/
+          retention-days: 7
