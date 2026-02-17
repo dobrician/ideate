@@ -161,7 +161,7 @@ export function ProposalForm(props: ProposalFormProps) {
       <DialogTrigger asChild>
         <Button size="sm">{form.t("proposalForm.newProposal")}</Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-lg max-h-[90vh] overflow-y-auto">
+      <DialogContent className="sm:max-w-lg max-h-[90dvh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>{form.t("proposalForm.title")}</DialogTitle>
         </DialogHeader>

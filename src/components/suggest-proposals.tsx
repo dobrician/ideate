@@ -156,7 +156,7 @@ export function SuggestProposalsButton({
       </Button>
 
       <Dialog open={open} onOpenChange={(v) => !v && handleClose()}>
-        <DialogContent className="sm:max-w-2xl max-h-[85vh] overflow-y-auto p-4 sm:p-6">
+        <DialogContent className="sm:max-w-2xl max-h-[85dvh] overflow-y-auto p-4 sm:p-6">
           <DialogHeader>
             <DialogTitle>{t("suggestions.title")}</DialogTitle>
             <DialogDescription>{t("suggestions.subtitle")}</DialogDescription>
@@ -220,7 +220,7 @@ export function SuggestProposalsButton({
         open={detailIdx !== null}
         onOpenChange={(v) => !v && setDetailIdx(null)}
       >
-        <DialogContent className="sm:max-w-2xl max-h-[85vh] overflow-y-auto p-4 sm:p-6">
+        <DialogContent className="sm:max-w-2xl max-h-[85dvh] overflow-y-auto p-4 sm:p-6">
           {detailIdx !== null && suggestions[detailIdx] && (
             <>
               <DialogHeader>
