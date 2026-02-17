@@ -75,22 +75,26 @@ export function Header() {
           })}
         </nav>
 
-        <div className="hidden flex-1 justify-center md:flex">
-          <div className="w-full max-w-sm">
-            <SearchBar />
+        {!pathname.startsWith("/admin") && (
+          <div className="hidden flex-1 justify-center md:flex">
+            <div className="w-full max-w-sm">
+              <SearchBar />
+            </div>
           </div>
-        </div>
+        )}
 
         <div className="ml-auto flex items-center gap-2 md:ml-0">
-          <Button
-            variant="ghost"
-            size="icon"
-            className="min-h-[44px] min-w-[44px] md:hidden"
-            aria-label={t("search.placeholder")}
-            onClick={() => setMobileSearchOpen((o) => !o)}
-          >
-            <Search className="h-4 w-4" />
-          </Button>
+          {!pathname.startsWith("/admin") && (
+            <Button
+              variant="ghost"
+              size="icon"
+              className="min-h-[44px] min-w-[44px] md:hidden"
+              aria-label={t("search.placeholder")}
+              onClick={() => setMobileSearchOpen((o) => !o)}
+            >
+              <Search className="h-4 w-4" />
+            </Button>
+          )}
           <LocaleSwitcher />
           <DarkModeToggle />
           <DropdownMenu>

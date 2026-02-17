@@ -16,9 +16,9 @@ import {
 import { Button } from "@/components/ui/button";
 import { Users, FolderOpen, Lightbulb, ThumbsUp, ShieldX } from "lucide-react";
 import { UserRoleManager } from "./user-role-manager";
+import { AuditLog } from "./audit-log";
 import { StatCard } from "@/components/stat-card";
 import { getTranslations } from "@/lib/i18n-server";
-import { formatRelativeTime } from "@/lib/utils";
 
 /**
  * Admin panel — user management, system stats, audit log
@@ -142,34 +142,7 @@ export default async function AdminPage() {
             <CardDescription>{t("admin.auditEntries")}</CardDescription>
           </CardHeader>
           <CardContent>
-            {recentAudit.length === 0 ? (
-              <p className="text-sm text-muted-foreground">{t("admin.noActivity")}</p>
-            ) : (
-              <div className="space-y-2">
-                {recentAudit.map((entry) => (
-                  <div
-                    key={entry.id}
-                    className="flex min-w-0 items-center gap-2 text-sm sm:gap-3"
-                  >
-                    <span className="shrink-0 rounded bg-muted px-2 py-0.5 text-xs font-medium">
-                      {entry.action}
-                    </span>
-                    <span className="min-w-0 truncate font-medium">
-                      {entry.userEmail || "System"}
-                    </span>
-                    <span className="hidden min-w-0 truncate text-muted-foreground sm:inline">
-                      {entry.entity}
-                      {entry.entityId ? ` #${entry.entityId.substring(0, 8)}` : ""}
-                    </span>
-                    <span className="ml-auto shrink-0 text-xs text-muted-foreground">
-                      {entry.createdAt
-                        ? formatRelativeTime(entry.createdAt, locale, t)
-                        : ""}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            )}
+            <AuditLog entries={recentAudit} />
           </CardContent>
         </Card>
       </div>
