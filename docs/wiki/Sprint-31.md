@@ -15,7 +15,7 @@
 
 - [x] **Goal 5: Date formatting respects locale** — Dates like "February 16, 2026" should display as "16 februarie 2026" when locale is RO. Audit all date displays (Created, Last Updated, deadline) and use locale-aware formatting via the i18n system.
 
-- [ ] **Goal 6: Proposal expand UX clarity** — The chevron (˅) on each proposal card should make it clear what expands (description? comments? both?). Add a subtle hint like "Detalii" next to the chevron, or show a preview line of the description below the title.
+- [x] **Goal 6: Proposal expand UX clarity** — The chevron (˅) on each proposal card should make it clear what expands (description? comments? both?). Add a subtle hint like "Detalii" next to the chevron, or show a preview line of the description below the title.
 
 - [ ] **Goal 7: Equal-vote sorting** — When proposals have equal votes, add secondary sort by newest first (created_at DESC). Ensure this is consistent in both server queries and client-side sorting.
 

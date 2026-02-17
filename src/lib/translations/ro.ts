@@ -120,6 +120,7 @@ export const ro: Record<string, string> = {
   "proposals.showSummary": "Arată rezumatul",
   "proposals.showFull": "Arată descrierea completă",
   "proposals.by": "de",
+  "proposals.details": "Detalii",
   "proposals.comments": "Comentarii",
 
   // Proposal form

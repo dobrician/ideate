@@ -189,13 +189,14 @@ function ProposalItem({
             />
           )}
         </div>
-        <div className="relative z-10 flex w-full flex-col gap-2 px-4 pr-2 sm:flex-row sm:items-center sm:justify-between">
-          <div className="min-w-0 flex-1 text-left">
-            <span className="font-medium">{proposal.title}</span>
-            <span className="ml-2 inline-flex max-w-[8rem] text-xs text-muted-foreground sm:max-w-none">
-              <span className="truncate">{t("proposals.by")} {proposal.authorName}</span>
-            </span>
-          </div>
+        <div className="relative z-10 flex w-full flex-col gap-1 px-4 pr-2">
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+            <div className="min-w-0 flex-1 text-left">
+              <span className="font-medium">{proposal.title}</span>
+              <span className="ml-2 inline-flex max-w-[8rem] text-xs text-muted-foreground sm:max-w-none">
+                <span className="truncate">{t("proposals.by")} {proposal.authorName}</span>
+              </span>
+            </div>
           <div
             className="flex min-w-0 items-center gap-2"
             onClick={(e) => e.stopPropagation()}
@@ -225,6 +226,15 @@ function ProposalItem({
               currentUserId={currentUserId}
             />
           </div>
+          </div>
+          {(proposal.description || proposal.summary) && (
+            <p className="truncate text-left text-xs text-muted-foreground/70">
+              {proposal.summary || proposal.description}
+            </p>
+          )}
+          <span className="text-left text-[11px] text-muted-foreground/50">
+            {t("proposals.details")} ↓
+          </span>
         </div>
       </AccordionTrigger>
       <AccordionContent>

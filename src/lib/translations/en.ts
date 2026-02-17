@@ -115,6 +115,7 @@ export const en: Record<string, string> = {
   "proposals.showSummary": "Show summary",
   "proposals.showFull": "Show full description",
   "proposals.by": "by",
+  "proposals.details": "Details",
   "proposals.comments": "Comments",
 
   // Proposal form
