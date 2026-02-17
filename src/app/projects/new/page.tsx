@@ -76,7 +76,7 @@ export default function NewProjectPage() {
 
   return (
     <div className="mx-auto max-w-2xl py-4 sm:py-8">
-      <Card>
+      <Card className="dark:border-white/10">
         <CardHeader>
           <CardTitle>{t("projectForm.createTitle")}</CardTitle>
           <CardDescription>

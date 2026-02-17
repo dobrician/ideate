@@ -164,11 +164,15 @@ describe("ProposalList", () => {
         widths.push((el as HTMLElement).style.width);
       });
     });
-    // maxTotalVotes = 5 (A: 3+2), halfWidth = 10% per vote (center-anchored)
-    // A: green=30%, red=20%. B: green=20%, red=10%. C: red=10%
+    // Vote bar uses actual pro/(pro+contra) ratio, scaled to 50% max per side
+    // A: 3up/5total → green=30%, 2/5 → red=20%
+    // B: 2up/3total → green=33%, 1/3 → red=17%
+    // C: 0up/1total → green not rendered, 1/1 → red=50%
     expect(widths).toContain("30%");
     expect(widths).toContain("20%");
-    expect(widths).toContain("10%");
+    expect(widths).toContain("33%");
+    expect(widths).toContain("17%");
+    expect(widths).toContain("50%");
     // No 0% width bar should be rendered
     expect(widths).not.toContain("0%");
   });

@@ -156,18 +156,32 @@ export function SuggestProposalsButton({
       </Button>
 
       <Dialog open={open} onOpenChange={(v) => !v && handleClose()}>
-        <DialogContent className="sm:max-w-2xl max-h-[85dvh] overflow-y-auto p-4 sm:p-6">
+        <DialogContent className="sm:max-w-3xl max-h-[85dvh] overflow-y-auto p-4 sm:p-6">
           <DialogHeader>
             <DialogTitle>{t("suggestions.title")}</DialogTitle>
             <DialogDescription>{t("suggestions.subtitle")}</DialogDescription>
           </DialogHeader>
 
           {loading && (
-            <div className="flex items-center justify-center gap-2 py-6 sm:py-8">
-              <Loader2 className="h-5 w-5 animate-spin" />
-              <span className="text-sm text-muted-foreground">
-                {t("suggestions.generating")}
-              </span>
+            <div className="space-y-3 py-2">
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="animate-pulse rounded-lg border p-4">
+                  <div className="h-4 w-2/3 rounded bg-muted" />
+                  <div className="mt-2 h-3 w-full rounded bg-muted" />
+                  <div className="mt-1 h-3 w-4/5 rounded bg-muted" />
+                  <div className="mt-3 flex gap-2">
+                    <div className="h-7 w-10 rounded bg-muted" />
+                    <div className="h-7 w-10 rounded bg-muted" />
+                    <div className="h-7 w-20 rounded bg-muted" />
+                  </div>
+                </div>
+              ))}
+              <div className="flex items-center justify-center gap-2 pt-2">
+                <Loader2 className="h-4 w-4 animate-spin" />
+                <span className="text-sm text-muted-foreground">
+                  {t("suggestions.generating")}
+                </span>
+              </div>
             </div>
           )}
 
@@ -220,7 +234,7 @@ export function SuggestProposalsButton({
         open={detailIdx !== null}
         onOpenChange={(v) => !v && setDetailIdx(null)}
       >
-        <DialogContent className="sm:max-w-2xl max-h-[85dvh] overflow-y-auto p-4 sm:p-6">
+        <DialogContent className="sm:max-w-3xl max-h-[85dvh] overflow-y-auto p-4 sm:p-6">
           {detailIdx !== null && suggestions[detailIdx] && (
             <>
               <DialogHeader>

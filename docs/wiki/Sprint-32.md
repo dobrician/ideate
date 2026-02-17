@@ -16,7 +16,7 @@
 
 - [x] **Goal 5: Navbar and form consistency** — Increase spacing between navbar icons for 44px minimum tap targets on mobile. Standardize all form inputs to bordered box style (not underline). Apply consistent `truncate` + `text-overflow: ellipsis` + `title` attributes on all project/proposal name displays. Add "Ideate" brand text to forgot-password card header for consistency with login/register.
 
-- [ ] **Goal 6: Project detail UX fixes** — Fix vote bar fill to match actual pro/(pro+contra) ratio. Make AI suggestions modal slightly larger on desktop + add skeleton loading state. Move Submit Proposal button closer to form fields in sidebar. Add dark mode border to create-project card for definition.
+- [x] **Goal 6: Project detail UX fixes** — Fix vote bar fill to match actual pro/(pro+contra) ratio. Make AI suggestions modal slightly larger on desktop + add skeleton loading state. Move Submit Proposal button closer to form fields in sidebar. Add dark mode border to create-project card for definition.
 
 - [ ] **Goal 7: Layout polish** — Center bottom row of feature cards on home page (desktop). Center forgot-password card vertically on mobile instead of pushing to lower half. Set min-height on project cards for consistent height on desktop. Fix admin search to filter the user table, not the global nav search. Add "Showing X-Y of Z projects" text near pagination.
 

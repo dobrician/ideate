@@ -80,16 +80,6 @@ export function ProposalList({
     });
   }, [proposals, voteUpdates]);
 
-  const maxTotalVotes = useMemo(() => {
-    let max = 0;
-    for (const p of proposals) {
-      const live = voteUpdates.get(p.id);
-      const total = (live?.upvotes ?? p.upvotes) + (live?.downvotes ?? p.downvotes);
-      max = Math.max(max, total);
-    }
-    return max;
-  }, [proposals, voteUpdates]);
-
   if (proposals.length === 0) {
     return (
       <div className="flex flex-col items-center gap-3 py-8 text-center">
@@ -116,7 +106,6 @@ export function ProposalList({
             isAdmin={isAdmin}
             liveUpvotes={live?.upvotes}
             liveDownvotes={live?.downvotes}
-            maxTotalVotes={maxTotalVotes}
           />
         );
       })}
@@ -131,7 +120,6 @@ function ProposalItem({
   isAdmin,
   liveUpvotes,
   liveDownvotes,
-  maxTotalVotes,
 }: {
   proposal: ProposalWithStats;
   projectId: string;
@@ -139,7 +127,6 @@ function ProposalItem({
   isAdmin: boolean;
   liveUpvotes?: number;
   liveDownvotes?: number;
-  maxTotalVotes: number;
 }) {
   const { t, locale } = useLocale();
   const [showFull, setShowFull] = useState(false);
@@ -149,9 +136,9 @@ function ProposalItem({
 
   const upvotes = liveUpvotes ?? proposal.upvotes;
   const downvotes = liveDownvotes ?? proposal.downvotes;
-  const halfWidth = maxTotalVotes > 0 ? 50 / maxTotalVotes : 0;
-  const greenWidth = Math.round(upvotes * halfWidth);
-  const redWidth = Math.round(downvotes * halfWidth);
+  const totalVotes = upvotes + downvotes;
+  const greenWidth = totalVotes > 0 ? Math.round((upvotes / totalVotes) * 50) : 0;
+  const redWidth = totalVotes > 0 ? Math.round((downvotes / totalVotes) * 50) : 0;
 
   async function handleDelete() {
     setIsDeleting(true);
