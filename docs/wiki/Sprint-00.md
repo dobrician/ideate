@@ -5,11 +5,11 @@
 
 ## Goals
 
-- [ ] **Goal 1: Push branch coverage to 95%+** — Target `rbac.ts` (75%), `sanitize.ts` (50%), `mail.ts` (87%), `csrf.ts` (88%), `llm.ts` (88%), `db/index.ts` (83%), `search.ts` (86%), `auth.ts` (90%). Add targeted tests for each uncovered branch.
+- [x] **Goal 1: Push branch coverage to 95%+** — Target `rbac.ts` (75%), `sanitize.ts` (50%), `mail.ts` (87%), `csrf.ts` (88%), `llm.ts` (88%), `db/index.ts` (83%), `search.ts` (86%), `auth.ts` (90%). Add targeted tests for each uncovered branch.
 
-- [ ] **Goal 2: Dark mode WCAG AA audit and fix** — Audit all text/background color pairs in dark mode. Fix any contrast ratio below 4.5:1 for normal text and 3:1 for large text. Deferred carry-over from Sprint 11.
+- [x] **Goal 2: Dark mode WCAG AA audit and fix** — Audit all text/background color pairs in dark mode. Fix any contrast ratio below 4.5:1 for normal text and 3:1 for large text. Deferred carry-over from Sprint 11.
 
-- [ ] **Goal 3: Icon tooltips / aria-labels on all icon-only buttons** — Find all buttons wrapping only a Lucide icon with no text label. Add `title` and `aria-label` attributes. Deferred carry-over from Sprint 11.
+- [x] **Goal 3: Icon tooltips / aria-labels on all icon-only buttons** — Find all buttons wrapping only a Lucide icon with no text label. Add `title` and `aria-label` attributes. Deferred carry-over from Sprint 11.
 
 - [ ] **Goal 4: Account lockout after repeated auth failures** — Add `failed_login_attempts` and `locked_until` columns to users table. Lock account after 5 failures for 15 minutes. Admin unlock endpoint. Tests.
 

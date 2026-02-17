@@ -95,7 +95,7 @@ export function Header() {
           <DarkModeToggle />
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" className="min-h-[44px] min-w-[44px]" title={t("nav.profile")}>
+              <Button variant="ghost" size="icon" className="min-h-[44px] min-w-[44px]" aria-label={t("nav.profile")} title={t("nav.profile")}>
                 <User className="h-4 w-4" />
                 <span className="sr-only">{t("nav.profile")}</span>
               </Button>

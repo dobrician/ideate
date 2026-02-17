@@ -204,7 +204,7 @@ describe("castVote", () => {
       value: 1,
     });
     expect(mockOnConflictDoUpdate).toHaveBeenCalledWith(
-      expect.objectContaining({ set: { value: 1 } })
+      expect.objectContaining({ set: expect.objectContaining({ value: 1, updatedAt: expect.any(Date) }) })
     );
   });
 

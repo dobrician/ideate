@@ -185,7 +185,7 @@ export async function castVote(
       .values({ proposalId, userId: user.id, value })
       .onConflictDoUpdate({
         target: [votes.proposalId, votes.userId],
-        set: { value },
+        set: { value, updatedAt: new Date() },
       });
 
     await logAudit({

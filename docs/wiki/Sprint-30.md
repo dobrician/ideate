@@ -18,7 +18,7 @@
 
 - [x] **Goal 6: Code quality deduplication** — Extract shared `isDeadlinePassed` to `lib/project-utils.ts`. Remove duplicate `escapeHtml` from `export.ts` (import from `sanitize.ts`). Extract duplicate `Comment` type to shared types. Remove verified unused exports from rbac, sanitize, ai, llm modules (verify they're truly unused first).
 
-- [ ] **Goal 7: DB indexes & schema fixes** — Add indexes on `proposals.projectId`, `comments.projectId`, `comments.proposalId`, `comments.parentId`. Add foreign key on `comments.parentId`. Add `updatedAt` to votes table. Generate and run migration.
+- [x] **Goal 7: DB indexes & schema fixes** — Add indexes on `proposals.projectId`, `comments.projectId`, `comments.proposalId`, `comments.parentId`. Add foreign key on `comments.parentId`. Add `updatedAt` to votes table. Generate and run migration.
 
 - [ ] **Goal 8: Change password in profile** — Add a "Change Password" section to the profile page. Require current password verification. Validate new password strength. Show toast on success. Add tests.
 

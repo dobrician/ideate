@@ -92,6 +92,9 @@ export const votes = sqliteTable(
     createdAt: integer("created_at", { mode: "timestamp" }).default(
       sql`(unixepoch())`
     ),
+    updatedAt: integer("updated_at", { mode: "timestamp" }).default(
+      sql`(unixepoch())`
+    ),
   },
   (table) => [primaryKey({ columns: [table.proposalId, table.userId] })]
 );
@@ -125,7 +128,9 @@ export const comments = sqliteTable("comments", {
   projectId: text("project_id").references(() => projects.id, {
     onDelete: "cascade",
   }),
-  parentId: text("parent_id"),
+  parentId: text("parent_id").references((): ReturnType<typeof text> => comments.id, {
+    onDelete: "cascade",
+  }),
   content: text("content").notNull(),
   createdAt: integer("created_at", { mode: "timestamp" }).default(
     sql`(unixepoch())`
