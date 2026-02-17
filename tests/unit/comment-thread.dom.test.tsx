@@ -59,7 +59,7 @@ vi.mock("@/components/markdown-renderer", () => ({
   MarkdownRenderer: ({ content }: { content: string }) => <span>{content}</span>,
 }));
 
-import type { Comment } from "@/components/comment-thread";
+import type { Comment } from "@/lib/comment-utils";
 import { CommentThread } from "@/components/comment-thread";
 
 function makeComment(overrides: Partial<Comment> = {}): Comment {

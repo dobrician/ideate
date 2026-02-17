@@ -14,10 +14,6 @@ import { buildThreadedCommentTree, isNearBottom } from "@/lib/comment-utils";
 import { ThreadedCommentNode } from "@/components/chat-bubble";
 import type { Comment } from "@/lib/comment-utils";
 
-// Re-export public API so existing imports from this module keep working
-export { buildThreadedCommentTree, formatTimeAgo, getInitials, avatarColor } from "@/lib/comment-utils";
-export type { Comment, CommentNode } from "@/lib/comment-utils";
-
 interface CommentThreadProps {
   comments: Comment[];
   hiddenFields: Record<string, string>;

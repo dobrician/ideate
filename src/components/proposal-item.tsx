@@ -32,7 +32,7 @@ import { getCsrfTokenClient } from "@/lib/csrf-client";
 import { MarkdownRenderer } from "@/components/markdown-renderer";
 import { AttachmentUpload } from "@/components/attachment-upload";
 import { formatDate } from "@/lib/utils";
-import type { Comment } from "@/components/comment-thread";
+import type { Comment } from "@/lib/comment-utils";
 
 export interface AttachmentInfo {
   id: string;

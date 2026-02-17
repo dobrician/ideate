@@ -7,7 +7,7 @@ import { MessageSquare } from "lucide-react";
 import { useLocale } from "@/lib/use-locale";
 import { useCommentPoll } from "@/lib/use-comment-poll";
 import { CommentThread } from "./comment-thread";
-import type { Comment } from "./comment-thread";
+import type { Comment } from "@/lib/comment-utils";
 
 interface DiscussionSheetProps {
   proposalId: string;

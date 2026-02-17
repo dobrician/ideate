@@ -4,8 +4,8 @@ import {
   formatTimeAgo,
   getInitials,
   avatarColor,
-} from "@/components/comment-thread";
-import type { Comment, CommentNode } from "@/components/comment-thread";
+} from "@/lib/comment-utils";
+import type { Comment, CommentNode } from "@/lib/comment-utils";
 
 function makeComment(overrides: Partial<Comment> = {}): Comment {
   return {

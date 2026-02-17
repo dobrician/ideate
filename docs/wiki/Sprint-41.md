@@ -13,7 +13,7 @@
 
 - [x] **Goal 4: Rename buildCommentTree to buildThreadedCommentTree** — The function in `lib/comment-utils.ts` sorts then builds a parent-child tree. Rename to `buildThreadedCommentTree` for clarity. Update all import sites.
 
-- [ ] **Goal 5: Remove re-export shim from comment-thread.tsx** — Lines 17-19 re-export `buildCommentTree`, `formatTimeAgo`, `getInitials`, `avatarColor` and types from `comment-utils`. Migrate the one external importer (`proposal-item.tsx`) to import directly from `lib/comment-utils`, then remove the shim.
+- [x] **Goal 5: Remove re-export shim from comment-thread.tsx** — Lines 17-19 re-export `buildCommentTree`, `formatTimeAgo`, `getInitials`, `avatarColor` and types from `comment-utils`. Migrate the one external importer (`proposal-item.tsx`) to import directly from `lib/comment-utils`, then remove the shim.
 
 - [ ] **Goal 6: Remove unused stripHtml and sanitizeInput from sanitize.ts** — These functions are exported but never imported in production code (only in tests). Remove them and their tests.
 
