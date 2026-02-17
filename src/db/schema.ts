@@ -5,7 +5,7 @@ import { randomUUID } from "crypto";
 // ─── Users ──────────────────────────────────────────────────────────────────
 
 export const users = sqliteTable("users", {
-  id: text("id").primaryKey(),
+  id: text("id").primaryKey().$defaultFn(() => randomUUID()),
   email: text("email").notNull().unique(),
   firstName: text("first_name"),
   lastName: text("last_name"),

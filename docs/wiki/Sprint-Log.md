@@ -4,9 +4,9 @@ Reverse chronological. Click each sprint for full details.
 
 ---
 
-### 🔄 [Sprint 40 — Security Hardening, Accessibility & Tech Debt](Sprint-40) *(2026-02-17)*
+### ✅ [Sprint 40 — Security Hardening, Accessibility & Tech Debt](Sprint-40) *(2026-02-17)*
 **Focus:** Account takeover fix, JWT revocation, auth logging, error text contrast, vote icon a11y, dialog focus, rate limiting, schema+hook cleanup
-**Stats:** 0/8 goals | 1096 tests | In progress
+**Stats:** 8/8 goals | 1100 tests | Security hardened, a11y fixes, rate limiting on all API routes
 
 ---
 

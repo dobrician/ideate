@@ -12,8 +12,8 @@ import {
 import { ThumbsUp, ThumbsDown, AlertTriangle, Loader2, Eye, Pencil } from "lucide-react";
 import { toast } from "sonner";
 import { getCsrfTokenClient } from "@/lib/csrf-client";
-import { useProposalForm } from "./use-proposal-form";
-import type { ProposalFormProps } from "./use-proposal-form";
+import { useProposalForm } from "@/lib/use-proposal-form";
+import type { ProposalFormProps } from "@/lib/use-proposal-form";
 import { MarkdownRenderer } from "./markdown-renderer";
 
 function ProposalFormFields({

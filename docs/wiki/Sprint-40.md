@@ -19,7 +19,7 @@
 
 - [x] **Goal 7: Add rate limiting to non-auth API routes** — Proposals, votes, search, and AI endpoints have no rate limiting. Add per-IP rate limits to these routes.
 
-- [ ] **Goal 8: Move use-proposal-form.ts to lib + add users.id defaultFn** — Move hook from `components/` to `lib/`. Add `$defaultFn(() => randomUUID())` to `users.id` in schema for consistency with all other tables.
+- [x] **Goal 8: Move use-proposal-form.ts to lib + add users.id defaultFn** — Move hook from `components/` to `lib/`. Add `$defaultFn(() => randomUUID())` to `users.id` in schema for consistency with all other tables.
 
 ## Notes
 
