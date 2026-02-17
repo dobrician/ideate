@@ -65,7 +65,7 @@ function ProposalFormFields({
       )}
 
       {warnings.length > 0 && (
-        <div className="space-y-2">
+        <div className="space-y-2" role="alert" aria-live="polite">
           {warnings.map((m) => (
             <div key={m.id} className="flex items-start gap-2 rounded-md border border-amber-300 bg-amber-50 p-3 dark:border-amber-700 dark:bg-amber-950">
               <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-amber-600 dark:text-amber-400" />
@@ -85,13 +85,17 @@ function ProposalFormFields({
         <div className="flex gap-2">
           <Button type="button" variant={initialVote === "1" ? "default" : "outline"} size="sm"
             onClick={() => setInitialVote("1")}
+            aria-pressed={initialVote === "1"}
+            aria-label={t("vote.pro")}
             className={initialVote === "1" ? "bg-green-600 hover:bg-green-700" : ""}>
-            <ThumbsUp className="mr-1 h-4 w-4" /> {t("vote.pro")}
+            <ThumbsUp className="mr-1 h-4 w-4" aria-hidden="true" /> {t("vote.pro")}
           </Button>
           <Button type="button" variant={initialVote === "-1" ? "default" : "outline"} size="sm"
             onClick={() => setInitialVote("-1")}
+            aria-pressed={initialVote === "-1"}
+            aria-label={t("vote.contra")}
             className={initialVote === "-1" ? "bg-red-600 hover:bg-red-700" : ""}>
-            <ThumbsDown className="mr-1 h-4 w-4" /> {t("vote.contra")}
+            <ThumbsDown className="mr-1 h-4 w-4" aria-hidden="true" /> {t("vote.contra")}
           </Button>
         </div>
       </div>
