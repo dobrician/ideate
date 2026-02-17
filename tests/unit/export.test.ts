@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { generateCsv, generateReportHtml, generatePdf } from "@/lib/export";
+import { generateCsv, generatePdf } from "@/lib/export";
 
 const mockProject = {
   title: "Test Project",
@@ -85,74 +85,6 @@ describe("Export", () => {
       expect(csv).toContain("ProjectComment");
       expect(csv).toContain("Eve");
       expect(csv).toContain("Great project!");
-    });
-  });
-
-  describe("generateReportHtml", () => {
-    it("should generate valid HTML document", () => {
-      const html = generateReportHtml(mockProject);
-      expect(html).toContain("<!DOCTYPE html>");
-      expect(html).toContain("</html>");
-    });
-
-    it("should include project title", () => {
-      const html = generateReportHtml(mockProject);
-      expect(html).toContain("Test Project");
-    });
-
-    it("should include proposal titles", () => {
-      const html = generateReportHtml(mockProject);
-      expect(html).toContain("Proposal One");
-      expect(html).toContain("Proposal Two");
-    });
-
-    it("should include vote counts", () => {
-      const html = generateReportHtml(mockProject);
-      expect(html).toContain("+5 Pro");
-      expect(html).toContain("-2 Contra");
-    });
-
-    it("should include comments", () => {
-      const html = generateReportHtml(mockProject);
-      expect(html).toContain("Great idea!");
-      expect(html).toContain("Bob");
-    });
-
-    it("should include stats summary", () => {
-      const html = generateReportHtml(mockProject);
-      expect(html).toContain("2");
-      expect(html).toContain("proposals");
-    });
-
-    it("should include project comments section when present", () => {
-      const project = {
-        ...mockProject,
-        projectComments: [
-          { content: "Project-level comment", authorName: "Eve", createdAt: new Date("2026-02-15") },
-        ],
-      };
-      const html = generateReportHtml(project);
-      expect(html).toContain("Project Discussion");
-      expect(html).toContain("Eve");
-      expect(html).toContain("Project-level comment");
-    });
-
-    it("should handle project with no description", () => {
-      const project = { ...mockProject, description: null, proposals: [] };
-      const html = generateReportHtml(project);
-      expect(html).toContain("Test Project");
-      expect(html).toContain("No proposals yet.");
-    });
-
-    it("should escape HTML in content", () => {
-      const project = {
-        ...mockProject,
-        title: '<script>alert("xss")</script>',
-        proposals: [],
-      };
-      const html = generateReportHtml(project);
-      expect(html).not.toContain("<script>");
-      expect(html).toContain("&lt;script&gt;");
     });
   });
 

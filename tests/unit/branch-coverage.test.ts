@@ -220,38 +220,8 @@ describe("i18n.ts branch coverage", () => {
   });
 });
 
-// ── export.ts lines 179,337,364,407: project comments + zero votes ─────
+// ── export.ts: project comments in PDF ─────
 describe("export.ts branch coverage", () => {
-  it("generateReportHtml handles zero-vote proposals and null dates", async () => {
-    const { generateReportHtml } = await import("@/lib/export");
-    const html = generateReportHtml({
-      title: "Test",
-      description: null,
-      status: "active",
-      deadline: null,
-      createdAt: null,
-      proposals: [
-        {
-          title: "Zero votes",
-          description: null,
-          summary: null,
-          authorName: "A",
-          createdAt: null,
-          upvotes: 0,
-          downvotes: 0,
-          comments: [],
-        },
-      ],
-      projectComments: [
-        { content: "Hello", authorName: "B", createdAt: null },
-      ],
-    });
-    expect(html).toContain("Zero votes");
-    expect(html).toContain("Hello");
-    expect(html).toContain("N/A");
-    expect(html).toContain("0% approval");
-  });
-
   it("generatePdf includes project comments section", async () => {
     const { generatePdf } = await import("@/lib/export");
     const buffer = await generatePdf({
@@ -266,31 +236,5 @@ describe("export.ts branch coverage", () => {
       ],
     });
     expect(buffer.byteLength).toBeGreaterThan(0);
-  });
-
-  it("generateReportHtml proposal with comments renders count", async () => {
-    const { generateReportHtml } = await import("@/lib/export");
-    const html = generateReportHtml({
-      title: "Test",
-      description: "D",
-      status: "active",
-      deadline: new Date(),
-      createdAt: new Date(),
-      proposals: [
-        {
-          title: "P1",
-          description: "D",
-          summary: "S",
-          authorName: "A",
-          createdAt: new Date(),
-          upvotes: 1,
-          downvotes: 0,
-          comments: [
-            { content: "C1", authorName: "B", createdAt: new Date() },
-          ],
-        },
-      ],
-    });
-    expect(html).toContain("1 comment");
   });
 });

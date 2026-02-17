@@ -13,7 +13,7 @@
 
 - [x] **Goal 4: Split oversized files** — Split files exceeding 300 lines: comment-thread.tsx (433), export.ts (424), admin/actions.ts (408), admin/user-role-manager.tsx (407), suggest-proposals.tsx (316), proposal-list.tsx (308).
 
-- [ ] **Goal 5: Remove dead `generateReportHtml`** — Remove unused `generateReportHtml` export from `lib/export.ts` and its associated dead code.
+- [x] **Goal 5: Remove dead `generateReportHtml`** — Remove unused `generateReportHtml` export from `lib/export.ts` and its associated dead code.
 
 - [ ] **Goal 6: Localize export date formatting** — Replace 3 hardcoded `"en-US"` locale strings in `lib/export.ts` with user locale support.
 
