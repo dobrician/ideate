@@ -189,11 +189,13 @@ export default async function DashboardPage() {
                       className="flex items-center gap-2 rounded-md px-2 py-1.5 transition-colors hover:bg-muted/50">
                       {v.value === 1 ? (
                         <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-emerald-100 dark:bg-emerald-900/50">
-                          <ThumbsUp className="h-3 w-3 text-emerald-700 dark:text-emerald-300" />
+                          <ThumbsUp className="h-3 w-3 text-emerald-700 dark:text-emerald-300" aria-hidden="true" />
+                          <span className="sr-only">{t("proposalForm.upvote")}</span>
                         </span>
                       ) : (
                         <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-red-100 dark:bg-red-900/50">
-                          <ThumbsDown className="h-3 w-3 text-red-700 dark:text-red-300" />
+                          <ThumbsDown className="h-3 w-3 text-red-700 dark:text-red-300" aria-hidden="true" />
+                          <span className="sr-only">{t("proposalForm.downvote")}</span>
                         </span>
                       )}
                       <Link href={`/projects/${v.projectId}`}

@@ -13,7 +13,7 @@
 
 - [x] **Goal 4: Fix error text WCAG AA contrast** — `text-red-600` on white fails AA for small text (~3.9:1). Switch to `text-red-700 dark:text-red-400` across all form error messages.
 
-- [ ] **Goal 5: Add sr-only text to dashboard vote icons** — ThumbsUp/ThumbsDown icons in dashboard recent votes convey direction by color only. Add `<span className="sr-only">` labels.
+- [x] **Goal 5: Add sr-only text to dashboard vote icons** — ThumbsUp/ThumbsDown icons in dashboard recent votes convey direction by color only. Add `<span className="sr-only">` labels.
 
 - [ ] **Goal 6: Fix nested AI dialog focus leakage** — Nested `<Dialog>` in suggest-proposals.tsx allows focus leakage between outer suggestion dialog and inner detail dialog. Replace inner dialog with inline expand or sheet.
 
