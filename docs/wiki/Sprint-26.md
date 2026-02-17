@@ -1,14 +1,29 @@
-# Sprint 26 — Comments & Discussion: Messenger-Style, Real-Time
-
-**Date:** 2026-02-16
-**Issue:** #47
-**Stats:** 718 tests | 98.59% stmt / 93.15% branch / 100% func / 99.19% line
+# Sprint 26 — Comments & Discussion (2026-02-17)
+**Status:** IN PROGRESS
 
 ## Goals
 
-- [x] Goal 1: Messenger-style comment bubbles with avatars
-- [x] Goal 2: Real-time comment updates (SSE or polling)
-- [x] Goal 3: Enter to submit, Shift+Enter for newline
-- [x] Goal 4: Scroll-to-bottom and auto-scroll behavior
-- [x] Goal 5: Mobile responsive messenger UX
-- [x] Goal 6: Exhaustive tests — unit, component, and E2E
+Based on unified analysis from Claude + Codex (see docs/sprint26-unified-plan.md).
+
+**UX:**
+- [ ] Goal 1: Avatar image support in comment bubbles
+- [ ] Goal 2: Hover-reveal timestamps
+- [ ] Goal 6: Character count indicator
+- [ ] Goal 9: Discussion sheet UX polish
+- [ ] Goal 10: Mobile keyboard + safe-area hardening
+
+**Backend:**
+- [ ] Goal 5: parentId server-side validation
+- [ ] Goal 7: Smart polling — only when discussion is visible
+- [ ] Goal 8: Include project comments in export
+
+**Testing:**
+- [ ] Goal 3: CommentThread + ChatBubble component render tests
+- [ ] Goal 4: Scroll and new-message indicator tests
+
+## Constraints
+- Commit + push after EACH goal
+- After each goal, edit this file: change `- [ ]` to `- [x]` (do NOT add new lines)
+- Lint + type check + tests + build must pass before each push
+- All files < 300 lines
+- Full unified plan in docs/sprint26-unified-plan.md
