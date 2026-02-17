@@ -16,6 +16,11 @@ Reverse chronological. Click each sprint for full details.
 
 ---
 
+### 🔄 [Sprint 37 — Search, Webhooks & Developer Experience](Sprint-37) *(2026-02-17)*
+**Focus:** Full-text search (FTS5+Cmd+K), webhooks, comment threading UI, LLM caching, API docs, email digests, project templates, GDPR export
+
+---
+
 ### ✅ [Sprint 36 — Enterprise Features & Polish](Sprint-36) *(2026-02-17)*
 **Focus:** File attachments, project archival (read-only), bulk operations, notification preferences, advanced sorting, categories/tags, markdown proposals, dashboard charts
 **Stats:** 8 commits | 869+ tests | 8 new features | recharts + react-markdown integrated
