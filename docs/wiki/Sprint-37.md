@@ -14,7 +14,7 @@
 
 - [x] **Goal 4: LLM response caching** — Cache AI suggestion responses to avoid re-querying for identical prompts. Add `llm_cache` table (hash of prompt → response, ttl, createdAt). TTL: 24 hours. Check cache before calling LLM. Add cache hit/miss logging. Add tests.
 
-- [ ] **Goal 5: Interactive API documentation** — Generate OpenAPI/Swagger spec from existing API routes. Serve interactive docs at /api/docs using swagger-ui or similar. Document all endpoints with request/response schemas. Auth endpoints, CRUD, AI, export, admin, webhooks.
+- [x] **Goal 5: Interactive API documentation** — Generate OpenAPI/Swagger spec from existing API routes. Serve interactive docs at /api/docs using swagger-ui or similar. Document all endpoints with request/response schemas. Auth endpoints, CRUD, AI, export, admin, webhooks.
 
 - [ ] **Goal 6: Email digest / weekly summary** — Add a weekly digest email option in notification preferences. Aggregate: new projects, top voted proposals, recent activity stats. Generate HTML email with summary. Add a cron-compatible endpoint that can be called to send digests. Add tests.
 
