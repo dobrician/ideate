@@ -7,7 +7,7 @@ Based on unified analysis from Claude + Codex (see docs/sprint27-unified-plan.md
 
 **Bug fixes:**
 - [x] Goal 1: Fix castVote/removeVote project-id integrity
-- [ ] Goal 2: Fix submit-suggested route: deadline + SSE + notifications
+- [x] Goal 2: Fix submit-suggested route: deadline + SSE + notifications
 - [ ] Goal 3: SSE robustness: keepalive leak + exponential backoff
 
 **UX & Accessibility:**

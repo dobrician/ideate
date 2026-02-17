@@ -5,9 +5,11 @@ import { hasPermission } from "@/lib/rbac";
 import type { Role } from "@/lib/rbac";
 import { db } from "@/db";
 import { projects, proposals, votes } from "@/db/schema";
-import { eq } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
 import { randomUUID } from "crypto";
 import { logAudit } from "@/lib/audit";
+import { emitVoteChange } from "@/lib/vote-events";
+import { notifyVote } from "@/lib/notifications";
 
 interface SuggestedProposal {
   title: string;
@@ -52,13 +54,20 @@ export async function POST(request: Request) {
     }
 
     const project = await db
-      .select({ id: projects.id })
+      .select({ id: projects.id, deadline: projects.deadline })
       .from(projects)
       .where(eq(projects.id, body.projectId))
       .limit(1);
 
     if (project.length === 0) {
       return NextResponse.json({ error: "Project not found" }, { status: 404 });
+    }
+
+    if (project[0].deadline && new Date(project[0].deadline).getTime() < Date.now()) {
+      return NextResponse.json(
+        { error: "Proposals are closed — the project deadline has passed" },
+        { status: 403 }
+      );
     }
 
     let created = 0;
@@ -81,6 +90,24 @@ export async function POST(request: Request) {
         userId: user.id,
         value: voteValue,
       });
+
+      // Emit SSE update so other clients see the new vote in real time
+      const counts = await db
+        .select({
+          upvotes: sql<number>`COALESCE(SUM(CASE WHEN ${votes.value} = 1 THEN 1 ELSE 0 END), 0)`,
+          downvotes: sql<number>`COALESCE(SUM(CASE WHEN ${votes.value} = -1 THEN 1 ELSE 0 END), 0)`,
+        })
+        .from(votes)
+        .where(eq(votes.proposalId, proposalId));
+
+      emitVoteChange({
+        proposalId,
+        projectId: body.projectId,
+        upvotes: Number(counts[0]?.upvotes ?? 0),
+        downvotes: Number(counts[0]?.downvotes ?? 0),
+      });
+
+      notifyVote(proposalId, body.projectId, user.id, voteValue);
 
       await logAudit({
         userId: user.id,

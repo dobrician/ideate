@@ -128,7 +128,7 @@ export function SuggestProposalsButton({
 
       const data = await res.json();
       if (res.ok) {
-        toast.success(`${data.created} proposal(s) added`);
+        toast.success(t("suggestions.added", { count: data.created }));
         setOpen(false);
         router.refresh();
       } else {

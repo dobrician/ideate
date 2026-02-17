@@ -363,6 +363,7 @@ export const en: Record<string, string> = {
   "suggestions.rateLimited": "AI rate limited — try again in a few minutes",
   "suggestions.noKeys": "AI is not configured on this server",
   "suggestions.unavailable": "AI is temporarily unavailable — please try again later",
+  "suggestions.added": "{count} proposal(s) added",
 
   // Project Summary
   "projectSummary.regenerate": "Regenerate Summary",
