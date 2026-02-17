@@ -4,6 +4,12 @@ Reverse chronological. Click each sprint for full details.
 
 ---
 
+### 🔄 [Sprint 41 — Code Quality, Dead Code Removal & Accessibility Polish](Sprint-41) *(2026-02-17)*
+**Focus:** Inline lone query, locale fallback fix, role=alert on error containers, rename buildCommentTree, remove re-export shim, dead sanitize exports, locale export test, dead code audit
+**Stats:** 0/8 goals | In progress
+
+---
+
 ### ✅ [Sprint 40 — Security Hardening, Accessibility & Tech Debt](Sprint-40) *(2026-02-17)*
 **Focus:** Account takeover fix, JWT revocation, auth logging, error text contrast, vote icon a11y, dialog focus, rate limiting, schema+hook cleanup
 **Stats:** 8/8 goals | 1100 tests | Security hardened, a11y fixes, rate limiting on all API routes
