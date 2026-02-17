@@ -19,6 +19,12 @@ import {
 } from "@/components/ui/dialog";
 import { VoteButtons } from "@/components/vote-buttons";
 import { DiscussionSheet } from "@/components/discussion-sheet";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { deleteProposal } from "@/app/projects/[id]/proposals/actions";
 import { useVoteStream } from "@/lib/use-vote-stream";
 import { Trash2, Lightbulb } from "lucide-react";
@@ -193,13 +199,22 @@ function ProposalItem({
             className="flex min-w-0 items-center gap-2"
             onClick={(e) => e.stopPropagation()}
           >
-            <VoteButtons
-              proposalId={proposal.id}
-              projectId={projectId}
-              upvotes={upvotes}
-              downvotes={downvotes}
-              userVote={proposal.userVote}
-            />
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <div title={t("vote.approvalRatio")}>
+                    <VoteButtons
+                      proposalId={proposal.id}
+                      projectId={projectId}
+                      upvotes={upvotes}
+                      downvotes={downvotes}
+                      userVote={proposal.userVote}
+                    />
+                  </div>
+                </TooltipTrigger>
+                <TooltipContent side="bottom">{t("vote.approvalRatio")}</TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
             <DiscussionSheet
               proposalId={proposal.id}
               projectId={projectId}

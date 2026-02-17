@@ -395,6 +395,9 @@ export const ro: Record<string, string> = {
   "pagination.ariaNext": "Pagina următoare",
   "pagination.ariaPage": "Pagina {page}",
 
+  // Vote bar
+  "vote.approvalRatio": "Rata de aprobare",
+
   // Vote accessibility
   "vote.ariaGroup": "Votează această propunere",
 

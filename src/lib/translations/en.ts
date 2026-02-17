@@ -376,6 +376,9 @@ export const en: Record<string, string> = {
   "pagination.ariaNext": "Next page",
   "pagination.ariaPage": "Page {page}",
 
+  // Vote bar
+  "vote.approvalRatio": "Approval ratio",
+
   // Vote accessibility
   "vote.ariaGroup": "Vote on this proposal",
 

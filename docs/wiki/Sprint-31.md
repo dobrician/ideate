@@ -11,7 +11,7 @@
 
 - [x] **Goal 3: Proposal card author name wrapping** — When author name is long, it wraps awkwardly (e.g., "by Ciprian" on one line, "Dobrea" alone on next). Use `truncate` or abbreviate on small screens. Ensure consistent layout across cards.
 
-- [ ] **Goal 4: Vote bar explanation** — Add a small tooltip or legend explaining what the green vote bar means (e.g., "Approval ratio" on hover/tap). First-time users have no context for it.
+- [x] **Goal 4: Vote bar explanation** — Add a small tooltip or legend explaining what the green vote bar means (e.g., "Approval ratio" on hover/tap). First-time users have no context for it.
 
 - [ ] **Goal 5: Date formatting respects locale** — Dates like "February 16, 2026" should display as "16 februarie 2026" when locale is RO. Audit all date displays (Created, Last Updated, deadline) and use locale-aware formatting via the i18n system.
 
