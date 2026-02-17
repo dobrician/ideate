@@ -13,7 +13,7 @@ Based on unified analysis from Claude + Codex (see docs/sprint28-unified-plan.md
 - [x] Goal 5: Form & dialog button touch targets
 - [x] Goal 6: Login page small touch targets
 - [x] Goal 7: Overflow protection for action rows & markdown
-- [ ] Goal 8: Mobile nav overflow resilience
+- [x] Goal 8: Mobile nav overflow resilience
 
 **Testing:**
 - [ ] Goal 9: Playwright mobile device projects

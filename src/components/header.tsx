@@ -137,7 +137,7 @@ export function Header() {
       </div>
 
       <nav className="border-t md:hidden" aria-label="Mobile navigation">
-        <div className="mx-auto flex max-w-7xl items-center gap-1 px-4 py-1">
+        <div className="mx-auto flex max-w-7xl items-center gap-1 overflow-x-auto px-4 py-1">
           {allNavItems.map((item) => {
             const isActive = pathname.startsWith(item.href);
             return (
@@ -146,7 +146,7 @@ export function Header() {
                 href={item.href}
                 aria-current={isActive ? "page" : undefined}
                 className={cn(
-                  "rounded-md px-3 py-2.5 text-sm font-medium transition-colors duration-150",
+                  "shrink-0 whitespace-nowrap rounded-md px-3 py-2.5 text-sm font-medium transition-colors duration-150",
                   isActive
                     ? "bg-accent text-accent-foreground"
                     : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
