@@ -103,6 +103,14 @@ export async function deliverWebhook(
         return;
       }
 
+      if (attempt === MAX_ATTEMPTS) {
+        logger.error(
+          { deliveryId, url, status: response.status, deadLetter: true },
+          "Webhook delivery permanently failed"
+        );
+        return;
+      }
+
       logger.warn(
         { deliveryId, url, attempt, status: response.status },
         "Webhook delivery failed, will retry"
@@ -119,7 +127,10 @@ export async function deliverWebhook(
         .where(eq(webhookDeliveries.id, deliveryId));
 
       if (attempt === MAX_ATTEMPTS) {
-        logger.error({ deliveryId, url, err }, "Webhook delivery exhausted retries");
+        logger.error(
+          { deliveryId, url, err, deadLetter: true },
+          "Webhook delivery permanently failed"
+        );
         return;
       }
 

@@ -4,9 +4,9 @@ Reverse chronological. Click each sprint for full details.
 
 ---
 
-### 🔄 [Sprint 00 — Cloudflare, Coverage, Accessibility & SSO](Sprint-00) *(2026-02-17)*
+### ✅ [Sprint 00 — Cloudflare, Coverage, Accessibility & SSO](Sprint-00) *(2026-02-17)*
 **Focus:** Cloudflare deployment, close coverage gaps (digest/utils/mail), search keyboard a11y, change-password, OIDC SSO, webhook resilience
-**Stats:** 0/8 goals | In progress
+**Stats:** 8/8 goals | 1099 tests | OIDC SSO + dead-letter webhook logging
 
 ---
 

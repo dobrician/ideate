@@ -19,7 +19,7 @@
 
 - [x] **Goal 7: SSO foundation (OIDC)** — Add OpenID Connect login with a configurable provider (Google as default), linking OIDC accounts to existing users by email.
 
-- [ ] **Goal 8: Improve webhook resilience** — Cover error retry paths in tests, add dead-letter logging for permanently failed deliveries.
+- [x] **Goal 8: Improve webhook resilience** — Cover error retry paths in tests, add dead-letter logging for permanently failed deliveries.
 
 ## Notes
 
