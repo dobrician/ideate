@@ -6,7 +6,7 @@
 
 ## Goals
 
-- [ ] **Goal 1: Dark mode primary button contrast** — Primary CTA buttons on auth pages (Login, Register, Forgot Password) are nearly invisible in dark mode. Change primary button variant in dark mode to use brand color (green/teal) fill or add visible border. Also fix outline buttons being too faint in dark mode. Files: `src/components/ui/button.tsx`, Tailwind theme config, globals.css.
+- [x] **Goal 1: Dark mode primary button contrast** — Primary CTA buttons on auth pages (Login, Register, Forgot Password) are nearly invisible in dark mode. Change primary button variant in dark mode to use brand color (green/teal) fill or add visible border. Also fix outline buttons being too faint in dark mode. Files: `src/components/ui/button.tsx`, Tailwind theme config, globals.css.
 
 - [ ] **Goal 2: Fix duplicate proposal form on desktop** — On project detail page, sidebar form AND bottom full-width form are both visible simultaneously on desktop. Show only the sidebar form on desktop. Hide the bottom form when sidebar is visible. Files: `src/app/projects/[id]/page.tsx`, proposal form components.
 
