@@ -199,7 +199,7 @@ function ProposalItem({
             </span>
           </div>
           <div
-            className="flex shrink-0 items-center gap-2"
+            className="flex min-w-0 items-center gap-2"
             onClick={(e) => e.stopPropagation()}
           >
             <VoteButtons
