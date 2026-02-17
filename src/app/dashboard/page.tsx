@@ -117,7 +117,7 @@ export default async function DashboardPage() {
                     <Link href={`/projects/${p.id}`}
                       className="group block rounded-md px-2 py-1.5 transition-colors hover:bg-muted/50">
                       <span className="flex items-center justify-between">
-                        <span className="truncate text-sm font-medium group-hover:underline">{p.title}</span>
+                        <span className="truncate text-sm font-medium group-hover:underline" title={p.title}>{p.title}</span>
                         <span className="flex shrink-0 gap-1.5">
                           {(() => { const dl = deadlineBadge(p.deadline, t); return dl ? <Badge className={dl.className}>{dl.label}</Badge> : null; })()}
                           <Badge className={statusBadgeClass(p.status)}>{statusLabel(p.status, t)}</Badge>
@@ -151,8 +151,8 @@ export default async function DashboardPage() {
                   <li key={p.id}>
                     <Link href={`/projects/${p.projectId}`}
                       className="group block rounded-md px-2 py-1.5 transition-colors hover:bg-muted/50">
-                      <span className="truncate text-sm font-medium group-hover:underline">{p.title}</span>
-                      <span className="block truncate text-xs text-muted-foreground">
+                      <span className="truncate text-sm font-medium group-hover:underline" title={p.title}>{p.title}</span>
+                      <span className="block truncate text-xs text-muted-foreground" title={p.projectTitle ?? ""}>
                         {t("dashboard.inProject", { project: p.projectTitle ?? t("projects.unknown") })}
                       </span>
                     </Link>

@@ -190,11 +190,11 @@ function ProposalItem({
             />
           )}
         </div>
-        <div className="relative z-10 flex w-full flex-col gap-1 px-4 pr-2">
+        <div className="relative z-10 flex w-full flex-col gap-1 px-2 sm:px-4 sm:pr-2">
           <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
             <div className="min-w-0 flex-1 text-left">
-              <span className="font-medium">{proposal.title}</span>
-              <span className="ml-2 inline-flex max-w-[8rem] text-xs text-muted-foreground sm:max-w-none">
+              <span className="truncate font-medium" title={proposal.title}>{proposal.title}</span>
+              <span className="ml-2 inline-flex max-w-[8rem] text-xs text-muted-foreground sm:max-w-none" title={proposal.authorName}>
                 <span className="truncate">{t("proposals.by")} {proposal.authorName}</span>
               </span>
             </div>
@@ -239,7 +239,7 @@ function ProposalItem({
         </div>
       </AccordionTrigger>
       <AccordionContent>
-        <div className="space-y-4 px-4 pb-2">
+        <div className="space-y-4 px-2 pb-2 sm:px-4">
           {displayText && (
             <MarkdownRenderer content={displayText} className="text-sm text-muted-foreground" />
           )}

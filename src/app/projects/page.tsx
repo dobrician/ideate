@@ -132,7 +132,7 @@ export default async function ProjectsPage({ searchParams }: ProjectsPageProps) 
                 <Card className="h-full transition-all duration-200 hover:shadow-lg hover:border-primary/20">
                   <CardHeader>
                     <div className="flex items-start justify-between gap-2">
-                      <CardTitle className="line-clamp-2 text-base">
+                      <CardTitle className="line-clamp-2 text-base" title={project.title}>
                         {project.title}
                       </CardTitle>
                       <Badge className={statusBadgeClass(project.status)}>

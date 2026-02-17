@@ -14,7 +14,7 @@
 
 - [x] **Goal 4: Admin panel mobile responsiveness** — User table is illegible on mobile (truncated emails, "--" for names). Use responsive card layout for mobile showing Email prominently, Role as badge, hide Name when empty. Show "Not set" in muted text instead of "--". Audit log entries: use relative timestamps ("2h ago"), truncate descriptions with expand. File: `src/app/admin/page.tsx`, `src/app/admin/user-role-manager.tsx`.
 
-- [ ] **Goal 5: Navbar and form consistency** — Increase spacing between navbar icons for 44px minimum tap targets on mobile. Standardize all form inputs to bordered box style (not underline). Apply consistent `truncate` + `text-overflow: ellipsis` + `title` attributes on all project/proposal name displays. Add "Ideate" brand text to forgot-password card header for consistency with login/register.
+- [x] **Goal 5: Navbar and form consistency** — Increase spacing between navbar icons for 44px minimum tap targets on mobile. Standardize all form inputs to bordered box style (not underline). Apply consistent `truncate` + `text-overflow: ellipsis` + `title` attributes on all project/proposal name displays. Add "Ideate" brand text to forgot-password card header for consistency with login/register.
 
 - [ ] **Goal 6: Project detail UX fixes** — Fix vote bar fill to match actual pro/(pro+contra) ratio. Make AI suggestions modal slightly larger on desktop + add skeleton loading state. Move Submit Proposal button closer to form fields in sidebar. Add dark mode border to create-project card for definition.
 
