@@ -6,7 +6,7 @@
 
 ## Goals
 
-- [ ] **Goal 1: Fix open redirect vulnerability** — In `login/page.tsx`, validate that `redirect` param starts with `/` and doesn't contain `//`. Reject or strip anything else. Add unit test for open redirect attack vectors.
+- [x] **Goal 1: Fix open redirect vulnerability** — In `login/page.tsx`, validate that `redirect` param starts with `/` and doesn't contain `//`. Reject or strip anything else. Add unit test for open redirect attack vectors.
 
 - [ ] **Goal 2: Zod validation on AI endpoints** — Add proper Zod schema validation to `api/proposals/suggest/route.ts` and `api/proposals/similarity/route.ts`. Validate input types, enforce max array lengths, reject oversized payloads. Add tests.
 

@@ -18,6 +18,14 @@ import {
 
 type AuthMode = "magic-link" | "password";
 
+export function getSafeRedirect(value: string | null): string {
+  if (!value) return "/";
+  if (!value.startsWith("/")) return "/";
+  if (value.startsWith("//")) return "/";
+  if (value.includes("\\")) return "/";
+  return value;
+}
+
 /**
  * Login page with dual authentication: magic link + email/password
  */
@@ -125,7 +133,7 @@ export default function LoginPage() {
         }
         return;
       }
-      window.location.href = searchParams.get("redirect") || "/";
+      window.location.href = getSafeRedirect(searchParams.get("redirect"));
     } catch {
       setError(t("common.errorOccurred"));
     } finally {
