@@ -181,6 +181,8 @@ export const en: Record<string, string> = {
   "dashboard.projectProposals": "{count} proposals",
   "dashboard.projectVotes": "{count} votes",
   "dashboard.projectComments": "{count} comments",
+  "dashboard.showMore": "Show {count} more",
+  "dashboard.showLess": "Show less",
 
   // Profile
   "profile.title": "Profile",

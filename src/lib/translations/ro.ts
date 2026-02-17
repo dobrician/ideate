@@ -191,6 +191,8 @@ export const ro: Record<string, string> = {
   "dashboard.projectProposals": "{count} propuneri",
   "dashboard.projectVotes": "{count} voturi",
   "dashboard.projectComments": "{count} comentarii",
+  "dashboard.showMore": "Arată încă {count}",
+  "dashboard.showLess": "Arată mai puțin",
 
   // Profile
   "profile.title": "Profil",

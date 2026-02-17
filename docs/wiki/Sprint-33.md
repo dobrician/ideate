@@ -12,7 +12,7 @@
 
 - [x] **Goal 3: Mobile navbar tap targets** — 5 icons packed tightly in mobile navbar. Increase spacing between icons to ensure 44px minimum tap targets, OR consolidate language+theme into a settings menu on mobile.
 
-- [ ] **Goal 4: Dashboard mobile optimization** — Dashboard is long on mobile. Limit visible items to 3 per section with "Show more" / "View all" links. Add project name context below each voted proposal in "Recent Votes".
+- [x] **Goal 4: Dashboard mobile optimization** — Dashboard is long on mobile. Limit visible items to 3 per section with "Show more" / "View all" links. Add project name context below each voted proposal in "Recent Votes".
 
 - [ ] **Goal 5: Auth & form polish** — Center forgot-password card vertically on mobile. Equalize spacing between register form fields. Move "Submit Proposal" button closer to form fields in sidebar (or make full-width). Add `title` attribute with full author name to truncated proposal author text.
 

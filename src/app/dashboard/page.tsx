@@ -14,6 +14,7 @@ import { StatCard, formatRelativeTime } from "@/components/stat-card";
 import { getTranslations } from "@/lib/i18n-server";
 import { statusBadgeClass, statusLabel, deadlineBadge } from "@/lib/status-utils";
 import { getDashboardData } from "./queries";
+import { CollapsibleList } from "./collapsible-list";
 
 function EmptyState({ icon, text }: { icon: React.ReactNode; text: React.ReactNode }) {
   return (
@@ -112,25 +113,27 @@ export default async function DashboardPage() {
               />
             ) : (
               <ul className="space-y-2" role="list">
-                {userProjects.map((p) => (
-                  <li key={p.id}>
-                    <Link href={`/projects/${p.id}`}
-                      className="group block rounded-md px-2 py-1.5 transition-colors hover:bg-muted/50">
-                      <span className="flex items-center justify-between">
-                        <span className="truncate text-sm font-medium group-hover:underline" title={p.title}>{p.title}</span>
-                        <span className="flex shrink-0 gap-1.5">
-                          {(() => { const dl = deadlineBadge(p.deadline, t); return dl ? <Badge className={dl.className}>{dl.label}</Badge> : null; })()}
-                          <Badge className={statusBadgeClass(p.status)}>{statusLabel(p.status, t)}</Badge>
+                <CollapsibleList total={userProjects.length}>
+                  {userProjects.map((p) => (
+                    <li key={p.id}>
+                      <Link href={`/projects/${p.id}`}
+                        className="group block rounded-md px-2 py-1.5 transition-colors hover:bg-muted/50">
+                        <span className="flex items-center justify-between">
+                          <span className="truncate text-sm font-medium group-hover:underline" title={p.title}>{p.title}</span>
+                          <span className="flex shrink-0 gap-1.5">
+                            {(() => { const dl = deadlineBadge(p.deadline, t); return dl ? <Badge className={dl.className}>{dl.label}</Badge> : null; })()}
+                            <Badge className={statusBadgeClass(p.status)}>{statusLabel(p.status, t)}</Badge>
+                          </span>
                         </span>
-                      </span>
-                      <span className="mt-0.5 flex gap-3 text-xs text-muted-foreground">
-                        <span>{t("dashboard.projectProposals", { count: p.proposalCount })}</span>
-                        <span>{t("dashboard.projectVotes", { count: p.voteCount })}</span>
-                        <span>{t("dashboard.projectComments", { count: p.commentCount })}</span>
-                      </span>
-                    </Link>
-                  </li>
-                ))}
+                        <span className="mt-0.5 flex gap-3 text-xs text-muted-foreground">
+                          <span>{t("dashboard.projectProposals", { count: p.proposalCount })}</span>
+                          <span>{t("dashboard.projectVotes", { count: p.voteCount })}</span>
+                          <span>{t("dashboard.projectComments", { count: p.commentCount })}</span>
+                        </span>
+                      </Link>
+                    </li>
+                  ))}
+                </CollapsibleList>
               </ul>
             )}
           </CardContent>
@@ -147,17 +150,19 @@ export default async function DashboardPage() {
               <EmptyState icon={<Lightbulb className="h-5 w-5 text-muted-foreground" />} text={t("dashboard.noProposals")} />
             ) : (
               <ul className="space-y-2" role="list">
-                {userProposals.map((p) => (
-                  <li key={p.id}>
-                    <Link href={`/projects/${p.projectId}`}
-                      className="group block rounded-md px-2 py-1.5 transition-colors hover:bg-muted/50">
-                      <span className="truncate text-sm font-medium group-hover:underline" title={p.title}>{p.title}</span>
-                      <span className="block truncate text-xs text-muted-foreground" title={p.projectTitle ?? ""}>
-                        {t("dashboard.inProject", { project: p.projectTitle ?? t("projects.unknown") })}
-                      </span>
-                    </Link>
-                  </li>
-                ))}
+                <CollapsibleList total={userProposals.length}>
+                  {userProposals.map((p) => (
+                    <li key={p.id}>
+                      <Link href={`/projects/${p.projectId}`}
+                        className="group block rounded-md px-2 py-1.5 transition-colors hover:bg-muted/50">
+                        <span className="truncate text-sm font-medium group-hover:underline" title={p.title}>{p.title}</span>
+                        <span className="block truncate text-xs text-muted-foreground" title={p.projectTitle ?? ""}>
+                          {t("dashboard.inProject", { project: p.projectTitle ?? t("projects.unknown") })}
+                        </span>
+                      </Link>
+                    </li>
+                  ))}
+                </CollapsibleList>
               </ul>
             )}
           </CardContent>
@@ -174,24 +179,29 @@ export default async function DashboardPage() {
               <EmptyState icon={<ThumbsUp className="h-5 w-5 text-muted-foreground" />} text={t("dashboard.noVotes")} />
             ) : (
               <ul className="space-y-2" role="list">
-                {recentVotes.map((v) => (
-                  <li key={`${v.proposalId}-${v.createdAt?.getTime()}`}
-                    className="flex items-center gap-2 rounded-md px-2 py-1.5 transition-colors hover:bg-muted/50">
-                    {v.value === 1 ? (
-                      <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-emerald-100 dark:bg-emerald-900/50">
-                        <ThumbsUp className="h-3 w-3 text-emerald-700 dark:text-emerald-300" />
-                      </span>
-                    ) : (
-                      <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-red-100 dark:bg-red-900/50">
-                        <ThumbsDown className="h-3 w-3 text-red-700 dark:text-red-300" />
-                      </span>
-                    )}
-                    <Link href={`/projects/${v.projectId}`}
-                      className="truncate text-sm transition-colors hover:underline">
-                      {v.proposalTitle}
-                    </Link>
-                  </li>
-                ))}
+                <CollapsibleList total={recentVotes.length}>
+                  {recentVotes.map((v) => (
+                    <li key={`${v.proposalId}-${v.createdAt?.getTime()}`}
+                      className="flex items-center gap-2 rounded-md px-2 py-1.5 transition-colors hover:bg-muted/50">
+                      {v.value === 1 ? (
+                        <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-emerald-100 dark:bg-emerald-900/50">
+                          <ThumbsUp className="h-3 w-3 text-emerald-700 dark:text-emerald-300" />
+                        </span>
+                      ) : (
+                        <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-red-100 dark:bg-red-900/50">
+                          <ThumbsDown className="h-3 w-3 text-red-700 dark:text-red-300" />
+                        </span>
+                      )}
+                      <Link href={`/projects/${v.projectId}`}
+                        className="min-w-0 transition-colors hover:underline">
+                        <span className="block truncate text-sm">{v.proposalTitle}</span>
+                        <span className="block truncate text-xs text-muted-foreground">
+                          {t("dashboard.inProject", { project: v.projectTitle ?? t("projects.unknown") })}
+                        </span>
+                      </Link>
+                    </li>
+                  ))}
+                </CollapsibleList>
               </ul>
             )}
           </CardContent>
@@ -208,29 +218,31 @@ export default async function DashboardPage() {
               <EmptyState icon={<MessageSquare className="h-5 w-5 text-muted-foreground" />} text={t("dashboard.noActivity")} />
             ) : (
               <ul className="space-y-2" role="list">
-                {recentActivity.map((a) => (
-                  <li key={a.id} className="text-sm">
-                    <Link href={a.projectId ? `/projects/${a.projectId}` : "/projects"}
-                      className="group flex gap-2 rounded-md px-2 py-1.5 transition-colors hover:bg-muted/50">
-                      <MessageSquare className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" />
-                      <div className="min-w-0">
-                        <div>
-                          <span className="font-medium group-hover:underline">
-                            {a.userName || a.userEmail || t("common.someone")}
-                          </span>
-                          <span className="text-muted-foreground"> {t("dashboard.commentedOn")} </span>
-                          <span className="font-medium group-hover:underline">{a.proposalTitle}</span>
-                          {a.createdAt && (
-                            <time className="ml-1 text-xs text-muted-foreground" dateTime={a.createdAt.toISOString()}>
-                              {formatRelativeTime(a.createdAt, t)}
-                            </time>
-                          )}
+                <CollapsibleList total={recentActivity.length}>
+                  {recentActivity.map((a) => (
+                    <li key={a.id} className="text-sm">
+                      <Link href={a.projectId ? `/projects/${a.projectId}` : "/projects"}
+                        className="group flex gap-2 rounded-md px-2 py-1.5 transition-colors hover:bg-muted/50">
+                        <MessageSquare className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" />
+                        <div className="min-w-0">
+                          <div>
+                            <span className="font-medium group-hover:underline">
+                              {a.userName || a.userEmail || t("common.someone")}
+                            </span>
+                            <span className="text-muted-foreground"> {t("dashboard.commentedOn")} </span>
+                            <span className="font-medium group-hover:underline">{a.proposalTitle}</span>
+                            {a.createdAt && (
+                              <time className="ml-1 text-xs text-muted-foreground" dateTime={a.createdAt.toISOString()}>
+                                {formatRelativeTime(a.createdAt, t)}
+                              </time>
+                            )}
+                          </div>
+                          <p className="mt-0.5 line-clamp-2 text-muted-foreground sm:line-clamp-1">{a.content}</p>
                         </div>
-                        <p className="mt-0.5 line-clamp-2 text-muted-foreground sm:line-clamp-1">{a.content}</p>
-                      </div>
-                    </Link>
-                  </li>
-                ))}
+                      </Link>
+                    </li>
+                  ))}
+                </CollapsibleList>
               </ul>
             )}
           </CardContent>
