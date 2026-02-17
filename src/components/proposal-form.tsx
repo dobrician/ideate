@@ -160,7 +160,10 @@ export function ProposalForm(props: ProposalFormProps) {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button size="sm">{form.t("proposalForm.newProposal")}</Button>
+        <Button size="sm">
+          <span className="sm:hidden">{form.t("proposalForm.newProposalShort")}</span>
+          <span className="hidden sm:inline">{form.t("proposalForm.newProposal")}</span>
+        </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-lg max-h-[90dvh] overflow-y-auto">
         <DialogHeader>

@@ -124,6 +124,7 @@ export const ro: Record<string, string> = {
 
   // Proposal form
   "proposalForm.newProposal": "+ Propunere Nouă",
+  "proposalForm.newProposalShort": "+ Nou",
   "proposalForm.title": "Propunere Nouă",
   "proposalForm.titleLabel": "Titlu",
   "proposalForm.titlePlaceholder": "Ce propui?",

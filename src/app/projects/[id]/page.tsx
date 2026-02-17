@@ -199,7 +199,7 @@ export default async function ProjectPage({ params, searchParams }: ProjectPageP
           </div>
 
           <div className="border-t pt-6">
-            <div className="mb-4 grid grid-cols-[1fr_auto] items-center gap-3">
+            <div className="mb-4 grid grid-cols-[1fr_auto] items-center gap-2">
               <h2 className="text-lg font-semibold">
                 {t("proposals.count", { count: proposalTotal })}
               </h2>

@@ -119,6 +119,7 @@ export const en: Record<string, string> = {
 
   // Proposal form
   "proposalForm.newProposal": "+ New Proposal",
+  "proposalForm.newProposalShort": "+ New",
   "proposalForm.title": "New Proposal",
   "proposalForm.titleLabel": "Title",
   "proposalForm.titlePlaceholder": "What do you propose?",
