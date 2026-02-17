@@ -16,8 +16,9 @@ Reverse chronological. Click each sprint for full details.
 
 ---
 
-### 🔄 [Sprint 36 — Enterprise Features & Polish](Sprint-36) *(2026-02-17)*
+### ✅ [Sprint 36 — Enterprise Features & Polish](Sprint-36) *(2026-02-17)*
 **Focus:** File attachments, project archival (read-only), bulk operations, notification preferences, advanced sorting, categories/tags, markdown proposals, dashboard charts
+**Stats:** 8 commits | 869+ tests | 8 new features | recharts + react-markdown integrated
 
 ---
 
