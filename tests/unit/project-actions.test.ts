@@ -284,6 +284,21 @@ describe("updateProject", () => {
       error: "Failed to update project. Please try again.",
     });
   });
+
+  it("fires webhook when archiving a previously active project", async () => {
+    mockSelectLimit.mockResolvedValueOnce([ownedProject]); // status: "active"
+    const fd = makeFormData({
+      title: "Updated Title",
+      description: "desc",
+      deadline: futureDate,
+      status: "archived",
+    });
+    const r = await updateProject("proj-1", fd);
+    expect(r).toEqual({ success: true });
+    expect(mockUpdateSet).toHaveBeenCalledWith(
+      expect.objectContaining({ status: "archived" })
+    );
+  });
 });
 
 describe("deleteProject", () => {
@@ -412,5 +427,23 @@ describe("unarchiveProject", () => {
     expect(mockUpdateSet).toHaveBeenCalledWith(
       expect.objectContaining({ status: "active" })
     );
+  });
+
+  it("redirects to login for unauthenticated users", async () => {
+    mockRequireAuth.mockRejectedValue(new Error("Unauthorized"));
+    await expect(unarchiveProject("proj-1", "token")).rejects.toThrow(
+      "NEXT_REDIRECT"
+    );
+    expect(mockRedirect).toHaveBeenCalledWith("/auth/login");
+  });
+
+  it("returns generic error on DB failure", async () => {
+    mockRequireAuth.mockResolvedValue(makeUser({ role: "admin" }));
+    mockSelectLimit.mockResolvedValueOnce([archivedProject]);
+    mockUpdateSet.mockImplementation(() => {
+      throw new Error("DB down");
+    });
+    const r = await unarchiveProject("proj-1", "token");
+    expect(r).toEqual({ error: "Failed to unarchive project" });
   });
 });
