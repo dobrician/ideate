@@ -4,6 +4,12 @@ Reverse chronological. Click each sprint for full details.
 
 ---
 
+### 🔄 [Sprint 30 — Docs Hygiene, Coverage Gaps & Production Hardening](Sprint-30) *(2026-02-17)*
+**Focus:** Update stale docs (Known-Issues, Nice-to-Have), close coverage gaps (vote-update.ts, export.ts, llm.ts), Cloudflare deployment spike, push branch coverage past 93%
+**Stats:** In progress | 795 tests | 1 open issue (#13 Cloudflare)
+
+---
+
 ### ✅ [Sprint 29 — UI/UX Polish (ChatGPT Review Fixes)](Sprint-29) *(2026-02-17)*
 **Focus:** Proposal submit feedback, real PDF export, styled form validation, auth error messages, admin UX (toast+search+pagination), i18n consistency, mobile/responsive fixes, projects list search/sort/filter
 **Stats:** 8 commits | 795 tests | Source: external ChatGPT UI/UX review (score 6/10 → fixes applied)

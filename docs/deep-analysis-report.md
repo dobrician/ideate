@@ -653,4 +653,63 @@ Verify the PWA manifest, service worker registration, and install prompt work co
 
 ---
 
-*Report updated for Sprint 28 planning on 2026-02-17.*
+## Sprint 30 Goals
+
+**Snapshot (2026-02-17):** 795 tests, 53 files, all green. `tsc --noEmit` clean. Coverage: 98.23% stmt / 91.96% branch / 98.62% func / 98.72% line. 1 open issue (#13 Cloudflare — nice-to-have). Sprint 29 completed all 8 goals (ChatGPT UI/UX review fixes: form validation, PDF export, admin panel UX, i18n consistency, projects list search/sort/filter).
+
+**Theme: Docs hygiene, coverage gaps, and production hardening**
+
+The app is feature-complete and well-tested. What remains: stale docs that haven't been updated since Sprint 1 (Known-Issues, Nice-to-Have), one file at 0% coverage (`vote-update.ts`), branch gaps in `export.ts` and `llm.ts`, and the Sprint Log is 14 sprints behind.
+
+### Goal 1: Update Known-Issues.md — completely stale since Sprint 1
+**Priority: High | Effort: 30min**
+Still says "Sprint 1 in progress" under Open and "None yet" under Resolved. Rewrite Open with current risks (in-memory rate limiter, no JWT revocation, single-instance SQLite). Move resolved items to Resolved (CSRF, structured logging, concurrent writes, AI rate limiting, session security). Remove risks already addressed.
+
+### Goal 2: Update Nice-to-Have.md — check off completed items
+**Priority: High | Effort: 30min**
+Many items are done: PDF/CSV export, real-time voting (SSE), email notifications, role-based access, audit logging, API rate limiting, search, structured logging, database backups, PWA, keyboard shortcuts. Check them off so the list reflects reality.
+
+### Goal 3: Cover vote-update.ts — 0% coverage (lines 14-22)
+**Priority: High | Effort: 1h**
+`src/lib/vote-update.ts` was extracted in Sprint 27 but never tested. It's a shared helper that queries vote counts and broadcasts via SSE. Add unit tests with mocked DB and `emitVoteChange`. Small file (28 lines) — should be straightforward.
+
+### Goal 4: Cover export.ts branch gaps (79% branch)
+**Priority: Medium | Effort: 1-2h**
+Uncovered lines at 59, 113-114, 391. These are likely format-specific or edge-case export paths. Add targeted tests to push branch coverage above 90%.
+
+### Goal 5: Cover llm.ts branch gaps (85% branch)
+**Priority: Medium | Effort: 1h**
+Uncovered lines at 188-189. Add tests for these specific error/fallback branches.
+
+### Goal 6: Update Sprint-Log.md — missing Sprints 12-29
+**Priority: High | Effort: 1-2h**
+Sprint-Log.md only has entries for Sprints 1-3 and 11. Add summary entries for Sprints 12-29 with status, theme, and key outcomes. Use git log and wiki sprint files as source.
+
+### Goal 7: Cloudflare deployment spike (Issue #13)
+**Priority: Low | Effort: 2-3h**
+The only remaining open issue. Write a concrete deployment spike: Pages for frontend, D1 for SQLite, Workers for API routes. Identify blockers (D1 compatibility with Drizzle, FTS5 support, file-based SQLite features). Update `docs/Deployment.md` with findings. Don't implement — just assess feasibility.
+
+### Goal 8: Final coverage push — target 93%+ branch overall
+**Priority: Medium | Effort: 1h**
+After Goals 3-5, review remaining branch gaps (db/index.ts at 83%, mail.ts at 87%, csrf.ts at 87%). Pick the easiest wins to push overall branch coverage from 91.96% past 93%.
+
+| # | Goal | Priority | Effort | Issue |
+|---|------|----------|--------|-------|
+| 1 | Update Known-Issues.md | High | 30min | — |
+| 2 | Update Nice-to-Have.md | High | 30min | — |
+| 3 | Cover vote-update.ts (0%) | High | 1h | — |
+| 4 | Cover export.ts branches (79%) | Medium | 1-2h | — |
+| 5 | Cover llm.ts branches (85%) | Medium | 1h | — |
+| 6 | Update Sprint-Log.md (missing 12-29) | High | 1-2h | — |
+| 7 | Cloudflare deployment spike | Low | 2-3h | #13 |
+| 8 | Final coverage push — 93%+ branch | Medium | 1h | — |
+
+**Total estimated effort:** ~8-12 hours
+
+**Out of scope:**
+- PostgreSQL migration, Redis rate limiter, JWT revocation, multi-tenancy
+- New features — the app is feature-complete; this sprint is maintenance and hardening
+
+---
+
+*Report updated for Sprint 30 planning on 2026-02-17.*
