@@ -143,6 +143,7 @@ export function CommentThread({ comments, hiddenFields, currentUserId }: Comment
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const prevCountRef = useRef(comments.length);
   const [showNewIndicator, setShowNewIndicator] = useState(false);
+  const [charCount, setCharCount] = useState(0);
   const [optimisticComments, addOptimisticComment] = useOptimistic(
     comments,
     (current: Comment[], newComment: Comment) => [...current, newComment]
@@ -179,6 +180,7 @@ export function CommentThread({ comments, hiddenFields, currentUserId }: Comment
     if (state?.success) {
       formRef.current?.reset();
       if (textareaRef.current) textareaRef.current.style.height = "";
+      setCharCount(0);
       router.refresh();
     }
   }, [state, router]);
@@ -206,6 +208,7 @@ export function CommentThread({ comments, hiddenFields, currentUserId }: Comment
     const ta = e.currentTarget;
     ta.style.height = "";
     ta.style.height = `${Math.min(ta.scrollHeight, 120)}px`;
+    setCharCount(ta.value.length);
   }
 
   return (
@@ -274,6 +277,16 @@ export function CommentThread({ comments, hiddenFields, currentUserId }: Comment
               <Send className="h-4 w-4" />
             </Button>
           </div>
+          {charCount >= 1800 && (
+            <p
+              data-testid="char-count"
+              className={`mt-1 text-right text-xs ${
+                charCount >= 2000 ? "text-destructive font-medium" : "text-muted-foreground"
+              }`}
+            >
+              {charCount}/2000
+            </p>
+          )}
           {state?.error && (
             <p className="mt-1 text-xs text-red-600 dark:text-red-400">{state.error}</p>
           )}
