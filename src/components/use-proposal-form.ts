@@ -77,11 +77,11 @@ export function useProposalForm({
     }, 800);
   }
 
-  function resetForm() {
+  const resetForm = useCallback(() => {
     setTitle("");
     setDescription("");
     setSimilarMatches([]);
-  }
+  }, []);
 
   // Clear debounce timer on unmount to prevent leaked setTimeout
   useEffect(() => {

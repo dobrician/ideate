@@ -6,7 +6,7 @@
 
 ## Goals
 
-- [ ] **Goal 1: Proposal submission feedback** — Add toast notification + form reset on successful proposal creation; show inline error on failure. User must have zero doubt whether it worked.
+- [x] **Goal 1: Proposal submission feedback** — Add toast notification + form reset on successful proposal creation; show inline error on failure. User must have zero doubt whether it worked.
 
 - [ ] **Goal 2: Fix export (PDF/CSV)** — PDF export must produce actual PDF (use server-side HTML→PDF or rename to HTML export); CSV export must produce valid CSV. Verify downloaded file types match button labels.
 
