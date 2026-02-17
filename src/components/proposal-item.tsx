@@ -212,7 +212,7 @@ export function ProposalItem({
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="text-xs text-red-600 hover:text-red-700 dark:text-red-300 dark:hover:text-red-300"
+                    className="text-xs text-red-700 hover:text-red-800 dark:text-red-300 dark:hover:text-red-200"
                     title={t("proposals.delete")}
                   >
                     <Trash2 className="mr-1 h-3 w-3" />

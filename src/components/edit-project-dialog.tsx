@@ -123,7 +123,7 @@ export function EditProjectDialog({
               aria-invalid={touched.title && !!fieldErrors.title}
             />
             {touched.title && fieldErrors.title && (
-              <p className="text-xs text-red-600 dark:text-red-300">{fieldErrors.title}</p>
+              <p className="text-xs text-red-700 dark:text-red-400">{fieldErrors.title}</p>
             )}
           </div>
 
@@ -152,7 +152,7 @@ export function EditProjectDialog({
               aria-invalid={touched.deadline && !!fieldErrors.deadline}
             />
             {touched.deadline && fieldErrors.deadline && (
-              <p className="text-xs text-red-600 dark:text-red-300">{fieldErrors.deadline}</p>
+              <p className="text-xs text-red-700 dark:text-red-400">{fieldErrors.deadline}</p>
             )}
           </div>
 

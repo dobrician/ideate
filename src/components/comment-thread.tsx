@@ -215,7 +215,7 @@ export function CommentThread({ comments, hiddenFields, currentUserId }: Comment
             </p>
           )}
           {state?.error && (
-            <p className="mt-1 text-xs text-red-600 dark:text-red-300" role="alert">{state.error}</p>
+            <p className="mt-1 text-xs text-red-700 dark:text-red-400" role="alert">{state.error}</p>
           )}
         </form>
       </div>

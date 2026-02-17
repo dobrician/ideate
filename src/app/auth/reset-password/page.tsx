@@ -168,7 +168,7 @@ export default function ResetPasswordPage() {
                 {t("auth.passwordRequirements")}
               </p>
               {touched.password && fieldErrors.password && (
-                <p id="reset-pw-error" className="text-xs text-red-600 dark:text-red-300">{fieldErrors.password}</p>
+                <p id="reset-pw-error" className="text-xs text-red-700 dark:text-red-400">{fieldErrors.password}</p>
               )}
             </div>
             <div className="space-y-2">
@@ -185,7 +185,7 @@ export default function ResetPasswordPage() {
                 aria-describedby={fieldErrors.confirmPassword ? "reset-cpw-error" : undefined}
               />
               {touched.confirmPassword && fieldErrors.confirmPassword && (
-                <p id="reset-cpw-error" className="text-xs text-red-600 dark:text-red-300">{fieldErrors.confirmPassword}</p>
+                <p id="reset-cpw-error" className="text-xs text-red-700 dark:text-red-400">{fieldErrors.confirmPassword}</p>
               )}
             </div>
 

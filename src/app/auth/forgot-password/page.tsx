@@ -129,7 +129,7 @@ export default function ForgotPasswordPage() {
                 aria-describedby={emailError ? "forgot-email-error" : undefined}
               />
               {emailTouched && emailError && (
-                <p id="forgot-email-error" className="text-xs text-red-600 dark:text-red-300">{emailError}</p>
+                <p id="forgot-email-error" className="text-xs text-red-700 dark:text-red-400">{emailError}</p>
               )}
             </div>
 

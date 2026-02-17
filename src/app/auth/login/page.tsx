@@ -93,7 +93,7 @@ export default function LoginPage() {
                 <Label htmlFor="email">{t("auth.email")}</Label>
                 <Input id="email" type="email" placeholder={t("auth.emailPlaceholder")} value={form.email} onChange={(e) => form.setEmail(e.target.value)} onBlur={() => form.handleBlur("email")} disabled={form.isLoading} autoComplete="email" autoFocus aria-invalid={form.touched.email && !!form.fieldErrors.email} aria-describedby={form.fieldErrors.email ? "login-email-error" : undefined} />
                 {form.touched.email && form.fieldErrors.email && (
-                  <p id="login-email-error" className="text-xs text-red-600 dark:text-red-300">{form.fieldErrors.email}</p>
+                  <p id="login-email-error" className="text-xs text-red-700 dark:text-red-400">{form.fieldErrors.email}</p>
                 )}
               </div>
               <div className="space-y-2">
@@ -103,7 +103,7 @@ export default function LoginPage() {
                 </div>
                 <PasswordInput id="password" placeholder={t("auth.enterPassword")} value={form.password} onChange={(e) => form.setPassword(e.target.value)} onBlur={() => form.handleBlur("password")} disabled={form.isLoading} autoComplete="current-password" aria-invalid={form.touched.password && !!form.fieldErrors.password} aria-describedby={form.fieldErrors.password ? "login-password-error" : undefined} />
                 {form.touched.password && form.fieldErrors.password && (
-                  <p id="login-password-error" className="text-xs text-red-600 dark:text-red-300">{form.fieldErrors.password}</p>
+                  <p id="login-password-error" className="text-xs text-red-700 dark:text-red-400">{form.fieldErrors.password}</p>
                 )}
               </div>
 
@@ -143,7 +143,7 @@ export default function LoginPage() {
                 <Label htmlFor="email-magic">{t("auth.email")}</Label>
                 <Input id="email-magic" type="email" placeholder={t("auth.emailPlaceholder")} value={form.email} onChange={(e) => form.setEmail(e.target.value)} onBlur={() => form.handleBlur("email")} disabled={form.isLoading} autoComplete="email" autoFocus aria-invalid={form.touched.email && !!form.fieldErrors.email} aria-describedby={form.fieldErrors.email ? "magic-email-error" : undefined} />
                 {form.touched.email && form.fieldErrors.email && (
-                  <p id="magic-email-error" className="text-xs text-red-600 dark:text-red-300">{form.fieldErrors.email}</p>
+                  <p id="magic-email-error" className="text-xs text-red-700 dark:text-red-400">{form.fieldErrors.email}</p>
                 )}
               </div>
               {form.error && (

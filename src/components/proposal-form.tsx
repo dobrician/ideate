@@ -69,7 +69,7 @@ function ProposalFormFields({
           aria-describedby={titleError ? "proposal-title-error" : undefined}
         />
         {titleError && (
-          <p id="proposal-title-error" className="text-xs text-red-600 dark:text-red-300">{titleError}</p>
+          <p id="proposal-title-error" className="text-xs text-red-700 dark:text-red-400">{titleError}</p>
         )}
       </div>
 
