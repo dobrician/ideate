@@ -27,11 +27,11 @@ export default function GlobalError({
         </CardHeader>
         <CardContent className="space-y-4">
           <p className="text-sm text-muted-foreground">
-            {error.message || "An unexpected error occurred. Please try again."}
+            {error.message || t("common.errorOccurred")}
           </p>
           {error.digest && (
             <p className="text-xs text-muted-foreground">
-              Error ID: {error.digest}
+              {t("common.errorId", { id: error.digest || "" })}
             </p>
           )}
           <div className="flex justify-center gap-2">

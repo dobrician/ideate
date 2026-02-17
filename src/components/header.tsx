@@ -54,7 +54,7 @@ export function Header() {
           <span className="text-lg font-semibold">Ideate</span>
         </Link>
 
-        <nav className="hidden items-center gap-1 md:flex" aria-label="Main navigation">
+        <nav className="hidden items-center gap-1 md:flex" aria-label={t("nav.mainNavigation")}>
           {allNavItems.map((item) => {
             const isActive = pathname.startsWith(item.href);
             return (
@@ -136,7 +136,7 @@ export function Header() {
         </div>
       </div>
 
-      <nav className="border-t md:hidden" aria-label="Mobile navigation">
+      <nav className="border-t md:hidden" aria-label={t("nav.mobileNavigation")}>
         <div className="mx-auto flex max-w-7xl items-center gap-1 overflow-x-auto px-4 py-1">
           {allNavItems.map((item) => {
             const isActive = pathname.startsWith(item.href);

@@ -51,7 +51,7 @@ export default function ForgotPasswordPage() {
       const data = await response.json();
 
       if (!response.ok) {
-        setError(data.error || "Failed to send reset link");
+        setError(data.error || t("common.errorOccurred"));
         return;
       }
 
@@ -117,7 +117,7 @@ export default function ForgotPasswordPage() {
               <Input
                 id="email"
                 type="email"
-                placeholder="you@example.com"
+                placeholder={t("auth.emailPlaceholder")}
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 onBlur={() => { setEmailTouched(true); setEmailError(validateEmail(email)); }}

@@ -80,7 +80,7 @@ export default function LoginPage() {
       });
       const data = await response.json();
       if (!response.ok) {
-        setError(data.error || "Failed to send magic link");
+        setError(data.error || t("common.errorOccurred"));
         return;
       }
       setSuccess(true);
@@ -208,7 +208,7 @@ export default function LoginPage() {
                 <Input
                   id="email"
                   type="email"
-                  placeholder="you@example.com"
+                  placeholder={t("auth.emailPlaceholder")}
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   onBlur={() => handleBlur("email")}
@@ -234,7 +234,7 @@ export default function LoginPage() {
                 </div>
                 <PasswordInput
                   id="password"
-                  placeholder="Enter your password"
+                  placeholder={t("auth.enterPassword")}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   onBlur={() => handleBlur("password")}
@@ -319,7 +319,7 @@ export default function LoginPage() {
                 <Input
                   id="email-magic"
                   type="email"
-                  placeholder="you@example.com"
+                  placeholder={t("auth.emailPlaceholder")}
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   onBlur={() => handleBlur("email")}

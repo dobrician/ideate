@@ -20,6 +20,8 @@ vi.mock("@/lib/use-locale", () => ({
         "nav.admin": "Admin",
         "nav.profile": "Profile",
         "nav.signOut": "Sign Out",
+        "nav.mainNavigation": "Main navigation",
+        "nav.mobileNavigation": "Mobile navigation",
         "theme.toggle": "Toggle theme",
         "search.placeholder": "Search projects & proposals...",
         "locale.switchToRo": "Switch to Romanian",
