@@ -229,40 +229,36 @@ export const projectTags = sqliteTable(
 // ─── Webhooks ────────────────────────────────────────────────────────────
 
 export const webhooks = sqliteTable("webhooks", {
-  id: text("id")
-    .primaryKey()
-    .$defaultFn(() => randomUUID()),
+  id: text("id").primaryKey().$defaultFn(() => randomUUID()),
   url: text("url").notNull(),
   events: text("events").notNull(), // JSON array of event names
   secret: text("secret").notNull(),
   active: integer("active", { mode: "boolean" }).notNull().default(true),
-  createdAt: integer("created_at", { mode: "timestamp" }).default(
-    sql`(unixepoch())`
-  ),
-  updatedAt: integer("updated_at", { mode: "timestamp" }).default(
-    sql`(unixepoch())`
-  ),
+  createdAt: integer("created_at", { mode: "timestamp" }).default(sql`(unixepoch())`),
+  updatedAt: integer("updated_at", { mode: "timestamp" }).default(sql`(unixepoch())`),
 });
 
 export const webhookDeliveries = sqliteTable("webhook_deliveries", {
-  id: text("id")
-    .primaryKey()
-    .$defaultFn(() => randomUUID()),
-  webhookId: text("webhook_id")
-    .notNull()
-    .references(() => webhooks.id, { onDelete: "cascade" }),
+  id: text("id").primaryKey().$defaultFn(() => randomUUID()),
+  webhookId: text("webhook_id").notNull().references(() => webhooks.id, { onDelete: "cascade" }),
   event: text("event").notNull(),
   payload: text("payload").notNull(),
-  status: text("status", { enum: ["pending", "success", "failed"] })
-    .notNull()
-    .default("pending"),
+  status: text("status", { enum: ["pending", "success", "failed"] }).notNull().default("pending"),
   attempts: integer("attempts").notNull().default(0),
   lastAttemptAt: integer("last_attempt_at", { mode: "timestamp" }),
   responseStatus: integer("response_status"),
   responseBody: text("response_body"),
-  createdAt: integer("created_at", { mode: "timestamp" }).default(
-    sql`(unixepoch())`
-  ),
+  createdAt: integer("created_at", { mode: "timestamp" }).default(sql`(unixepoch())`),
+});
+
+// ─── OAuth Accounts ──────────────────────────────────────────────────────
+
+export const oauthAccounts = sqliteTable("oauth_accounts", {
+  id: text("id").primaryKey().$defaultFn(() => randomUUID()),
+  userId: text("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  provider: text("provider").notNull(),
+  providerAccountId: text("provider_account_id").notNull(),
+  createdAt: integer("created_at", { mode: "timestamp" }).default(sql`(unixepoch())`),
 });
 
 // ─── LLM Cache ────────────────────────────────────────────────────────────

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, FormEvent, useCallback } from "react";
+import { useState } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -8,14 +8,10 @@ import { Input } from "@/components/ui/input";
 import { PasswordInput } from "@/components/ui/password-input";
 import { Label } from "@/components/ui/label";
 import { useLocale } from "@/lib/use-locale";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-} from "@/components/ui/card";
+import { useLoginForm } from "@/lib/use-login-form";
+import { Card, CardContent, CardDescription, CardHeader } from "@/components/ui/card";
 
-type AuthMode = "magic-link" | "password";
+const oidcEnabled = process.env.NEXT_PUBLIC_OIDC_ENABLED === "true";
 
 export function getSafeRedirect(value: string | null): string {
   if (!value) return "/";
@@ -25,138 +21,40 @@ export function getSafeRedirect(value: string | null): string {
   return value;
 }
 
-/**
- * Login page with dual authentication: magic link + email/password
- */
+function OrDivider({ label }: { label: string }) {
+  return (
+    <div className="relative my-4">
+      <div className="absolute inset-0 flex items-center">
+        <span className="w-full border-t" />
+      </div>
+      <div className="relative flex justify-center text-xs uppercase">
+        <span className="bg-background px-2 text-muted-foreground">{label}</span>
+      </div>
+    </div>
+  );
+}
+
 export default function LoginPage() {
   const { t } = useLocale();
   const searchParams = useSearchParams();
   const verified = searchParams.get("verified") === "true";
   const errorParam = searchParams.get("error");
-
-  const [mode, setMode] = useState<AuthMode>("password");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState(errorParam || "");
-  const [success, setSuccess] = useState(false);
   const [verifiedBanner, setVerifiedBanner] = useState(verified);
-  const [needsVerification, setNeedsVerification] = useState(false);
-  const [resendLoading, setResendLoading] = useState(false);
-  const [resendSuccess, setResendSuccess] = useState(false);
-  const [fieldErrors, setFieldErrors] = useState<{ email?: string; password?: string }>({});
-  const [touched, setTouched] = useState<Record<string, boolean>>({});
 
-  const validateLoginEmail = useCallback(
-    (v: string) => {
-      if (!v.trim()) return t("auth.emailRequired");
-      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)) return t("auth.emailInvalid");
-      return undefined;
-    },
-    [t]
-  );
+  const form = useLoginForm(t, searchParams.get("redirect"));
 
-  function handleBlur(field: string) {
-    setTouched((prev) => ({ ...prev, [field]: true }));
-    if (field === "email") {
-      setFieldErrors((prev) => ({ ...prev, email: validateLoginEmail(email) }));
-    } else if (field === "password") {
-      setFieldErrors((prev) => ({
-        ...prev,
-        password: !password ? t("auth.passwordRequired") : undefined,
-      }));
-    }
-  }
-
-  async function handleMagicLink(e: FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    const emailErr = validateLoginEmail(email);
-    setFieldErrors({ email: emailErr });
-    setTouched({ email: true });
-    if (emailErr) return;
-
-    setIsLoading(true);
-    setError("");
-    setSuccess(false);
-
-    try {
-      const response = await fetch("/auth/request", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email }),
-      });
-      const data = await response.json();
-      if (!response.ok) {
-        setError(data.error || t("common.errorOccurred"));
-        return;
-      }
-      setSuccess(true);
-      setEmail("");
-    } catch {
-      setError(t("common.errorOccurred"));
-    } finally {
-      setIsLoading(false);
-    }
-  }
-
-  async function handlePasswordLogin(e: FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    const emailErr = validateLoginEmail(email);
-    const passwordErr = !password ? t("auth.passwordRequired") : undefined;
-    setFieldErrors({ email: emailErr, password: passwordErr });
-    setTouched({ email: true, password: true });
-    if (emailErr || passwordErr) return;
-
-    setIsLoading(true);
-    setError("");
-    setNeedsVerification(false);
-    setResendSuccess(false);
-
-    try {
-      const response = await fetch("/api/auth/login-password", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
-      });
-      const data = await response.json();
-      if (!response.ok) {
-        if (data.code === "EMAIL_NOT_VERIFIED") {
-          setNeedsVerification(true);
-          setError(t("auth.verifyEmailFirst"));
-        } else if (response.status === 401) {
-          setError(t("auth.invalidCredentials"));
-        } else if (response.status === 429) {
-          setError(t("auth.tooManyAttempts"));
-        } else {
-          setError(data.error || t("common.errorOccurred"));
-        }
-        return;
-      }
-      window.location.href = getSafeRedirect(searchParams.get("redirect"));
-    } catch {
-      setError(t("common.errorOccurred"));
-    } finally {
-      setIsLoading(false);
-    }
-  }
-
-  async function handleResendVerification() {
-    setResendLoading(true);
-    setResendSuccess(false);
-    try {
-      const response = await fetch("/api/auth/resend-verification", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email }),
-      });
-      if (response.ok) {
-        setResendSuccess(true);
-      }
-    } catch {
-      // silent — the button already gave feedback
-    } finally {
-      setResendLoading(false);
-    }
+  // Map OIDC error params to initial error
+  if (errorParam && !form.error) {
+    const oidcErrors: Record<string, string> = {
+      oidc_error: t("auth.oidcError"),
+      oidc_denied: t("auth.oidcDenied"),
+      oidc_state_mismatch: t("auth.oidcError"),
+      oidc_not_configured: t("auth.oidcError"),
+      oidc_missing_params: t("auth.oidcError"),
+      oidc_no_subject: t("auth.oidcError"),
+    };
+    if (oidcErrors[errorParam]) form.setError(oidcErrors[errorParam]);
+    else if (errorParam) form.setError(errorParam);
   }
 
   return (
@@ -164,231 +62,104 @@ export default function LoginPage() {
       <Card className="w-full max-w-md shadow-lg">
         <CardHeader className="space-y-1 text-center">
           <p className="text-3xl font-bold tracking-tight">Ideate</p>
-          <h1 className="text-2xl font-bold leading-none">
-            {t("auth.signIn")}
-          </h1>
+          <h1 className="text-2xl font-bold leading-none">{t("auth.signIn")}</h1>
           <CardDescription>
-            {mode === "magic-link"
-              ? t("auth.signInMagicDesc")
-              : t("auth.signInDesc")}
+            {form.mode === "magic-link" ? t("auth.signInMagicDesc") : t("auth.signInDesc")}
           </CardDescription>
         </CardHeader>
         <CardContent>
           {verifiedBanner && (
             <div className="mb-4 rounded-md bg-green-50 p-3 dark:bg-green-950">
-              <p className="text-sm text-green-800 dark:text-green-200">
-                {t("auth.emailVerified")}
-              </p>
-              <Button
-                variant="link"
-                onClick={() => setVerifiedBanner(false)}
-                className="mt-1 px-0 text-xs text-green-600 dark:text-green-300"
-              >
+              <p className="text-sm text-green-800 dark:text-green-200">{t("auth.emailVerified")}</p>
+              <Button variant="link" onClick={() => setVerifiedBanner(false)} className="mt-1 px-0 text-xs text-green-600 dark:text-green-300">
                 {t("auth.dismiss")}
               </Button>
             </div>
           )}
 
-          {success ? (
+          {form.success ? (
             <div className="space-y-4 text-center">
               <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-green-100 dark:bg-green-900">
                 <svg className="h-6 w-6 text-green-600 dark:text-green-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
               </div>
               <h3 className="text-lg font-semibold">{t("auth.magicLinkCheckTitle")}</h3>
-              <p className="text-sm text-muted-foreground">
-                {t("auth.magicLinkCheckDesc")}
-              </p>
-              <p className="text-xs text-muted-foreground">
-                {t("auth.magicLinkCheckSpam")}
-              </p>
-              <Button
-                variant="outline"
-                onClick={() => setSuccess(false)}
-                className="w-full"
-              >
-                {t("auth.sendAnother")}
-              </Button>
+              <p className="text-sm text-muted-foreground">{t("auth.magicLinkCheckDesc")}</p>
+              <p className="text-xs text-muted-foreground">{t("auth.magicLinkCheckSpam")}</p>
+              <Button variant="outline" onClick={() => form.setSuccess(false)} className="w-full">{t("auth.sendAnother")}</Button>
             </div>
-          ) : mode === "password" ? (
-            <form onSubmit={handlePasswordLogin} className="space-y-4" noValidate>
+          ) : form.mode === "password" ? (
+            <form onSubmit={form.handlePasswordLogin} className="space-y-4" noValidate>
               <div className="space-y-2">
                 <Label htmlFor="email">{t("auth.email")}</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder={t("auth.emailPlaceholder")}
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  onBlur={() => handleBlur("email")}
-                  disabled={isLoading}
-                  autoComplete="email"
-                  autoFocus
-                  aria-invalid={touched.email && !!fieldErrors.email}
-                  aria-describedby={fieldErrors.email ? "login-email-error" : undefined}
-                />
-                {touched.email && fieldErrors.email && (
-                  <p id="login-email-error" className="text-xs text-red-600 dark:text-red-300">{fieldErrors.email}</p>
+                <Input id="email" type="email" placeholder={t("auth.emailPlaceholder")} value={form.email} onChange={(e) => form.setEmail(e.target.value)} onBlur={() => form.handleBlur("email")} disabled={form.isLoading} autoComplete="email" autoFocus aria-invalid={form.touched.email && !!form.fieldErrors.email} aria-describedby={form.fieldErrors.email ? "login-email-error" : undefined} />
+                {form.touched.email && form.fieldErrors.email && (
+                  <p id="login-email-error" className="text-xs text-red-600 dark:text-red-300">{form.fieldErrors.email}</p>
                 )}
               </div>
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
                   <Label htmlFor="password">{t("auth.password")}</Label>
-                  <Link
-                    href="/auth/forgot-password"
-                    className="inline-flex min-h-[44px] items-center text-xs text-muted-foreground hover:underline"
-                  >
-                    {t("auth.forgotPassword")}
-                  </Link>
+                  <Link href="/auth/forgot-password" className="inline-flex min-h-[44px] items-center text-xs text-muted-foreground hover:underline">{t("auth.forgotPassword")}</Link>
                 </div>
-                <PasswordInput
-                  id="password"
-                  placeholder={t("auth.enterPassword")}
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  onBlur={() => handleBlur("password")}
-                  disabled={isLoading}
-                  autoComplete="current-password"
-                  aria-invalid={touched.password && !!fieldErrors.password}
-                  aria-describedby={fieldErrors.password ? "login-password-error" : undefined}
-                />
-                {touched.password && fieldErrors.password && (
-                  <p id="login-password-error" className="text-xs text-red-600 dark:text-red-300">{fieldErrors.password}</p>
+                <PasswordInput id="password" placeholder={t("auth.enterPassword")} value={form.password} onChange={(e) => form.setPassword(e.target.value)} onBlur={() => form.handleBlur("password")} disabled={form.isLoading} autoComplete="current-password" aria-invalid={form.touched.password && !!form.fieldErrors.password} aria-describedby={form.fieldErrors.password ? "login-password-error" : undefined} />
+                {form.touched.password && form.fieldErrors.password && (
+                  <p id="login-password-error" className="text-xs text-red-600 dark:text-red-300">{form.fieldErrors.password}</p>
                 )}
               </div>
 
-              {error && (
+              {form.error && (
                 <div className="rounded-md bg-red-50 p-3 dark:bg-red-950" role="alert">
-                  <p className="text-sm text-red-800 dark:text-red-200">
-                    {error}
-                  </p>
-                  {needsVerification && !resendSuccess && (
-                    <Button
-                      type="button"
-                      variant="link"
-                      className="mt-1 px-0 text-xs text-red-700 dark:text-red-300"
-                      onClick={handleResendVerification}
-                      disabled={resendLoading}
-                    >
-                      {resendLoading ? t("auth.sending") : t("auth.resendVerification")}
+                  <p className="text-sm text-red-800 dark:text-red-200">{form.error}</p>
+                  {form.needsVerification && !form.resendSuccess && (
+                    <Button type="button" variant="link" className="mt-1 px-0 text-xs text-red-700 dark:text-red-300" onClick={form.handleResendVerification} disabled={form.resendLoading}>
+                      {form.resendLoading ? t("auth.sending") : t("auth.resendVerification")}
                     </Button>
                   )}
-                  {resendSuccess && (
-                    <p className="mt-1 text-xs text-green-700 dark:text-green-300">
-                      {t("auth.verifyEmailNote")}
-                    </p>
+                  {form.resendSuccess && (
+                    <p className="mt-1 text-xs text-green-700 dark:text-green-300">{t("auth.verifyEmailNote")}</p>
                   )}
                 </div>
               )}
 
-              <Button type="submit" className="w-full" disabled={isLoading}>
-                {isLoading ? t("auth.signingIn") : t("auth.signInWithPassword")}
+              <Button type="submit" className="w-full" disabled={form.isLoading}>
+                {form.isLoading ? t("auth.signingIn") : t("auth.signInWithPassword")}
               </Button>
-
-              <div className="relative my-4">
-                <div className="absolute inset-0 flex items-center">
-                  <span className="w-full border-t" />
-                </div>
-                <div className="relative flex justify-center text-xs uppercase">
-                  <span className="bg-background px-2 text-muted-foreground">
-                    {t("auth.or")}
-                  </span>
-                </div>
-              </div>
-
-              <Button
-                type="button"
-                variant="outline"
-                className="w-full"
-                onClick={() => {
-                  setMode("magic-link");
-                  setError("");
-                }}
-              >
-                {t("auth.signInWithMagicLink")}
-              </Button>
-
+              <OrDivider label={t("auth.or")} />
+              {oidcEnabled && (
+                <Button type="button" variant="outline" className="w-full" onClick={() => { window.location.href = "/api/auth/oidc"; }}>
+                  {t("auth.signInWithOidc")}
+                </Button>
+              )}
+              <Button type="button" variant="outline" className="w-full" onClick={() => form.switchMode("magic-link")}>{t("auth.signInWithMagicLink")}</Button>
               <p className="text-center text-sm text-muted-foreground">
                 {t("auth.noAccount")}{" "}
-                <Link
-                  href="/auth/register"
-                  className="inline-flex min-h-[44px] items-center font-medium text-primary hover:underline"
-                >
-                  {t("auth.register")}
-                </Link>
+                <Link href="/auth/register" className="inline-flex min-h-[44px] items-center font-medium text-primary hover:underline">{t("auth.register")}</Link>
               </p>
             </form>
           ) : (
-            <form onSubmit={handleMagicLink} className="space-y-4" noValidate>
-              <p className="text-sm text-muted-foreground">
-                {t("auth.magicLinkExplainer")}
-              </p>
+            <form onSubmit={form.handleMagicLink} className="space-y-4" noValidate>
+              <p className="text-sm text-muted-foreground">{t("auth.magicLinkExplainer")}</p>
               <div className="space-y-2">
                 <Label htmlFor="email-magic">{t("auth.email")}</Label>
-                <Input
-                  id="email-magic"
-                  type="email"
-                  placeholder={t("auth.emailPlaceholder")}
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  onBlur={() => handleBlur("email")}
-                  disabled={isLoading}
-                  autoComplete="email"
-                  autoFocus
-                  aria-invalid={touched.email && !!fieldErrors.email}
-                  aria-describedby={fieldErrors.email ? "magic-email-error" : undefined}
-                />
-                {touched.email && fieldErrors.email && (
-                  <p id="magic-email-error" className="text-xs text-red-600 dark:text-red-300">{fieldErrors.email}</p>
+                <Input id="email-magic" type="email" placeholder={t("auth.emailPlaceholder")} value={form.email} onChange={(e) => form.setEmail(e.target.value)} onBlur={() => form.handleBlur("email")} disabled={form.isLoading} autoComplete="email" autoFocus aria-invalid={form.touched.email && !!form.fieldErrors.email} aria-describedby={form.fieldErrors.email ? "magic-email-error" : undefined} />
+                {form.touched.email && form.fieldErrors.email && (
+                  <p id="magic-email-error" className="text-xs text-red-600 dark:text-red-300">{form.fieldErrors.email}</p>
                 )}
               </div>
-
-              {error && (
+              {form.error && (
                 <div className="rounded-md bg-red-50 p-3 dark:bg-red-950" role="alert">
-                  <p className="text-sm text-red-800 dark:text-red-200">
-                    {error}
-                  </p>
+                  <p className="text-sm text-red-800 dark:text-red-200">{form.error}</p>
                 </div>
               )}
-
-              <Button type="submit" className="w-full" disabled={isLoading}>
-                {isLoading ? t("auth.sending") : t("auth.sendLink")}
+              <Button type="submit" className="w-full" disabled={form.isLoading}>
+                {form.isLoading ? t("auth.sending") : t("auth.sendLink")}
               </Button>
-
-              <p className="text-center text-xs text-muted-foreground">
-                {t("auth.magicLinkExpiry")}
-              </p>
-
-              <div className="relative my-4">
-                <div className="absolute inset-0 flex items-center">
-                  <span className="w-full border-t" />
-                </div>
-                <div className="relative flex justify-center text-xs uppercase">
-                  <span className="bg-background px-2 text-muted-foreground">
-                    {t("auth.or")}
-                  </span>
-                </div>
-              </div>
-
-              <Button
-                type="button"
-                variant="outline"
-                className="w-full"
-                onClick={() => {
-                  setMode("password");
-                  setError("");
-                }}
-              >
-                {t("auth.signInWithPassword")}
-              </Button>
-
+              <p className="text-center text-xs text-muted-foreground">{t("auth.magicLinkExpiry")}</p>
+              <OrDivider label={t("auth.or")} />
+              <Button type="button" variant="outline" className="w-full" onClick={() => form.switchMode("password")}>{t("auth.signInWithPassword")}</Button>
               <p className="text-center text-sm text-muted-foreground">
                 {t("auth.noAccount")}{" "}
-                <Link
-                  href="/auth/register"
-                  className="inline-flex min-h-[44px] items-center font-medium text-primary hover:underline"
-                >
-                  {t("auth.register")}
-                </Link>
+                <Link href="/auth/register" className="inline-flex min-h-[44px] items-center font-medium text-primary hover:underline">{t("auth.register")}</Link>
               </p>
             </form>
           )}

@@ -55,6 +55,8 @@ const PUBLIC_PATHS = [
   "/api/email/deliverability",
   "/api/me",
   "/api/cron/project-summaries",
+  "/api/auth/oidc",
+  "/api/auth/oidc/callback",
   "/api/test/seed",
   "/sitemap.xml",
   "/robots.txt",

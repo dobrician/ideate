@@ -401,6 +401,9 @@ export const ro: Record<string, string> = {
   "auth.createPassword": "Creează o parolă",
   "auth.confirmNewPassword": "Confirmă parola nouă",
   "auth.createNewPassword": "Creează o parolă nouă",
+  "auth.signInWithOidc": "Autentificare cu SSO",
+  "auth.oidcError": "Autentificarea SSO a eșuat. Încearcă din nou.",
+  "auth.oidcDenied": "Autentificarea SSO a fost anulată.",
 
   // Common
   "common.loading": "Se încarcă...",

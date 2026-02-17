@@ -23,7 +23,9 @@ type AuditAction =
   | "upload"
   | "bulk_update"
   | "bulk_delete"
-  | "bulk_archive";
+  | "bulk_archive"
+  | "oidc_login"
+  | "oidc_register";
 
 type AuditEntity =
   | "project"

@@ -383,6 +383,9 @@ export const en: Record<string, string> = {
   "auth.createPassword": "Create a password",
   "auth.confirmNewPassword": "Confirm your new password",
   "auth.createNewPassword": "Create a new password",
+  "auth.signInWithOidc": "Sign in with SSO",
+  "auth.oidcError": "SSO sign-in failed. Please try again.",
+  "auth.oidcDenied": "SSO sign-in was cancelled.",
 
   // Common
   "common.loading": "Loading...",
