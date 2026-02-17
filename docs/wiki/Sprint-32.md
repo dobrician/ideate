@@ -20,7 +20,7 @@
 
 - [x] **Goal 7: Layout polish** — Center bottom row of feature cards on home page (desktop). Center forgot-password card vertically on mobile instead of pushing to lower half. Set min-height on project cards for consistent height on desktop. Fix admin search to filter the user table, not the global nav search. Add "Showing X-Y of Z projects" text near pagination.
 
-- [ ] **Goal 8: P3 quick wins** — Add avatar/initials circle to Profile account section. Show "30 days left" instead of "29d 23:59:30 remaining" on project countdown. Make admin stat cards link to filtered views. Add `title="Send comment"` tooltip to comment send button. Make "Go Home" a filled primary button on 404 page, "View Projects" as outline.
+- [x] **Goal 8: P3 quick wins** — Add avatar/initials circle to Profile account section. Show "30 days left" instead of "29d 23:59:30 remaining" on project countdown. Make admin stat cards link to filtered views. Add `title="Send comment"` tooltip to comment send button. Make "Go Home" a filled primary button on 404 page, "View Projects" as outline.
 
 ## Notes
 

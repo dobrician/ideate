@@ -68,13 +68,18 @@ export function DeadlineCountdown({ deadline }: DeadlineCountdownProps) {
       }`}
     >
       <Clock className="h-4 w-4" />
-      <span>
-        {timeLeft.days > 0 && `${timeLeft.days}d `}
-        {String(timeLeft.hours).padStart(2, "0")}:
-        {String(timeLeft.minutes).padStart(2, "0")}:
-        {String(timeLeft.seconds).padStart(2, "0")}
-      </span>
-      <span className="text-xs opacity-75">{t("deadline.remaining")}</span>
+      {timeLeft.days > 0 ? (
+        <span>{t("deadline.daysLeft", { count: timeLeft.days + (timeLeft.hours > 0 || timeLeft.minutes > 0 ? 1 : 0) })}</span>
+      ) : (
+        <>
+          <span>
+            {String(timeLeft.hours).padStart(2, "0")}:
+            {String(timeLeft.minutes).padStart(2, "0")}:
+            {String(timeLeft.seconds).padStart(2, "0")}
+          </span>
+          <span className="text-xs opacity-75">{t("deadline.remaining")}</span>
+        </>
+      )}
     </div>
   );
 }

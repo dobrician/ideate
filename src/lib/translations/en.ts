@@ -412,6 +412,7 @@ export const en: Record<string, string> = {
   // Deadline
   "deadline.closed": "Voting Closed",
   "deadline.remaining": "remaining",
+  "deadline.daysLeft": "{count} days left",
 
   // Relative time
   "time.justNow": "just now",

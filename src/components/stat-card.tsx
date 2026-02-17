@@ -1,3 +1,4 @@
+import Link from "next/link";
 import {
   Card,
   CardContent,
@@ -8,20 +9,23 @@ import {
 /**
  * Reusable stat card for dashboard and admin pages.
  * Displays a title, numeric value, and optional icon.
+ * Optionally links to a filtered view via href.
  */
 export function StatCard({
   title,
   value,
   icon,
   description,
+  href,
 }: {
   title: string;
   value: number;
   icon: React.ReactNode;
   description?: string;
+  href?: string;
 }) {
-  return (
-    <Card>
+  const card = (
+    <Card className={href ? "transition-shadow hover:shadow-md" : undefined}>
       <CardHeader className="flex flex-row items-center justify-between pb-2">
         <CardTitle className="text-sm font-medium">{title}</CardTitle>
         <span aria-hidden="true">{icon}</span>
@@ -36,6 +40,9 @@ export function StatCard({
       </CardContent>
     </Card>
   );
+
+  if (href) return <Link href={href}>{card}</Link>;
+  return card;
 }
 
 type TranslateFn = (key: string, vars?: Record<string, string | number>) => string;

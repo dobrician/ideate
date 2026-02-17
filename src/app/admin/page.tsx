@@ -101,11 +101,13 @@ export default async function AdminPage() {
           title={t("admin.users")}
           value={Number(s?.userCount ?? 0)}
           icon={<Users className="h-4 w-4 text-muted-foreground" />}
+          href="#user-management"
         />
         <StatCard
           title={t("admin.projects")}
           value={Number(s?.projectCount ?? 0)}
           icon={<FolderOpen className="h-4 w-4 text-muted-foreground" />}
+          href="/projects"
         />
         <StatCard
           title={t("admin.proposals")}
@@ -121,7 +123,7 @@ export default async function AdminPage() {
 
       <div className="grid gap-6 lg:grid-cols-2">
         {/* User Management */}
-        <Card className="lg:col-span-2">
+        <Card id="user-management" className="lg:col-span-2 scroll-mt-20">
           <CardHeader>
             <CardTitle>{t("admin.userManagement")}</CardTitle>
             <CardDescription>

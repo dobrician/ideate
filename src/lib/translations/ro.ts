@@ -431,6 +431,7 @@ export const ro: Record<string, string> = {
   // Deadline
   "deadline.closed": "Votare Închisă",
   "deadline.remaining": "rămas",
+  "deadline.daysLeft": "{count} zile rămase",
 
   // Relative time
   "time.justNow": "chiar acum",

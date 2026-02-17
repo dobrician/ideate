@@ -86,6 +86,12 @@ function CollapsibleList<T extends { id: string }>({
   );
 }
 
+function getInitials(firstName: string, lastName: string, email: string): string {
+  if (firstName && lastName) return `${firstName[0]}${lastName[0]}`.toUpperCase();
+  if (firstName) return firstName[0].toUpperCase();
+  return email[0].toUpperCase();
+}
+
 export function ProfileTabs({ user, projects, proposals }: ProfileTabsProps) {
   const { t } = useLocale();
 
@@ -101,7 +107,15 @@ export function ProfileTabs({ user, projects, proposals }: ProfileTabsProps) {
       <TabsContent value="account" className="space-y-6">
         <Card>
           <CardHeader>
-            <CardTitle>{t("profile.account")}</CardTitle>
+            <div className="flex items-center gap-4">
+              <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-primary text-xl font-bold text-primary-foreground">
+                {getInitials(user.firstName, user.lastName, user.email)}
+              </div>
+              <div>
+                <CardTitle>{t("profile.account")}</CardTitle>
+                <p className="text-sm text-muted-foreground">{user.email}</p>
+              </div>
+            </div>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid gap-4 sm:grid-cols-2">
