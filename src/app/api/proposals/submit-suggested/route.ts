@@ -1,14 +1,15 @@
 import { NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
-import { requireAuth, requireCsrfToken } from "@/lib/auth";
+import { requireAuth } from "@/lib/auth";
+import { requireCsrfToken } from "@/lib/csrf";
 import { hasPermission } from "@/lib/rbac";
 import type { Role } from "@/lib/rbac";
 import { db } from "@/db";
 import { projects, proposals, votes } from "@/db/schema";
-import { eq, sql } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import { randomUUID } from "crypto";
 import { logAudit } from "@/lib/audit";
-import { emitVoteChange } from "@/lib/vote-events";
+import { emitVoteUpdate } from "@/lib/vote-update";
 import { notifyVote } from "@/lib/notifications";
 
 interface SuggestedProposal {
@@ -91,21 +92,7 @@ export async function POST(request: Request) {
         value: voteValue,
       });
 
-      // Emit SSE update so other clients see the new vote in real time
-      const counts = await db
-        .select({
-          upvotes: sql<number>`COALESCE(SUM(CASE WHEN ${votes.value} = 1 THEN 1 ELSE 0 END), 0)`,
-          downvotes: sql<number>`COALESCE(SUM(CASE WHEN ${votes.value} = -1 THEN 1 ELSE 0 END), 0)`,
-        })
-        .from(votes)
-        .where(eq(votes.proposalId, proposalId));
-
-      emitVoteChange({
-        proposalId,
-        projectId: body.projectId,
-        upvotes: Number(counts[0]?.upvotes ?? 0),
-        downvotes: Number(counts[0]?.downvotes ?? 0),
-      });
+      await emitVoteUpdate(proposalId, body.projectId);
 
       notifyVote(proposalId, body.projectId, user.id, voteValue);
 

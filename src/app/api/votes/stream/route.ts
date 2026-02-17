@@ -1,6 +1,6 @@
 import { NextRequest } from "next/server";
 import { getCurrentUser } from "@/lib/auth";
-import { subscribeVotes, type VoteEvent } from "@/lib/vote-events";
+import { subscribeVotes } from "@/lib/vote-events";
 import { logger } from "@/lib/logger";
 
 export const dynamic = "force-dynamic";
@@ -37,7 +37,7 @@ export async function GET(request: NextRequest) {
       start(controller) {
         controller.enqueue(encoder.encode(": keepalive\n\n"));
 
-        unsubscribe = subscribeVotes(projectId, (event: VoteEvent) => {
+        unsubscribe = subscribeVotes(projectId, (event) => {
           try {
             const data = JSON.stringify({
               proposalId: event.proposalId,

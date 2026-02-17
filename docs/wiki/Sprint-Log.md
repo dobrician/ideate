@@ -4,15 +4,9 @@ Reverse chronological. Click each sprint for full details.
 
 ---
 
-### 🔄 [Sprint 26 — Comments & Discussion: Messenger-Style, Real-Time](Sprint-26) *(2026-02-16)*
-**Focus:** Messenger-style bubbles with avatars, real-time comment updates (SSE/polling), enter-to-submit + auto-grow textarea, scroll-to-bottom behavior, mobile messenger UX, exhaustive tests
-**Stats:** 718 tests | Issue #47
-
----
-
-### ✅ [Sprint 25 — AI Features: Suggestions, Summarization, Reliability](Sprint-25) *(2026-02-16)*
-**Focus:** Structured LLM logging, graceful AI degradation, suggestion reliability (retry + validation), dashboard/queries.ts coverage, E2E tests with mocked LLM, mobile AI dialog polish, new logo integration
-**Stats:** 702 tests | Issue #46, #40
+### ✅ [Sprint 27 — Voting & Proposals](Sprint-27) *(2026-02-17)*
+**Focus:** Vote integrity (server-side projectId resolution), submit-suggested deadline+SSE+notifications, SSE keepalive leak fix + exponential backoff, accessibility (aria-labels, aria-pressed), optimistic vote UI, center-anchored vote bar, proposal card animations, mobile 44px touch targets, useVoteStream unit + SSE E2E tests, dead code cleanup + shared emitVoteUpdate helper
+**Stats:** 10 commits | 792 tests | Issue #48
 
 ---
 
@@ -29,6 +23,7 @@ Reverse chronological. Click each sprint for full details.
 ---
 
 ### ✅ [Sprint 24 — Project Detail Page](Sprint-24) *(2026-02-16)*
+
 **Focus:** Markdown rendering (descriptions, proposals, comments), edit project dialog, two-column layout with sticky sidebar, deadline enforcement, mobile comment height, project CRUD unit tests, E2E tests
 **Stats:** 12 commits | 702 tests | Issue #45
 

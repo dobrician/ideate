@@ -1,5 +1,5 @@
 # Sprint 27 — Voting & Proposals (2026-02-17)
-**Status:** IN PROGRESS
+**Status:** COMPLETE
 
 ## Goals
 
@@ -19,7 +19,7 @@ Based on unified analysis from Claude + Codex (see docs/sprint27-unified-plan.md
 
 **Testing & Cleanup:**
 - [x] Goal 9: Test coverage: SSE live updates E2E + useVoteStream unit
-- [ ] Goal 10: Cleanup: redundant filter + remove dead code
+- [x] Goal 10: Cleanup: redundant filter + remove dead code
 
 ## Constraints
 - Commit + push after EACH goal

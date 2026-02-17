@@ -29,9 +29,9 @@ vi.mock("@/lib/ai", () => ({
   buildProposalSummary: vi.fn().mockResolvedValue("AI summary"),
 }));
 
-const mockEmitVoteChange = vi.fn();
-vi.mock("@/lib/vote-events", () => ({
-  emitVoteChange: (...args: unknown[]) => mockEmitVoteChange(...args),
+const mockEmitVoteUpdate = vi.fn().mockResolvedValue(undefined);
+vi.mock("@/lib/vote-update", () => ({
+  emitVoteUpdate: (...args: unknown[]) => mockEmitVoteUpdate(...args),
 }));
 
 const mockInsertValues = vi.fn();
@@ -118,7 +118,7 @@ beforeEach(() => {
   mockDeleteWhere.mockReset();
   mockSelectFrom.mockClear();
   mockSelectWhere.mockClear();
-  mockEmitVoteChange.mockClear();
+  mockEmitVoteUpdate.mockClear();
   selectCallIndex = 0;
   mockSelectResults.length = 0;
   mockRequireAuth.mockResolvedValue(makeUser());

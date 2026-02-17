@@ -1,9 +1,12 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 
 const mockRequireAuth = vi.fn();
-const mockRequireCsrfToken = vi.fn();
 vi.mock("@/lib/auth", () => ({
   requireAuth: (...args: unknown[]) => mockRequireAuth(...args),
+}));
+
+const mockRequireCsrfToken = vi.fn();
+vi.mock("@/lib/csrf", () => ({
   requireCsrfToken: (...args: unknown[]) => mockRequireCsrfToken(...args),
 }));
 
@@ -38,9 +41,9 @@ vi.mock("@/db/schema", () => ({
   votes: { proposalId: "proposal_id", value: "value" },
 }));
 
-const mockEmitVoteChange = vi.fn();
-vi.mock("@/lib/vote-events", () => ({
-  emitVoteChange: (...args: unknown[]) => mockEmitVoteChange(...args),
+const mockEmitVoteUpdate = vi.fn().mockResolvedValue(undefined);
+vi.mock("@/lib/vote-update", () => ({
+  emitVoteUpdate: (...args: unknown[]) => mockEmitVoteUpdate(...args),
 }));
 
 const mockNotifyVote = vi.fn();
@@ -107,11 +110,7 @@ describe("POST /api/proposals/submit-suggested", () => {
 
   it("creates proposals and emits SSE events on success", async () => {
     const futureDate = new Date(Date.now() + 86400000);
-    // 1st select: project lookup, 2nd+: vote count queries
-    setSelectResults(
-      [{ id: "p1", deadline: futureDate }],
-      [{ upvotes: 1, downvotes: 0 }]
-    );
+    setSelectResults([{ id: "p1", deadline: futureDate }]);
 
     const res = await POST(
       makeRequest({
@@ -124,9 +123,7 @@ describe("POST /api/proposals/submit-suggested", () => {
     expect(res.status).toBe(200);
     const data = await res.json();
     expect(data.created).toBe(1);
-    expect(mockEmitVoteChange).toHaveBeenCalledWith(
-      expect.objectContaining({ projectId: "p1" })
-    );
+    expect(mockEmitVoteUpdate).toHaveBeenCalled();
     expect(mockNotifyVote).toHaveBeenCalled();
   });
 

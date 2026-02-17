@@ -8,8 +8,8 @@ import { requireAuth } from "@/lib/auth";
 import { hasPermission, canManageResource } from "@/lib/rbac";
 import type { Role } from "@/lib/rbac";
 import { buildProposalSummary } from "@/lib/ai";
-import { emitVoteChange } from "@/lib/vote-events";
-import { eq, and, sql } from "drizzle-orm";
+import { emitVoteUpdate } from "@/lib/vote-update";
+import { eq, and } from "drizzle-orm";
 import { randomUUID } from "crypto";
 import { logAudit } from "@/lib/audit";
 import { notifyVote } from "@/lib/notifications";
@@ -35,26 +35,6 @@ async function resolveProposalProject(
     .where(eq(proposals.id, proposalId))
     .limit(1);
   return row[0]?.projectId ?? null;
-}
-
-async function emitVoteUpdate(
-  proposalId: string,
-  projectId: string
-): Promise<void> {
-  const result = await db
-    .select({
-      upvotes: sql<number>`COALESCE(SUM(CASE WHEN ${votes.value} = 1 THEN 1 ELSE 0 END), 0)`,
-      downvotes: sql<number>`COALESCE(SUM(CASE WHEN ${votes.value} = -1 THEN 1 ELSE 0 END), 0)`,
-    })
-    .from(votes)
-    .where(eq(votes.proposalId, proposalId));
-
-  emitVoteChange({
-    proposalId,
-    projectId,
-    upvotes: Number(result[0]?.upvotes ?? 0),
-    downvotes: Number(result[0]?.downvotes ?? 0),
-  });
 }
 
 const proposalSchema = z.object({

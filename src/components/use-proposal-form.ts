@@ -90,7 +90,7 @@ export function useProposalForm({
     };
   }, []);
 
-  const warnings = similarMatches.filter((m) => m.similarity > 40);
+  const warnings = similarMatches;
 
   return {
     t,
