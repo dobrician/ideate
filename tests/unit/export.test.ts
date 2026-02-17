@@ -1,5 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { generateCsv, generatePdf } from "@/lib/export";
+import { formatDate } from "@/lib/export-types";
 
 const mockProject = {
   title: "Test Project",
@@ -156,6 +157,43 @@ describe("Export", () => {
       };
       const buffer = await generatePdf(project);
       expect(buffer.byteLength).toBeGreaterThan(0);
+    });
+  });
+
+  describe("formatDate", () => {
+    it("returns N/A for null date", () => {
+      expect(formatDate(null)).toBe("N/A");
+    });
+
+    it("formats date with default en-US locale", () => {
+      const result = formatDate(new Date("2026-03-15"));
+      expect(result).toContain("2026");
+      expect(result).toContain("Mar");
+    });
+
+    it("formats date with Romanian locale", () => {
+      const result = formatDate(new Date("2026-03-15"), "ro-RO");
+      expect(result).toContain("2026");
+      expect(result).toMatch(/mar/i);
+    });
+
+    it("handles POSIX locale format with underscores", () => {
+      const result = formatDate(new Date("2026-06-20"), "ro_RO");
+      expect(result).toContain("2026");
+      expect(result).toMatch(/iun/i);
+    });
+
+    it("respects process.env.LOCALE when no explicit locale is passed", () => {
+      const orig = process.env.LOCALE;
+      try {
+        process.env.LOCALE = "ro-RO";
+        const result = formatDate(new Date("2026-03-15"));
+        expect(result).toContain("2026");
+        expect(result).toMatch(/mar/i);
+      } finally {
+        if (orig === undefined) delete process.env.LOCALE;
+        else process.env.LOCALE = orig;
+      }
     });
   });
 });
