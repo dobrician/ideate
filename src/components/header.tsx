@@ -4,11 +4,12 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
-import { User, LogOut, Shield, Search } from "lucide-react";
+import { User, LogOut, Shield, Search, Globe, Sun, Moon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { DarkModeToggle } from "@/components/dark-mode-toggle";
 import { SearchBar } from "@/components/search-bar";
 import { LocaleSwitcher } from "@/components/locale-switcher";
+import { useTheme } from "@/components/theme-provider";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -26,7 +27,8 @@ const NAV_ITEMS = [
 
 export function Header() {
   const pathname = usePathname();
-  const { t } = useLocale();
+  const { t, locale } = useLocale();
+  const { theme, setTheme } = useTheme();
   const [isAdmin, setIsAdmin] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
@@ -95,8 +97,10 @@ export function Header() {
               <Search className="h-4 w-4" />
             </Button>
           )}
-          <LocaleSwitcher />
-          <DarkModeToggle />
+          <div className="hidden md:flex md:items-center md:gap-2">
+            <LocaleSwitcher />
+            <DarkModeToggle />
+          </div>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="icon" className="min-h-[44px] min-w-[44px]" aria-label={t("nav.profile")} title={t("nav.profile")}>
@@ -119,6 +123,29 @@ export function Header() {
                   </Link>
                 </DropdownMenuItem>
               )}
+              <DropdownMenuSeparator className="md:hidden" />
+              <DropdownMenuItem
+                className="flex items-center gap-2 md:hidden"
+                onSelect={(e) => {
+                  e.preventDefault();
+                  const next = locale === "en" ? "ro" : "en";
+                  document.cookie = `locale=${next}; expires=${new Date(Date.now() + 365 * 864e5).toUTCString()}; path=/; SameSite=Lax`;
+                  window.location.reload();
+                }}
+              >
+                <Globe className="h-4 w-4" />
+                {t(locale === "ro" ? "locale.switchToEn" : "locale.switchToRo")}
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                className="flex items-center gap-2 md:hidden"
+                onSelect={(e) => {
+                  e.preventDefault();
+                  setTheme(theme === "dark" ? "light" : "dark");
+                }}
+              >
+                {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+                {t("theme.toggle")}
+              </DropdownMenuItem>
               {isLoggedIn && (
                 <>
                   <DropdownMenuSeparator />

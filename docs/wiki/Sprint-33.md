@@ -10,7 +10,7 @@
 
 - [x] **Goal 2: Admin panel mobile card layout** — User emails truncated to unreadable fragments on mobile. Implement responsive card layout for mobile: show email prominently, role as badge, hide Name when empty. Add "Show more" to audit log (limit to 5 entries by default). Fix admin search to filter the user table, not the global nav search. Standardize on relative timestamps ("2h ago") in audit log.
 
-- [ ] **Goal 3: Mobile navbar tap targets** — 5 icons packed tightly in mobile navbar. Increase spacing between icons to ensure 44px minimum tap targets, OR consolidate language+theme into a settings menu on mobile.
+- [x] **Goal 3: Mobile navbar tap targets** — 5 icons packed tightly in mobile navbar. Increase spacing between icons to ensure 44px minimum tap targets, OR consolidate language+theme into a settings menu on mobile.
 
 - [ ] **Goal 4: Dashboard mobile optimization** — Dashboard is long on mobile. Limit visible items to 3 per section with "Show more" / "View all" links. Add project name context below each voted proposal in "Recent Votes".
 
