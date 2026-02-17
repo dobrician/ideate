@@ -9,7 +9,7 @@
 
 - [x] **Goal 2: Close coverage gap on `lib/digest.ts`** — Add unit tests for digest aggregation, HTML generation, and cron endpoint (currently 50% stmts).
 
-- [ ] **Goal 3: Close coverage gap on `lib/utils.ts`** — Add tests for `formatDate`, `formatDateTime`, `formatRelativeTime` (currently 37% stmts).
+- [x] **Goal 3: Close coverage gap on `lib/utils.ts`** — Add tests for `formatDate`, `formatDateTime`, `formatRelativeTime` (currently 37% stmts).
 
 - [ ] **Goal 4: Close coverage gap on `lib/mail.ts`** — Test HTML email template rendering and edge cases on lines 212-243 (currently 86% stmts).
 

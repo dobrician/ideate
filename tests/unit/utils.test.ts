@@ -1,5 +1,5 @@
-import { describe, it, expect } from "vitest";
-import { cn, formatDate, formatDateTime } from "@/lib/utils";
+import { describe, it, expect, vi } from "vitest";
+import { cn, formatDate, formatDateTime, formatRelativeTime } from "@/lib/utils";
 
 describe("cn utility", () => {
   it("should merge class names", () => {
@@ -67,5 +67,82 @@ describe("formatDateTime", () => {
     const result = formatDateTime(new Date("2026-02-16T14:30:00Z"), "en");
     expect(result.length).toBeGreaterThan(0);
     expect(result).toContain("2026");
+  });
+
+  it("should format ro locale", () => {
+    const result = formatDateTime(new Date("2026-02-16T14:30:00Z"), "ro");
+    expect(result.length).toBeGreaterThan(0);
+    expect(result).toContain("2026");
+  });
+});
+
+describe("formatDate — default style", () => {
+  it("uses locale default when style is 'default'", () => {
+    const result = formatDate(new Date("2026-03-01T00:00:00Z"), "en", "default");
+    expect(result).toContain("2026");
+  });
+
+  it("accepts string date input", () => {
+    expect(formatDate("2026-01-15", "en")).toContain("January");
+  });
+
+  it("accepts numeric timestamp input", () => {
+    const ts = new Date("2026-06-01").getTime();
+    expect(formatDate(ts, "en", "short")).toContain("Jun");
+  });
+});
+
+describe("formatRelativeTime", () => {
+  const t = vi.fn((key: string, vars?: Record<string, string | number>) => {
+    if (vars?.count !== undefined) return `${key}:${vars.count}`;
+    return key;
+  });
+
+  it("returns empty string for null/undefined", () => {
+    expect(formatRelativeTime(null, "en", t)).toBe("");
+    expect(formatRelativeTime(undefined, "en", t)).toBe("");
+  });
+
+  it("returns '1 minute ago' for just now", () => {
+    const justNow = new Date(Date.now() - 10_000); // 10s ago
+    const result = formatRelativeTime(justNow, "en", t);
+    expect(result).toBe("time.minutesAgo:1");
+  });
+
+  it("returns minutes ago for < 60 min", () => {
+    const thirtyMinAgo = new Date(Date.now() - 30 * 60_000);
+    const result = formatRelativeTime(thirtyMinAgo, "en", t);
+    expect(result).toBe("time.minutesAgo:30");
+  });
+
+  it("returns hours ago for < 24 hours", () => {
+    const fiveHoursAgo = new Date(Date.now() - 5 * 3600_000);
+    const result = formatRelativeTime(fiveHoursAgo, "en", t);
+    expect(result).toBe("time.hoursAgo:5");
+  });
+
+  it("returns days ago for <= 30 days", () => {
+    const tenDaysAgo = new Date(Date.now() - 10 * 86400_000);
+    const result = formatRelativeTime(tenDaysAgo, "en", t);
+    expect(result).toBe("time.daysAgo:10");
+  });
+
+  it("returns short date for > 30 days", () => {
+    const sixtyDaysAgo = new Date(Date.now() - 60 * 86400_000);
+    const result = formatRelativeTime(sixtyDaysAgo, "en", t);
+    // Should fall back to formatDate short style
+    expect(result).toContain("202");
+  });
+
+  it("works with string date input", () => {
+    const recent = new Date(Date.now() - 120_000).toISOString();
+    const result = formatRelativeTime(recent, "ro", t);
+    expect(result).toBe("time.minutesAgo:2");
+  });
+
+  it("works with numeric timestamp input", () => {
+    const ts = Date.now() - 3 * 3600_000;
+    const result = formatRelativeTime(ts, "en", t);
+    expect(result).toBe("time.hoursAgo:3");
   });
 });
