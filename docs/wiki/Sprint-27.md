@@ -1,0 +1,29 @@
+# Sprint 27 — Voting & Proposals (2026-02-17)
+**Status:** IN PROGRESS
+
+## Goals
+
+Based on unified analysis from Claude + Codex (see docs/sprint27-unified-plan.md).
+
+**Bug fixes:**
+- [ ] Goal 1: Fix castVote/removeVote project-id integrity
+- [ ] Goal 2: Fix submit-suggested route: deadline + SSE + notifications
+- [ ] Goal 3: SSE robustness: keepalive leak + exponential backoff
+
+**UX & Accessibility:**
+- [ ] Goal 4: Accessibility fixes (vote buttons, suggestion cards, similarity warnings)
+- [ ] Goal 5: Vote animation: instant optimistic feedback
+- [ ] Goal 6: Center-anchored vote bar with smooth transitions
+- [ ] Goal 7: Proposal card polish: expand/collapse animation
+- [ ] Goal 8: Mobile touch UX hardening
+
+**Testing & Cleanup:**
+- [ ] Goal 9: Test coverage: SSE live updates E2E + useVoteStream unit
+- [ ] Goal 10: Cleanup: redundant filter + remove dead code
+
+## Constraints
+- Commit + push after EACH goal
+- After each goal, edit this file: change `- [ ]` to `- [x]` (do NOT add new lines)
+- Lint + type check + tests + build must pass before each push
+- All files < 300 lines
+- Full unified plan in docs/sprint27-unified-plan.md

@@ -535,4 +535,63 @@ Unit tests for real-time update logic (SSE/polling hook), messenger keyboard beh
 
 ---
 
-*Report updated for Sprint 26 planning on 2026-02-16.*
+## Sprint 27 Goals
+
+**Snapshot (2026-02-17):** 774 tests, 51 files, all green. `tsc --noEmit` clean. Coverage: 98.38% stmt / 93.08% branch / 99.28% func / 98.97% line. 3 open issues (#48 this sprint, #49 mobile polish final sweep, #13 Cloudflare nice-to-have).
+
+**Theme: Voting & Proposals — UX, animations, mobile (Issue #48)**
+
+Voting infrastructure is solid: `vote-buttons.tsx` handles upvote/downvote with SSE-powered real-time updates (`use-vote-stream.ts`), `proposal-list.tsx` sorts by vote count with bar chart visualization. But the UX is bare-bones — CSS `transition-colors duration-150` is the only animation, there's no sorting/filtering UI, no proposal detail view, no touch gestures, and no optimistic vote feedback. This sprint makes voting feel snappy and satisfying.
+
+### Goal 1: Vote bar animations — smooth count transitions
+**Priority: High | Effort: 2-3h**
+Vote bars in `proposal-list.tsx` snap instantly to new widths. Add animated width transitions (CSS `transition` or framer-motion `layout` animation) so bars grow/shrink smoothly when votes change. Animate the vote count number changes too (e.g. a brief scale pulse on increment). Keep animations subtle (<300ms) and respect `prefers-reduced-motion`.
+
+### Goal 2: Instant optimistic vote feedback
+**Priority: High | Effort: 2h**
+Currently votes round-trip to the server before UI updates. Add optimistic state to `vote-buttons.tsx`: immediately toggle the button state and increment/decrement the count on click, then reconcile with the server response. Handle rollback on error. The SSE stream already provides server-confirmed counts — use that as the source of truth to correct any drift.
+
+### Goal 3: Proposal sorting and filtering controls
+**Priority: High | Effort: 2-3h**
+`proposal-list.tsx` has a hardcoded sort by net votes descending. Add a sort dropdown (most votes, newest, oldest, most discussed) and a filter option (all, my proposals, has comments). Persist the user's preference in `localStorage`. Ensure the controls are compact and mobile-friendly.
+
+### Goal 4: Proposal detail view — full content + discussion
+**Priority: High | Effort: 2-3h**
+Clicking a proposal currently does nothing beyond showing the inline content. Add a detail modal/sheet that shows: full proposal text (with markdown rendering), vote buttons, author + timestamp, and the proposal's comment thread. Reuse the existing `comment-thread.tsx` messenger UI from Sprint 26.
+
+### Goal 5: Mobile touch UX for voting
+**Priority: High | Effort: 1-2h**
+Vote buttons have no mobile-specific affordances — no touch feedback, no gesture support, no haptic hint. Add: active/pressed state on touch (scale down), ensure 44px minimum tap targets, add touch-action CSS to prevent scroll interference when tapping vote buttons. Test on 320px/375px viewports.
+
+### Goal 6: Vote confirmation micro-interaction
+**Priority: Medium | Effort: 1-2h**
+Add a brief visual confirmation when a vote is cast: a ripple/pulse effect on the button, a subtle color flash on the bar, or a small "+1" / "-1" floating animation. Keep it lightweight — CSS animations preferred over JS-driven. Respect `prefers-reduced-motion`.
+
+### Goal 7: Exhaustive tests — unit, component, E2E
+**Priority: High | Effort: 2-3h**
+Unit tests for optimistic vote logic (toggle, rollback on error, SSE reconciliation). Component tests for sort/filter controls, bar animations (verify transition classes), detail view rendering. E2E tests: cast a vote and verify count updates, change sort order, open detail view, test mobile viewport interactions. All tests green.
+
+### Goal 8: Sprint 27 docs — Sprint-Log + wiki page
+**Priority: Low | Effort: 15min**
+Add Sprint 27 entry to `docs/wiki/Sprint-Log.md`. Create `docs/wiki/Sprint-27.md` with goal checklist. Update after completion.
+
+| # | Goal | Priority | Effort | Issue |
+|---|------|----------|--------|-------|
+| 1 | Vote bar animations | High | 2-3h | #48 |
+| 2 | Optimistic vote feedback | High | 2h | #48 |
+| 3 | Proposal sorting + filtering | High | 2-3h | #48 |
+| 4 | Proposal detail view | High | 2-3h | #48 |
+| 5 | Mobile touch UX for voting | High | 1-2h | #48 |
+| 6 | Vote confirmation micro-interaction | Medium | 1-2h | #48 |
+| 7 | Exhaustive tests (unit + E2E) | High | 2-3h | #48 |
+| 8 | Sprint 27 docs | Low | 15min | — |
+
+**Total estimated effort:** ~13-19 hours
+
+**Out of scope:**
+- Mobile polish final sweep (Sprint 28, Issue #49)
+- PostgreSQL migration, Cloudflare (#13), Redis rate limiter, JWT revocation
+
+---
+
+*Report updated for Sprint 27 planning on 2026-02-17.*
