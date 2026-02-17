@@ -12,7 +12,7 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { MarkdownRenderer } from "@/components/markdown-renderer";
-import { Sparkles, Loader2 } from "lucide-react";
+import { Sparkles, Loader2, ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
 import { useLocale } from "@/lib/use-locale";
 import { getCsrfTokenClient } from "@/lib/csrf-client";
@@ -176,7 +176,7 @@ export function SuggestProposalsButton({
             </div>
           )}
 
-          {!loading && !error && suggestions.length > 0 && (
+          {!loading && !error && suggestions.length > 0 && detailIdx === null && (
             <div className="space-y-2 sm:space-y-3">
               {suggestions.map((s, i) => (
                 <SuggestionCard
@@ -190,6 +190,20 @@ export function SuggestProposalsButton({
             </div>
           )}
 
+          {detailIdx !== null && suggestions[detailIdx] && (
+            <div className="space-y-3">
+              <Button variant="ghost" size="sm" onClick={() => setDetailIdx(null)}>
+                <ArrowLeft className="mr-1 h-4 w-4" />
+                {t("projectForm.goBack")}
+              </Button>
+              <h3 className="text-base font-semibold">{suggestions[detailIdx].title}</h3>
+              <p className="text-sm text-muted-foreground">
+                {suggestions[detailIdx].summary || t("suggestions.noSummary")}
+              </p>
+              <MarkdownRenderer content={suggestions[detailIdx].details} />
+            </div>
+          )}
+
           {!loading && (
             <DialogFooter>
               <Button variant="outline" size="sm" onClick={handleClose}>
@@ -197,7 +211,7 @@ export function SuggestProposalsButton({
                   ? t("suggestions.close")
                   : t("suggestions.cancel")}
               </Button>
-              {suggestions.length > 0 && (
+              {suggestions.length > 0 && detailIdx === null && (
                 <Button
                   size="sm"
                   onClick={submitSelected}
@@ -210,35 +224,6 @@ export function SuggestProposalsButton({
                 </Button>
               )}
             </DialogFooter>
-          )}
-        </DialogContent>
-      </Dialog>
-
-      {/* Detail dialog */}
-      <Dialog
-        open={detailIdx !== null}
-        onOpenChange={(v) => !v && setDetailIdx(null)}
-      >
-        <DialogContent className="sm:max-w-3xl max-h-[85dvh] overflow-y-auto p-4 sm:p-6">
-          {detailIdx !== null && suggestions[detailIdx] && (
-            <>
-              <DialogHeader>
-                <DialogTitle>{suggestions[detailIdx].title}</DialogTitle>
-                <DialogDescription>
-                  {suggestions[detailIdx].summary || t("suggestions.noSummary")}
-                </DialogDescription>
-              </DialogHeader>
-              <MarkdownRenderer content={suggestions[detailIdx].details} />
-              <DialogFooter>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setDetailIdx(null)}
-                >
-                  {t("suggestions.close")}
-                </Button>
-              </DialogFooter>
-            </>
           )}
         </DialogContent>
       </Dialog>

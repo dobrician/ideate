@@ -15,7 +15,7 @@
 
 - [x] **Goal 5: Add sr-only text to dashboard vote icons** — ThumbsUp/ThumbsDown icons in dashboard recent votes convey direction by color only. Add `<span className="sr-only">` labels.
 
-- [ ] **Goal 6: Fix nested AI dialog focus leakage** — Nested `<Dialog>` in suggest-proposals.tsx allows focus leakage between outer suggestion dialog and inner detail dialog. Replace inner dialog with inline expand or sheet.
+- [x] **Goal 6: Fix nested AI dialog focus leakage** — Nested `<Dialog>` in suggest-proposals.tsx allows focus leakage between outer suggestion dialog and inner detail dialog. Replace inner dialog with inline expand or sheet.
 
 - [ ] **Goal 7: Add rate limiting to non-auth API routes** — Proposals, votes, search, and AI endpoints have no rate limiting. Add per-IP rate limits to these routes.
 
