@@ -7,7 +7,7 @@
 
 - [x] **Goal 1: Inline getProjectComments and remove db/queries.ts** — `db/queries.ts` is a lone outlier with a single function while all other queries are page-local. Move the query inline to its sole caller (`projects/[id]/page.tsx`) and delete the file.
 
-- [ ] **Goal 2: Replace hardcoded "en-US" fallback in export formatDate** — `lib/export-types.ts` uses `locale ?? "en-US"`. Fall back to `process.env.LOCALE || "en-US"` to match the locale strategy used in `lib/ai.ts`.
+- [x] **Goal 2: Replace hardcoded "en-US" fallback in export formatDate** — `lib/export-types.ts` uses `locale ?? "en-US"`. Fall back to `process.env.LOCALE || "en-US"` to match the locale strategy used in `lib/ai.ts`.
 
 - [ ] **Goal 3: Add role="alert" to remaining dynamic error containers** — `reset-password`, `forgot-password`, `projects/new`, `edit-project-dialog`, and `suggest-proposals` have dynamic error divs without `role="alert"`. Add it for screen reader announcements.
 

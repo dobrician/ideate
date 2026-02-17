@@ -31,7 +31,9 @@ export interface ExportProject {
 
 export function formatDate(date: Date | null, locale?: string): string {
   if (!date) return "N/A";
-  return new Date(date).toLocaleDateString(locale ?? "en-US", {
+  const env = process.env.LOCALE;
+  const tag = (locale ?? (env && env.length > 1 ? env : null) ?? "en-US").replace(/_/g, "-");
+  return new Date(date).toLocaleDateString(tag, {
     year: "numeric",
     month: "short",
     day: "numeric",

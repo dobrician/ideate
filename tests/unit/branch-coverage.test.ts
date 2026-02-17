@@ -216,7 +216,8 @@ describe("i18n.ts branch coverage", () => {
     vi.resetModules();
     const { getDefaultLocale } = await import("@/lib/i18n");
     expect(getDefaultLocale()).toBe("ro");
-    process.env.LOCALE = orig;
+    if (orig === undefined) delete process.env.LOCALE;
+    else process.env.LOCALE = orig;
   });
 });
 
