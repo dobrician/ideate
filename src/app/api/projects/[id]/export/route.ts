@@ -3,7 +3,7 @@ import { db } from "@/db";
 import { projects, proposals, votes, comments, users } from "@/db/schema";
 import { getCurrentUser } from "@/lib/auth";
 import { eq, sql } from "drizzle-orm";
-import { generateCsv, generateReportHtml } from "@/lib/export";
+import { generateCsv, generatePdf } from "@/lib/export";
 import { logger } from "@/lib/logger";
 
 interface RouteParams {
@@ -155,11 +155,11 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
       });
     }
 
-    const html = generateReportHtml(exportData);
-    return new NextResponse(html, {
+    const pdfBuffer = await generatePdf(exportData);
+    return new NextResponse(pdfBuffer, {
       headers: {
-        "Content-Type": "text/html; charset=utf-8",
-        "Content-Disposition": `attachment; filename="${safeTitle}-report.html"`,
+        "Content-Type": "application/pdf",
+        "Content-Disposition": `attachment; filename="${safeTitle}-report.pdf"`,
       },
     });
   } catch (error) {

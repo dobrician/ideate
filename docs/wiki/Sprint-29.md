@@ -8,7 +8,7 @@
 
 - [x] **Goal 1: Proposal submission feedback** — Add toast notification + form reset on successful proposal creation; show inline error on failure. User must have zero doubt whether it worked.
 
-- [ ] **Goal 2: Fix export (PDF/CSV)** — PDF export must produce actual PDF (use server-side HTML→PDF or rename to HTML export); CSV export must produce valid CSV. Verify downloaded file types match button labels.
+- [x] **Goal 2: Fix export (PDF/CSV)** — PDF export must produce actual PDF (use server-side HTML→PDF or rename to HTML export); CSV export must produce valid CSV. Verify downloaded file types match button labels.
 
 - [ ] **Goal 3: Styled form validation across all forms** — Replace browser-default validation tooltips with styled inline error messages on: login, registration, forgot password, create project, create proposal, comments. Include: required fields, email format, password mismatch, min length. Fix the "Creeează" typo → "Creează".
 

@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { generateCsv, generateReportHtml } from "@/lib/export";
+import { generateCsv, generateReportHtml, generatePdf } from "@/lib/export";
 
 const mockProject = {
   title: "Test Project",
@@ -120,6 +120,34 @@ describe("Export", () => {
       const html = generateReportHtml(project);
       expect(html).not.toContain("<script>");
       expect(html).toContain("&lt;script&gt;");
+    });
+  });
+
+  describe("generatePdf", () => {
+    it("should generate a valid PDF binary starting with %PDF header", async () => {
+      const buffer = await generatePdf(mockProject);
+      expect(buffer).toBeInstanceOf(ArrayBuffer);
+      expect(buffer.byteLength).toBeGreaterThan(0);
+      const header = new TextDecoder().decode(new Uint8Array(buffer).slice(0, 5));
+      expect(header).toBe("%PDF-");
+    });
+
+    it("should handle project with no proposals", async () => {
+      const emptyProject = { ...mockProject, proposals: [] };
+      const buffer = await generatePdf(emptyProject);
+      const header = new TextDecoder().decode(new Uint8Array(buffer).slice(0, 5));
+      expect(header).toBe("%PDF-");
+    });
+
+    it("should handle project with project comments", async () => {
+      const projectWithComments = {
+        ...mockProject,
+        projectComments: [
+          { content: "A project comment", authorName: "Eve", createdAt: new Date("2026-02-15") },
+        ],
+      };
+      const buffer = await generatePdf(projectWithComments);
+      expect(buffer.byteLength).toBeGreaterThan(0);
     });
   });
 });
