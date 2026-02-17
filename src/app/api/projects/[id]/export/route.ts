@@ -23,6 +23,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
 
     const { id } = await params;
     const format = request.nextUrl.searchParams.get("format") || "pdf";
+    const locale = request.headers.get("Accept-Language")?.split(",")[0]?.split(";")[0] || undefined;
     const fromDate = request.nextUrl.searchParams.get("from");
     const toDate = request.nextUrl.searchParams.get("to");
 
@@ -179,7 +180,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
       .substring(0, 50);
 
     if (format === "csv") {
-      const csv = generateCsv(exportData);
+      const csv = generateCsv(exportData, locale);
       return new NextResponse(csv, {
         headers: {
           "Content-Type": "text/csv; charset=utf-8",
@@ -188,7 +189,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
       });
     }
 
-    const pdfBuffer = await generatePdf(exportData);
+    const pdfBuffer = await generatePdf(exportData, locale);
     return new NextResponse(pdfBuffer, {
       headers: {
         "Content-Type": "application/pdf",

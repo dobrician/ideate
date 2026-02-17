@@ -15,7 +15,7 @@
 
 - [x] **Goal 5: Remove dead `generateReportHtml`** — Remove unused `generateReportHtml` export from `lib/export.ts` and its associated dead code.
 
-- [ ] **Goal 6: Localize export date formatting** — Replace 3 hardcoded `"en-US"` locale strings in `lib/export.ts` with user locale support.
+- [x] **Goal 6: Localize export date formatting** — Replace 3 hardcoded `"en-US"` locale strings in `lib/export.ts` with user locale support.
 
 - [ ] **Goal 7: Wire `aria-describedby` on proposal form** — Connect error messages to description field via `aria-describedby`. Fix WCAG A.11 compliance gap.
 

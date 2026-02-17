@@ -8,8 +8,9 @@ import { formatDate } from "@/lib/export-types";
 /**
  * Generate CSV content for a project report
  */
-export function generateCsv(project: ExportProject): string {
+export function generateCsv(project: ExportProject, locale?: string): string {
   const rows: string[][] = [];
+  const fmt = (d: Date | null) => formatDate(d, locale);
 
   rows.push([
     "Type",
@@ -28,7 +29,7 @@ export function generateCsv(project: ExportProject): string {
     project.description || "",
     "",
     "",
-    formatDate(project.createdAt),
+    fmt(project.createdAt),
   ]);
 
   for (const pc of project.projectComments ?? []) {
@@ -39,7 +40,7 @@ export function generateCsv(project: ExportProject): string {
       pc.content,
       "",
       "",
-      formatDate(pc.createdAt),
+      fmt(pc.createdAt),
     ]);
   }
 
@@ -51,7 +52,7 @@ export function generateCsv(project: ExportProject): string {
       proposal.description || proposal.summary || "",
       String(proposal.upvotes),
       String(proposal.downvotes),
-      formatDate(proposal.createdAt),
+      fmt(proposal.createdAt),
     ]);
 
     for (const comment of proposal.comments) {
@@ -62,7 +63,7 @@ export function generateCsv(project: ExportProject): string {
         comment.content,
         "",
         "",
-        formatDate(comment.createdAt),
+        fmt(comment.createdAt),
       ]);
     }
   }

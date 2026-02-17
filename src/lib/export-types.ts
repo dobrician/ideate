@@ -29,9 +29,9 @@ export interface ExportProject {
   projectComments?: ExportComment[];
 }
 
-export function formatDate(date: Date | null): string {
+export function formatDate(date: Date | null, locale?: string): string {
   if (!date) return "N/A";
-  return new Date(date).toLocaleDateString("en-US", {
+  return new Date(date).toLocaleDateString(locale ?? "en-US", {
     year: "numeric",
     month: "short",
     day: "numeric",
