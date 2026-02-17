@@ -4,6 +4,12 @@ Reverse chronological. Click each sprint for full details.
 
 ---
 
+### 🔄 [Sprint 29 — UI/UX Polish (ChatGPT Review Fixes)](Sprint-29) *(2026-02-17)*
+**Focus:** Proposal submit feedback, export fix (real PDF/CSV), styled form validation, auth error messages, admin UX (toast+search+pagination), i18n consistency, mobile/responsive fixes, projects list search/sort/filter
+**Source:** External ChatGPT UI/UX review
+
+---
+
 ### ✅ [Sprint 28 — Mobile Polish & Final Sweep](Sprint-28) *(2026-02-17)*
 **Focus:** Admin table mobile fix, iOS select auto-zoom prevention, header/nav 44px touch targets, action button touch targets, form/dialog button touch targets, auth page touch targets, markdown overflow protection, mobile nav overflow resilience, Playwright mobile device projects (Pixel 5 + iPhone 13), mobile E2E test suite
 **Stats:** 10 commits | 792 tests | Issue #49
