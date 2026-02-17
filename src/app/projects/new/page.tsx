@@ -100,7 +100,7 @@ export default function NewProjectPage() {
                 aria-describedby={touched.title && fieldErrors.title ? "project-title-error" : undefined}
               />
               {touched.title && fieldErrors.title ? (
-                <p id="project-title-error" className="text-xs text-red-600 dark:text-red-400">{fieldErrors.title}</p>
+                <p id="project-title-error" className="text-xs text-red-600 dark:text-red-300">{fieldErrors.title}</p>
               ) : (
                 <p className="text-xs text-muted-foreground">
                   {t("projectForm.titleHint")}
@@ -136,7 +136,7 @@ export default function NewProjectPage() {
                 aria-describedby={touched.deadline && fieldErrors.deadline ? "project-deadline-error" : undefined}
               />
               {touched.deadline && fieldErrors.deadline ? (
-                <p id="project-deadline-error" className="text-xs text-red-600 dark:text-red-400">{fieldErrors.deadline}</p>
+                <p id="project-deadline-error" className="text-xs text-red-600 dark:text-red-300">{fieldErrors.deadline}</p>
               ) : (
                 <p className="text-xs text-muted-foreground">
                   {t("projectForm.deadlineHint")}

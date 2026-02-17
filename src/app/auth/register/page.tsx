@@ -168,7 +168,7 @@ export default function RegisterPage() {
                 aria-describedby={fieldErrors.email ? "email-error" : undefined}
               />
               {touched.email && fieldErrors.email && (
-                <p id="email-error" className="text-xs text-red-600 dark:text-red-400">
+                <p id="email-error" className="text-xs text-red-600 dark:text-red-300">
                   {fieldErrors.email}
                 </p>
               )}
@@ -195,7 +195,7 @@ export default function RegisterPage() {
                 {t("auth.passwordRequirements")}
               </p>
               {touched.password && fieldErrors.password && (
-                <p id="password-error" className="text-xs text-red-600 dark:text-red-400">
+                <p id="password-error" className="text-xs text-red-600 dark:text-red-300">
                   {fieldErrors.password}
                 </p>
               )}
@@ -219,7 +219,7 @@ export default function RegisterPage() {
                 }
               />
               {touched.confirmPassword && fieldErrors.confirmPassword && (
-                <p id="confirm-error" className="text-xs text-red-600 dark:text-red-400">
+                <p id="confirm-error" className="text-xs text-red-600 dark:text-red-300">
                   {fieldErrors.confirmPassword}
                 </p>
               )}

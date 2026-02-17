@@ -182,7 +182,7 @@ export default function LoginPage() {
               </p>
               <button
                 onClick={() => setVerifiedBanner(false)}
-                className="mt-1 inline-flex min-h-[44px] items-center text-xs text-green-600 underline dark:text-green-400"
+                className="mt-1 inline-flex min-h-[44px] items-center text-xs text-green-600 underline dark:text-green-300"
               >
                 {t("auth.dismiss")}
               </button>
@@ -227,7 +227,7 @@ export default function LoginPage() {
                   aria-describedby={fieldErrors.email ? "login-email-error" : undefined}
                 />
                 {touched.email && fieldErrors.email && (
-                  <p id="login-email-error" className="text-xs text-red-600 dark:text-red-400">{fieldErrors.email}</p>
+                  <p id="login-email-error" className="text-xs text-red-600 dark:text-red-300">{fieldErrors.email}</p>
                 )}
               </div>
               <div className="space-y-2">
@@ -252,7 +252,7 @@ export default function LoginPage() {
                   aria-describedby={fieldErrors.password ? "login-password-error" : undefined}
                 />
                 {touched.password && fieldErrors.password && (
-                  <p id="login-password-error" className="text-xs text-red-600 dark:text-red-400">{fieldErrors.password}</p>
+                  <p id="login-password-error" className="text-xs text-red-600 dark:text-red-300">{fieldErrors.password}</p>
                 )}
               </div>
 
@@ -338,7 +338,7 @@ export default function LoginPage() {
                   aria-describedby={fieldErrors.email ? "magic-email-error" : undefined}
                 />
                 {touched.email && fieldErrors.email && (
-                  <p id="magic-email-error" className="text-xs text-red-600 dark:text-red-400">{fieldErrors.email}</p>
+                  <p id="magic-email-error" className="text-xs text-red-600 dark:text-red-300">{fieldErrors.email}</p>
                 )}
               </div>
 

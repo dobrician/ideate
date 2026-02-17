@@ -254,7 +254,7 @@ function ProposalItem({
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="h-6 min-h-[44px] px-2 text-xs text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300"
+                    className="h-6 min-h-[44px] px-2 text-xs text-red-600 hover:text-red-700 dark:text-red-300 dark:hover:text-red-300"
                     title={t("proposals.delete")}
                   >
                     <Trash2 className="mr-1 h-3 w-3" />

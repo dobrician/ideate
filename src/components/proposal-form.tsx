@@ -66,7 +66,7 @@ function ProposalFormFields({
           aria-invalid={!!titleError}
         />
         {titleError && (
-          <p className="text-xs text-red-600 dark:text-red-400">{titleError}</p>
+          <p className="text-xs text-red-600 dark:text-red-300">{titleError}</p>
         )}
       </div>
 
