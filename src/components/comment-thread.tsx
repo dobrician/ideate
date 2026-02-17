@@ -82,7 +82,7 @@ function ChatBubble({
   const colorClass = avatarColor(comment.userId);
 
   return (
-    <div className={`flex gap-2 ${isOwn ? "flex-row-reverse" : "flex-row"}`}>
+    <div className={`group/bubble flex gap-2 ${isOwn ? "flex-row-reverse" : "flex-row"}`}>
       {showAvatar ? (
         <Avatar size="sm" className="mt-1 shrink-0">
           {comment.avatarUrl && (
@@ -112,7 +112,10 @@ function ChatBubble({
           <MarkdownRenderer content={comment.content} simple />
         </div>
         {!showAvatar && timeAgo && (
-          <span className={`text-[10px] text-muted-foreground mt-0.5 block ${isOwn ? "text-right" : ""}`}>
+          <span
+            data-testid="hover-timestamp"
+            className={`text-[10px] text-muted-foreground mt-0.5 block opacity-0 transition-opacity group-hover/bubble:opacity-100 active:opacity-100 ${isOwn ? "text-right" : ""}`}
+          >
             {timeAgo}
           </span>
         )}

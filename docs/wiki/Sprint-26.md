@@ -7,7 +7,7 @@ Based on unified analysis from Claude + Codex (see docs/sprint26-unified-plan.md
 
 **UX:**
 - [x] Goal 1: Avatar image support in comment bubbles
-- [ ] Goal 2: Hover-reveal timestamps
+- [x] Goal 2: Hover-reveal timestamps
 - [ ] Goal 6: Character count indicator
 - [ ] Goal 9: Discussion sheet UX polish
 - [ ] Goal 10: Mobile keyboard + safe-area hardening
