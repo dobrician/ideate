@@ -16,9 +16,9 @@ Reverse chronological. Click each sprint for full details.
 
 ---
 
-### 🔄 [Sprint 30 — Security & Accessibility Hardening](Sprint-30) *(2026-02-17)*
+### ✅ [Sprint 30 — Security & Accessibility Hardening](Sprint-30) *(2026-02-17)*
 **Focus:** Open redirect fix, Zod on AI endpoints, HSTS, middleware bypass fix, a11y critical (skip-link, headings, aria), code dedup, DB indexes/schema, change password in profile
-**Source:** Deep analysis report
+**Stats:** 862 tests | 8 security+a11y fixes | Source: deep analysis report
 
 ---
 
