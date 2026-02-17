@@ -16,6 +16,11 @@ Reverse chronological. Click each sprint for full details.
 
 ---
 
+### 🔄 [Sprint 35 — Production Hardening & DevOps](Sprint-35) *(2026-02-17)*
+**Focus:** Sentry error tracking, E2E in CI, flaky test fix, SSE heartbeat, DB backup, user invitations, audit export, middleware→proxy migration
+
+---
+
 ### ✅ [Sprint 34 — UI Consistency Audit & Fix](Sprint-34) *(2026-02-17)*
 **Focus:** Button standardization, remove className hacks, enforce 44px touch targets, consistent variants across all pages
 **Stats:** 8 commits | 869 tests | UI conventions documented | Zero manual size overrides remaining
