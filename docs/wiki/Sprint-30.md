@@ -13,7 +13,7 @@
 
 - [x] **Goal 4: Cover export.ts branch gaps (79% branch)** — Add targeted tests for uncovered lines at 59, 113-114, 391. Push branch coverage above 90%.
 
-- [ ] **Goal 5: Cover llm.ts branch gaps (85% branch)** — Add tests for uncovered lines at 188-189 (error/fallback branches).
+- [x] **Goal 5: Cover llm.ts branch gaps (85% branch)** — Add tests for uncovered lines at 188-189 (error/fallback branches).
 
 - [ ] **Goal 6: Update Sprint-Log.md — missing Sprints 12-29** — Sprint-Log.md only has entries for Sprints 1-3 and 11. Add summary entries for Sprints 12-29.
 

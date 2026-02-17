@@ -172,6 +172,30 @@ describe("completeWithFallback basic behavior", () => {
     expect(result.modelUsed).toBe("openai");
   });
 
+  it("should skip OpenAI when it is throttled after a 429", async () => {
+    const fetchMock = vi.fn<(input: string | URL | Request, init?: RequestInit) => Promise<Response>>();
+    // Both Gemini and OpenAI return 429 on first call
+    fetchMock.mockResolvedValueOnce(mockResponse({}, 429)); // Gemini 429
+    fetchMock.mockResolvedValueOnce(mockResponse({}, 429)); // OpenAI 429
+    globalThis.fetch = fetchMock;
+
+    const { completeWithFallback } = await loadLLM({
+      GEMINI_API_KEY: "test-gemini-key",
+      OPENAI_API_KEY: "test-openai-key",
+    });
+
+    // First call triggers both 429s and throttle timers
+    const result1 = await completeWithFallback("prompt");
+    expect(result1.text).toBeNull();
+
+    // Second call: both providers throttled, should not make any fetch calls
+    const result2 = await completeWithFallback("prompt 2");
+    expect(result2.text).toBeNull();
+    expect(result2.modelUsed).toBeNull();
+    // Only 2 fetch calls total (from first attempt), none from second
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+  });
+
   it("should use only OpenAI when only OPENAI_API_KEY is set", async () => {
     const fetchMock = vi.fn<(input: string | URL | Request, init?: RequestInit) => Promise<Response>>();
     fetchMock.mockResolvedValue(openaiResponse("openai only"));
