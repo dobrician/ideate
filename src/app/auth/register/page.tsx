@@ -233,7 +233,7 @@ export default function RegisterPage() {
               {t("auth.haveAccount")}{" "}
               <Link
                 href="/auth/login"
-                className="font-medium text-primary hover:underline"
+                className="inline-flex min-h-[44px] items-center font-medium text-primary hover:underline"
               >
                 {t("auth.login")}
               </Link>

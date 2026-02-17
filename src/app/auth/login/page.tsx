@@ -134,7 +134,7 @@ export default function LoginPage() {
               </p>
               <button
                 onClick={() => setVerifiedBanner(false)}
-                className="mt-1 text-xs text-green-600 underline dark:text-green-400"
+                className="mt-1 inline-flex min-h-[44px] items-center text-xs text-green-600 underline dark:text-green-400"
               >
                 {t("auth.dismiss")}
               </button>
@@ -182,7 +182,7 @@ export default function LoginPage() {
                   <Label htmlFor="password">{t("auth.password")}</Label>
                   <Link
                     href="/auth/forgot-password"
-                    className="text-xs text-muted-foreground hover:underline"
+                    className="inline-flex min-h-[44px] items-center text-xs text-muted-foreground hover:underline"
                   >
                     {t("auth.forgotPassword")}
                   </Link>
@@ -207,7 +207,7 @@ export default function LoginPage() {
                     <Button
                       type="button"
                       variant="link"
-                      className="mt-1 h-auto p-0 text-xs text-red-700 dark:text-red-300"
+                      className="mt-1 min-h-[44px] px-0 text-xs text-red-700 dark:text-red-300"
                       onClick={handleResendVerification}
                       disabled={resendLoading}
                     >
@@ -253,7 +253,7 @@ export default function LoginPage() {
                 {t("auth.noAccount")}{" "}
                 <Link
                   href="/auth/register"
-                  className="font-medium text-primary hover:underline"
+                  className="inline-flex min-h-[44px] items-center font-medium text-primary hover:underline"
                 >
                   {t("auth.register")}
                 </Link>
@@ -322,7 +322,7 @@ export default function LoginPage() {
                 {t("auth.noAccount")}{" "}
                 <Link
                   href="/auth/register"
-                  className="font-medium text-primary hover:underline"
+                  className="inline-flex min-h-[44px] items-center font-medium text-primary hover:underline"
                 >
                   {t("auth.register")}
                 </Link>

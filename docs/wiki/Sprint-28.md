@@ -10,8 +10,8 @@ Based on unified analysis from Claude + Codex (see docs/sprint28-unified-plan.md
 - [x] Goal 2: Fix all select elements for iOS auto-zoom
 - [x] Goal 3: Header & navigation touch targets
 - [x] Goal 4: Fix undersized action buttons (pagination, export, delete)
-- [ ] Goal 5: Form & dialog button touch targets
-- [ ] Goal 6: Login page small touch targets
+- [x] Goal 5: Form & dialog button touch targets
+- [x] Goal 6: Login page small touch targets
 - [ ] Goal 7: Overflow protection for action rows & markdown
 - [ ] Goal 8: Mobile nav overflow resilience
 

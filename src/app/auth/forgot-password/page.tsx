@@ -129,7 +129,7 @@ export default function ForgotPasswordPage() {
             <p className="text-center text-sm text-muted-foreground">
               <Link
                 href="/auth/login"
-                className="font-medium text-primary hover:underline"
+                className="inline-flex min-h-[44px] items-center font-medium text-primary hover:underline"
               >
                 {t("auth.backToLogin")}
               </Link>
