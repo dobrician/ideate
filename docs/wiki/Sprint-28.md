@@ -1,5 +1,5 @@
 # Sprint 28 — Mobile Polish & Final Sweep (2026-02-17)
-**Status:** IN PROGRESS
+**Status:** COMPLETE
 
 ## Goals
 
@@ -17,7 +17,7 @@ Based on unified analysis from Claude + Codex (see docs/sprint28-unified-plan.md
 
 **Testing:**
 - [x] Goal 9: Playwright mobile device projects
-- [ ] Goal 10: Mobile E2E test cases
+- [x] Goal 10: Mobile E2E test cases
 
 ## Constraints
 - Commit + push after EACH goal

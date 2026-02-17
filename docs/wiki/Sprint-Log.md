@@ -4,6 +4,12 @@ Reverse chronological. Click each sprint for full details.
 
 ---
 
+### ✅ [Sprint 28 — Mobile Polish & Final Sweep](Sprint-28) *(2026-02-17)*
+**Focus:** Admin table mobile fix, iOS select auto-zoom prevention, header/nav 44px touch targets, action button touch targets, form/dialog button touch targets, auth page touch targets, markdown overflow protection, mobile nav overflow resilience, Playwright mobile device projects (Pixel 5 + iPhone 13), mobile E2E test suite
+**Stats:** 10 commits | 792 tests | Issue #49
+
+---
+
 ### ✅ [Sprint 27 — Voting & Proposals](Sprint-27) *(2026-02-17)*
 **Focus:** Vote integrity (server-side projectId resolution), submit-suggested deadline+SSE+notifications, SSE keepalive leak fix + exponential backoff, accessibility (aria-labels, aria-pressed), optimistic vote UI, center-anchored vote bar, proposal card animations, mobile 44px touch targets, useVoteStream unit + SSE E2E tests, dead code cleanup + shared emitVoteUpdate helper
 **Stats:** 10 commits | 792 tests | Issue #48

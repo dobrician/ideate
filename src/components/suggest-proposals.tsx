@@ -150,7 +150,7 @@ export function SuggestProposalsButton({
 
   return (
     <>
-      <Button onClick={generate} variant="outline" size="sm" className="gap-1">
+      <Button onClick={generate} variant="outline" size="sm" className="min-h-[44px] gap-1">
         <Sparkles className="h-4 w-4" />
         {t("suggestions.cta")}
       </Button>

@@ -108,7 +108,7 @@ function ProposalFormFields({
 
       <div className="flex justify-end gap-2 pt-1">
         {showCancel && onCancel}
-        <Button type="submit" size="sm" disabled={isPending}>
+        <Button type="submit" size="sm" className="min-h-[44px]" disabled={isPending}>
           {isPending ? t("proposalForm.submitting") : t("proposalForm.submit")}
         </Button>
       </div>

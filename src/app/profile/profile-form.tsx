@@ -69,7 +69,7 @@ export function ProfileForm({ firstName, lastName }: ProfileFormProps) {
             </div>
           </div>
 
-          <Button type="submit" disabled={isLoading}>
+          <Button type="submit" className="min-h-[44px]" disabled={isLoading}>
             {isLoading ? t("profile.updating") : t("profile.update")}
           </Button>
         </form>
