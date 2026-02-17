@@ -85,7 +85,7 @@ export function Header() {
           <Button
             variant="ghost"
             size="icon"
-            className="md:hidden"
+            className="min-h-[44px] min-w-[44px] md:hidden"
             aria-label={t("search.placeholder")}
             onClick={() => setMobileSearchOpen((o) => !o)}
           >
@@ -95,7 +95,7 @@ export function Header() {
           <DarkModeToggle />
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" title={t("nav.profile")}>
+              <Button variant="ghost" size="icon" className="min-h-[44px] min-w-[44px]" title={t("nav.profile")}>
                 <User className="h-4 w-4" />
                 <span className="sr-only">{t("nav.profile")}</span>
               </Button>
@@ -146,7 +146,7 @@ export function Header() {
                 href={item.href}
                 aria-current={isActive ? "page" : undefined}
                 className={cn(
-                  "rounded-md px-3 py-1.5 text-sm font-medium transition-colors duration-150",
+                  "rounded-md px-3 py-2.5 text-sm font-medium transition-colors duration-150",
                   isActive
                     ? "bg-accent text-accent-foreground"
                     : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"

@@ -46,7 +46,7 @@ export function LocaleSwitcher() {
       variant="ghost"
       size="sm"
       onClick={toggle}
-      className="gap-1 text-xs font-medium"
+      className="min-h-[44px] min-w-[44px] gap-1 text-xs font-medium"
       title={locale === "en" ? t("locale.switchToRo") : t("locale.switchToEn")}
     >
       <Globe className="h-3.5 w-3.5" />
