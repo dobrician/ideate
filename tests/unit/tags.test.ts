@@ -102,7 +102,7 @@ import {
   deleteTag,
   addProjectTag,
   removeProjectTag,
-} from "@/app/admin/actions";
+} from "@/app/admin/project-actions";
 
 beforeEach(() => {
   mockRevalidatePath.mockClear();

@@ -86,9 +86,11 @@ function makeAdmin(overrides: Partial<MockUser> = {}): MockUser {
 import {
   bulkUpdateUserRole,
   bulkDeleteUsers,
+} from "@/app/admin/user-actions";
+import {
   bulkArchiveProjects,
   bulkDeleteProjects,
-} from "@/app/admin/actions";
+} from "@/app/admin/project-actions";
 
 beforeEach(() => {
   mockRevalidatePath.mockClear();

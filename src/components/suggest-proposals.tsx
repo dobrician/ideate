@@ -11,28 +11,13 @@ import {
   DialogDescription,
   DialogFooter,
 } from "@/components/ui/dialog";
-import { Card, CardContent } from "@/components/ui/card";
 import { MarkdownRenderer } from "@/components/markdown-renderer";
-import {
-  Sparkles,
-  ThumbsUp,
-  ThumbsDown,
-  Eye,
-  Loader2,
-} from "lucide-react";
+import { Sparkles, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { useLocale } from "@/lib/use-locale";
 import { getCsrfTokenClient } from "@/lib/csrf-client";
-
-interface Suggestion {
-  title: string;
-  details: string;
-  summary: string;
-}
-
-interface SuggestionWithVote extends Suggestion {
-  vote: 1 | -1 | null;
-}
+import { SuggestionCard } from "@/components/suggestion-card";
+import type { Suggestion, SuggestionWithVote } from "@/components/suggestion-card";
 
 interface Props {
   projectId: string;
@@ -258,59 +243,5 @@ export function SuggestProposalsButton({
         </DialogContent>
       </Dialog>
     </>
-  );
-}
-
-function SuggestionCard({
-  suggestion,
-  onVote,
-  onViewDetails,
-  t,
-}: {
-  suggestion: SuggestionWithVote;
-  onVote: (v: 1 | -1) => void;
-  onViewDetails: () => void;
-  t: (key: string) => string;
-}) {
-  return (
-    <Card className="group relative" role="article" aria-label={suggestion.title}>
-      <CardContent className="p-3 sm:p-4">
-        <h3 className="font-medium text-sm sm:text-base">{suggestion.title}</h3>
-        <p className="mt-1 line-clamp-2 text-xs sm:text-sm text-muted-foreground">
-          {suggestion.summary || t("suggestions.noSummary")}
-        </p>
-        <div className="mt-2 sm:mt-3 flex items-center gap-1.5 sm:gap-1">
-          <Button
-            variant={suggestion.vote === 1 ? "default" : "outline"}
-            size="sm"
-            aria-label={t("vote.pro")}
-            aria-pressed={suggestion.vote === 1}
-            className={suggestion.vote === 1 ? "bg-green-600 hover:bg-green-700" : ""}
-            onClick={() => onVote(1)}
-          >
-            <ThumbsUp className="h-3.5 w-3.5" aria-hidden="true" />
-          </Button>
-          <Button
-            variant={suggestion.vote === -1 ? "default" : "outline"}
-            size="sm"
-            aria-label={t("vote.contra")}
-            aria-pressed={suggestion.vote === -1}
-            className={suggestion.vote === -1 ? "bg-red-600 hover:bg-red-700" : ""}
-            onClick={() => onVote(-1)}
-          >
-            <ThumbsDown className="h-3.5 w-3.5" aria-hidden="true" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={onViewDetails}
-            aria-label={t("suggestions.viewDetails")}
-          >
-            <Eye className="h-3.5 w-3.5" aria-hidden="true" />
-            <span className="text-xs">{t("suggestions.viewDetails")}</span>
-          </Button>
-        </div>
-      </CardContent>
-    </Card>
   );
 }

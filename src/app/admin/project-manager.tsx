@@ -16,7 +16,7 @@ import { useLocale } from "@/lib/use-locale";
 import { formatDate } from "@/lib/utils";
 import { statusBadgeClass, statusLabel } from "@/lib/status-utils";
 import { getCsrfTokenClient } from "@/lib/csrf-client";
-import { bulkArchiveProjects, bulkDeleteProjects } from "./actions";
+import { bulkArchiveProjects, bulkDeleteProjects } from "./project-actions";
 import { Archive, Trash2 } from "lucide-react";
 
 interface ProjectData {

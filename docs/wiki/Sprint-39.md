@@ -11,7 +11,7 @@
 
 - [x] **Goal 3: Test coverage for `projects/actions.ts`** — Improve branch (87%) and function (71%) coverage. Test edge cases: validation failures, permission denials, archive-state checks.
 
-- [ ] **Goal 4: Split oversized files** — Split files exceeding 300 lines: comment-thread.tsx (433), export.ts (424), admin/actions.ts (408), admin/user-role-manager.tsx (407), suggest-proposals.tsx (316), proposal-list.tsx (308).
+- [x] **Goal 4: Split oversized files** — Split files exceeding 300 lines: comment-thread.tsx (433), export.ts (424), admin/actions.ts (408), admin/user-role-manager.tsx (407), suggest-proposals.tsx (316), proposal-list.tsx (308).
 
 - [ ] **Goal 5: Remove dead `generateReportHtml`** — Remove unused `generateReportHtml` export from `lib/export.ts` and its associated dead code.
 

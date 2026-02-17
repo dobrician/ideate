@@ -1,47 +1,24 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { updateUserRole, bulkUpdateUserRole, bulkDeleteUsers } from "./actions";
-import { Badge } from "@/components/ui/badge";
+import { updateUserRole, bulkUpdateUserRole, bulkDeleteUsers } from "./user-actions";
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { useLocale } from "@/lib/use-locale";
-import { formatDate } from "@/lib/utils";
 import { getCsrfTokenClient } from "@/lib/csrf-client";
-import { Search, ChevronLeft, ChevronRight, Trash2 } from "lucide-react";
+import { Search } from "lucide-react";
+import { type UserData, ROLES, PAGE_SIZE } from "./user-role-manager-types";
+import { BulkActionBar, ConfirmDeleteDialog } from "./user-bulk-actions";
+import { UserPagination } from "./user-pagination";
+import { UserTableRow, UserMobileCard } from "./user-table-row";
 
-interface UserData {
-  id: string;
-  email: string;
-  firstName: string | null;
-  lastName: string | null;
-  role: string;
-  createdAt: Date | null;
-}
+// Re-export types for any external consumers
+export type { UserData } from "./user-role-manager-types";
 
 interface UserRoleManagerProps {
   users: UserData[];
   currentUserId: string;
 }
-
-const ROLES = ["admin", "manager", "member", "viewer"] as const;
-const PAGE_SIZE = 20;
-
-const ROLE_COLORS: Record<string, string> = {
-  admin: "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200",
-  manager: "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200",
-  member: "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200",
-  viewer: "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200",
-};
 
 export function UserRoleManager({
   users,
@@ -148,78 +125,18 @@ export function UserRoleManager({
     }
   }
 
-  function getUserName(u: UserData): string | null {
-    const name = [u.firstName, u.lastName].filter(Boolean).join(" ");
-    return name || null;
-  }
-
-  function renderRoleControl(u: UserData) {
-    const isSelf = u.id === currentUserId;
-    if (isSelf) {
-      return (
-        <Badge className={ROLE_COLORS[u.role] || ""} variant="outline">
-          {t(`role.${u.role}`)} {t("admin.you")}
-        </Badge>
-      );
-    }
-    return (
-      <select
-        value={u.role}
-        onChange={(e) => handleRoleChange(u.id, e.target.value)}
-        disabled={loadingId === u.id}
-        aria-label={t("a11y.changeRoleFor", { email: u.email })}
-        className="rounded border border-input bg-background px-2 py-2 text-base text-foreground md:text-xs"
-      >
-        {ROLES.map((r) => (
-          <option key={r} value={r}>
-            {t(`role.${r}`)}
-          </option>
-        ))}
-      </select>
-    );
-  }
-
-  const selectedCount = selected.size;
-
   return (
     <div className="space-y-4">
       {/* Bulk action bar */}
-      {selectedCount > 0 && (
-        <div className="flex flex-wrap items-center gap-2 rounded-lg border border-primary/20 bg-primary/5 px-3 py-2">
-          <span className="text-sm font-medium">
-            {t("admin.selected", { count: selectedCount })}
-          </span>
-          <select
-            onChange={(e) => {
-              if (e.target.value) handleBulkRoleChange(e.target.value);
-              e.target.value = "";
-            }}
-            disabled={bulkLoading}
-            defaultValue=""
-            className="h-8 rounded border border-input bg-background px-2 text-sm"
-          >
-            <option value="" disabled>
-              {t("admin.bulkChangeRole")}
-            </option>
-            {ROLES.map((r) => (
-              <option key={r} value={r}>
-                {t(`role.${r}`)}
-              </option>
-            ))}
-          </select>
-          <Button
-            variant="destructive"
-            size="sm"
-            disabled={bulkLoading}
-            onClick={() =>
-              setConfirmDialog({ type: "delete", ids: Array.from(selected) })
-            }
-          >
-            <Trash2 className="mr-1 h-3.5 w-3.5" />
-            {t("admin.bulkDelete")}
-          </Button>
-        </div>
-      )}
+      <BulkActionBar
+        selectedCount={selected.size}
+        bulkLoading={bulkLoading}
+        onBulkRoleChange={handleBulkRoleChange}
+        onDeleteClick={() =>
+          setConfirmDialog({ type: "delete", ids: Array.from(selected) })
+        }
+        t={t}
+      />
 
       {/* Search & filter bar */}
       <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
@@ -253,34 +170,19 @@ export function UserRoleManager({
         <>
           {/* Mobile card layout */}
           <div className="space-y-3 md:hidden">
-            {paginated.map((u) => {
-              const name = getUserName(u);
-              const isSelf = u.id === currentUserId;
-              return (
-                <div key={u.id} className="rounded-lg border p-3 space-y-2">
-                  <div className="flex items-start gap-2">
-                    {!isSelf && (
-                      <input
-                        type="checkbox"
-                        checked={selected.has(u.id)}
-                        onChange={() => toggleSelect(u.id)}
-                        className="mt-1 h-4 w-4 shrink-0 rounded border-gray-300"
-                      />
-                    )}
-                    <div className="flex flex-1 items-start justify-between gap-2">
-                      <p className="min-w-0 break-all text-sm font-medium">{u.email}</p>
-                      {renderRoleControl(u)}
-                    </div>
-                  </div>
-                  {name && (
-                    <p className="text-xs text-muted-foreground">{name}</p>
-                  )}
-                  <p className="text-xs text-muted-foreground">
-                    {u.createdAt ? formatDate(u.createdAt, locale, "short") : ""}
-                  </p>
-                </div>
-              );
-            })}
+            {paginated.map((u) => (
+              <UserMobileCard
+                key={u.id}
+                user={u}
+                currentUserId={currentUserId}
+                selected={selected}
+                loadingId={loadingId}
+                onToggleSelect={toggleSelect}
+                onRoleChange={handleRoleChange}
+                locale={locale}
+                t={t}
+              />
+            ))}
           </div>
 
           {/* Desktop table layout */}
@@ -304,40 +206,19 @@ export function UserRoleManager({
                 </tr>
               </thead>
               <tbody>
-                {paginated.map((u) => {
-                  const name = getUserName(u);
-                  const isSelf = u.id === currentUserId;
-                  return (
-                    <tr key={u.id} className="border-b last:border-0">
-                      <td className="py-2 pr-2">
-                        {!isSelf && (
-                          <input
-                            type="checkbox"
-                            checked={selected.has(u.id)}
-                            onChange={() => toggleSelect(u.id)}
-                            className="h-4 w-4 rounded border-gray-300"
-                          />
-                        )}
-                      </td>
-                      <td className="max-w-[200px] truncate py-2 pr-4" title={u.email}>
-                        {u.email}
-                      </td>
-                      <td className="py-2 pr-4">
-                        {name || (
-                          <span className="text-muted-foreground">{t("admin.nameNotSet")}</span>
-                        )}
-                      </td>
-                      <td className="py-2 pr-4">
-                        {renderRoleControl(u)}
-                      </td>
-                      <td className="py-2 text-muted-foreground">
-                        {u.createdAt
-                          ? formatDate(u.createdAt, locale, "short")
-                          : ""}
-                      </td>
-                    </tr>
-                  );
-                })}
+                {paginated.map((u) => (
+                  <UserTableRow
+                    key={u.id}
+                    user={u}
+                    currentUserId={currentUserId}
+                    selected={selected}
+                    loadingId={loadingId}
+                    onToggleSelect={toggleSelect}
+                    onRoleChange={handleRoleChange}
+                    locale={locale}
+                    t={t}
+                  />
+                ))}
               </tbody>
             </table>
           </div>
@@ -345,63 +226,22 @@ export function UserRoleManager({
       )}
 
       {/* Pagination */}
-      {totalPages > 1 && (
-        <div className="flex items-center justify-between pt-2">
-          <p className="text-sm text-muted-foreground">
-            {t("admin.showingUsers", {
-              from: (safePage - 1) * PAGE_SIZE + 1,
-              to: Math.min(safePage * PAGE_SIZE, filtered.length),
-              total: filtered.length,
-            })}
-          </p>
-          <div className="flex gap-1">
-            <Button
-              variant="outline"
-              size="icon"
-              disabled={safePage <= 1}
-              onClick={() => setPage(safePage - 1)}
-              aria-label={t("pagination.previous")}
-            >
-              <ChevronLeft className="h-4 w-4" />
-            </Button>
-            <Button
-              variant="outline"
-              size="icon"
-              disabled={safePage >= totalPages}
-              onClick={() => setPage(safePage + 1)}
-              aria-label={t("pagination.next")}
-            >
-              <ChevronRight className="h-4 w-4" />
-            </Button>
-          </div>
-        </div>
-      )}
+      <UserPagination
+        safePage={safePage}
+        totalPages={totalPages}
+        filteredCount={filtered.length}
+        onPageChange={setPage}
+        t={t}
+      />
 
       {/* Confirm delete dialog */}
-      <Dialog
+      <ConfirmDeleteDialog
         open={!!confirmDialog}
-        onOpenChange={(open) => !open && setConfirmDialog(null)}
-      >
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>
-              {confirmDialog &&
-                t("admin.bulkDeleteConfirmTitle", { count: confirmDialog.ids.length })}
-            </DialogTitle>
-            <DialogDescription>
-              {t("admin.bulkDeleteConfirmDesc")}
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setConfirmDialog(null)}>
-              {t("admin.cancel")}
-            </Button>
-            <Button variant="destructive" onClick={handleBulkDelete}>
-              {t("admin.confirm")}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+        count={confirmDialog?.ids.length ?? 0}
+        onClose={() => setConfirmDialog(null)}
+        onConfirm={handleBulkDelete}
+        t={t}
+      />
     </div>
   );
 }

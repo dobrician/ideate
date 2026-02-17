@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { useLocale } from "@/lib/use-locale";
 import { getCsrfTokenClient } from "@/lib/csrf-client";
-import { createTag, deleteTag } from "./actions";
+import { createTag, deleteTag } from "./project-actions";
 import { X } from "lucide-react";
 
 interface TagManagerProps {
