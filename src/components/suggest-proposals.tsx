@@ -271,7 +271,7 @@ function SuggestionCard({
             size="sm"
             aria-label={t("vote.pro")}
             aria-pressed={suggestion.vote === 1}
-            className={`h-8 sm:h-7 gap-1 px-2.5 sm:px-2 ${suggestion.vote === 1 ? "bg-green-600 hover:bg-green-700" : ""}`}
+            className={`min-h-[44px] sm:min-h-0 sm:h-7 gap-1 px-2.5 sm:px-2 ${suggestion.vote === 1 ? "bg-green-600 hover:bg-green-700" : ""}`}
             onClick={() => onVote(1)}
           >
             <ThumbsUp className="h-3.5 w-3.5" aria-hidden="true" />
@@ -281,7 +281,7 @@ function SuggestionCard({
             size="sm"
             aria-label={t("vote.contra")}
             aria-pressed={suggestion.vote === -1}
-            className={`h-8 sm:h-7 gap-1 px-2.5 sm:px-2 ${suggestion.vote === -1 ? "bg-red-600 hover:bg-red-700" : ""}`}
+            className={`min-h-[44px] sm:min-h-0 sm:h-7 gap-1 px-2.5 sm:px-2 ${suggestion.vote === -1 ? "bg-red-600 hover:bg-red-700" : ""}`}
             onClick={() => onVote(-1)}
           >
             <ThumbsDown className="h-3.5 w-3.5" aria-hidden="true" />
@@ -289,7 +289,7 @@ function SuggestionCard({
           <Button
             variant="ghost"
             size="sm"
-            className="h-8 sm:h-7 gap-1 px-2.5 sm:px-2"
+            className="min-h-[44px] sm:min-h-0 sm:h-7 gap-1 px-2.5 sm:px-2"
             onClick={onViewDetails}
             aria-label={t("suggestions.viewDetails")}
           >
