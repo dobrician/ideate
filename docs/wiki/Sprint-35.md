@@ -15,7 +15,7 @@
 
 - [x] **Goal 5: Database backup automation** — Create a backup script (scripts/backup-db.sh) that copies the SQLite DB + WAL to a timestamped backup file. Add retention (keep last 7 daily backups). Make it runnable via npm script (`npm run db:backup`). Document in README.
 
-- [ ] **Goal 6: User invitation flow** — Add ability for admins to invite users by email. Create /api/admin/invite endpoint. Send invitation email with a link to register. Track pending invitations in a new `invitations` table. Show pending invitations in admin panel. Add tests.
+- [x] **Goal 6: User invitation flow** — Add ability for admins to invite users by email. Create /api/admin/invite endpoint. Send invitation email with a link to register. Track pending invitations in a new `invitations` table. Show pending invitations in admin panel. Add tests.
 
 - [ ] **Goal 7: Audit log export** — Add CSV and JSON export buttons to the admin audit log section. Export all audit entries (with pagination/date range filter). Use the existing export patterns from project export. Add tests.
 

@@ -199,6 +199,52 @@ export async function sendPasswordResetEmail(
 }
 
 /**
+ * Send invitation email
+ * @param email - Recipient email address
+ * @param inviteLink - Registration link with invitation token
+ * @param inviterEmail - Email of the admin who sent the invitation
+ */
+export async function sendInvitationEmail(
+  email: string,
+  inviteLink: string,
+  inviterEmail: string
+): Promise<void> {
+  const transport = getTransporter();
+
+  const subject = "You're invited to Ideate";
+  const text = `You've been invited to join Ideate by ${inviterEmail}.\n\nClick the link below to create your account:\n\n${inviteLink}\n\nThis invitation expires in 7 days.\n\nIf you weren't expecting this invitation, you can safely ignore this email.`;
+  const html = `
+    <!DOCTYPE html>
+    <html>
+      <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      </head>
+      <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
+        <h1 style="color: #0070f3; margin-bottom: 24px;">You're Invited to Ideate!</h1>
+        <p style="margin-bottom: 16px;">${inviterEmail} has invited you to join Ideate, a democratic idea prioritization platform.</p>
+        <p style="margin: 32px 0;">
+          <a href="${inviteLink}" style="background-color: #0070f3; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; display: inline-block; font-weight: 600;">Create Account</a>
+        </p>
+        <p style="margin-bottom: 16px; color: #666; font-size: 14px;">Or copy and paste this link into your browser:</p>
+        <p style="margin-bottom: 32px; word-break: break-all; font-size: 14px; color: #666;">${inviteLink}</p>
+        <hr style="border: none; border-top: 1px solid #eee; margin: 32px 0;">
+        <p style="color: #999; font-size: 12px; margin-bottom: 8px;">This invitation expires in 7 days.</p>
+        <p style="color: #999; font-size: 12px;">If you weren't expecting this invitation, you can safely ignore this email.</p>
+      </body>
+    </html>
+  `;
+
+  try {
+    await transport.sendMail({ from: SMTP_FROM, to: email, subject, text, html });
+    logMail(email, "invitation", inviteLink);
+  } catch (error) {
+    logger.error({ err: error }, "Failed to send invitation email");
+    throw new Error("Failed to send invitation email");
+  }
+}
+
+/**
  * Verify SMTP connection
  * @returns True if connection successful
  */

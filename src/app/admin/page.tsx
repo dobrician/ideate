@@ -1,11 +1,11 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { db } from "@/db";
-import { users, projects, proposals, votes, comments, auditLogs } from "@/db/schema";
+import { users, projects, proposals, votes, comments, auditLogs, invitations } from "@/db/schema";
 import { getCurrentUser } from "@/lib/auth";
 import { hasPermission } from "@/lib/rbac";
 import type { Role } from "@/lib/rbac";
-import { desc, sql, count } from "drizzle-orm";
+import { desc, eq, sql, count } from "drizzle-orm";
 import {
   Card,
   CardContent,
@@ -17,6 +17,7 @@ import { Button } from "@/components/ui/button";
 import { Users, FolderOpen, Lightbulb, ThumbsUp, ShieldX } from "lucide-react";
 import { UserRoleManager } from "./user-role-manager";
 import { AuditLog } from "./audit-log";
+import { InvitationPanel } from "./invitation-panel";
 import { StatCard } from "@/components/stat-card";
 import { getTranslations } from "@/lib/i18n-server";
 
@@ -45,7 +46,7 @@ export default async function AdminPage() {
   }
   // locale used for date formatting via formatDateTime
 
-  const [allUsers, stats, recentAudit] = await Promise.all([
+  const [allUsers, stats, recentAudit, pendingInvitations] = await Promise.all([
     db
       .select({
         id: users.id,
@@ -82,6 +83,19 @@ export default async function AdminPage() {
       .leftJoin(users, sql`${auditLogs.userId} = ${users.id}`)
       .orderBy(desc(auditLogs.createdAt))
       .limit(20),
+
+    db
+      .select({
+        id: invitations.id,
+        email: invitations.email,
+        status: invitations.status,
+        expiresAt: invitations.expiresAt,
+        createdAt: invitations.createdAt,
+        inviterEmail: users.email,
+      })
+      .from(invitations)
+      .leftJoin(users, eq(invitations.invitedBy, users.id))
+      .orderBy(desc(invitations.createdAt)),
   ]);
 
   const s = stats[0];
@@ -132,6 +146,23 @@ export default async function AdminPage() {
           </CardHeader>
           <CardContent>
             <UserRoleManager users={allUsers} currentUserId={user.id} />
+          </CardContent>
+        </Card>
+
+        {/* Invitations */}
+        <Card className="lg:col-span-2">
+          <CardHeader>
+            <CardTitle>{t("admin.invitations")}</CardTitle>
+            <CardDescription>{t("admin.invitationsDesc")}</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <InvitationPanel
+              initialInvitations={pendingInvitations.map((inv) => ({
+                ...inv,
+                expiresAt: inv.expiresAt?.toISOString() ?? null,
+                createdAt: inv.createdAt?.toISOString() ?? null,
+              }))}
+            />
           </CardContent>
         </Card>
 

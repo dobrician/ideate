@@ -27,6 +27,7 @@ type AuditEntity =
   | "vote"
   | "comment"
   | "user"
+  | "invitation"
   | "session";
 
 interface AuditEntry {

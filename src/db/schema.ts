@@ -116,6 +116,24 @@ export const auditLogs = sqliteTable("audit_logs", {
   ),
 });
 
+// ─── Invitations ───────────────────────────────────────────────────────────
+
+export const invitations = sqliteTable("invitations", {
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => randomUUID()),
+  email: text("email").notNull(),
+  token: text("token").notNull().unique(),
+  invitedBy: text("invited_by").references(() => users.id, { onDelete: "set null" }),
+  status: text("status", { enum: ["pending", "accepted", "expired"] })
+    .notNull()
+    .default("pending"),
+  expiresAt: integer("expires_at", { mode: "timestamp" }).notNull(),
+  createdAt: integer("created_at", { mode: "timestamp" }).default(
+    sql`(unixepoch())`
+  ),
+});
+
 // ─── Comments ──────────────────────────────────────────────────────────────
 
 export const comments = sqliteTable("comments", {
