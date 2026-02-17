@@ -1,6 +1,7 @@
 "use client";
 
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import { useState } from "react";
+import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { MessageSquare } from "lucide-react";
 import { useLocale } from "@/lib/use-locale";
@@ -26,14 +27,15 @@ export function DiscussionSheet({
   currentUserId,
 }: DiscussionSheetProps) {
   const { t } = useLocale();
-  useCommentPoll();
+  const [open, setOpen] = useState(false);
+  useCommentPoll(15_000, open);
 
   return (
-    <Sheet>
+    <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
-        <Button variant="ghost" size="sm" className="text-muted-foreground" title={t("comments.open")}>
+        <Button variant="ghost" size="sm" className="min-h-[44px] text-muted-foreground" title={t("comments.open")}>
           <MessageSquare className="mr-1 h-4 w-4" />
-          <span className="text-sm">{commentCount}</span>
+          <span className="rounded-full bg-muted px-1.5 py-0.5 text-xs font-medium">{commentCount}</span>
         </Button>
       </SheetTrigger>
       <SheetContent className="w-full sm:max-w-lg">
@@ -41,6 +43,9 @@ export function DiscussionSheet({
           <SheetTitle className="text-left">
             {t("comments.title")}: {proposalTitle}
           </SheetTitle>
+          <SheetDescription className="text-left">
+            {t("comments.sheetDescription")}
+          </SheetDescription>
         </SheetHeader>
         <div className="mt-2 h-[calc(100dvh-8rem)] px-2 pb-[env(safe-area-inset-bottom)] sm:mt-4 sm:h-[calc(100vh-10rem)] sm:px-4">
           <CommentThread

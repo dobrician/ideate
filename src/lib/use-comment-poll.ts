@@ -8,9 +8,10 @@ import { useRouter } from "next/navigation";
  * at a fixed interval. The server component re-fetches comments on each
  * refresh, so new messages from other users appear automatically.
  *
- * Polling pauses when the tab is hidden (Page Visibility API).
+ * Polling pauses when the tab is hidden (Page Visibility API) or when
+ * `enabled` is false (e.g. when the discussion sheet is closed).
  */
-export function useCommentPoll(intervalMs = 15_000) {
+export function useCommentPoll(intervalMs = 15_000, enabled = true) {
   const router = useRouter();
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
@@ -29,6 +30,11 @@ export function useCommentPoll(intervalMs = 15_000) {
   }, []);
 
   useEffect(() => {
+    if (!enabled) {
+      stop();
+      return;
+    }
+
     start();
 
     function onVisibilityChange() {
@@ -46,5 +52,5 @@ export function useCommentPoll(intervalMs = 15_000) {
       stop();
       document.removeEventListener("visibilitychange", onVisibilityChange);
     };
-  }, [start, stop, router]);
+  }, [start, stop, router, enabled]);
 }

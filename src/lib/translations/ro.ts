@@ -137,6 +137,7 @@ export const ro: Record<string, string> = {
   "comments.projectDiscussion": "Discuție Proiect",
   "comments.you": "Tu",
   "comments.newMessages": "Mesaje noi",
+  "comments.sheetDescription": "Participă la discuția despre această propunere",
 
   // Dashboard
   "dashboard.title": "Dashboard",

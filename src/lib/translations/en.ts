@@ -130,6 +130,7 @@ export const en: Record<string, string> = {
   "comments.projectDiscussion": "Project Discussion",
   "comments.you": "You",
   "comments.newMessages": "New messages",
+  "comments.sheetDescription": "Join the discussion on this proposal",
 
   // Dashboard
   "dashboard.title": "Dashboard",
