@@ -172,7 +172,15 @@ describe("addComment", () => {
     expect(a.action).toBe("comment");
   });
 
-  it("creates threaded reply with parentId", async () => {
+  it("creates threaded reply with valid parentId (proposal)", async () => {
+    // 1. Proposal lookup for deadline → projectId
+    mockSelectLimit.mockResolvedValueOnce([{ projectId: "proj-1" }]);
+    // 2. Deadline check → no deadline
+    mockSelectLimit.mockResolvedValueOnce([]);
+    // 3. Parent comment lookup → same scope
+    mockSelectLimit.mockResolvedValueOnce([
+      { id: "parent-1", proposalId: "prop-1", projectId: null },
+    ]);
     const fd = makeFormData({
       proposalId: "prop-1",
       content: "reply",
@@ -182,6 +190,92 @@ describe("addComment", () => {
     expect(r).toEqual({ success: true });
     const v = mockInsertValues.mock.calls[0][0] as CommentInsertValues;
     expect(v.parentId).toBe("parent-1");
+  });
+
+  it("creates threaded reply with valid parentId (project)", async () => {
+    // 1. Deadline check → no deadline
+    mockSelectLimit.mockResolvedValueOnce([]);
+    // 2. Parent comment lookup → same scope
+    mockSelectLimit.mockResolvedValueOnce([
+      { id: "parent-1", proposalId: null, projectId: "proj-1" },
+    ]);
+    const fd = makeFormData({
+      projectId: "proj-1",
+      content: "project reply",
+      parentId: "parent-1",
+    });
+    const r = await addComment(null, fd);
+    expect(r).toEqual({ success: true });
+    const v = mockInsertValues.mock.calls[0][0] as CommentInsertValues;
+    expect(v.parentId).toBe("parent-1");
+  });
+
+  it("rejects parentId that does not exist (proposal)", async () => {
+    // 1. Proposal lookup → projectId
+    mockSelectLimit.mockResolvedValueOnce([{ projectId: "proj-1" }]);
+    // 2. Deadline check → no deadline
+    mockSelectLimit.mockResolvedValueOnce([]);
+    // 3. Parent comment lookup → not found (default [])
+    mockSelectLimit.mockResolvedValueOnce([]);
+    const fd = makeFormData({
+      proposalId: "prop-1",
+      content: "reply to ghost",
+      parentId: "nonexistent",
+    });
+    const r = await addComment(null, fd);
+    expect(r).toEqual({ error: "Parent comment not found" });
+    expect(mockInsertValues).not.toHaveBeenCalled();
+  });
+
+  it("rejects parentId that does not exist (project)", async () => {
+    // 1. Deadline check → no deadline
+    mockSelectLimit.mockResolvedValueOnce([]);
+    // 2. Parent comment lookup → not found
+    mockSelectLimit.mockResolvedValueOnce([]);
+    const fd = makeFormData({
+      projectId: "proj-1",
+      content: "reply to ghost",
+      parentId: "nonexistent",
+    });
+    const r = await addComment(null, fd);
+    expect(r).toEqual({ error: "Parent comment not found" });
+    expect(mockInsertValues).not.toHaveBeenCalled();
+  });
+
+  it("rejects parentId from different proposal scope", async () => {
+    // 1. Proposal lookup → projectId
+    mockSelectLimit.mockResolvedValueOnce([{ projectId: "proj-1" }]);
+    // 2. Deadline check → no deadline
+    mockSelectLimit.mockResolvedValueOnce([]);
+    // 3. Parent comment → different proposal
+    mockSelectLimit.mockResolvedValueOnce([
+      { id: "parent-1", proposalId: "prop-OTHER", projectId: null },
+    ]);
+    const fd = makeFormData({
+      proposalId: "prop-1",
+      content: "cross-scope reply",
+      parentId: "parent-1",
+    });
+    const r = await addComment(null, fd);
+    expect(r).toEqual({ error: "Parent comment belongs to a different scope" });
+    expect(mockInsertValues).not.toHaveBeenCalled();
+  });
+
+  it("rejects parentId from different project scope", async () => {
+    // 1. Deadline check → no deadline
+    mockSelectLimit.mockResolvedValueOnce([]);
+    // 2. Parent comment → different project
+    mockSelectLimit.mockResolvedValueOnce([
+      { id: "parent-1", proposalId: null, projectId: "proj-OTHER" },
+    ]);
+    const fd = makeFormData({
+      projectId: "proj-1",
+      content: "cross-scope reply",
+      parentId: "parent-1",
+    });
+    const r = await addComment(null, fd);
+    expect(r).toEqual({ error: "Parent comment belongs to a different scope" });
+    expect(mockInsertValues).not.toHaveBeenCalled();
   });
 
   it("returns generic error on DB failure", async () => {

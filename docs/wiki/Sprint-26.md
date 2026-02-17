@@ -13,7 +13,7 @@ Based on unified analysis from Claude + Codex (see docs/sprint26-unified-plan.md
 - [ ] Goal 10: Mobile keyboard + safe-area hardening
 
 **Backend:**
-- [ ] Goal 5: parentId server-side validation
+- [x] Goal 5: parentId server-side validation
 - [ ] Goal 7: Smart polling — only when discussion is visible
 - [ ] Goal 8: Include project comments in export
 

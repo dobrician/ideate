@@ -87,6 +87,31 @@ export async function addComment(
     }
 
     const { proposalId, projectId, content, parentId } = result.data;
+
+    // Validate parentId: must exist and belong to the same scope
+    if (parentId) {
+      const parent = await db
+        .select({
+          id: comments.id,
+          proposalId: comments.proposalId,
+          projectId: comments.projectId,
+        })
+        .from(comments)
+        .where(eq(comments.id, parentId))
+        .limit(1);
+
+      if (parent.length === 0) {
+        return { error: "Parent comment not found" };
+      }
+      const p = parent[0];
+      if (proposalId && p.proposalId !== proposalId) {
+        return { error: "Parent comment belongs to a different scope" };
+      }
+      if (projectId && p.projectId !== projectId) {
+        return { error: "Parent comment belongs to a different scope" };
+      }
+    }
+
     const isProjectComment = Boolean(projectId && !proposalId);
 
     await db.insert(comments).values({
