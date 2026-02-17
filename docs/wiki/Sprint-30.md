@@ -5,7 +5,7 @@
 
 ## Goals
 
-- [ ] **Goal 1: Update Known-Issues.md** — Rewrite Open section with current risks (in-memory rate limiter, no JWT revocation, single-instance SQLite). Move resolved items to Resolved (CSRF, structured logging, concurrent writes, AI rate limiting, session security). Remove risks already addressed.
+- [x] **Goal 1: Update Known-Issues.md** — Rewrite Open section with current risks (in-memory rate limiter, no JWT revocation, single-instance SQLite). Move resolved items to Resolved (CSRF, structured logging, concurrent writes, AI rate limiting, session security). Remove risks already addressed.
 
 - [ ] **Goal 2: Update Nice-to-Have.md** — Check off completed items: PDF/CSV export, real-time voting (SSE), email notifications, role-based access, audit logging, API rate limiting, search, structured logging, database backups, PWA, keyboard shortcuts.
 
