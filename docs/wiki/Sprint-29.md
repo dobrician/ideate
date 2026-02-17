@@ -14,7 +14,7 @@
 
 - [x] **Goal 4: Auth flow error feedback** — Login: show styled error for wrong credentials. Registration: show error if email exists, success message + redirect on creation. Forgot password: show confirmation message regardless of email existence (security). All auth forms must have visible feedback for every outcome.
 
-- [ ] **Goal 5: Admin panel UX** — Add toast confirmation when role is changed. Add search/filter to user table. Add pagination (or virtual scroll) if >20 users.
+- [x] **Goal 5: Admin panel UX** — Add toast confirmation when role is changed. Add search/filter to user table. Add pagination (or virtual scroll) if >20 users.
 
 - [ ] **Goal 6: i18n consistency** — Audit all user-facing strings. Fix mixed ro/en labels (e.g., "Joined at" in profile, "Proiectele Mele X din Y total"). Ensure consistent language throughout. Fix "chiar acum Tu" → proper Romanian phrasing.
 

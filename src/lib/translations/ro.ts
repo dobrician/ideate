@@ -216,6 +216,9 @@ export const ro: Record<string, string> = {
   "admin.role": "Rol",
   "admin.joined": "Înregistrat",
   "admin.you": "(tu)",
+  "admin.searchUsers": "Caută utilizatori...",
+  "admin.allRoles": "Toate rolurile",
+  "admin.showingUsers": "{from}–{to} din {total} utilizatori",
 
   // Auth
   "auth.signIn": "Autentifică-te pe Ideate",
