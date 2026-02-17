@@ -1,48 +1,54 @@
 import { test, expect } from "@playwright/test";
-import { readFileSync } from "fs";
+import { readFileSync, existsSync } from "fs";
 
 const APP_URL = process.env.APP_URL || "https://idea.surmont.co";
 const ORIGIN = new URL(APP_URL).origin;
-const MAIL_LOG_FILE = process.env.MAIL_LOG_FILE || "/tmp/ideate-logs/mail.log";
+const MAIL_LOG_FILE =
+  process.env.MAIL_LOG_FILE || "/tmp/ideate-mail.log";
 const TEST_EMAIL_PREFIX = `smokepass${Date.now()}`;
 const TEST_EMAIL = `${TEST_EMAIL_PREFIX}@surcod.ro`;
 const TEST_PASSWORD = "SmokeTest123";
 
 /**
  * Extract a URL from the mail log file for the given email and type.
- * Polls the log file until a matching entry appears or timeout is reached.
+ * Uses async polling with setTimeout instead of busy-wait to avoid
+ * blocking the event loop and causing Playwright timeouts.
  */
-function getUrlFromMailLog(
+async function getUrlFromMailLog(
   email: string,
   type: string,
   maxWaitMs = 30000
-): string {
+): Promise<string> {
   const startTime = Date.now();
   const pollInterval = 500;
 
   while (Date.now() - startTime < maxWaitMs) {
     try {
-      const content = readFileSync(MAIL_LOG_FILE, "utf-8");
-      const lines = content.trim().split("\n").reverse();
-      for (const line of lines) {
-        if (!line) continue;
-        const entry = JSON.parse(line);
-        if (entry.to === email && entry.type === type) {
-          return entry.url;
+      if (existsSync(MAIL_LOG_FILE)) {
+        const content = readFileSync(MAIL_LOG_FILE, "utf-8");
+        const lines = content.trim().split("\n").reverse();
+        for (const line of lines) {
+          if (!line) continue;
+          try {
+            const entry = JSON.parse(line);
+            if (entry.to === email && entry.type === type) {
+              return entry.url;
+            }
+          } catch {
+            // Skip malformed JSON lines
+          }
         }
       }
     } catch {
       // File may not exist yet, keep polling
     }
 
-    const waitUntil = Date.now() + pollInterval;
-    while (Date.now() < waitUntil) {
-      // busy-wait (Playwright tests run sync helper functions)
-    }
+    // Async sleep instead of busy-wait
+    await new Promise((resolve) => setTimeout(resolve, pollInterval));
   }
 
   throw new Error(
-    `No ${type} mail log entry found for ${email} within ${maxWaitMs}ms`
+    `No ${type} mail log entry found for ${email} within ${maxWaitMs}ms (file: ${MAIL_LOG_FILE})`
   );
 }
 
@@ -182,8 +188,12 @@ test.describe("Smoke Tests - Password Auth Flow", () => {
     const preLoginData = await preLoginResponse.json();
     expect(preLoginData.code).toBe("EMAIL_NOT_VERIFIED");
 
-    // Step 3: Get verification URL from mail log
-    const verifyUrl = getUrlFromMailLog(TEST_EMAIL, "verification", 15000);
+    // Step 3: Get verification URL from mail log (30s timeout with async polling)
+    const verifyUrl = await getUrlFromMailLog(
+      TEST_EMAIL,
+      "verification",
+      30000
+    );
     expect(verifyUrl).toBeTruthy();
 
     // Step 4: Verify email

@@ -9,7 +9,7 @@
 
 - [x] **Goal 2: E2E tests in CI pipeline** — Add a CI job that runs Playwright smoke tests against a built app. Use the existing playwright.smoke.config.ts. Start the app with `npm start` in CI, wait for ready, run tests. Add to .github/workflows/ci.yml as a new job after Build. Cache Playwright browsers.
 
-- [ ] **Goal 3: Fix flaky password-auth smoke test** — The "full register -> verify -> login flow via API" test fails intermittently. Investigate the verification URL timing issue. Add proper retry/wait logic. Ensure the test passes 10/10 runs locally.
+- [x] **Goal 3: Fix flaky password-auth smoke test** — The "full register -> verify -> login flow via API" test fails intermittently. Investigate the verification URL timing issue. Add proper retry/wait logic. Ensure the test passes 10/10 runs locally.
 
 - [ ] **Goal 4: SSE heartbeat + reconnection** — Add 30-second heartbeat pings to the SSE vote stream to prevent proxy timeouts. Add exponential backoff reconnection on the client side if connection drops. Test with unit tests.
 
