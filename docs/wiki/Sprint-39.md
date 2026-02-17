@@ -7,7 +7,7 @@
 
 - [x] **Goal 1: Fix proposal-form.tsx lint warnings** — Fix 2 `react-hooks/exhaustive-deps` warnings (useEffect missing `form` dependency at lines 192/228). Only lint issues in the codebase.
 
-- [ ] **Goal 2: Test coverage for `search-d1.ts`** — Close coverage gap (87.5% stmts, 53.8% branch). Test D1 search adapter fallback paths and proposal mapping.
+- [x] **Goal 2: Test coverage for `search-d1.ts`** — Close coverage gap (87.5% stmts, 53.8% branch). Test D1 search adapter fallback paths and proposal mapping.
 
 - [ ] **Goal 3: Test coverage for `projects/actions.ts`** — Improve branch (87%) and function (71%) coverage. Test edge cases: validation failures, permission denials, archive-state checks.
 
