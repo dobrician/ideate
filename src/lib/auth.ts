@@ -4,6 +4,7 @@ import { db } from "@/db";
 import { users, revokedTokens } from "@/db/schema";
 import { eq, lt } from "drizzle-orm";
 import { randomUUID } from "crypto";
+import { logger } from "@/lib/logger";
 
 const SESSION_COOKIE_NAME = "session";
 const CSRF_COOKIE_NAME = "csrf_token";
@@ -67,6 +68,7 @@ export function verifyMagicLinkToken(token: string): string | null {
 
     return payload.email;
   } catch (error) {
+    logger.warn({ err: error }, "Magic link token verification failed");
     return null;
   }
 }
@@ -133,6 +135,7 @@ export function verifySessionToken(
 
     return payload;
   } catch (error) {
+    logger.warn({ err: error }, "Session token verification failed");
     return null;
   }
 }

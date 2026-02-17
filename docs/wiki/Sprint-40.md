@@ -9,7 +9,7 @@
 
 - [x] **Goal 2: Add JWT revocation blocklist** — `jti` field is generated but never checked. Add a `revokedTokens` table and check `jti` on every auth call. Logout inserts `jti` into blocklist.
 
-- [ ] **Goal 3: Add auth error logging** — `auth.ts` lines 90 and 177 silently catch JWT verification errors. Add structured pino logging to both catch blocks.
+- [x] **Goal 3: Add auth error logging** — `auth.ts` lines 90 and 177 silently catch JWT verification errors. Add structured pino logging to both catch blocks.
 
 - [ ] **Goal 4: Fix error text WCAG AA contrast** — `text-red-600` on white fails AA for small text (~3.9:1). Switch to `text-red-700 dark:text-red-400` across all form error messages.
 
