@@ -16,8 +16,9 @@ Reverse chronological. Click each sprint for full details.
 
 ---
 
-### 🔄 [Sprint 37 — Search, Webhooks & Developer Experience](Sprint-37) *(2026-02-17)*
+### ✅ [Sprint 37 — Search, Webhooks & Developer Experience](Sprint-37) *(2026-02-17)*
 **Focus:** Full-text search (FTS5+Cmd+K), webhooks, comment threading UI, LLM caching, API docs, email digests, project templates, GDPR export
+**Stats:** 8 commits | 900+ tests | 8 features: FTS5 search, webhooks, threading, LLM cache, Swagger docs, digests, templates, GDPR export
 
 ---
 
