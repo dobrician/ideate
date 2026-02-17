@@ -73,6 +73,19 @@ describe("Export", () => {
       const csv = generateCsv(project);
       expect(csv).toContain('"Test, Project"');
     });
+
+    it("should include project comments when present", () => {
+      const project = {
+        ...mockProject,
+        projectComments: [
+          { content: "Great project!", authorName: "Eve", createdAt: new Date("2026-02-15") },
+        ],
+      };
+      const csv = generateCsv(project);
+      expect(csv).toContain("ProjectComment");
+      expect(csv).toContain("Eve");
+      expect(csv).toContain("Great project!");
+    });
   });
 
   describe("generateReportHtml", () => {
@@ -111,6 +124,26 @@ describe("Export", () => {
       expect(html).toContain("proposals");
     });
 
+    it("should include project comments section when present", () => {
+      const project = {
+        ...mockProject,
+        projectComments: [
+          { content: "Project-level comment", authorName: "Eve", createdAt: new Date("2026-02-15") },
+        ],
+      };
+      const html = generateReportHtml(project);
+      expect(html).toContain("Project Discussion");
+      expect(html).toContain("Eve");
+      expect(html).toContain("Project-level comment");
+    });
+
+    it("should handle project with no description", () => {
+      const project = { ...mockProject, description: null, proposals: [] };
+      const html = generateReportHtml(project);
+      expect(html).toContain("Test Project");
+      expect(html).toContain("No proposals yet.");
+    });
+
     it("should escape HTML in content", () => {
       const project = {
         ...mockProject,
@@ -147,6 +180,49 @@ describe("Export", () => {
         ],
       };
       const buffer = await generatePdf(projectWithComments);
+      expect(buffer.byteLength).toBeGreaterThan(0);
+    });
+
+    it("should handle page overflow with many proposals", async () => {
+      const manyProposals = Array.from({ length: 15 }, (_, i) => ({
+        title: `Proposal ${i + 1}`,
+        description: "A ".repeat(200),
+        summary: null,
+        authorName: `Author ${i}`,
+        createdAt: new Date("2026-02-10"),
+        upvotes: i + 1,
+        downvotes: i,
+        comments: [
+          { content: "Comment text here", authorName: "Bob", createdAt: new Date("2026-02-11") },
+        ],
+      }));
+      const bigProject = { ...mockProject, proposals: manyProposals };
+      const buffer = await generatePdf(bigProject);
+      expect(buffer.byteLength).toBeGreaterThan(0);
+    });
+
+    it("should handle project with no description", async () => {
+      const project = { ...mockProject, description: null };
+      const buffer = await generatePdf(project);
+      const header = new TextDecoder().decode(new Uint8Array(buffer).slice(0, 5));
+      expect(header).toBe("%PDF-");
+    });
+
+    it("should handle proposals with zero votes", async () => {
+      const project = {
+        ...mockProject,
+        proposals: [{
+          title: "Zero Votes",
+          description: null,
+          summary: null,
+          authorName: "Alice",
+          createdAt: new Date("2026-02-10"),
+          upvotes: 0,
+          downvotes: 0,
+          comments: [],
+        }],
+      };
+      const buffer = await generatePdf(project);
       expect(buffer.byteLength).toBeGreaterThan(0);
     });
   });

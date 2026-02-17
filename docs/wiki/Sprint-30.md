@@ -11,7 +11,7 @@
 
 - [x] **Goal 3: Cover vote-update.ts (0% coverage)** — Add unit tests for `emitVoteUpdate` helper with mocked DB and `emitVoteChange`. Small file (28 lines).
 
-- [ ] **Goal 4: Cover export.ts branch gaps (79% branch)** — Add targeted tests for uncovered lines at 59, 113-114, 391. Push branch coverage above 90%.
+- [x] **Goal 4: Cover export.ts branch gaps (79% branch)** — Add targeted tests for uncovered lines at 59, 113-114, 391. Push branch coverage above 90%.
 
 - [ ] **Goal 5: Cover llm.ts branch gaps (85% branch)** — Add tests for uncovered lines at 188-189 (error/fallback branches).
 
