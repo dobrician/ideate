@@ -175,9 +175,11 @@ describe("addComment", () => {
   it("creates threaded reply with valid parentId (proposal)", async () => {
     // 1. Proposal lookup for deadline → projectId
     mockSelectLimit.mockResolvedValueOnce([{ projectId: "proj-1" }]);
-    // 2. Deadline check → no deadline
+    // 2. Archived check → not archived
+    mockSelectLimit.mockResolvedValueOnce([{ status: "active" }]);
+    // 3. Deadline check → no deadline
     mockSelectLimit.mockResolvedValueOnce([]);
-    // 3. Parent comment lookup → same scope
+    // 4. Parent comment lookup → same scope
     mockSelectLimit.mockResolvedValueOnce([
       { id: "parent-1", proposalId: "prop-1", projectId: null },
     ]);
@@ -193,9 +195,11 @@ describe("addComment", () => {
   });
 
   it("creates threaded reply with valid parentId (project)", async () => {
-    // 1. Deadline check → no deadline
+    // 1. Archived check → not archived
+    mockSelectLimit.mockResolvedValueOnce([{ status: "active" }]);
+    // 2. Deadline check → no deadline
     mockSelectLimit.mockResolvedValueOnce([]);
-    // 2. Parent comment lookup → same scope
+    // 3. Parent comment lookup → same scope
     mockSelectLimit.mockResolvedValueOnce([
       { id: "parent-1", proposalId: null, projectId: "proj-1" },
     ]);
@@ -213,9 +217,11 @@ describe("addComment", () => {
   it("rejects parentId that does not exist (proposal)", async () => {
     // 1. Proposal lookup → projectId
     mockSelectLimit.mockResolvedValueOnce([{ projectId: "proj-1" }]);
-    // 2. Deadline check → no deadline
+    // 2. Archived check → not archived
+    mockSelectLimit.mockResolvedValueOnce([{ status: "active" }]);
+    // 3. Deadline check → no deadline
     mockSelectLimit.mockResolvedValueOnce([]);
-    // 3. Parent comment lookup → not found (default [])
+    // 4. Parent comment lookup → not found (default [])
     mockSelectLimit.mockResolvedValueOnce([]);
     const fd = makeFormData({
       proposalId: "prop-1",
@@ -228,9 +234,11 @@ describe("addComment", () => {
   });
 
   it("rejects parentId that does not exist (project)", async () => {
-    // 1. Deadline check → no deadline
+    // 1. Archived check → not archived
+    mockSelectLimit.mockResolvedValueOnce([{ status: "active" }]);
+    // 2. Deadline check → no deadline
     mockSelectLimit.mockResolvedValueOnce([]);
-    // 2. Parent comment lookup → not found
+    // 3. Parent comment lookup → not found
     mockSelectLimit.mockResolvedValueOnce([]);
     const fd = makeFormData({
       projectId: "proj-1",
@@ -245,9 +253,11 @@ describe("addComment", () => {
   it("rejects parentId from different proposal scope", async () => {
     // 1. Proposal lookup → projectId
     mockSelectLimit.mockResolvedValueOnce([{ projectId: "proj-1" }]);
-    // 2. Deadline check → no deadline
+    // 2. Archived check → not archived
+    mockSelectLimit.mockResolvedValueOnce([{ status: "active" }]);
+    // 3. Deadline check → no deadline
     mockSelectLimit.mockResolvedValueOnce([]);
-    // 3. Parent comment → different proposal
+    // 4. Parent comment → different proposal
     mockSelectLimit.mockResolvedValueOnce([
       { id: "parent-1", proposalId: "prop-OTHER", projectId: null },
     ]);
@@ -262,9 +272,11 @@ describe("addComment", () => {
   });
 
   it("rejects parentId from different project scope", async () => {
-    // 1. Deadline check → no deadline
+    // 1. Archived check → not archived
+    mockSelectLimit.mockResolvedValueOnce([{ status: "active" }]);
+    // 2. Deadline check → no deadline
     mockSelectLimit.mockResolvedValueOnce([]);
-    // 2. Parent comment → different project
+    // 3. Parent comment → different project
     mockSelectLimit.mockResolvedValueOnce([
       { id: "parent-1", proposalId: null, projectId: "proj-OTHER" },
     ]);
@@ -290,7 +302,9 @@ describe("addComment", () => {
     const pastDeadline = new Date(Date.now() - 86400000); // yesterday
     // First select: proposal lookup returns projectId
     mockSelectLimit.mockResolvedValueOnce([{ projectId: "proj-1" }]);
-    // Second select: project deadline lookup returns past deadline
+    // Second select: archived check → not archived
+    mockSelectLimit.mockResolvedValueOnce([{ status: "active" }]);
+    // Third select: project deadline lookup returns past deadline
     mockSelectLimit.mockResolvedValueOnce([{ deadline: pastDeadline }]);
 
     const fd = makeFormData({ proposalId: "prop-1", content: "Late comment" });
@@ -305,7 +319,9 @@ describe("addComment", () => {
     const futureDeadline = new Date(Date.now() + 86400000); // tomorrow
     // First select: proposal lookup returns projectId
     mockSelectLimit.mockResolvedValueOnce([{ projectId: "proj-1" }]);
-    // Second select: project deadline lookup returns future deadline
+    // Second select: archived check → not archived
+    mockSelectLimit.mockResolvedValueOnce([{ status: "active" }]);
+    // Third select: project deadline lookup returns future deadline
     mockSelectLimit.mockResolvedValueOnce([{ deadline: futureDeadline }]);
 
     const fd = makeFormData({ proposalId: "prop-1", content: "Timely comment" });

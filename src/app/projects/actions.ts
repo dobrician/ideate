@@ -160,6 +160,57 @@ export async function updateProject(projectId: string, formData: FormData) {
 }
 
 /**
+ * Unarchive a project (admin only) — sets status back to active
+ */
+export async function unarchiveProject(projectId: string, csrfToken: string) {
+  try {
+    await requireCsrfToken(csrfToken);
+    const user = await requireAuth();
+
+    if (!hasPermission(user.role as Role, "project:manage_all")) {
+      return { error: "Only admins can unarchive projects" };
+    }
+
+    const existingProject = await db
+      .select()
+      .from(projects)
+      .where(eq(projects.id, projectId))
+      .limit(1);
+
+    if (existingProject.length === 0) {
+      return { error: "Project not found" };
+    }
+
+    if (existingProject[0].status !== "archived") {
+      return { error: "Project is not archived" };
+    }
+
+    await db
+      .update(projects)
+      .set({ status: "active", updatedAt: new Date() })
+      .where(eq(projects.id, projectId));
+
+    await logAudit({
+      userId: user.id,
+      action: "update",
+      entity: "project",
+      entityId: projectId,
+      details: JSON.stringify({ action: "unarchive" }),
+    });
+
+    revalidatePath(`/projects/${projectId}`);
+    revalidatePath("/projects");
+
+    return { success: true };
+  } catch (error) {
+    if (error instanceof Error && error.message === "Unauthorized") {
+      redirect("/auth/login");
+    }
+    return { error: "Failed to unarchive project" };
+  }
+}
+
+/**
  * Delete a project
  */
 export async function deleteProject(projectId: string, csrfToken: string) {

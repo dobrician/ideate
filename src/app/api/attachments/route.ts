@@ -5,6 +5,7 @@ import { getCurrentUser } from "@/lib/auth";
 import { hasPermission } from "@/lib/rbac";
 import type { Role } from "@/lib/rbac";
 import { logAudit } from "@/lib/audit";
+import { isProjectArchived } from "@/lib/project-utils";
 import { eq, count } from "drizzle-orm";
 import { writeFile, mkdir } from "fs/promises";
 import { resolve } from "path";
@@ -44,7 +45,7 @@ export async function POST(request: NextRequest) {
 
     // Verify proposal exists
     const proposal = await db
-      .select({ id: proposals.id })
+      .select({ id: proposals.id, projectId: proposals.projectId })
       .from(proposals)
       .where(eq(proposals.id, proposalId))
       .limit(1);
@@ -53,6 +54,14 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         { error: "Proposal not found" },
         { status: 404 }
+      );
+    }
+
+    // Check if project is archived
+    if (await isProjectArchived(proposal[0].projectId)) {
+      return NextResponse.json(
+        { error: "This project is archived and read-only" },
+        { status: 403 }
       );
     }
 

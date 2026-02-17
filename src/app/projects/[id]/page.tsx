@@ -31,6 +31,7 @@ import { formatDate } from "@/lib/utils";
 import { RegenerateSummaryButton } from "@/components/regenerate-summary-button";
 import { SuggestProposalsButton } from "@/components/suggest-proposals";
 import { MarkdownRenderer } from "@/components/markdown-renderer";
+import { ArchiveBanner } from "@/components/archive-banner";
 
 interface ProjectPageProps {
   params: Promise<{ id: string }>;
@@ -95,8 +96,9 @@ export default async function ProjectPage({ params, searchParams }: ProjectPageP
   }
 
   const projectData = project[0];
-  const canEdit = canManageResource(role, projectData.userId, user.id);
-  const canCreateProposal = hasPermission(role, "proposal:create");
+  const isArchived = projectData.status === "archived";
+  const canEdit = !isArchived && canManageResource(role, projectData.userId, user.id);
+  const canCreateProposal = !isArchived && hasPermission(role, "proposal:create");
   const isAdmin = hasPermission(role, "project:manage_all");
 
   const sp = await searchParams;
@@ -116,6 +118,8 @@ export default async function ProjectPage({ params, searchParams }: ProjectPageP
           &larr; {t("projects.back")}
         </Link>
       </div>
+
+      {isArchived && <ArchiveBanner projectId={id} isAdmin={isAdmin} />}
 
       <div className="lg:grid lg:grid-cols-[1.6fr_1fr] lg:items-start lg:gap-6">
       <Card>

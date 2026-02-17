@@ -532,4 +532,11 @@ export const ro: Record<string, string> = {
   "attachments.dropzone": "Trage fișierul aici sau apasă pentru a căuta",
   "attachments.limit": "Max 5MB per fișier, 3 fișiere per propunere",
   "attachments.count": "{count} atașament(e)",
+
+  // Archive
+  "archive.banner": "Acest proiect este arhivat și doar pentru citire.",
+  "archive.unarchive": "Dezarhivează",
+  "archive.unarchiving": "Se dezarhivează...",
+  "archive.unarchived": "Proiect dezarhivat",
+  "archive.unarchiveFailed": "Dezarhivarea proiectului a eșuat",
 };

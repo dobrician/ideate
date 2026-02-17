@@ -513,4 +513,11 @@ export const en: Record<string, string> = {
   "attachments.dropzone": "Drop file here or click to browse",
   "attachments.limit": "Max 5MB per file, 3 files per proposal",
   "attachments.count": "{count} attachment(s)",
+
+  // Archive
+  "archive.banner": "This project is archived and read-only.",
+  "archive.unarchive": "Unarchive",
+  "archive.unarchiving": "Unarchiving...",
+  "archive.unarchived": "Project unarchived",
+  "archive.unarchiveFailed": "Failed to unarchive project",
 };

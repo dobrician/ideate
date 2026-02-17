@@ -194,8 +194,8 @@ describe("castVote", () => {
   });
 
   it("upserts a positive vote", async () => {
-    // 1st select: resolve proposal → proj-1, 2nd select: deadline → none
-    setSelectResults([{ projectId: "proj-1" }], []);
+    // 1st select: resolve proposal → proj-1, 2nd: archived check, 3rd: deadline → none
+    setSelectResults([{ projectId: "proj-1" }], [{ status: "active" }], []);
     const r = await castVote("prop-1", 1, "proj-1", "csrf");
     expect(r).toEqual({ success: true });
     expect(mockInsertValues).toHaveBeenCalledWith({
@@ -209,7 +209,7 @@ describe("castVote", () => {
   });
 
   it("upserts a negative vote", async () => {
-    setSelectResults([{ projectId: "proj-1" }], []);
+    setSelectResults([{ projectId: "proj-1" }], [{ status: "active" }], []);
     const r = await castVote("prop-1", -1, "proj-1", "csrf");
     expect(r).toEqual({ success: true });
     expect(mockInsertValues).toHaveBeenCalledWith(
@@ -224,16 +224,23 @@ describe("castVote", () => {
 
   it("rejects vote when project deadline has passed", async () => {
     const pastDate = new Date(Date.now() - 86400000).toISOString();
-    // 1st: resolve proposal, 2nd: deadline passed
-    setSelectResults([{ projectId: "proj-1" }], [{ deadline: pastDate }]);
+    // 1st: resolve proposal, 2nd: archived check, 3rd: deadline passed
+    setSelectResults([{ projectId: "proj-1" }], [{ status: "active" }], [{ deadline: pastDate }]);
     const r = await castVote("prop-1", 1, "proj-1", "csrf");
     expect(r).toEqual({ error: "Voting is closed — the project deadline has passed" });
+  });
+
+  it("rejects vote when project is archived", async () => {
+    // 1st: resolve proposal, 2nd: archived check → archived
+    setSelectResults([{ projectId: "proj-1" }], [{ status: "archived" }]);
+    const r = await castVote("prop-1", 1, "proj-1", "csrf");
+    expect(r).toEqual({ error: "This project is archived and read-only" });
   });
 
   it("uses server-resolved projectId for deadline check, ignoring client value", async () => {
     const pastDate = new Date(Date.now() - 86400000).toISOString();
     // Proposal belongs to proj-REAL which has expired deadline
-    setSelectResults([{ projectId: "proj-REAL" }], [{ deadline: pastDate }]);
+    setSelectResults([{ projectId: "proj-REAL" }], [{ status: "active" }], [{ deadline: pastDate }]);
     // Client sends fake project id "proj-FAKE"
     const r = await castVote("prop-1", 1, "proj-FAKE", "csrf");
     expect(r).toEqual({ error: "Voting is closed — the project deadline has passed" });
@@ -246,7 +253,7 @@ describe("castVote", () => {
   });
 
   it("returns error on DB failure", async () => {
-    setSelectResults([{ projectId: "proj-1" }], []);
+    setSelectResults([{ projectId: "proj-1" }], [{ status: "active" }], []);
     mockInsertValues.mockImplementation(() => {
       throw new Error("DB error");
     });
@@ -270,13 +277,19 @@ describe("removeVote", () => {
 
   it("rejects vote removal when project deadline has passed", async () => {
     const pastDate = new Date(Date.now() - 86400000).toISOString();
-    setSelectResults([{ projectId: "proj-1" }], [{ deadline: pastDate }]);
+    setSelectResults([{ projectId: "proj-1" }], [{ status: "active" }], [{ deadline: pastDate }]);
     const r = await removeVote("prop-1", "proj-1", "csrf");
     expect(r).toEqual({ error: "Voting is closed — the project deadline has passed" });
   });
 
+  it("rejects vote removal when project is archived", async () => {
+    setSelectResults([{ projectId: "proj-1" }], [{ status: "archived" }]);
+    const r = await removeVote("prop-1", "proj-1", "csrf");
+    expect(r).toEqual({ error: "This project is archived and read-only" });
+  });
+
   it("deletes the vote", async () => {
-    setSelectResults([{ projectId: "proj-1" }], []);
+    setSelectResults([{ projectId: "proj-1" }], [{ status: "active" }], []);
     const r = await removeVote("prop-1", "proj-1", "csrf");
     expect(r).toEqual({ success: true });
     expect(mockDeleteWhere).toHaveBeenCalled();
@@ -289,7 +302,7 @@ describe("removeVote", () => {
   });
 
   it("returns error on DB failure", async () => {
-    setSelectResults([{ projectId: "proj-1" }], []);
+    setSelectResults([{ projectId: "proj-1" }], [{ status: "active" }], []);
     mockDeleteWhere.mockImplementation(() => {
       throw new Error("DB error");
     });

@@ -14,7 +14,7 @@ import { randomUUID } from "crypto";
 import { logAudit } from "@/lib/audit";
 import { notifyVote } from "@/lib/notifications";
 import { requireCsrfToken } from "@/lib/csrf";
-import { isDeadlinePassed } from "@/lib/project-utils";
+import { isDeadlinePassed, isProjectArchived } from "@/lib/project-utils";
 
 async function resolveProposalProject(
   proposalId: string
@@ -62,6 +62,10 @@ export async function createProposal(
     }
 
     const { projectId, title, description, initialVote } = result.data;
+
+    if (await isProjectArchived(projectId)) {
+      return { error: "This project is archived and read-only" };
+    }
 
     if (await isDeadlinePassed(projectId)) {
       return { error: "Proposals are closed — the project deadline has passed" };
@@ -176,6 +180,10 @@ export async function castVote(
       return { error: "Proposal not found" };
     }
 
+    if (await isProjectArchived(projectId)) {
+      return { error: "This project is archived and read-only" };
+    }
+
     if (await isDeadlinePassed(projectId)) {
       return { error: "Voting is closed — the project deadline has passed" };
     }
@@ -224,6 +232,10 @@ export async function removeVote(
     const projectId = await resolveProposalProject(proposalId);
     if (!projectId) {
       return { error: "Proposal not found" };
+    }
+
+    if (await isProjectArchived(projectId)) {
+      return { error: "This project is archived and read-only" };
     }
 
     if (await isDeadlinePassed(projectId)) {

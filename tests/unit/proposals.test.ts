@@ -243,9 +243,21 @@ describe("createProposal", () => {
     expect(result).toEqual({ error: "Forbidden: Invalid CSRF token" });
   });
 
+  it("rejects proposal when project is archived", async () => {
+    mockSelectLimit
+      .mockResolvedValueOnce([{ status: "archived" }]); // isProjectArchived
+    const result = await createProposal(null, validFormData());
+    expect(result).toEqual({
+      error: "This project is archived and read-only",
+    });
+    expect(mockInsertValues).not.toHaveBeenCalled();
+  });
+
   it("rejects proposal when project deadline has passed", async () => {
     const pastDeadline = new Date(Date.now() - 86400000);
-    mockSelectLimit.mockResolvedValueOnce([{ deadline: pastDeadline }]);
+    mockSelectLimit
+      .mockResolvedValueOnce([{ status: "active" }]) // isProjectArchived
+      .mockResolvedValueOnce([{ deadline: pastDeadline }]); // isDeadlinePassed
     const result = await createProposal(null, validFormData());
     expect(result).toEqual({
       error: "Proposals are closed — the project deadline has passed",
@@ -255,7 +267,9 @@ describe("createProposal", () => {
 
   it("allows proposal when project deadline is in the future", async () => {
     const futureDeadline = new Date(Date.now() + 86400000);
-    mockSelectLimit.mockResolvedValueOnce([{ deadline: futureDeadline }]);
+    mockSelectLimit
+      .mockResolvedValueOnce([{ status: "active" }]) // isProjectArchived
+      .mockResolvedValueOnce([{ deadline: futureDeadline }]); // isDeadlinePassed
     const result = await createProposal(null, validFormData());
     expect(result).toEqual({ success: true });
   });

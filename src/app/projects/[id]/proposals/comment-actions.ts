@@ -12,7 +12,7 @@ import { randomUUID } from "crypto";
 import { logAudit } from "@/lib/audit";
 import { notifyComment } from "@/lib/notifications";
 import { requireCsrfToken } from "@/lib/csrf";
-import { isDeadlinePassed } from "@/lib/project-utils";
+import { isDeadlinePassed, isProjectArchived } from "@/lib/project-utils";
 
 /**
  * Comment validation schema — exactly one of proposalId or projectId required
@@ -58,6 +58,10 @@ export async function addComment(
         .where(eq(proposals.id, rawProposalId))
         .limit(1);
       deadlineProjectId = proposal[0]?.projectId;
+    }
+
+    if (deadlineProjectId && (await isProjectArchived(deadlineProjectId))) {
+      return { error: "This project is archived and read-only" };
     }
 
     if (deadlineProjectId && (await isDeadlinePassed(deadlineProjectId))) {

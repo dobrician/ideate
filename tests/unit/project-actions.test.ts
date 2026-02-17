@@ -109,6 +109,7 @@ import {
   createProject,
   updateProject,
   deleteProject,
+  unarchiveProject,
 } from "@/app/projects/actions";
 
 beforeEach(() => {
@@ -365,5 +366,51 @@ describe("deleteProject", () => {
     expect(r).toEqual({
       error: "Failed to delete project. Please try again.",
     });
+  });
+});
+
+describe("unarchiveProject", () => {
+  const archivedProject = {
+    id: "proj-1",
+    title: "Archived",
+    description: null,
+    deadline: new Date(),
+    status: "archived",
+    userId: "user-1",
+    summary: null,
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  };
+
+  it("rejects non-admin users", async () => {
+    mockRequireAuth.mockResolvedValue(makeUser({ role: "member" }));
+    const r = await unarchiveProject("proj-1", "token");
+    expect(r).toEqual({ error: "Only admins can unarchive projects" });
+  });
+
+  it("returns not found for missing project", async () => {
+    mockRequireAuth.mockResolvedValue(makeUser({ role: "admin" }));
+    mockSelectLimit.mockResolvedValueOnce([]);
+    const r = await unarchiveProject("proj-1", "token");
+    expect(r).toEqual({ error: "Project not found" });
+  });
+
+  it("rejects unarchiving a non-archived project", async () => {
+    mockRequireAuth.mockResolvedValue(makeUser({ role: "admin" }));
+    mockSelectLimit.mockResolvedValueOnce([
+      { ...archivedProject, status: "active" },
+    ]);
+    const r = await unarchiveProject("proj-1", "token");
+    expect(r).toEqual({ error: "Project is not archived" });
+  });
+
+  it("unarchives project as admin", async () => {
+    mockRequireAuth.mockResolvedValue(makeUser({ role: "admin" }));
+    mockSelectLimit.mockResolvedValueOnce([archivedProject]);
+    const r = await unarchiveProject("proj-1", "token");
+    expect(r).toEqual({ success: true });
+    expect(mockUpdateSet).toHaveBeenCalledWith(
+      expect.objectContaining({ status: "active" })
+    );
   });
 });
