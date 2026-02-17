@@ -4,8 +4,8 @@ Reverse chronological. Click each sprint for full details.
 
 ---
 
-### 🔄 [Sprint 00 — Coverage, Accessibility, Security & UX Features](Sprint-00) *(2026-02-17)*
-**Focus:** Push branch coverage past 95%, dark mode WCAG AA, icon aria-labels, account lockout, proposal tags, onboarding modal, Sentry integration
+### 🔄 [Sprint 00 — Cloudflare, Coverage, Accessibility & SSO](Sprint-00) *(2026-02-17)*
+**Focus:** Cloudflare deployment, close coverage gaps (digest/utils/mail), search keyboard a11y, change-password, OIDC SSO, webhook resilience
 **Stats:** 0/8 goals | In progress
 
 ---

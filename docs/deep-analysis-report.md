@@ -396,6 +396,49 @@ What an enterprise customer would expect that Ideate currently lacks:
 
 ---
 
+## 13. Sprint 38 Analysis & Goals
+
+**Date:** 2026-02-17
+**Basis:** Open issues, test coverage, TypeScript check, Sprint 37 outcomes
+
+### Current State
+
+| Check | Result |
+|-------|--------|
+| `tsc --noEmit` | **Clean** — zero errors |
+| `vitest run` | **1,044 tests, 76 files, all passing** |
+| Statement coverage | **95.23%** |
+| Branch coverage | **91.87%** |
+| Function coverage | **94.56%** |
+| Line coverage | **95.84%** |
+| Open issues | **1** — #13 Cloudflare deployment (nice-to-have) |
+
+### Coverage Gaps
+
+| File | Stmts | Branch | Issue |
+|------|-------|--------|-------|
+| `lib/digest.ts` | 50% | 75% | Largest gap — core digest logic + HTML generation untested |
+| `lib/utils.ts` | 37% | 48% | `formatRelativeTime` and date helpers lack tests |
+| `lib/mail.ts` | 86% | 93% | Lines 212-243 (HTML email template) uncovered |
+| `lib/webhooks.ts` | 94% | 79% | Error retry paths uncovered |
+| `app/projects/actions.ts` | 95% | 87% | Edge cases on lines 154, 213-216 |
+| `components/stat-card.tsx` | 94% | 90% | Conditional rendering branches |
+
+### Sprint 38 Goals
+
+| # | Goal | Category | Rationale |
+|---|------|----------|-----------|
+| 1 | **Cloudflare deployment** — Pages + D1 migration, wrangler config, deploy pipeline | DevOps | Only open issue (#13). Moves from Docker-only to edge deployment. |
+| 2 | **Close coverage gap on `lib/digest.ts`** — add unit tests for digest aggregation, HTML generation, and cron endpoint (currently 50% stmts) | Testing | Largest single coverage hole. Digest is a user-facing weekly feature shipped in Sprint 37 with minimal test coverage. |
+| 3 | **Close coverage gap on `lib/utils.ts`** — add tests for `formatDate`, `formatDateTime`, `formatRelativeTime` (currently 37% stmts) | Testing | Widely-used utility module at 37% coverage. Date formatting bugs affect every page. |
+| 4 | **Close coverage gap on `lib/mail.ts`** — test HTML email template rendering and edge cases on lines 212-243 (currently 86% stmts) | Testing | Mail is critical infrastructure. Template rendering bugs are invisible until users report broken emails. |
+| 5 | **Search keyboard navigation** — add ArrowUp/Down/Enter handlers to search combobox, fix `aria-selected` tracking, remove misleading static ARIA attributes | Accessibility | WCAG 2.1.1 violation (A.3 in deep analysis). The combobox declares `role="listbox"` but has no keyboard support, which breaks screen reader expectations. |
+| 6 | **Profile change-password flow** — add change-password form to profile page with current-password verification | Feature | Users who set a password via magic-link have no way to change it. Also addresses the medium-severity account-takeover finding (password set without ownership proof). |
+| 7 | **SSO foundation (OIDC)** — add OpenID Connect login with a configurable provider (Google as default), linking OIDC accounts to existing users by email | Feature | Top-ranked missing enterprise feature. Unblocks organizational adoption. |
+| 8 | **Improve webhook resilience** — cover error retry paths in tests, add dead-letter logging for permanently failed deliveries (lines 122-123 uncovered) | Testing + Reliability | Webhooks shipped in Sprint 37. Retry failure paths are untested and failures are silently dropped. |
+
+---
+
 ## Appendix: Key Files Reference
 
 | File | Lines | Purpose |
