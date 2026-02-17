@@ -1,5 +1,7 @@
 "use client";
 
+import { useEffect } from "react";
+import * as Sentry from "@sentry/nextjs";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import Link from "next/link";
@@ -16,6 +18,10 @@ export default function GlobalError({
   reset: () => void;
 }) {
   const { t } = useLocale();
+
+  useEffect(() => {
+    Sentry.captureException(error);
+  }, [error]);
 
   return (
     <div className="flex min-h-[60vh] items-center justify-center px-4">

@@ -6,6 +6,7 @@ import { checkRateLimit } from "@/lib/rate-limit";
 import { getClientIp } from "@/lib/request-utils";
 import { logAudit } from "@/lib/audit";
 import { logger } from "@/lib/logger";
+import { captureError } from "@/lib/sentry";
 import { z } from "zod";
 
 const APP_URL = process.env.APP_URL || "http://localhost:3000";
@@ -108,6 +109,7 @@ export async function POST(request: NextRequest) {
       );
     }
     logger.error({ err: error }, "Registration error");
+    captureError(error, { route: "POST /api/auth/register" });
     return NextResponse.json(
       { error: "An error occurred. Please try again." },
       { status: 500 }

@@ -5,7 +5,7 @@
 
 ## Goals
 
-- [ ] **Goal 1: Add Sentry error tracking** — Install @sentry/nextjs. Configure for both client and server. Add error boundary integration. Create sentry.client.config.ts and sentry.server.config.ts. Use SENTRY_DSN env var (leave empty in dev to disable). Add source maps upload in build. Wrap API routes with Sentry error capture. Test that errors are captured correctly.
+- [x] **Goal 1: Add Sentry error tracking** — Install @sentry/nextjs. Configure for both client and server. Add error boundary integration. Create sentry.client.config.ts and sentry.server.config.ts. Use SENTRY_DSN env var (leave empty in dev to disable). Add source maps upload in build. Wrap API routes with Sentry error capture. Test that errors are captured correctly.
 
 - [ ] **Goal 2: E2E tests in CI pipeline** — Add a CI job that runs Playwright smoke tests against a built app. Use the existing playwright.smoke.config.ts. Start the app with `npm start` in CI, wait for ready, run tests. Add to .github/workflows/ci.yml as a new job after Build. Cache Playwright browsers.
 

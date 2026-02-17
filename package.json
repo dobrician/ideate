@@ -23,6 +23,7 @@
   },
   "license": "ISC",
   "dependencies": {
+    "@sentry/nextjs": "^10.39.0",
     "@tailwindcss/typography": "^0.5.19",
     "bcryptjs": "^3.0.3",
     "better-sqlite3": "^12.6.2",
