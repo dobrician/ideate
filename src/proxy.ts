@@ -1,10 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 
 /**
- * Lightweight JWT validation for Edge middleware.
- * Decodes the payload and checks expiry/structure without full crypto verification
- * (Edge runtime can't use node:crypto). Full jwt.verify() happens downstream in
- * getSession()/requireAuth().
+ * Lightweight JWT validation for proxy.
+ * Decodes the payload and checks expiry/structure without full crypto verification.
+ * Full jwt.verify() happens downstream in getSession()/requireAuth().
  */
 function isValidSessionJwt(token: string): boolean {
   try {
@@ -141,11 +140,11 @@ function addSecurityHeaders(response: NextResponse): NextResponse {
 }
 
 /**
- * Auth middleware with security headers and locale forwarding.
+ * Auth proxy with security headers and locale forwarding.
  * Forwards locale cookie as a header so Next.js invalidates
  * its client router cache when locale changes.
  */
-export function middleware(request: NextRequest) {
+export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const locale = request.cookies.get("locale")?.value || "en";
 

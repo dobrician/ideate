@@ -13,7 +13,7 @@ export default defineConfig({
       provider: "v8",
       include: [
         "src/lib/**/*.ts",
-        "src/middleware.ts",
+        "src/proxy.ts",
         "src/db/index.ts",
         "src/components/stat-card.tsx",
         "src/app/dashboard/queries.ts",

@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { NextRequest } from "next/server";
-import { middleware } from "@/middleware";
+import { proxy } from "@/proxy";
 
 const BASE_URL = "http://localhost:3000";
 
@@ -50,46 +50,46 @@ function getRedirectUrl(response: Response): URL | null {
   return new URL(location);
 }
 
-describe("Middleware", () => {
+describe("Proxy", () => {
   describe("public paths", () => {
     it("should allow access to the home page without authentication", () => {
       const request = createRequest("/");
-      const response = middleware(request);
+      const response = proxy(request);
 
       expect(isNextResponse(response)).toBe(true);
     });
 
     it("should allow access to /auth/login without authentication", () => {
       const request = createRequest("/auth/login");
-      const response = middleware(request);
+      const response = proxy(request);
 
       expect(isNextResponse(response)).toBe(true);
     });
 
     it("should allow access to /auth/verify without authentication", () => {
       const request = createRequest("/auth/verify");
-      const response = middleware(request);
+      const response = proxy(request);
 
       expect(isNextResponse(response)).toBe(true);
     });
 
     it("should allow access to /auth/request without authentication", () => {
       const request = createRequest("/auth/request");
-      const response = middleware(request);
+      const response = proxy(request);
 
       expect(isNextResponse(response)).toBe(true);
     });
 
     it("should allow access to /auth/logout without authentication", () => {
       const request = createRequest("/auth/logout");
-      const response = middleware(request);
+      const response = proxy(request);
 
       expect(isNextResponse(response)).toBe(true);
     });
 
     it("should allow access to /api/health without authentication", () => {
       const request = createRequest("/api/health");
-      const response = middleware(request);
+      const response = proxy(request);
 
       expect(isNextResponse(response)).toBe(true);
     });
@@ -98,56 +98,56 @@ describe("Middleware", () => {
   describe("static assets", () => {
     it("should allow access to _next/ prefixed paths", () => {
       const request = createRequest("/_next/static/chunks/main.js");
-      const response = middleware(request);
+      const response = proxy(request);
 
       expect(isNextResponse(response)).toBe(true);
     });
 
     it("should allow access to _next/image paths", () => {
       const request = createRequest("/_next/image?url=/photo.png&w=640&q=75");
-      const response = middleware(request);
+      const response = proxy(request);
 
       expect(isNextResponse(response)).toBe(true);
     });
 
     it("should allow access to favicon.ico", () => {
       const request = createRequest("/favicon.ico");
-      const response = middleware(request);
+      const response = proxy(request);
 
       expect(isNextResponse(response)).toBe(true);
     });
 
     it("should allow access to .css files", () => {
       const request = createRequest("/styles/globals.css");
-      const response = middleware(request);
+      const response = proxy(request);
 
       expect(isNextResponse(response)).toBe(true);
     });
 
     it("should allow access to .js files", () => {
       const request = createRequest("/scripts/analytics.js");
-      const response = middleware(request);
+      const response = proxy(request);
 
       expect(isNextResponse(response)).toBe(true);
     });
 
     it("should allow access to .svg files", () => {
       const request = createRequest("/images/logo.svg");
-      const response = middleware(request);
+      const response = proxy(request);
 
       expect(isNextResponse(response)).toBe(true);
     });
 
     it("should allow access to .woff2 font files", () => {
       const request = createRequest("/fonts/inter.woff2");
-      const response = middleware(request);
+      const response = proxy(request);
 
       expect(isNextResponse(response)).toBe(true);
     });
 
     it("should NOT treat paths with dots as static if extension is unknown", () => {
       const request = createRequest("/admin/export.csv");
-      const response = middleware(request);
+      const response = proxy(request);
 
       // Should require auth and redirect to login
       expect(response.status).toBe(307);
@@ -157,7 +157,7 @@ describe("Middleware", () => {
 
     it("should NOT bypass auth for paths with arbitrary dots", () => {
       const request = createRequest("/admin/user.settings");
-      const response = middleware(request);
+      const response = proxy(request);
 
       expect(response.status).toBe(307);
     });
@@ -166,7 +166,7 @@ describe("Middleware", () => {
   describe("protected paths without session cookie", () => {
     it("should redirect to /auth/login when accessing /projects without session", () => {
       const request = createRequest("/projects");
-      const response = middleware(request);
+      const response = proxy(request);
 
       expect(response.status).toBe(307);
       const redirectUrl = getRedirectUrl(response);
@@ -176,7 +176,7 @@ describe("Middleware", () => {
 
     it("should redirect to /auth/login when accessing /profile without session", () => {
       const request = createRequest("/profile");
-      const response = middleware(request);
+      const response = proxy(request);
 
       expect(response.status).toBe(307);
       const redirectUrl = getRedirectUrl(response);
@@ -186,7 +186,7 @@ describe("Middleware", () => {
 
     it("should redirect when session cookie is present but empty", () => {
       const request = createRequest("/projects", { sessionCookie: "" });
-      const response = middleware(request);
+      const response = proxy(request);
 
       expect(response.status).toBe(307);
       const redirectUrl = getRedirectUrl(response);
@@ -198,14 +198,14 @@ describe("Middleware", () => {
   describe("protected paths with session cookie", () => {
     it("should allow access to /projects when session cookie is present", () => {
       const request = createRequest("/projects", { sessionCookie: validSessionJwt() });
-      const response = middleware(request);
+      const response = proxy(request);
 
       expect(isNextResponse(response)).toBe(true);
     });
 
     it("should allow access to /profile when session cookie is present", () => {
       const request = createRequest("/profile", { sessionCookie: validSessionJwt() });
-      const response = middleware(request);
+      const response = proxy(request);
 
       expect(isNextResponse(response)).toBe(true);
     });
@@ -214,7 +214,7 @@ describe("Middleware", () => {
       const request = createRequest("/projects/123/proposals", {
         sessionCookie: validSessionJwt(),
       });
-      const response = middleware(request);
+      const response = proxy(request);
 
       expect(isNextResponse(response)).toBe(true);
     });
@@ -223,7 +223,7 @@ describe("Middleware", () => {
   describe("JWT validation", () => {
     it("should redirect when session cookie is a random string (not a JWT)", () => {
       const request = createRequest("/projects", { sessionCookie: "not-a-jwt" });
-      const response = middleware(request);
+      const response = proxy(request);
 
       expect(response.status).toBe(307);
       const redirectUrl = getRedirectUrl(response);
@@ -238,7 +238,7 @@ describe("Middleware", () => {
         exp: Math.floor(Date.now() / 1000) - 3600, // 1 hour ago
       });
       const request = createRequest("/projects", { sessionCookie: expiredJwt });
-      const response = middleware(request);
+      const response = proxy(request);
 
       expect(response.status).toBe(307);
       const redirectUrl = getRedirectUrl(response);
@@ -253,7 +253,7 @@ describe("Middleware", () => {
         exp: Math.floor(Date.now() / 1000) + 3600,
       });
       const request = createRequest("/projects", { sessionCookie: wrongTypeJwt });
-      const response = middleware(request);
+      const response = proxy(request);
 
       expect(response.status).toBe(307);
     });
@@ -265,14 +265,14 @@ describe("Middleware", () => {
         exp: Math.floor(Date.now() / 1000) + 3600,
       });
       const request = createRequest("/projects", { sessionCookie: noUserJwt });
-      const response = middleware(request);
+      const response = proxy(request);
 
       expect(response.status).toBe(307);
     });
 
     it("should allow a valid session JWT", () => {
       const request = createRequest("/projects", { sessionCookie: validSessionJwt() });
-      const response = middleware(request);
+      const response = proxy(request);
 
       expect(isNextResponse(response)).toBe(true);
     });
@@ -281,7 +281,7 @@ describe("Middleware", () => {
   describe("security headers", () => {
     it("includes HSTS header on public paths", () => {
       const request = createRequest("/");
-      const response = middleware(request);
+      const response = proxy(request);
       expect(response.headers.get("Strict-Transport-Security")).toBe(
         "max-age=63072000; includeSubDomains"
       );
@@ -289,7 +289,7 @@ describe("Middleware", () => {
 
     it("includes HSTS header on protected paths", () => {
       const request = createRequest("/projects", { sessionCookie: validSessionJwt() });
-      const response = middleware(request);
+      const response = proxy(request);
       expect(response.headers.get("Strict-Transport-Security")).toBe(
         "max-age=63072000; includeSubDomains"
       );
@@ -297,7 +297,7 @@ describe("Middleware", () => {
 
     it("includes HSTS header on redirect responses", () => {
       const request = createRequest("/projects");
-      const response = middleware(request);
+      const response = proxy(request);
       expect(response.status).toBe(307);
       expect(response.headers.get("Strict-Transport-Security")).toBe(
         "max-age=63072000; includeSubDomains"
@@ -308,7 +308,7 @@ describe("Middleware", () => {
   describe("redirect URL", () => {
     it("should include the original path as redirect param", () => {
       const request = createRequest("/projects");
-      const response = middleware(request);
+      const response = proxy(request);
 
       const redirectUrl = getRedirectUrl(response);
       expect(redirectUrl).not.toBeNull();
@@ -317,7 +317,7 @@ describe("Middleware", () => {
 
     it("should include a nested path as redirect param", () => {
       const request = createRequest("/projects/456/edit");
-      const response = middleware(request);
+      const response = proxy(request);
 
       const redirectUrl = getRedirectUrl(response);
       expect(redirectUrl).not.toBeNull();
@@ -326,7 +326,7 @@ describe("Middleware", () => {
 
     it("should include /profile as redirect param when accessing profile", () => {
       const request = createRequest("/profile");
-      const response = middleware(request);
+      const response = proxy(request);
 
       const redirectUrl = getRedirectUrl(response);
       expect(redirectUrl).not.toBeNull();
