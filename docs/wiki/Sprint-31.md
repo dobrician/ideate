@@ -19,7 +19,7 @@
 
 - [x] **Goal 7: Equal-vote sorting** — When proposals have equal votes, add secondary sort by newest first (created_at DESC). Ensure this is consistent in both server queries and client-side sorting.
 
-- [ ] **Goal 8: General mobile spacing polish** — Review all pages on 375px viewport. Fix any overflow, awkward wrapping, or excessive spacing. Ensure consistent padding and margins across project detail, proposals, dashboard, and admin pages.
+- [x] **Goal 8: General mobile spacing polish** — Review all pages on 375px viewport. Fix any overflow, awkward wrapping, or excessive spacing. Ensure consistent padding and margins across project detail, proposals, dashboard, and admin pages.
 
 ## Notes
 
