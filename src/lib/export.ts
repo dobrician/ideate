@@ -2,6 +2,8 @@
  * Export utilities for generating PDF and CSV reports of projects.
  */
 
+import { escapeHtml } from "@/lib/sanitize";
+
 interface ExportProposal {
   title: string;
   description: string | null;
@@ -420,10 +422,3 @@ function escapeCsvField(field: string): string {
   return str;
 }
 
-function escapeHtml(str: string): string {
-  return str
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;");
-}

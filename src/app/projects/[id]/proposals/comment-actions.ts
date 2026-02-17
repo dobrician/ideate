@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { db } from "@/db";
-import { projects, proposals, comments } from "@/db/schema";
+import { proposals, comments } from "@/db/schema";
 import { requireAuth } from "@/lib/auth";
 import { hasPermission } from "@/lib/rbac";
 import type { Role } from "@/lib/rbac";
@@ -12,17 +12,7 @@ import { randomUUID } from "crypto";
 import { logAudit } from "@/lib/audit";
 import { notifyComment } from "@/lib/notifications";
 import { requireCsrfToken } from "@/lib/csrf";
-
-async function isDeadlinePassed(projectId: string): Promise<boolean> {
-  const project = await db
-    .select({ deadline: projects.deadline })
-    .from(projects)
-    .where(eq(projects.id, projectId))
-    .limit(1);
-
-  if (!project[0]?.deadline) return false;
-  return new Date(project[0].deadline).getTime() < Date.now();
-}
+import { isDeadlinePassed } from "@/lib/project-utils";
 
 /**
  * Comment validation schema — exactly one of proposalId or projectId required

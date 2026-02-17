@@ -26,16 +26,7 @@ import { toast } from "sonner";
 import { useLocale } from "@/lib/use-locale";
 import { getCsrfTokenClient } from "@/lib/csrf-client";
 import { MarkdownRenderer } from "@/components/markdown-renderer";
-
-interface Comment {
-  id: string;
-  content: string;
-  parentId: string | null;
-  userId: string | null;
-  userEmail?: string;
-  userName?: string;
-  createdAt: Date | null;
-}
+import type { Comment } from "@/components/comment-thread";
 
 interface ProposalWithStats {
   id: string;

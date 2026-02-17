@@ -16,7 +16,7 @@
 
 - [x] **Goal 5: Accessibility critical fixes** — Add skip-to-main-content link + `id="main-content"` on `<main>`. Fix heading hierarchy (h1 on home, login, register pages). Replace `title` with `aria-label` on all icon-only buttons. Add `aria-label` to unlabeled `<select>` elements. Add `role="alert"` to error message containers. Wire `aria-describedby` on proposal form errors.
 
-- [ ] **Goal 6: Code quality deduplication** — Extract shared `isDeadlinePassed` to `lib/project-utils.ts`. Remove duplicate `escapeHtml` from `export.ts` (import from `sanitize.ts`). Extract duplicate `Comment` type to shared types. Remove verified unused exports from rbac, sanitize, ai, llm modules (verify they're truly unused first).
+- [x] **Goal 6: Code quality deduplication** — Extract shared `isDeadlinePassed` to `lib/project-utils.ts`. Remove duplicate `escapeHtml` from `export.ts` (import from `sanitize.ts`). Extract duplicate `Comment` type to shared types. Remove verified unused exports from rbac, sanitize, ai, llm modules (verify they're truly unused first).
 
 - [ ] **Goal 7: DB indexes & schema fixes** — Add indexes on `proposals.projectId`, `comments.projectId`, `comments.proposalId`, `comments.parentId`. Add foreign key on `comments.parentId`. Add `updatedAt` to votes table. Generate and run migration.
 
