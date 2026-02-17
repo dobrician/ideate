@@ -97,7 +97,7 @@ export function EditProjectDialog({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="ghost" size="sm" className="h-8 px-2 text-xs">
+        <Button variant="ghost" size="sm">
           <Pencil className="mr-1 h-3 w-3" />
           {t("projects.edit")}
         </Button>
@@ -181,13 +181,12 @@ export function EditProjectDialog({
             <Button
               type="button"
               variant="outline"
-              size="sm"
               onClick={() => setOpen(false)}
               disabled={isSaving}
             >
               {t("common.cancel")}
             </Button>
-            <Button type="submit" size="sm" disabled={isSaving}>
+            <Button type="submit" disabled={isSaving}>
               {isSaving ? t("projectForm.saving") : t("projectForm.update")}
             </Button>
           </div>

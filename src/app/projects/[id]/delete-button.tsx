@@ -56,7 +56,7 @@ export function DeleteProjectButton({ projectId }: DeleteProjectButtonProps) {
     <>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant="ghost" size="sm" className="h-8 w-8 p-0" title={t("projects.moreActions")}>
+          <Button variant="ghost" size="icon" title={t("projects.moreActions")}>
             <MoreHorizontal className="h-4 w-4" />
           </Button>
         </DropdownMenuTrigger>

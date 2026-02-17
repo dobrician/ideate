@@ -10,7 +10,7 @@
 
 - [x] **Goal 2: Standardize auth page buttons** — All auth pages (login, register, forgot-password, reset-password, verify-email) should use identical button patterns: primary CTA = `w-full` + default size, secondary actions = `variant="outline" w-full`, back links = `variant="ghost"`. Remove any one-off className overrides. Ensure consistent vertical spacing between buttons.
 
-- [ ] **Goal 3: Standardize project detail action buttons** — The action bar (PDF, CSV, Edit, ⋯ menu) should use consistent size and variant. All icon+text buttons same size. The "⋯" more menu trigger should match the other action buttons visually. "← Back" link should be a consistent ghost button or text link pattern.
+- [x] **Goal 3: Standardize project detail action buttons** — The action bar (PDF, CSV, Edit, ⋯ menu) should use consistent size and variant. All icon+text buttons same size. The "⋯" more menu trigger should match the other action buttons visually. "← Back" link should be a consistent ghost button or text link pattern.
 
 - [ ] **Goal 4: Standardize proposal section buttons** — "+ New Proposal" button, "AI Suggestions" button, vote buttons (👍/👎), expand/collapse chevrons, "Submit" in proposal form, "Cancel" — all should follow consistent sizing. Vote buttons specifically should be identical size. Dialog action buttons (Save/Cancel) should follow a consistent pattern: primary right, outline left.
 
