@@ -1,6 +1,6 @@
 import { db } from "@/db";
 import { projects, proposals, votes, comments, users, attachments } from "@/db/schema";
-import { eq, desc, sql, count } from "drizzle-orm";
+import { eq, desc, asc, sql, count } from "drizzle-orm";
 
 export const PROPOSALS_PAGE_SIZE = 20;
 
@@ -40,12 +40,46 @@ export interface ProposalWithStats {
  * Fetch proposals with vote counts, user votes, and comments for a project.
  * Supports pagination via limit/offset.
  */
+export type ProposalSort = "votes" | "newest" | "oldest" | "comments" | "controversy";
+
+const VALID_SORTS: ProposalSort[] = ["votes", "newest", "oldest", "comments", "controversy"];
+
+export function isValidSort(s: string): s is ProposalSort {
+  return VALID_SORTS.includes(s as ProposalSort);
+}
+
 export async function getProjectProposals(
   projectId: string,
   currentUserId: string,
   limit = PROPOSALS_PAGE_SIZE,
-  offset = 0
+  offset = 0,
+  sort: ProposalSort = "votes"
 ): Promise<{ proposals: ProposalWithStats[]; total: number }> {
+  // Build ORDER BY based on sort parameter
+  const upExpr = sql`COALESCE(SUM(CASE WHEN ${votes.value} = 1 THEN 1 ELSE 0 END), 0)`;
+  const downExpr = sql`COALESCE(SUM(CASE WHEN ${votes.value} = -1 THEN 1 ELSE 0 END), 0)`;
+  const netExpr = sql`(${upExpr} - ${downExpr})`;
+  const totalVotesExpr = sql`(${upExpr} + ${downExpr})`;
+  // Controversy: closest to 50/50 split → minimize abs(up - down) / total,
+  // prioritize proposals with more total votes
+  const controversyExpr = sql`CASE WHEN (${totalVotesExpr}) = 0 THEN 999999 ELSE ABS(${upExpr} - ${downExpr}) * 1.0 / (${totalVotesExpr}) END`;
+
+  const orderClauses = (() => {
+    switch (sort) {
+      case "newest":
+        return [desc(proposals.createdAt)];
+      case "oldest":
+        return [asc(proposals.createdAt)];
+      case "controversy":
+        return [sql`${controversyExpr} ASC`, sql`${totalVotesExpr} DESC`];
+      // "comments" sort is done post-query since comment count is fetched separately
+      case "comments":
+      case "votes":
+      default:
+        return [sql`${netExpr} DESC`, desc(proposals.createdAt)];
+    }
+  })();
+
   const [proposalRows, totalResult] = await Promise.all([
     db
       .select({
@@ -66,10 +100,7 @@ export async function getProjectProposals(
       .leftJoin(users, eq(proposals.userId, users.id))
       .where(eq(proposals.projectId, projectId))
       .groupBy(proposals.id)
-      .orderBy(
-        sql`(COALESCE(SUM(CASE WHEN ${votes.value} = 1 THEN 1 ELSE 0 END), 0) - COALESCE(SUM(CASE WHEN ${votes.value} = -1 THEN 1 ELSE 0 END), 0)) DESC`,
-        desc(proposals.createdAt),
-      )
+      .orderBy(...orderClauses)
       .limit(limit)
       .offset(offset),
     db.select({ total: count() }).from(proposals).where(eq(proposals.projectId, projectId)),
@@ -163,7 +194,7 @@ export async function getProjectProposals(
     attachmentsByProposal.set(a.proposalId, list);
   }
 
-  return { total, proposals: proposalRows.map((p) => {
+  const mapped = proposalRows.map((p) => {
     const pComments = commentsByProposal.get(p.id) || [];
     const authorName =
       [p.authorFirstName, p.authorLastName].filter(Boolean).join(" ") ||
@@ -194,5 +225,12 @@ export async function getProjectProposals(
       authorName,
       attachments: attachmentsByProposal.get(p.id) || [],
     };
-  }) };
+  });
+
+  // Post-query sort for "comments" mode (comment counts come from separate query)
+  if (sort === "comments") {
+    mapped.sort((a, b) => b.commentCount - a.commentCount);
+  }
+
+  return { total, proposals: mapped };
 }

@@ -111,6 +111,12 @@ export const ro: Record<string, string> = {
   // Proposals
   "proposals.title": "Propuneri",
   "proposals.count": "Propuneri ({count})",
+  "proposals.sortLabel": "Sortează propunerile",
+  "proposals.sort.votes": "Cele mai populare",
+  "proposals.sort.newest": "Cele mai noi",
+  "proposals.sort.oldest": "Cele mai vechi",
+  "proposals.sort.comments": "Cele mai discutate",
+  "proposals.sort.controversy": "Cele mai controversate",
   "proposals.add": "Adaugă Propunere",
   "proposals.noProposals":
     "Nicio propunere încă. Fii primul care adaugă una!",

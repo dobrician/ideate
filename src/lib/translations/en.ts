@@ -108,6 +108,12 @@ export const en: Record<string, string> = {
   // Proposals
   "proposals.title": "Proposals",
   "proposals.count": "Proposals ({count})",
+  "proposals.sortLabel": "Sort proposals",
+  "proposals.sort.votes": "Most popular",
+  "proposals.sort.newest": "Newest first",
+  "proposals.sort.oldest": "Oldest first",
+  "proposals.sort.comments": "Most discussed",
+  "proposals.sort.controversy": "Most controversial",
   "proposals.add": "Add Proposal",
   "proposals.noProposals": "No proposals yet. Be the first to submit one!",
   "proposals.delete": "Delete",

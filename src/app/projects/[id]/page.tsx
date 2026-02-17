@@ -21,7 +21,9 @@ import { ProposalForm, ProposalFormInline } from "@/components/proposal-form";
 import { ProposalList } from "@/components/proposal-list";
 import { ExportButtons } from "@/components/export-buttons";
 import { DeadlineCountdown } from "@/components/deadline-countdown";
-import { getProjectProposals, PROPOSALS_PAGE_SIZE } from "./queries";
+import { getProjectProposals, PROPOSALS_PAGE_SIZE, isValidSort } from "./queries";
+import type { ProposalSort } from "./queries";
+import { ProposalSortSelector } from "@/components/proposal-sort-selector";
 import { getProjectComments } from "@/db/queries";
 import { Pagination } from "@/components/pagination";
 import { ProjectComments } from "@/components/project-comments";
@@ -35,7 +37,7 @@ import { ArchiveBanner } from "@/components/archive-banner";
 
 interface ProjectPageProps {
   params: Promise<{ id: string }>;
-  searchParams: Promise<{ page?: string }>;
+  searchParams: Promise<{ page?: string; sort?: string }>;
 }
 
 /**
@@ -103,10 +105,11 @@ export default async function ProjectPage({ params, searchParams }: ProjectPageP
 
   const sp = await searchParams;
   const proposalPage = Math.max(1, parseInt(sp.page || "1", 10) || 1);
+  const proposalSort: ProposalSort = isValidSort(sp.sort || "") ? sp.sort as ProposalSort : "votes";
   const proposalOffset = (proposalPage - 1) * PROPOSALS_PAGE_SIZE;
   const [{ proposals: proposalsWithStats, total: proposalTotal }, projectComments] =
     await Promise.all([
-      getProjectProposals(id, user.id, PROPOSALS_PAGE_SIZE, proposalOffset),
+      getProjectProposals(id, user.id, PROPOSALS_PAGE_SIZE, proposalOffset, proposalSort),
       getProjectComments(id),
     ]);
   const proposalTotalPages = Math.ceil(proposalTotal / PROPOSALS_PAGE_SIZE);
@@ -202,6 +205,7 @@ export default async function ProjectPage({ params, searchParams }: ProjectPageP
               <h2 className="text-lg font-semibold">
                 {t("proposals.count", { count: proposalTotal })}
               </h2>
+              <ProposalSortSelector currentSort={proposalSort} />
               <div className="flex-1" />
               {canCreateProposal && (
                 <div className="flex gap-2">

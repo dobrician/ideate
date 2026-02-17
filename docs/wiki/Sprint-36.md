@@ -14,7 +14,7 @@
 
 - [x] **Goal 4: Notification preferences** — Add a notifications settings section to user profile. Options: email on new proposal in my projects, email on vote on my proposals, email on comment reply. Store preferences in a `notification_preferences` table. Respect preferences when sending emails. Add tests.
 
-- [ ] **Goal 5: Advanced proposal sorting** — Add sort options to proposal list: by votes (most popular), by date (newest/oldest), by comments (most discussed), by controversy (closest pro/contra ratio). Persist sort preference in URL params. Add tests.
+- [x] **Goal 5: Advanced proposal sorting** — Add sort options to proposal list: by votes (most popular), by date (newest/oldest), by comments (most discussed), by controversy (closest pro/contra ratio). Persist sort preference in URL params. Add tests.
 
 - [ ] **Goal 6: Project categories/tags** — Allow projects to have tags (e.g., "Tech", "Design", "Business"). Add `tags` table and `project_tags` junction table. Show tags on project cards. Allow filtering projects by tag. Admin can manage available tags. Add tests.
 
