@@ -183,6 +183,85 @@ describe("db/index migration logic", () => {
     );
   });
 
+  it("should rollback on non-idempotent migration error", async () => {
+    mockExistsSync.mockReturnValue(true);
+    mockReadFileSync.mockImplementation((path: string) => {
+      if (path.includes("_journal.json")) {
+        return JSON.stringify({ entries: [{ idx: 0, tag: "0003_bad" }] });
+      }
+      return "DROP TABLE nonexistent;";
+    });
+    mockPrepare.mockReturnValue({
+      get: vi.fn().mockReturnValue(null),
+      run: vi.fn(),
+    });
+    mockExec.mockImplementation((sql: string) => {
+      if (sql.includes("DROP TABLE")) {
+        throw new Error("no such table: nonexistent");
+      }
+      if (sql === "ROLLBACK") return;
+    });
+
+    await expect(import("@/db/index")).rejects.toThrow("process.exit called");
+    expect(mockExec).toHaveBeenCalledWith("ROLLBACK");
+    expect(mockLogFatal).toHaveBeenCalled();
+  });
+
+  it("should sort journal entries by idx", async () => {
+    mockExistsSync.mockReturnValue(true);
+    mockReadFileSync.mockImplementation((path: string) => {
+      if (path.includes("_journal.json")) {
+        return JSON.stringify({
+          entries: [
+            { idx: 2, tag: "0002_second" },
+            { idx: 0, tag: "0000_first" },
+            { idx: 1, tag: "0001_middle" },
+          ],
+        });
+      }
+      return "SELECT 1;";
+    });
+    const mockRun = vi.fn();
+    mockPrepare.mockReturnValue({
+      get: vi.fn().mockReturnValue(null),
+      run: mockRun,
+    });
+
+    await import("@/db/index");
+
+    // Verify migrations applied in order
+    const runCalls = mockRun.mock.calls.map((c: unknown[]) => c[0]);
+    expect(runCalls).toEqual([
+      "0000_first.sql",
+      "0001_middle.sql",
+      "0002_second.sql",
+    ]);
+  });
+
+  it("should skip 'already exists' errors as idempotent", async () => {
+    mockExistsSync.mockReturnValue(true);
+    mockReadFileSync.mockImplementation((path: string) => {
+      if (path.includes("_journal.json")) {
+        return JSON.stringify({ entries: [{ idx: 0, tag: "0004_create" }] });
+      }
+      return "CREATE TABLE foo (id TEXT);";
+    });
+    const mockRun = vi.fn();
+    mockPrepare.mockReturnValue({
+      get: vi.fn().mockReturnValue(null),
+      run: mockRun,
+    });
+    mockExec.mockImplementation((sql: string) => {
+      if (sql.includes("CREATE TABLE foo")) {
+        throw new Error("table foo already exists");
+      }
+    });
+
+    await import("@/db/index");
+
+    expect(mockRun).toHaveBeenCalledWith("0004_create.sql");
+  });
+
   it("should abort after max retries on persistent SQLITE_BUSY", async () => {
     mockExistsSync.mockReturnValue(true);
     mockReadFileSync.mockReturnValue(

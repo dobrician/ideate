@@ -19,7 +19,7 @@
 
 - [x] **Goal 7: Wire `aria-describedby` on proposal form** — Connect error messages to description field via `aria-describedby`. Fix WCAG A.11 compliance gap.
 
-- [ ] **Goal 8: Test coverage for `db/index.ts`** — Close branch gap (83.33%). Test migration error handling and D1 adapter code paths.
+- [x] **Goal 8: Test coverage for `db/index.ts`** — Close branch gap (83.33%). Test migration error handling and D1 adapter code paths.
 
 ## Notes
 

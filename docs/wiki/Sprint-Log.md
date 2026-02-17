@@ -4,9 +4,9 @@ Reverse chronological. Click each sprint for full details.
 
 ---
 
-### 🔄 [Sprint 39 — Code Quality, Coverage Gaps & Accessibility](Sprint-39) *(2026-02-17)*
+### ✅ [Sprint 39 — Code Quality, Coverage Gaps & Accessibility](Sprint-39) *(2026-02-17)*
 **Focus:** Fix lint warnings, close coverage gaps (search-d1/actions/db), split oversized files, remove dead code, localize export dates, proposal form a11y
-**Stats:** 0/8 goals | In progress
+**Stats:** 8/8 goals | 1096 tests | 6 files split, dead code removed, locale-aware exports, a11y fix
 
 ---
 
