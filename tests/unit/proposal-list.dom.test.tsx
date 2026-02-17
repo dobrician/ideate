@@ -12,6 +12,7 @@ vi.mock("@/lib/use-locale", () => ({
       const map: Record<string, string> = {
         "proposals.noProposals": "No proposals yet. Be the first to submit one!",
         "proposals.by": "by",
+        "proposals.details": "Details",
         "proposals.delete": "Delete",
         "proposals.deleteConfirm": "Delete this proposal?",
         "proposals.deleted": "Proposal deleted",
@@ -21,6 +22,7 @@ vi.mock("@/lib/use-locale", () => ({
         "vote.contra": "Contra",
         "vote.remove": "Remove vote",
         "vote.noVotes": "No votes yet",
+        "vote.approvalRatio": "Approval ratio",
         "common.cancel": "Cancel",
         "common.delete": "Delete",
         "deleteProject.deleting": "Deleting...",
@@ -122,25 +124,25 @@ describe("ProposalList", () => {
     expect(screen.getByText("Feature Y")).toBeInTheDocument();
   });
 
-  it("sorts proposals by net votes (highest first), tie-break by contra ascending", () => {
+  it("sorts proposals by net votes (highest first), tie-break by newest first", () => {
     const proposals = [
-      makeProposal({ id: "low", title: "Low Priority", upvotes: 1, downvotes: 3 }),
-      makeProposal({ id: "high", title: "High Priority", upvotes: 10, downvotes: 0 }),
-      makeProposal({ id: "mid", title: "Mid Priority", upvotes: 5, downvotes: 2 }),
-      makeProposal({ id: "tie1", title: "Tie Fewer Contra", upvotes: 3, downvotes: 1 }),
-      makeProposal({ id: "tie2", title: "Tie More Contra", upvotes: 5, downvotes: 3 }),
+      makeProposal({ id: "low", title: "Low Priority", upvotes: 1, downvotes: 3, createdAt: new Date("2025-01-01") }),
+      makeProposal({ id: "high", title: "High Priority", upvotes: 10, downvotes: 0, createdAt: new Date("2025-01-02") }),
+      makeProposal({ id: "mid", title: "Mid Priority", upvotes: 5, downvotes: 2, createdAt: new Date("2025-01-03") }),
+      makeProposal({ id: "tie-old", title: "Tie Older", upvotes: 3, downvotes: 1, createdAt: new Date("2025-01-04") }),
+      makeProposal({ id: "tie-new", title: "Tie Newer", upvotes: 5, downvotes: 3, createdAt: new Date("2025-01-10") }),
     ];
     render(
       <ProposalList proposals={proposals} projectId="proj1" currentUserId="u1" isAdmin={false} />
     );
     const titles = screen.getAllByText(/Priority|Tie/).map((el) => el.textContent);
-    // net: High=10, Mid=3, Tie Fewer=2, Tie More=2, Low=-2
-    // Tie-break (net=2): Fewer Contra (1) before More Contra (3)
+    // net: High=10, Mid=3, Tie Older=2, Tie Newer=2, Low=-2
+    // Tie-break (net=2): Newer (Jan 10) before Older (Jan 4)
     expect(titles).toEqual([
       "High Priority",
       "Mid Priority",
-      "Tie Fewer Contra",
-      "Tie More Contra",
+      "Tie Newer",
+      "Tie Older",
       "Low Priority",
     ]);
   });

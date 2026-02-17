@@ -58,7 +58,10 @@ export async function getProjectProposals(
       .leftJoin(users, eq(proposals.userId, users.id))
       .where(eq(proposals.projectId, projectId))
       .groupBy(proposals.id)
-      .orderBy(desc(proposals.createdAt))
+      .orderBy(
+        sql`(COALESCE(SUM(CASE WHEN ${votes.value} = 1 THEN 1 ELSE 0 END), 0) - COALESCE(SUM(CASE WHEN ${votes.value} = -1 THEN 1 ELSE 0 END), 0)) DESC`,
+        desc(proposals.createdAt),
+      )
       .limit(limit)
       .offset(offset),
     db.select({ total: count() }).from(proposals).where(eq(proposals.projectId, projectId)),

@@ -73,9 +73,10 @@ export function ProposalList({
       const aNet = (aLive?.upvotes ?? a.upvotes) - (aLive?.downvotes ?? a.downvotes);
       const bNet = (bLive?.upvotes ?? b.upvotes) - (bLive?.downvotes ?? b.downvotes);
       if (bNet !== aNet) return bNet - aNet;
-      const aContra = aLive?.downvotes ?? a.downvotes;
-      const bContra = bLive?.downvotes ?? b.downvotes;
-      return aContra - bContra;
+      // Tiebreak: newest first (createdAt DESC)
+      const aTime = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+      const bTime = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+      return bTime - aTime;
     });
   }, [proposals, voteUpdates]);
 
