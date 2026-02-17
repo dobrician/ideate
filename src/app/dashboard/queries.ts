@@ -60,10 +60,12 @@ export async function getDashboardData(userId: string) {
         value: votes.value,
         proposalTitle: proposals.title,
         projectId: proposals.projectId,
+        projectTitle: projects.title,
         createdAt: votes.createdAt,
       })
       .from(votes)
       .innerJoin(proposals, eq(votes.proposalId, proposals.id))
+      .leftJoin(projects, eq(proposals.projectId, projects.id))
       .where(eq(votes.userId, userId))
       .orderBy(desc(votes.createdAt))
       .limit(8),

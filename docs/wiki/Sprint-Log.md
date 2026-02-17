@@ -16,9 +16,9 @@ Reverse chronological. Click each sprint for full details.
 
 ---
 
-### 🔄 [Sprint 33 — Visual Review v2 Remaining Fixes](Sprint-33) *(2026-02-17)*
-**Focus:** Duplicate form/discussion removal, admin mobile cards, navbar tap targets, dashboard mobile, auth/form polish, 404 auth redirect
-**Source:** Visual review v2 (docs/visual-review-report-v2.md)
+### ✅ [Sprint 33 — Visual Review v2 Remaining Fixes](Sprint-33) *(2026-02-17)*
+**Focus:** Duplicate form/discussion removal, admin mobile cards, navbar consolidation, dashboard mobile, auth/form polish, 404 auth redirect
+**Stats:** 6 commits | 869 tests | All v2 review issues resolved
 
 ---
 
