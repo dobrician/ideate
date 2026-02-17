@@ -15,7 +15,7 @@
 
 - [x] **Goal 5: Cover llm.ts branch gaps (85% branch)** — Add tests for uncovered lines at 188-189 (error/fallback branches).
 
-- [ ] **Goal 6: Update Sprint-Log.md — missing Sprints 12-29** — Sprint-Log.md only has entries for Sprints 1-3 and 11. Add summary entries for Sprints 12-29.
+- [x] **Goal 6: Update Sprint-Log.md — missing Sprints 12-29** — Sprint-Log.md only has entries for Sprints 1-3 and 11. Add summary entries for Sprints 12-29.
 
 - [ ] **Goal 7: Cloudflare deployment spike (Issue #13)** — Write deployment spike: Pages for frontend, D1 for SQLite, Workers for API. Identify blockers. Update docs/Deployment.md.
 
