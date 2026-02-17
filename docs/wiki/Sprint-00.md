@@ -11,7 +11,7 @@
 
 - [x] **Goal 3: Close coverage gap on `lib/utils.ts`** — Add tests for `formatDate`, `formatDateTime`, `formatRelativeTime` (currently 37% stmts).
 
-- [ ] **Goal 4: Close coverage gap on `lib/mail.ts`** — Test HTML email template rendering and edge cases on lines 212-243 (currently 86% stmts).
+- [x] **Goal 4: Close coverage gap on `lib/mail.ts`** — Test HTML email template rendering and edge cases on lines 212-243 (currently 86% stmts).
 
 - [ ] **Goal 5: Search keyboard navigation** — Add ArrowUp/Down/Enter handlers to search combobox, fix `aria-selected` tracking, remove misleading static ARIA attributes.
 
