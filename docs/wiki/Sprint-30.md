@@ -19,7 +19,7 @@
 
 - [x] **Goal 7: Cloudflare deployment spike (Issue #13)** — Write deployment spike: Pages for frontend, D1 for SQLite, Workers for API. Identify blockers. Update docs/Deployment.md.
 
-- [ ] **Goal 8: Final coverage push — 93%+ branch** — After Goals 3-5, review remaining branch gaps. Pick easiest wins to push overall branch coverage past 93%.
+- [x] **Goal 8: Final coverage push — 93%+ branch** — After Goals 3-5, review remaining branch gaps. Pick easiest wins to push overall branch coverage past 93%.
 
 ## Notes
 

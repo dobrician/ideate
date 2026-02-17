@@ -4,9 +4,9 @@ Reverse chronological. Click each sprint for full details.
 
 ---
 
-### 🔄 [Sprint 30 — Docs Hygiene, Coverage Gaps & Production Hardening](Sprint-30) *(2026-02-17)*
+### ✅ [Sprint 30 — Docs Hygiene, Coverage Gaps & Production Hardening](Sprint-30) *(2026-02-17)*
 **Focus:** Update stale docs (Known-Issues, Nice-to-Have), close coverage gaps (vote-update.ts, export.ts, llm.ts), Cloudflare deployment spike, push branch coverage past 93%
-**Stats:** In progress | 795 tests | 1 open issue (#13 Cloudflare)
+**Stats:** 8/8 goals | 808 tests | 93.85% branch coverage | 1 open issue (#13 Cloudflare — spike complete)
 
 ---
 

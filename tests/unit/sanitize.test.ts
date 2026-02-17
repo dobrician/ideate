@@ -24,6 +24,14 @@ describe("Sanitize", () => {
     it("should leave safe strings untouched", () => {
       expect(escapeHtml("hello world")).toBe("hello world");
     });
+
+    it("should escape forward slashes", () => {
+      expect(escapeHtml("a/b")).toBe("a&#x2F;b");
+    });
+
+    it("should escape all special characters in one string", () => {
+      expect(escapeHtml(`&<>"'/`)).toBe("&amp;&lt;&gt;&quot;&#x27;&#x2F;");
+    });
   });
 
   describe("stripHtml", () => {
