@@ -110,18 +110,19 @@ export default async function ProjectPage({ params, searchParams }: ProjectPageP
   const proposalTotalPages = Math.ceil(proposalTotal / PROPOSALS_PAGE_SIZE);
 
   return (
-    <div className="mx-auto max-w-4xl py-4 sm:py-6 lg:max-w-6xl lg:grid lg:grid-cols-[1.6fr_1fr] lg:items-start lg:gap-6">
-      <div className="mb-3 lg:col-span-2">
+    <div className="mx-auto max-w-4xl py-4 sm:py-6 lg:max-w-6xl">
+      <div className="mb-3">
         <Link href="/projects" className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground transition-colors">
           &larr; {t("projects.back")}
         </Link>
       </div>
 
+      <div className="lg:grid lg:grid-cols-[1.6fr_1fr] lg:items-start lg:gap-6">
       <Card>
         <CardHeader>
           <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
             <div className="min-w-0 flex-1">
-              <CardTitle className="text-2xl sm:text-3xl">
+              <CardTitle className="break-words text-2xl sm:text-3xl">
                 {projectData.title}
               </CardTitle>
               <CardDescription className="mt-2 flex flex-wrap items-center gap-2 sm:gap-4">
@@ -260,6 +261,7 @@ export default async function ProjectPage({ params, searchParams }: ProjectPageP
           />
         </aside>
       )}
+      </div>
     </div>
   );
 }
