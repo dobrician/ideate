@@ -43,6 +43,7 @@ interface ProfileTabsProps {
     emailNewProposal: boolean;
     emailVoteOnMine: boolean;
     emailCommentReply: boolean;
+    emailWeeklyDigest: boolean;
   };
 }
 

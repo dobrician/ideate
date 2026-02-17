@@ -13,6 +13,7 @@ interface NotificationSettingsProps {
     emailNewProposal: boolean;
     emailVoteOnMine: boolean;
     emailCommentReply: boolean;
+    emailWeeklyDigest: boolean;
   };
 }
 
@@ -21,12 +22,13 @@ export function NotificationSettings({ prefs }: NotificationSettingsProps) {
   const [emailNewProposal, setEmailNewProposal] = useState(prefs.emailNewProposal);
   const [emailVoteOnMine, setEmailVoteOnMine] = useState(prefs.emailVoteOnMine);
   const [emailCommentReply, setEmailCommentReply] = useState(prefs.emailCommentReply);
+  const [emailWeeklyDigest, setEmailWeeklyDigest] = useState(prefs.emailWeeklyDigest);
   const [loading, setLoading] = useState(false);
 
   async function handleSave() {
     setLoading(true);
     const result = await updateNotificationPreferences(
-      { emailNewProposal, emailVoteOnMine, emailCommentReply },
+      { emailNewProposal, emailVoteOnMine, emailCommentReply, emailWeeklyDigest },
       getCsrfTokenClient()
     );
     setLoading(false);
@@ -90,6 +92,21 @@ export function NotificationSettings({ prefs }: NotificationSettingsProps) {
               <p className="text-sm font-medium">{t("notifications.commentReply")}</p>
               <p className="text-xs text-muted-foreground">
                 {t("notifications.commentReplyDesc")}
+              </p>
+            </div>
+          </label>
+
+          <label className="flex items-center gap-3">
+            <input
+              type="checkbox"
+              checked={emailWeeklyDigest}
+              onChange={(e) => setEmailWeeklyDigest(e.target.checked)}
+              className="h-4 w-4 rounded border-gray-300"
+            />
+            <div>
+              <p className="text-sm font-medium">{t("digest.enable")}</p>
+              <p className="text-xs text-muted-foreground">
+                {t("digest.enableDesc")}
               </p>
             </div>
           </label>

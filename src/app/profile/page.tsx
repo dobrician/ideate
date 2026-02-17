@@ -48,6 +48,7 @@ export default async function ProfilePage() {
     emailNewProposal: true,
     emailVoteOnMine: true,
     emailCommentReply: true,
+    emailWeeklyDigest: false,
   };
 
   const displayName = [user.firstName, user.lastName].filter(Boolean).join(" ") || user.email;
@@ -75,6 +76,7 @@ export default async function ProfilePage() {
           emailNewProposal: Boolean(prefs.emailNewProposal),
           emailVoteOnMine: Boolean(prefs.emailVoteOnMine),
           emailCommentReply: Boolean(prefs.emailCommentReply),
+          emailWeeklyDigest: Boolean(prefs.emailWeeklyDigest),
         }}
       />
     </div>

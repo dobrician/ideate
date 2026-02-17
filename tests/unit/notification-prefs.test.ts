@@ -104,7 +104,7 @@ describe("updateNotificationPreferences", () => {
   it("rejects unauthenticated users", async () => {
     mockRequireAuth.mockRejectedValue(new Error("Unauthorized"));
     const r = await updateNotificationPreferences(
-      { emailNewProposal: true, emailVoteOnMine: true, emailCommentReply: true },
+      { emailNewProposal: true, emailVoteOnMine: true, emailCommentReply: true, emailWeeklyDigest: false },
       "csrf"
     );
     expect(r).toEqual({ error: "You must be logged in" });
@@ -112,7 +112,7 @@ describe("updateNotificationPreferences", () => {
 
   it("saves preferences with upsert", async () => {
     const r = await updateNotificationPreferences(
-      { emailNewProposal: false, emailVoteOnMine: true, emailCommentReply: false },
+      { emailNewProposal: false, emailVoteOnMine: true, emailCommentReply: false, emailWeeklyDigest: false },
       "csrf"
     );
     expect(r).toEqual({ success: true });
@@ -130,7 +130,7 @@ describe("updateNotificationPreferences", () => {
 
   it("saves all-enabled preferences", async () => {
     const r = await updateNotificationPreferences(
-      { emailNewProposal: true, emailVoteOnMine: true, emailCommentReply: true },
+      { emailNewProposal: true, emailVoteOnMine: true, emailCommentReply: true, emailWeeklyDigest: false },
       "csrf"
     );
     expect(r).toEqual({ success: true });
@@ -145,7 +145,7 @@ describe("updateNotificationPreferences", () => {
 
   it("saves all-disabled preferences", async () => {
     const r = await updateNotificationPreferences(
-      { emailNewProposal: false, emailVoteOnMine: false, emailCommentReply: false },
+      { emailNewProposal: false, emailVoteOnMine: false, emailCommentReply: false, emailWeeklyDigest: false },
       "csrf"
     );
     expect(r).toEqual({ success: true });
@@ -169,7 +169,7 @@ describe("getUserNotificationPref", () => {
 
   it("returns stored preference value", async () => {
     mockSelectLimit.mockResolvedValue([
-      { emailNewProposal: true, emailVoteOnMine: false, emailCommentReply: true },
+      { emailNewProposal: true, emailVoteOnMine: false, emailCommentReply: true, emailWeeklyDigest: false },
     ]);
     const { getUserNotificationPref } = await import("@/lib/notifications");
     const result = await getUserNotificationPref("user-1", "emailVoteOnMine");

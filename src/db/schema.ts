@@ -168,6 +168,9 @@ export const notificationPreferences = sqliteTable("notification_preferences", {
   emailCommentReply: integer("email_comment_reply", { mode: "boolean" })
     .notNull()
     .default(true),
+  emailWeeklyDigest: integer("email_weekly_digest", { mode: "boolean" })
+    .notNull()
+    .default(false),
   updatedAt: integer("updated_at", { mode: "timestamp" }).default(
     sql`(unixepoch())`
   ),

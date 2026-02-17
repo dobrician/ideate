@@ -138,6 +138,7 @@ export async function updateNotificationPreferences(
     emailNewProposal: boolean;
     emailVoteOnMine: boolean;
     emailCommentReply: boolean;
+    emailWeeklyDigest: boolean;
   },
   csrfToken: string
 ): Promise<{ error?: string; success?: boolean }> {
@@ -152,6 +153,7 @@ export async function updateNotificationPreferences(
         emailNewProposal: prefs.emailNewProposal,
         emailVoteOnMine: prefs.emailVoteOnMine,
         emailCommentReply: prefs.emailCommentReply,
+        emailWeeklyDigest: prefs.emailWeeklyDigest,
         updatedAt: new Date(),
       })
       .onConflictDoUpdate({
@@ -160,6 +162,7 @@ export async function updateNotificationPreferences(
           emailNewProposal: prefs.emailNewProposal,
           emailVoteOnMine: prefs.emailVoteOnMine,
           emailCommentReply: prefs.emailCommentReply,
+          emailWeeklyDigest: prefs.emailWeeklyDigest,
           updatedAt: new Date(),
         },
       });
