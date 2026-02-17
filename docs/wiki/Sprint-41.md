@@ -15,7 +15,7 @@
 
 - [x] **Goal 5: Remove re-export shim from comment-thread.tsx** — Lines 17-19 re-export `buildCommentTree`, `formatTimeAgo`, `getInitials`, `avatarColor` and types from `comment-utils`. Migrate the one external importer (`proposal-item.tsx`) to import directly from `lib/comment-utils`, then remove the shim.
 
-- [ ] **Goal 6: Remove unused stripHtml and sanitizeInput from sanitize.ts** — These functions are exported but never imported in production code (only in tests). Remove them and their tests.
+- [x] **Goal 6: Remove unused stripHtml and sanitizeInput from sanitize.ts** — These functions are exported but never imported in production code (only in tests). Remove them and their tests.
 
 - [ ] **Goal 7: Add test verifying export formatDate respects non-English locale** — Add a unit test that calls `formatDate` with a Romanian locale and asserts month names are in Romanian, confirming the locale parameter works end-to-end.
 

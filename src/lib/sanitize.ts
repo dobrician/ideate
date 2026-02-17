@@ -19,18 +19,3 @@ const HTML_ENTITY_RE = /[&<>"'/]/g;
 export function escapeHtml(input: string): string {
   return input.replace(HTML_ENTITY_RE, (char) => HTML_ENTITY_MAP[char] || char);
 }
-
-/**
- * Strip all HTML tags from a string
- */
-export function stripHtml(input: string): string {
-  return input.replace(/<[^>]*>/g, "");
-}
-
-/**
- * Sanitize user input: strip HTML tags and trim whitespace
- */
-export function sanitizeInput(input: string): string {
-  return stripHtml(input).trim();
-}
-

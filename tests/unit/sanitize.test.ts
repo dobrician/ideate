@@ -1,9 +1,5 @@
 import { describe, it, expect } from "vitest";
-import {
-  escapeHtml,
-  stripHtml,
-  sanitizeInput,
-} from "@/lib/sanitize";
+import { escapeHtml } from "@/lib/sanitize";
 
 describe("Sanitize", () => {
   describe("escapeHtml", () => {
@@ -33,35 +29,4 @@ describe("Sanitize", () => {
       expect(escapeHtml(`&<>"'/`)).toBe("&amp;&lt;&gt;&quot;&#x27;&#x2F;");
     });
   });
-
-  describe("stripHtml", () => {
-    it("should strip HTML tags", () => {
-      expect(stripHtml("<b>bold</b>")).toBe("bold");
-    });
-
-    it("should strip nested tags", () => {
-      expect(stripHtml("<div><p>text</p></div>")).toBe("text");
-    });
-
-    it("should handle script tags", () => {
-      expect(stripHtml('<script>alert("xss")</script>')).toBe(
-        'alert("xss")'
-      );
-    });
-
-    it("should leave plain text untouched", () => {
-      expect(stripHtml("no tags here")).toBe("no tags here");
-    });
-  });
-
-  describe("sanitizeInput", () => {
-    it("should strip tags and trim", () => {
-      expect(sanitizeInput("  <b>text</b>  ")).toBe("text");
-    });
-
-    it("should handle empty string", () => {
-      expect(sanitizeInput("")).toBe("");
-    });
-  });
-
 });

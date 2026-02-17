@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { verifySessionToken, verifyMagicLinkToken } from "@/lib/auth";
-import { escapeHtml, stripHtml } from "@/lib/sanitize";
+import { escapeHtml } from "@/lib/sanitize";
 import { subscribeVotes, emitVoteChange } from "@/lib/vote-events";
 import { checkRateLimit, resetRateLimits } from "@/lib/rate-limit";
 import jwt from "jsonwebtoken";
@@ -183,12 +183,10 @@ describe("Error Recovery", () => {
   describe("Sanitization edge cases", () => {
     it("should handle empty inputs without crashing", () => {
       expect(escapeHtml("")).toBe("");
-      expect(stripHtml("")).toBe("");
     });
 
     it("should neutralize XSS payloads", () => {
       expect(escapeHtml("<script>alert('xss')</script>")).not.toContain("<script>");
-      expect(stripHtml("<img onerror='alert(1)' src='x'>")).not.toContain("<img");
     });
   });
 });
