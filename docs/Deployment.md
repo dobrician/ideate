@@ -51,3 +51,6 @@ docker compose up -d staging --build
 git checkout HEAD~1
 docker compose up -d staging --build
 ```
+
+## Cloudflare Deployment (Issue #13)
+A deployment spike assessed Cloudflare Pages + D1 + Workers compatibility. See `docs/cloudflare-deployment-spike.md` for full findings. Summary: feasible but requires replacing better-sqlite3, nodemailer, pino, and bcryptjs (11-16h effort). Deferred until free hosting or edge performance is needed.

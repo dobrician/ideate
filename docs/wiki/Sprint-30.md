@@ -17,7 +17,7 @@
 
 - [x] **Goal 6: Update Sprint-Log.md — missing Sprints 12-29** — Sprint-Log.md only has entries for Sprints 1-3 and 11. Add summary entries for Sprints 12-29.
 
-- [ ] **Goal 7: Cloudflare deployment spike (Issue #13)** — Write deployment spike: Pages for frontend, D1 for SQLite, Workers for API. Identify blockers. Update docs/Deployment.md.
+- [x] **Goal 7: Cloudflare deployment spike (Issue #13)** — Write deployment spike: Pages for frontend, D1 for SQLite, Workers for API. Identify blockers. Update docs/Deployment.md.
 
 - [ ] **Goal 8: Final coverage push — 93%+ branch** — After Goals 3-5, review remaining branch gaps. Pick easiest wins to push overall branch coverage past 93%.
 
