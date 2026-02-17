@@ -7,7 +7,7 @@
 
 - [x] **Goal 1: Cloudflare deployment** — Pages + D1 migration, wrangler config, deploy pipeline. Moves from Docker-only to edge deployment.
 
-- [ ] **Goal 2: Close coverage gap on `lib/digest.ts`** — Add unit tests for digest aggregation, HTML generation, and cron endpoint (currently 50% stmts).
+- [x] **Goal 2: Close coverage gap on `lib/digest.ts`** — Add unit tests for digest aggregation, HTML generation, and cron endpoint (currently 50% stmts).
 
 - [ ] **Goal 3: Close coverage gap on `lib/utils.ts`** — Add tests for `formatDate`, `formatDateTime`, `formatRelativeTime` (currently 37% stmts).
 
