@@ -7,7 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { addComment } from "@/app/projects/[id]/proposals/comment-actions";
-import { Send, ChevronDown, MessageSquare } from "lucide-react";
+import { Send, ChevronDown, MessageSquare, Reply, ChevronRight } from "lucide-react";
 import { useLocale } from "@/lib/use-locale";
 import { useKeyboardInset } from "@/lib/use-keyboard-inset";
 import { getCsrfTokenClient } from "@/lib/csrf-client";
@@ -24,10 +24,34 @@ export interface Comment {
   createdAt: Date | null;
 }
 
-export function buildCommentTree(comments: Comment[]): Comment[] {
-  return [...comments].sort(
+export interface CommentNode extends Comment {
+  children: CommentNode[];
+}
+
+const MAX_THREAD_DEPTH = 3;
+
+export function buildCommentTree(comments: Comment[]): CommentNode[] {
+  const sorted = [...comments].sort(
     (a, b) => (a.createdAt?.getTime() ?? 0) - (b.createdAt?.getTime() ?? 0)
   );
+
+  const map = new Map<string, CommentNode>();
+  const roots: CommentNode[] = [];
+
+  for (const c of sorted) {
+    map.set(c.id, { ...c, children: [] });
+  }
+
+  for (const c of sorted) {
+    const node = map.get(c.id)!;
+    if (c.parentId && map.has(c.parentId)) {
+      map.get(c.parentId)!.children.push(node);
+    } else {
+      roots.push(node);
+    }
+  }
+
+  return roots;
 }
 
 type TranslateFn = (key: string, vars?: Record<string, string | number>) => string;
@@ -67,10 +91,12 @@ function ChatBubble({
   comment,
   isOwn,
   showAvatar,
+  onReply,
 }: {
   comment: Comment;
   isOwn: boolean;
   showAvatar: boolean;
+  onReply?: () => void;
 }) {
   const { t } = useLocale();
   const displayName = comment.userName || comment.userEmail || t("common.anonymous");
@@ -108,15 +134,91 @@ function ChatBubble({
         >
           <MarkdownRenderer content={comment.content} simple />
         </div>
-        {!showAvatar && timeAgo && (
-          <span
-            data-testid="hover-timestamp"
-            className={`text-[10px] text-muted-foreground mt-0.5 block opacity-0 transition-opacity group-hover/bubble:opacity-100 active:opacity-100 ${isOwn ? "text-right" : ""}`}
-          >
-            {timeAgo}
-          </span>
-        )}
+        <div className={`flex items-center gap-2 mt-0.5 ${isOwn ? "justify-end" : ""}`}>
+          {!showAvatar && timeAgo && (
+            <span
+              data-testid="hover-timestamp"
+              className={`text-[10px] text-muted-foreground block opacity-0 transition-opacity group-hover/bubble:opacity-100 active:opacity-100`}
+            >
+              {timeAgo}
+            </span>
+          )}
+          {onReply && (
+            <button
+              type="button"
+              onClick={onReply}
+              className="text-[10px] text-muted-foreground hover:text-foreground opacity-0 group-hover/bubble:opacity-100 active:opacity-100 transition-opacity flex items-center gap-0.5"
+            >
+              <Reply className="h-3 w-3" />
+              {t("comments.reply")}
+            </button>
+          )}
+        </div>
       </div>
+    </div>
+  );
+}
+
+function ThreadedCommentNode({
+  node,
+  depth,
+  currentUserId,
+  onReply,
+}: {
+  node: CommentNode;
+  depth: number;
+  currentUserId?: string;
+  onReply: (parentId: string) => void;
+}) {
+  const { t } = useLocale();
+  const [collapsed, setCollapsed] = useState(false);
+  const isOwn = !!currentUserId && node.userId === currentUserId;
+  const canNest = depth < MAX_THREAD_DEPTH;
+  const hasChildren = node.children.length > 0;
+
+  return (
+    <div className={depth > 0 ? "ml-4 sm:ml-6 border-l-2 border-muted pl-2" : ""}>
+      <div className={depth > 0 ? "pt-1" : ""}>
+        <ChatBubble
+          comment={node}
+          isOwn={isOwn}
+          showAvatar={true}
+          onReply={() => onReply(canNest ? node.id : (node.parentId || node.id))}
+        />
+      </div>
+      {hasChildren && depth >= MAX_THREAD_DEPTH - 1 && !collapsed && (
+        <button
+          type="button"
+          onClick={() => setCollapsed(true)}
+          className="mt-1 ml-8 text-xs text-muted-foreground hover:text-foreground flex items-center gap-1"
+        >
+          <ChevronDown className="h-3 w-3" />
+          {t("comments.collapseReplies")}
+        </button>
+      )}
+      {hasChildren && collapsed && (
+        <button
+          type="button"
+          onClick={() => setCollapsed(false)}
+          className="mt-1 ml-8 text-xs text-muted-foreground hover:text-foreground flex items-center gap-1"
+        >
+          <ChevronRight className="h-3 w-3" />
+          {t("comments.showMoreReplies", { count: node.children.length })}
+        </button>
+      )}
+      {hasChildren && !collapsed && (
+        <div className="space-y-1">
+          {node.children.map((child) => (
+            <ThreadedCommentNode
+              key={child.id}
+              node={child}
+              depth={canNest ? depth + 1 : depth}
+              currentUserId={currentUserId}
+              onReply={onReply}
+            />
+          ))}
+        </div>
+      )}
     </div>
   );
 }
@@ -141,11 +243,16 @@ export function CommentThread({ comments, hiddenFields, currentUserId }: Comment
   const prevCountRef = useRef(comments.length);
   const [showNewIndicator, setShowNewIndicator] = useState(false);
   const [charCount, setCharCount] = useState(0);
+  const [replyToId, setReplyToId] = useState<string | null>(null);
   const [optimisticComments, addOptimisticComment] = useOptimistic(
     comments,
     (current: Comment[], newComment: Comment) => [...current, newComment]
   );
-  const sorted = buildCommentTree(optimisticComments);
+  const tree = buildCommentTree(optimisticComments);
+
+  const replyToComment = replyToId
+    ? optimisticComments.find((c) => c.id === replyToId)
+    : null;
 
   async function formAction(formData: FormData) {
     const content = formData.get("content") as string;
@@ -153,13 +260,19 @@ export function CommentThread({ comments, hiddenFields, currentUserId }: Comment
       addOptimisticComment({
         id: `optimistic-${optimisticComments.length}`,
         content,
-        parentId: null,
+        parentId: replyToId,
         userId: currentUserId,
         createdAt: null,
       });
     }
     setCharCount(0);
+    setReplyToId(null);
     return baseFormAction(formData);
+  }
+
+  function handleReply(parentId: string) {
+    setReplyToId(parentId);
+    textareaRef.current?.focus();
   }
 
   const getViewport = useCallback(() => {
@@ -201,6 +314,9 @@ export function CommentThread({ comments, hiddenFields, currentUserId }: Comment
       e.preventDefault();
       formRef.current?.requestSubmit();
     }
+    if (e.key === "Escape" && replyToId) {
+      setReplyToId(null);
+    }
   }
 
   function handleInput(e: React.FormEvent<HTMLTextAreaElement>) {
@@ -214,7 +330,7 @@ export function CommentThread({ comments, hiddenFields, currentUserId }: Comment
     <div className="flex h-full flex-col">
       <div className="relative flex-1">
         <ScrollArea ref={scrollRef} className="h-full pr-2">
-          {sorted.length === 0 ? (
+          {tree.length === 0 ? (
             <div className="flex h-full flex-col items-center justify-center gap-2 py-12">
               <MessageSquare className="h-8 w-8 text-muted-foreground/40" />
               <p className="text-center text-sm text-muted-foreground">
@@ -223,19 +339,16 @@ export function CommentThread({ comments, hiddenFields, currentUserId }: Comment
             </div>
           ) : (
             <div className="space-y-1 pb-2">
-              {sorted.map((c, i) => {
-                const prev = i > 0 ? sorted[i - 1] : null;
-                const showAvatar = !prev || prev.userId !== c.userId;
-                return (
-                  <div key={c.id} className={showAvatar && i > 0 ? "pt-2" : ""}>
-                    <ChatBubble
-                      comment={c}
-                      isOwn={!!currentUserId && c.userId === currentUserId}
-                      showAvatar={showAvatar}
-                    />
-                  </div>
-                );
-              })}
+              {tree.map((node, i) => (
+                <div key={node.id} className={i > 0 ? "pt-2" : ""}>
+                  <ThreadedCommentNode
+                    node={node}
+                    depth={0}
+                    currentUserId={currentUserId}
+                    onReply={handleReply}
+                  />
+                </div>
+              ))}
             </div>
           )}
         </ScrollArea>
@@ -251,16 +364,37 @@ export function CommentThread({ comments, hiddenFields, currentUserId }: Comment
         )}
       </div>
       <div className="border-t pt-2 pb-[max(env(safe-area-inset-bottom),0.5rem)] sm:pt-3">
+        {replyToComment && (
+          <div className="flex items-center gap-2 mb-1.5 px-1 text-xs text-muted-foreground">
+            <Reply className="h-3 w-3 shrink-0" />
+            <span className="truncate">
+              {t("comments.replyingTo", {
+                name: replyToComment.userName || replyToComment.userEmail || t("common.anonymous"),
+              })}
+            </span>
+            <button
+              type="button"
+              onClick={() => setReplyToId(null)}
+              className="ml-auto text-muted-foreground hover:text-foreground shrink-0"
+              aria-label={t("common.cancel")}
+            >
+              &times;
+            </button>
+          </div>
+        )}
         <form ref={formRef} action={formAction} noValidate>
           {Object.entries(hiddenFields).map(([name, value]) => (
             <input key={name} type="hidden" name={name} value={value} />
           ))}
           <input type="hidden" name="csrfToken" value={getCsrfTokenClient()} />
+          {replyToId && (
+            <input type="hidden" name="parentId" value={replyToId} />
+          )}
           <div className="flex items-end gap-2">
             <Textarea
               ref={textareaRef}
               name="content"
-              placeholder={t("comments.placeholder")}
+              placeholder={replyToId ? t("comments.replyPlaceholder") : t("comments.placeholder")}
               rows={1}
               maxLength={2000}
               disabled={isPending}

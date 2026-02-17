@@ -4,18 +4,34 @@ import { render, screen, within, act } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom/vitest";
 
+// Polyfill ResizeObserver for jsdom
+if (typeof globalThis.ResizeObserver === "undefined") {
+  globalThis.ResizeObserver = class ResizeObserver {
+    observe() {}
+    unobserve() {}
+    disconnect() {}
+  } as unknown as typeof globalThis.ResizeObserver;
+}
+
 // ── Mocks ──────────────────────────────────────────────────────
 
 vi.mock("@/lib/use-locale", () => ({
   useLocale: () => ({
     locale: "en",
-    t: (key: string) => {
+    t: (key: string, vars?: Record<string, string | number>) => {
       const map: Record<string, string> = {
         "comments.noComments": "No comments yet",
         "comments.placeholder": "Write a message…",
+        "comments.replyPlaceholder": "Write a reply…",
         "comments.submit": "Send",
         "comments.you": "You",
         "comments.newMessages": "New messages",
+        "comments.reply": "Reply",
+        "comments.replyingTo": `Replying to ${vars?.name ?? ""}`,
+        "comments.showMoreReplies": `${vars?.count ?? 0} more replies`,
+        "comments.collapseReplies": "Collapse replies",
+        "common.anonymous": "Anonymous",
+        "common.cancel": "Cancel",
         "time.justNow": "just now",
         "time.minutesAgo": "min ago",
         "time.hoursAgo": "hr ago",
@@ -110,7 +126,7 @@ describe("CommentThread rendering", () => {
     expect(bubbles[0].classList.contains("flex-row")).toBe(true);
   });
 
-  it("shows avatar on first message and collapses on consecutive same-user", () => {
+  it("shows avatar on each root comment in threaded view", () => {
     const comments = [
       makeComment({ id: "c1", userId: "u1", userName: "Alice" }),
       makeComment({
@@ -124,12 +140,9 @@ describe("CommentThread rendering", () => {
     const { container } = render(
       <CommentThread comments={comments} hiddenFields={{ projectId: "p1" }} />
     );
-    // First message shows avatar, second shows spacer div
+    // Each threaded node shows its own avatar
     const avatars = container.querySelectorAll("[data-slot='avatar']");
-    expect(avatars.length).toBe(1);
-    // Spacer div (w-6) for collapsed avatar
-    const spacers = container.querySelectorAll("div.w-6.shrink-0");
-    expect(spacers.length).toBe(1);
+    expect(avatars.length).toBe(2);
   });
 
   it("shows avatar when user changes between messages", () => {
@@ -203,7 +216,7 @@ describe("CommentThread rendering", () => {
     expect(fallback?.textContent).toBe("AS");
   });
 
-  it("renders hover-reveal timestamp on non-grouped messages", () => {
+  it("renders reply button on each comment", () => {
     const comments = [
       makeComment({ id: "c1", userId: "u1" }),
       makeComment({
@@ -213,13 +226,14 @@ describe("CommentThread rendering", () => {
         createdAt: new Date("2026-01-15T12:01:00Z"),
       }),
     ];
-    render(
+    const { container } = render(
       <CommentThread comments={comments} hiddenFields={{ projectId: "p1" }} />
     );
-    const ts = screen.getByTestId("hover-timestamp");
-    expect(ts).toBeInTheDocument();
-    expect(ts.className).toContain("opacity-0");
-    expect(ts.className).toContain("group-hover/bubble:opacity-100");
+    // Each comment node should have a Reply button
+    const replyButtons = Array.from(container.querySelectorAll("button")).filter(
+      (btn) => btn.textContent?.includes("Reply")
+    );
+    expect(replyButtons.length).toBe(2);
   });
 
   it("renders error message from server action state", () => {
@@ -440,5 +454,112 @@ describe("Scroll and new-message indicator", () => {
     expect(pill).toBeInTheDocument();
     expect(pill?.className).toContain("rounded-full");
     expect(pill?.className).toContain("bg-primary");
+  });
+});
+
+/* ------------------------------------------------------------------ */
+/*  Comment threading UI tests                                         */
+/* ------------------------------------------------------------------ */
+
+describe("Comment threading", () => {
+  it("renders child comments indented under parent", () => {
+    const comments = [
+      makeComment({ id: "root", content: "Root comment", createdAt: new Date("2026-01-15T12:00:00Z") }),
+      makeComment({ id: "reply", parentId: "root", content: "Reply comment", createdAt: new Date("2026-01-15T12:01:00Z") }),
+    ];
+    const { container } = render(
+      <CommentThread comments={comments} hiddenFields={{ projectId: "p1" }} />
+    );
+    // Reply should be in an indented container with border-l
+    const indented = container.querySelector(".border-l-2");
+    expect(indented).toBeInTheDocument();
+    expect(screen.getByText("Reply comment")).toBeInTheDocument();
+  });
+
+  it("renders multi-level nesting with indentation", () => {
+    const comments = [
+      makeComment({ id: "root", content: "Level 0", createdAt: new Date("2026-01-15T00:00:00Z") }),
+      makeComment({ id: "child", parentId: "root", content: "Level 1", createdAt: new Date("2026-01-15T01:00:00Z") }),
+      makeComment({ id: "grandchild", parentId: "child", content: "Level 2", createdAt: new Date("2026-01-15T02:00:00Z") }),
+    ];
+    const { container } = render(
+      <CommentThread comments={comments} hiddenFields={{ projectId: "p1" }} />
+    );
+    // Should have nested border-l elements
+    const indented = container.querySelectorAll(".border-l-2");
+    expect(indented.length).toBeGreaterThanOrEqual(2);
+    expect(screen.getByText("Level 0")).toBeInTheDocument();
+    expect(screen.getByText("Level 1")).toBeInTheDocument();
+    expect(screen.getByText("Level 2")).toBeInTheDocument();
+  });
+
+  it("renders parentId hidden field when replying", async () => {
+    const user = userEvent.setup();
+    const comments = [
+      makeComment({ id: "root", content: "Root", createdAt: new Date("2026-01-15T12:00:00Z") }),
+    ];
+    const { container } = render(
+      <CommentThread comments={comments} hiddenFields={{ projectId: "p1" }} />
+    );
+
+    // Click Reply button
+    const replyBtn = Array.from(container.querySelectorAll("button")).find(
+      (btn) => btn.textContent?.includes("Reply")
+    );
+    expect(replyBtn).toBeDefined();
+    await user.click(replyBtn!);
+
+    // Should show "Replying to" indicator and hidden parentId field
+    expect(screen.getByText(/Replying to/)).toBeInTheDocument();
+    const parentIdInput = container.querySelector("input[name='parentId']") as HTMLInputElement;
+    expect(parentIdInput).toBeInTheDocument();
+    expect(parentIdInput.value).toBe("root");
+  });
+
+  it("clears reply state when cancel is clicked", async () => {
+    const user = userEvent.setup();
+    const comments = [
+      makeComment({ id: "root", content: "Root", userName: "Alice", createdAt: new Date("2026-01-15T12:00:00Z") }),
+    ];
+    const { container } = render(
+      <CommentThread comments={comments} hiddenFields={{ projectId: "p1" }} />
+    );
+
+    // Click Reply
+    const replyBtn = Array.from(container.querySelectorAll("button")).find(
+      (btn) => btn.textContent?.includes("Reply")
+    );
+    await user.click(replyBtn!);
+    expect(screen.getByText(/Replying to/)).toBeInTheDocument();
+
+    // Click cancel (x button)
+    const cancelBtn = screen.getByRole("button", { name: "Cancel" });
+    await user.click(cancelBtn);
+
+    // Reply indicator should be gone
+    expect(screen.queryByText(/Replying to/)).not.toBeInTheDocument();
+    expect(container.querySelector("input[name='parentId']")).not.toBeInTheDocument();
+  });
+
+  it("changes placeholder when in reply mode", async () => {
+    const user = userEvent.setup();
+    const comments = [
+      makeComment({ id: "root", content: "Root", createdAt: new Date("2026-01-15T12:00:00Z") }),
+    ];
+    const { container } = render(
+      <CommentThread comments={comments} hiddenFields={{ projectId: "p1" }} />
+    );
+
+    // Before reply: normal placeholder
+    expect(screen.getByPlaceholderText("Write a message…")).toBeInTheDocument();
+
+    // Click Reply
+    const replyBtn = Array.from(container.querySelectorAll("button")).find(
+      (btn) => btn.textContent?.includes("Reply")
+    );
+    await user.click(replyBtn!);
+
+    // After reply: reply placeholder
+    expect(screen.getByPlaceholderText("Write a reply…")).toBeInTheDocument();
   });
 });

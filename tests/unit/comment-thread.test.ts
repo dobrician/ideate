@@ -5,7 +5,7 @@ import {
   getInitials,
   avatarColor,
 } from "@/components/comment-thread";
-import type { Comment } from "@/components/comment-thread";
+import type { Comment, CommentNode } from "@/components/comment-thread";
 
 function makeComment(overrides: Partial<Comment> = {}): Comment {
   return {
@@ -18,6 +18,16 @@ function makeComment(overrides: Partial<Comment> = {}): Comment {
   };
 }
 
+/** Flatten a tree back into an array of ids (depth-first) */
+function flattenIds(nodes: CommentNode[]): string[] {
+  const result: string[] = [];
+  for (const n of nodes) {
+    result.push(n.id);
+    result.push(...flattenIds(n.children));
+  }
+  return result;
+}
+
 /* ------------------------------------------------------------------ */
 /*  buildCommentTree                                                   */
 /* ------------------------------------------------------------------ */
@@ -26,14 +36,14 @@ describe("buildCommentTree", () => {
     expect(buildCommentTree([])).toEqual([]);
   });
 
-  it("sorts comments oldest-first", () => {
+  it("sorts root comments oldest-first", () => {
     const comments: Comment[] = [
       makeComment({ id: "c2", createdAt: new Date("2026-01-16T00:00:00Z") }),
       makeComment({ id: "c1", createdAt: new Date("2026-01-15T00:00:00Z") }),
       makeComment({ id: "c3", createdAt: new Date("2026-01-17T00:00:00Z") }),
     ];
-    const sorted = buildCommentTree(comments);
-    expect(sorted.map((c) => c.id)).toEqual(["c1", "c2", "c3"]);
+    const tree = buildCommentTree(comments);
+    expect(tree.map((c) => c.id)).toEqual(["c1", "c2", "c3"]);
   });
 
   it("handles null createdAt (sorts to beginning)", () => {
@@ -41,8 +51,8 @@ describe("buildCommentTree", () => {
       makeComment({ id: "c2", createdAt: new Date("2026-01-15T00:00:00Z") }),
       makeComment({ id: "c1", createdAt: null }),
     ];
-    const sorted = buildCommentTree(comments);
-    expect(sorted[0].id).toBe("c1");
+    const tree = buildCommentTree(comments);
+    expect(tree[0].id).toBe("c1");
   });
 
   it("does not mutate the original array", () => {
@@ -61,8 +71,84 @@ describe("buildCommentTree", () => {
       makeComment({ id: "a", createdAt: ts }),
       makeComment({ id: "b", createdAt: ts }),
     ];
-    const sorted = buildCommentTree(comments);
-    expect(sorted.map((c) => c.id)).toEqual(["a", "b"]);
+    const tree = buildCommentTree(comments);
+    expect(tree.map((c) => c.id)).toEqual(["a", "b"]);
+  });
+
+  it("nests child comments under their parent", () => {
+    const comments: Comment[] = [
+      makeComment({ id: "root", createdAt: new Date("2026-01-15T00:00:00Z") }),
+      makeComment({ id: "reply1", parentId: "root", createdAt: new Date("2026-01-15T01:00:00Z") }),
+      makeComment({ id: "reply2", parentId: "root", createdAt: new Date("2026-01-15T02:00:00Z") }),
+    ];
+    const tree = buildCommentTree(comments);
+    expect(tree).toHaveLength(1);
+    expect(tree[0].id).toBe("root");
+    expect(tree[0].children).toHaveLength(2);
+    expect(tree[0].children.map((c) => c.id)).toEqual(["reply1", "reply2"]);
+  });
+
+  it("builds multi-level nesting", () => {
+    const comments: Comment[] = [
+      makeComment({ id: "root", createdAt: new Date("2026-01-15T00:00:00Z") }),
+      makeComment({ id: "child", parentId: "root", createdAt: new Date("2026-01-15T01:00:00Z") }),
+      makeComment({ id: "grandchild", parentId: "child", createdAt: new Date("2026-01-15T02:00:00Z") }),
+    ];
+    const tree = buildCommentTree(comments);
+    expect(tree).toHaveLength(1);
+    expect(tree[0].children).toHaveLength(1);
+    expect(tree[0].children[0].children).toHaveLength(1);
+    expect(tree[0].children[0].children[0].id).toBe("grandchild");
+  });
+
+  it("treats orphan replies (missing parent) as root comments", () => {
+    const comments: Comment[] = [
+      makeComment({ id: "c1", createdAt: new Date("2026-01-15T00:00:00Z") }),
+      makeComment({ id: "orphan", parentId: "nonexistent", createdAt: new Date("2026-01-15T01:00:00Z") }),
+    ];
+    const tree = buildCommentTree(comments);
+    expect(tree).toHaveLength(2);
+    expect(tree.map((c) => c.id)).toEqual(["c1", "orphan"]);
+  });
+
+  it("each node has a children array (even if empty)", () => {
+    const comments: Comment[] = [
+      makeComment({ id: "c1" }),
+    ];
+    const tree = buildCommentTree(comments);
+    expect(tree[0].children).toEqual([]);
+  });
+
+  it("handles complex tree with multiple roots and nested replies", () => {
+    const comments: Comment[] = [
+      makeComment({ id: "r1", createdAt: new Date("2026-01-15T00:00:00Z") }),
+      makeComment({ id: "r2", createdAt: new Date("2026-01-15T01:00:00Z") }),
+      makeComment({ id: "r1-a", parentId: "r1", createdAt: new Date("2026-01-15T02:00:00Z") }),
+      makeComment({ id: "r2-a", parentId: "r2", createdAt: new Date("2026-01-15T03:00:00Z") }),
+      makeComment({ id: "r1-a-i", parentId: "r1-a", createdAt: new Date("2026-01-15T04:00:00Z") }),
+    ];
+    const tree = buildCommentTree(comments);
+    expect(tree).toHaveLength(2);
+    expect(tree[0].id).toBe("r1");
+    expect(tree[1].id).toBe("r2");
+    expect(tree[0].children).toHaveLength(1);
+    expect(tree[0].children[0].id).toBe("r1-a");
+    expect(tree[0].children[0].children).toHaveLength(1);
+    expect(tree[0].children[0].children[0].id).toBe("r1-a-i");
+    expect(tree[1].children).toHaveLength(1);
+    expect(tree[1].children[0].id).toBe("r2-a");
+  });
+
+  it("depth-first traversal gives correct order", () => {
+    const comments: Comment[] = [
+      makeComment({ id: "a", createdAt: new Date("2026-01-15T00:00:00Z") }),
+      makeComment({ id: "b", createdAt: new Date("2026-01-15T01:00:00Z") }),
+      makeComment({ id: "a1", parentId: "a", createdAt: new Date("2026-01-15T02:00:00Z") }),
+      makeComment({ id: "a2", parentId: "a", createdAt: new Date("2026-01-15T03:00:00Z") }),
+      makeComment({ id: "a1i", parentId: "a1", createdAt: new Date("2026-01-15T04:00:00Z") }),
+    ];
+    const tree = buildCommentTree(comments);
+    expect(flattenIds(tree)).toEqual(["a", "a1", "a1i", "a2", "b"]);
   });
 });
 

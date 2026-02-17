@@ -10,7 +10,7 @@
 
 - [x] **Goal 2: Webhook notifications** — Allow admins to configure webhook URLs that receive POST notifications on key events: new project, new proposal, vote cast, project archived. Add `webhooks` table (id, url, events, secret, active, createdAt). Admin UI to manage webhooks. Sign payloads with HMAC-SHA256. Retry failed deliveries (3 attempts with exponential backoff). Add tests.
 
-- [ ] **Goal 3: Comment threading UI** — Comments already store `parentId` but display as flat list. Render threaded/nested comments with visual indentation (max 3 levels deep). Add "Reply" button on each comment. Collapse deep threads with "Show more replies". Add tests.
+- [x] **Goal 3: Comment threading UI** — Comments already store `parentId` but display as flat list. Render threaded/nested comments with visual indentation (max 3 levels deep). Add "Reply" button on each comment. Collapse deep threads with "Show more replies". Add tests.
 
 - [ ] **Goal 4: LLM response caching** — Cache AI suggestion responses to avoid re-querying for identical prompts. Add `llm_cache` table (hash of prompt → response, ttl, createdAt). TTL: 24 hours. Check cache before calling LLM. Add cache hit/miss logging. Add tests.
 

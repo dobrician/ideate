@@ -159,6 +159,11 @@ export const en: Record<string, string> = {
   "comments.projectDiscussion": "Project Discussion",
   "comments.you": "You",
   "comments.newMessages": "New messages",
+  "comments.reply": "Reply",
+  "comments.replyPlaceholder": "Write a reply...",
+  "comments.replyingTo": "Replying to {name}",
+  "comments.showMoreReplies": "{count} more replies",
+  "comments.collapseReplies": "Collapse replies",
   "comments.sheetDescription": "Join the discussion on this proposal",
 
   // Dashboard

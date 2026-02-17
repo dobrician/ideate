@@ -166,6 +166,11 @@ export const ro: Record<string, string> = {
   "comments.projectDiscussion": "Discuție Proiect",
   "comments.you": "Tu",
   "comments.newMessages": "Mesaje noi",
+  "comments.reply": "Răspunde",
+  "comments.replyPlaceholder": "Scrie un răspuns...",
+  "comments.replyingTo": "Răspuns la {name}",
+  "comments.showMoreReplies": "Încă {count} răspunsuri",
+  "comments.collapseReplies": "Restrânge răspunsurile",
   "comments.sheetDescription": "Participă la discuția despre această propunere",
 
   // Dashboard
