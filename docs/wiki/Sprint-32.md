@@ -10,7 +10,7 @@
 
 - [x] **Goal 2: Fix duplicate proposal form on desktop** — On project detail page, sidebar form AND bottom full-width form are both visible simultaneously on desktop. Show only the sidebar form on desktop. Hide the bottom form when sidebar is visible. Files: `src/app/projects/[id]/page.tsx`, proposal form components.
 
-- [ ] **Goal 3: Profile page restructure with tabs** — Profile page is too long (5 sections stacked). Split into tabbed sections: Account, Security, My Projects, My Proposals. Use shadcn/ui Tabs component. Add "Show more" with default limit of 3-5 items for project/proposal lists. File: `src/app/profile/page.tsx`.
+- [x] **Goal 3: Profile page restructure with tabs** — Profile page is too long (5 sections stacked). Split into tabbed sections: Account, Security, My Projects, My Proposals. Use shadcn/ui Tabs component. Add "Show more" with default limit of 3-5 items for project/proposal lists. File: `src/app/profile/page.tsx`.
 
 - [ ] **Goal 4: Admin panel mobile responsiveness** — User table is illegible on mobile (truncated emails, "--" for names). Use responsive card layout for mobile showing Email prominently, Role as badge, hide Name when empty. Show "Not set" in muted text instead of "--". Audit log entries: use relative timestamps ("2h ago"), truncate descriptions with expand. File: `src/app/admin/page.tsx`, `src/app/admin/user-role-manager.tsx`.
 

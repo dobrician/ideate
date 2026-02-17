@@ -209,6 +209,12 @@ export const en: Record<string, string> = {
   "profile.passwordChangeFailed": "Failed to change password",
   "profile.incorrectPassword": "Current password is incorrect",
   "profile.noPasswordSet": "No password set on this account",
+  "profile.tabAccount": "Account",
+  "profile.tabSecurity": "Security",
+  "profile.tabProjects": "My Projects",
+  "profile.tabProposals": "My Proposals",
+  "profile.showMore": "Show more",
+  "profile.showLess": "Show less",
 
   // Admin
   "admin.title": "Admin Panel",
