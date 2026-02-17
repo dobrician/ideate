@@ -139,6 +139,10 @@ export const en: Record<string, string> = {
   "proposalForm.submit": "Submit Proposal",
   "proposalForm.submitting": "Creating...",
   "proposalForm.created": "Proposal created successfully",
+  "proposalForm.write": "Write",
+  "proposalForm.preview": "Preview",
+  "proposalForm.previewEmpty": "Nothing to preview",
+  "proposalForm.markdownHint": "Supports Markdown: **bold**, *italic*, [links](url), lists",
 
   // Voting
   "vote.pro": "Pro",

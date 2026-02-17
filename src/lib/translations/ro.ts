@@ -145,6 +145,10 @@ export const ro: Record<string, string> = {
   "proposalForm.submit": "Depune Propunerea",
   "proposalForm.submitting": "Se creează...",
   "proposalForm.created": "Propunere creată cu succes",
+  "proposalForm.write": "Scrie",
+  "proposalForm.preview": "Previzualizare",
+  "proposalForm.previewEmpty": "Nimic de previzualizat",
+  "proposalForm.markdownHint": "Suportă Markdown: **bold**, *italic*, [linkuri](url), liste",
 
   // Voting
   "vote.pro": "Pro",

@@ -9,11 +9,12 @@ import {
   Dialog, DialogContent, DialogHeader, DialogTitle,
   DialogTrigger, DialogClose,
 } from "@/components/ui/dialog";
-import { ThumbsUp, ThumbsDown, AlertTriangle, Loader2 } from "lucide-react";
+import { ThumbsUp, ThumbsDown, AlertTriangle, Loader2, Eye, Pencil } from "lucide-react";
 import { toast } from "sonner";
 import { getCsrfTokenClient } from "@/lib/csrf-client";
 import { useProposalForm } from "./use-proposal-form";
 import type { ProposalFormProps } from "./use-proposal-form";
+import { MarkdownRenderer } from "./markdown-renderer";
 
 function ProposalFormFields({
   form,
@@ -30,6 +31,7 @@ function ProposalFormFields({
     checkingSimilarity, warnings, handleFieldChange, state, projectId,
   } = form;
   const [titleTouched, setTitleTouched] = useState(false);
+  const [showPreview, setShowPreview] = useState(false);
   const formRef = useRef<HTMLFormElement>(null);
   const titleError = titleTouched && title.trim().length > 0 && title.trim().length < 5
     ? t("projectForm.proposalTitleMin")
@@ -72,14 +74,46 @@ function ProposalFormFields({
       </div>
 
       <div className="space-y-1.5">
-        <Label htmlFor="proposal-description">{t("proposalForm.description")}</Label>
-        <Textarea
-          id="proposal-description" name="description"
-          placeholder={t("proposalForm.descriptionPlaceholder")}
-          rows={3} maxLength={5000} disabled={isPending}
-          value={description}
-          onChange={(e) => { setDescription(e.target.value); handleFieldChange(title, e.target.value); }}
-        />
+        <div className="flex items-center justify-between">
+          <Label htmlFor="proposal-description">{t("proposalForm.description")}</Label>
+          <div className="flex gap-1">
+            <button
+              type="button"
+              onClick={() => setShowPreview(false)}
+              className={`inline-flex items-center gap-1 rounded px-2 py-0.5 text-xs ${!showPreview ? "bg-muted font-medium" : "text-muted-foreground hover:text-foreground"}`}
+              aria-pressed={!showPreview}
+            >
+              <Pencil className="h-3 w-3" /> {t("proposalForm.write")}
+            </button>
+            <button
+              type="button"
+              onClick={() => setShowPreview(true)}
+              className={`inline-flex items-center gap-1 rounded px-2 py-0.5 text-xs ${showPreview ? "bg-muted font-medium" : "text-muted-foreground hover:text-foreground"}`}
+              aria-pressed={showPreview}
+            >
+              <Eye className="h-3 w-3" /> {t("proposalForm.preview")}
+            </button>
+          </div>
+        </div>
+        {showPreview ? (
+          <div className="min-h-[5rem] rounded-md border border-input bg-background px-3 py-2">
+            {description.trim() ? (
+              <MarkdownRenderer content={description} className="text-sm" />
+            ) : (
+              <p className="text-sm text-muted-foreground">{t("proposalForm.previewEmpty")}</p>
+            )}
+          </div>
+        ) : (
+          <Textarea
+            id="proposal-description" name="description"
+            placeholder={t("proposalForm.descriptionPlaceholder")}
+            rows={3} maxLength={5000} disabled={isPending}
+            value={description}
+            onChange={(e) => { setDescription(e.target.value); handleFieldChange(title, e.target.value); }}
+          />
+        )}
+        <p className="text-xs text-muted-foreground">{t("proposalForm.markdownHint")}</p>
+        {showPreview && <input type="hidden" name="description" value={description} />}
       </div>
 
       {checkingSimilarity && (
