@@ -1,6 +1,8 @@
 import { NextRequest } from "next/server";
 import { getCurrentUser } from "@/lib/auth";
 import { subscribeVotes } from "@/lib/vote-events";
+import { checkRateLimit } from "@/lib/rate-limit";
+import { getClientIp } from "@/lib/request-utils";
 import { logger } from "@/lib/logger";
 import { captureError } from "@/lib/sentry";
 
@@ -18,6 +20,14 @@ export async function GET(request: NextRequest) {
       return new Response(JSON.stringify({ error: "Unauthorized" }), {
         status: 401,
         headers: { "Content-Type": "application/json" },
+      });
+    }
+
+    const ipCheck = checkRateLimit(`sse:ip:${getClientIp(request)}`, 10, 15 * 60_000);
+    if (!ipCheck.allowed) {
+      return new Response(JSON.stringify({ error: "Too many connections" }), {
+        status: 429,
+        headers: { "Content-Type": "application/json", "Retry-After": String(Math.ceil(ipCheck.retryAfterMs / 1000)) },
       });
     }
 

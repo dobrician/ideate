@@ -9,6 +9,9 @@ const mockRequireCsrfToken = vi.fn();
 vi.mock("@/lib/csrf", () => ({
   requireCsrfToken: (...args: unknown[]) => mockRequireCsrfToken(...args),
 }));
+vi.mock("@/lib/rate-limit", () => ({
+  checkRateLimit: vi.fn().mockReturnValue({ allowed: true, remaining: 19, retryAfterMs: 0 }),
+}));
 
 const mockInsertValues = vi.fn().mockReturnValue(Promise.resolve());
 const mockSelectResults: Array<Promise<unknown[]>> = [];

@@ -5,6 +5,9 @@ vi.mock("@/lib/auth", () => ({ requireAuth: vi.fn() }));
 vi.mock("@/lib/llm", () => ({
   completeWithFallback: vi.fn(),
 }));
+vi.mock("@/lib/rate-limit", () => ({
+  checkRateLimit: vi.fn().mockReturnValue({ allowed: true, remaining: 19, retryAfterMs: 0 }),
+}));
 
 import { POST } from "@/app/api/proposals/similarity/route";
 import { requireAuth } from "@/lib/auth";

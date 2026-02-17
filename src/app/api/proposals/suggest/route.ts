@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { requireAuth } from "@/lib/auth";
 import { completeWithFallback, isAiConfigured, isAiRateLimited } from "@/lib/llm";
+import { checkRateLimit } from "@/lib/rate-limit";
+import { getClientIp } from "@/lib/request-utils";
 import { z } from "zod";
 
 const LOCALE = process.env.LOCALE || "en";
@@ -114,6 +116,14 @@ export async function POST(request: Request) {
     await requireAuth();
   } catch {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  const ipCheck = checkRateLimit(`suggest:ip:${getClientIp(request)}`, 10, 15 * 60_000);
+  if (!ipCheck.allowed) {
+    return NextResponse.json(
+      { proposals: [], error: "Too many requests", code: "RATE_LIMITED" },
+      { status: 429, headers: { "Retry-After": String(Math.ceil(ipCheck.retryAfterMs / 1000)) } }
+    );
   }
 
   try {

@@ -7,6 +7,9 @@ vi.mock("@/lib/llm", () => ({
   isAiConfigured: vi.fn().mockReturnValue(true),
   isAiRateLimited: vi.fn().mockReturnValue(false),
 }));
+vi.mock("@/lib/rate-limit", () => ({
+  checkRateLimit: vi.fn().mockReturnValue({ allowed: true, remaining: 9, retryAfterMs: 0 }),
+}));
 
 import { POST } from "@/app/api/proposals/suggest/route";
 import { requireAuth } from "@/lib/auth";

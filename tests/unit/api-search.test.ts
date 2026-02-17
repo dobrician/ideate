@@ -13,6 +13,9 @@ vi.mock("@/lib/search", () => ({
 vi.mock("@/lib/auth", () => ({
   getCurrentUser: () => mockGetCurrentUser(),
 }));
+vi.mock("@/lib/rate-limit", () => ({
+  checkRateLimit: vi.fn().mockReturnValue({ allowed: true, remaining: 59, retryAfterMs: 0 }),
+}));
 
 // ── Import SUT ─────────────────────────────────────────────────────────────
 

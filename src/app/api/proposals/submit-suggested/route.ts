@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
 import { requireAuth } from "@/lib/auth";
 import { requireCsrfToken } from "@/lib/csrf";
+import { checkRateLimit } from "@/lib/rate-limit";
+import { getClientIp } from "@/lib/request-utils";
 import { hasPermission } from "@/lib/rbac";
 import type { Role } from "@/lib/rbac";
 import { db } from "@/db";
@@ -35,6 +37,14 @@ export async function POST(request: Request) {
     user = await requireAuth();
   } catch {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  const ipCheck = checkRateLimit(`submit-suggested:ip:${getClientIp(request)}`, 20, 15 * 60_000);
+  if (!ipCheck.allowed) {
+    return NextResponse.json(
+      { error: "Too many requests" },
+      { status: 429, headers: { "Retry-After": String(Math.ceil(ipCheck.retryAfterMs / 1000)) } }
+    );
   }
 
   const role = user.role as Role;
