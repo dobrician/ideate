@@ -282,6 +282,10 @@ export const en: Record<string, string> = {
   "auth.verifyEmailFirst": "Please verify your email before signing in",
   "auth.emailAlreadyExists": "An account with this email already exists",
   "auth.tooManyAttempts": "Too many attempts. Please try again later.",
+  "auth.emailPlaceholder": "you@example.com",
+  "auth.enterPassword": "Enter your password",
+  "auth.hidePassword": "Hide password",
+  "auth.showPassword": "Show password",
   "auth.magicLinkExplainer":
     "A magic link lets you sign in without a password. We send a one-time link to your email — just click it to log in securely.",
   "auth.magicLinkSent":
@@ -314,6 +318,8 @@ export const en: Record<string, string> = {
   "common.viewProjects": "View Projects",
   "common.errorId": "Error ID: {id}",
   "common.someone": "Someone",
+  "common.anonymous": "Anonymous",
+  "common.close": "Close",
   "common.accessDenied": "Access Denied",
   "common.accessDeniedDesc": "You do not have permission to access this page. Admin privileges are required.",
   "common.goToDashboard": "Go to Dashboard",
@@ -325,9 +331,16 @@ export const en: Record<string, string> = {
   "theme.system": "System",
 
   // Search
+  "nav.mainNavigation": "Main navigation",
+  "nav.mobileNavigation": "Mobile navigation",
+
+  // Search
   "search.placeholder": "Search projects & proposals...",
   "search.searching": "Searching...",
   "search.noResults": "No results found",
+  "search.typeProject": "Project",
+  "search.typeProposal": "Proposal",
+  "search.ariaResults": "Search results",
 
   // Export
   "export.pdf": "PDF",
@@ -335,6 +348,27 @@ export const en: Record<string, string> = {
   "export.pdfTooltip": "Download report as PDF",
   "export.csvTooltip": "Download data as CSV",
   "export.failed": "Failed to export report",
+
+  // Pagination
+  "pagination.ariaNav": "Pagination",
+  "pagination.ariaPrev": "Previous page",
+  "pagination.ariaNext": "Next page",
+  "pagination.ariaPage": "Page {page}",
+
+  // Vote accessibility
+  "vote.ariaGroup": "Vote on this proposal",
+
+  // Dashboard accessibility
+  "dashboard.ariaStats": "Your statistics",
+
+  // Home accessibility
+  "home.ariaFeatures": "Platform features",
+
+  // Roles
+  "role.admin": "Admin",
+  "role.manager": "Manager",
+  "role.member": "Member",
+  "role.viewer": "Viewer",
 
   // PWA
   "pwa.install": "Install Ideate",

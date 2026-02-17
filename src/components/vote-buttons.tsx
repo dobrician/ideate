@@ -75,7 +75,7 @@ export function VoteButtons({
   const downTitle = optimistic.userVote === -1 ? t("vote.remove") : t("vote.contra");
 
   return (
-    <div className="flex items-center gap-1" role="group" aria-label="Vote on this proposal">
+    <div className="flex items-center gap-1" role="group" aria-label={t("vote.ariaGroup")}>
       <Button
         variant="ghost"
         size="sm"

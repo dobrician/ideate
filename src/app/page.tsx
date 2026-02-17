@@ -63,7 +63,7 @@ export default async function HomePage() {
         </Button>
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3" role="region" aria-label="Platform features">
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3" role="region" aria-label={t("home.ariaFeatures")}>
         <Card className="transition-shadow duration-200 hover:shadow-md">
           <CardHeader>
             <FolderOpen className="mb-2 h-6 w-6 text-muted-foreground" aria-hidden="true" />

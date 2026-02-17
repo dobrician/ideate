@@ -152,7 +152,7 @@ export const ro: Record<string, string> = {
   "dashboard.stats.proposals": "Propunerile Mele",
   "dashboard.stats.votes": "Voturile Mele",
   "dashboard.stats.comments": "Comentariile Mele",
-  "dashboard.stats.ofTotal": "din {total} total",
+  "dashboard.stats.ofTotal": "din {total} în total",
   "dashboard.yourProjects": "Proiectele Tale",
   "dashboard.yourProposals": "Propunerile Tale",
   "dashboard.recentVotes": "Voturile Tale Recente",
@@ -294,6 +294,10 @@ export const ro: Record<string, string> = {
   "auth.verifyEmailFirst": "Te rugăm să verifici email-ul înainte de autentificare",
   "auth.emailAlreadyExists": "Un cont cu acest email există deja",
   "auth.tooManyAttempts": "Prea multe încercări. Încearcă din nou mai târziu.",
+  "auth.emailPlaceholder": "tu@exemplu.com",
+  "auth.enterPassword": "Introdu parola",
+  "auth.hidePassword": "Ascunde parola",
+  "auth.showPassword": "Arată parola",
   "auth.backToLogin": "Înapoi la Autentificare",
   "auth.invalidLink": "Link Invalid",
   "auth.invalidLinkDesc":
@@ -333,6 +337,8 @@ export const ro: Record<string, string> = {
   "common.viewProjects": "Vezi Proiecte",
   "common.errorId": "ID Eroare: {id}",
   "common.someone": "Cineva",
+  "common.anonymous": "Anonim",
+  "common.close": "Închide",
   "common.accessDenied": "Acces Interzis",
   "common.accessDeniedDesc": "Nu ai permisiunea de a accesa această pagină. Sunt necesare privilegii de administrator.",
   "common.goToDashboard": "Mergi la Dashboard",
@@ -344,9 +350,16 @@ export const ro: Record<string, string> = {
   "theme.system": "Sistem",
 
   // Search
+  "nav.mainNavigation": "Navigare principală",
+  "nav.mobileNavigation": "Navigare mobilă",
+
+  // Search
   "search.placeholder": "Caută proiecte și propuneri...",
   "search.searching": "Se caută...",
   "search.noResults": "Niciun rezultat găsit",
+  "search.typeProject": "Proiect",
+  "search.typeProposal": "Propunere",
+  "search.ariaResults": "Rezultate căutare",
 
   // Export
   "export.pdf": "PDF",
@@ -354,6 +367,27 @@ export const ro: Record<string, string> = {
   "export.pdfTooltip": "Descarcă raportul ca PDF",
   "export.csvTooltip": "Descarcă datele ca CSV",
   "export.failed": "Exportul a eșuat",
+
+  // Pagination
+  "pagination.ariaNav": "Paginare",
+  "pagination.ariaPrev": "Pagina anterioară",
+  "pagination.ariaNext": "Pagina următoare",
+  "pagination.ariaPage": "Pagina {page}",
+
+  // Vote accessibility
+  "vote.ariaGroup": "Votează această propunere",
+
+  // Dashboard accessibility
+  "dashboard.ariaStats": "Statisticile tale",
+
+  // Home accessibility
+  "home.ariaFeatures": "Funcționalități platformă",
+
+  // Roles
+  "role.admin": "Admin",
+  "role.manager": "Manager",
+  "role.member": "Membru",
+  "role.viewer": "Vizualizator",
 
   // PWA
   "pwa.install": "Instalează Ideate",

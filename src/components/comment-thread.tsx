@@ -73,7 +73,7 @@ function ChatBubble({
   showAvatar: boolean;
 }) {
   const { t } = useLocale();
-  const displayName = comment.userName || comment.userEmail || "Anonymous";
+  const displayName = comment.userName || comment.userEmail || t("common.anonymous");
   const timeAgo = comment.createdAt ? formatTimeAgo(comment.createdAt, t) : "";
   const initials = getInitials(displayName);
   const colorClass = avatarColor(comment.userId);
@@ -92,11 +92,11 @@ function ChatBubble({
       )}
       <div className={`max-w-[85%] sm:max-w-[75%] ${isOwn ? "items-end" : "items-start"}`}>
         {showAvatar && (
-          <div className={`flex items-center gap-2 mb-0.5 ${isOwn ? "flex-row-reverse" : ""}`}>
+          <div className={`flex items-center gap-1.5 mb-0.5 ${isOwn ? "justify-end" : ""}`}>
             <span className="text-xs font-medium text-foreground">
               {isOwn ? t("comments.you") : displayName}
             </span>
-            {timeAgo && <span className="text-xs text-muted-foreground">{timeAgo}</span>}
+            {timeAgo && <span className="text-xs text-muted-foreground">&middot; {timeAgo}</span>}
           </div>
         )}
         <div

@@ -83,7 +83,7 @@ export function SearchBar() {
       </div>
 
       {isOpen && (
-        <div id="search-results-listbox" role="listbox" aria-label="Search results" className="absolute top-full left-0 right-0 z-50 mt-1 bg-popover border rounded-md shadow-lg max-h-80 overflow-y-auto animate-in fade-in-0 slide-in-from-top-1 duration-150">
+        <div id="search-results-listbox" role="listbox" aria-label={t("search.ariaResults")} className="absolute top-full left-0 right-0 z-50 mt-1 bg-popover border rounded-md shadow-lg max-h-80 overflow-y-auto animate-in fade-in-0 slide-in-from-top-1 duration-150">
           {loading && (
             <div className="p-3 text-sm text-muted-foreground" role="status" aria-live="polite">
               {t("search.searching")}
@@ -116,8 +116,8 @@ export function SearchBar() {
                 <div className="text-sm font-medium truncate">
                   {result.title}
                 </div>
-                <div className="text-xs text-muted-foreground capitalize">
-                  {result.type}
+                <div className="text-xs text-muted-foreground">
+                  {result.type === "project" ? t("search.typeProject") : t("search.typeProposal")}
                 </div>
               </div>
             </a>

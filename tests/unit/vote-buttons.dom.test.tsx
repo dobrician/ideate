@@ -14,6 +14,8 @@ vi.mock("@/lib/use-locale", () => ({
         "vote.pro": "Pro",
         "vote.contra": "Contra",
         "vote.remove": "Remove vote",
+        "vote.ariaGroup": "Vote on this proposal",
+        "vote.loading": "Voting...",
       };
       return map[key] ?? key;
     },

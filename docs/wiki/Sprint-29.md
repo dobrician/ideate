@@ -16,7 +16,7 @@
 
 - [x] **Goal 5: Admin panel UX** — Add toast confirmation when role is changed. Add search/filter to user table. Add pagination (or virtual scroll) if >20 users.
 
-- [ ] **Goal 6: i18n consistency** — Audit all user-facing strings. Fix mixed ro/en labels (e.g., "Joined at" in profile, "Proiectele Mele X din Y total"). Ensure consistent language throughout. Fix "chiar acum Tu" → proper Romanian phrasing.
+- [x] **Goal 6: i18n consistency** — Audit all user-facing strings. Fix mixed ro/en labels (e.g., "Joined at" in profile, "Proiectele Mele X din Y total"). Ensure consistent language throughout. Fix "chiar acum Tu" → proper Romanian phrasing.
 
 - [ ] **Goal 7: Mobile & responsive fixes** — PWA install banner must not overlap content (reposition or make dismissible). AI suggestions modal must be scrollable and fit small screens. Test all modals/dialogs on mobile viewports.
 

@@ -44,7 +44,7 @@ export default async function DashboardPage() {
       </div>
 
       {/* Mobile stat pills (compact 2x2 grid) */}
-      <div className="mb-6 grid grid-cols-2 gap-2 sm:hidden" role="region" aria-label="Your statistics">
+      <div className="mb-6 grid grid-cols-2 gap-2 sm:hidden" role="region" aria-label={t("dashboard.ariaStats")}>
         {[
           { icon: <FolderOpen className="h-3.5 w-3.5" />, value: userStats.projectCount, label: t("dashboard.stats.projects") },
           { icon: <Lightbulb className="h-3.5 w-3.5" />, value: userStats.proposalCount, label: t("dashboard.stats.proposals") },
@@ -60,7 +60,7 @@ export default async function DashboardPage() {
       </div>
 
       {/* Desktop stat cards */}
-      <div className="mb-8 hidden gap-4 sm:grid sm:grid-cols-2 lg:grid-cols-4" role="region" aria-label="Your statistics">
+      <div className="mb-8 hidden gap-4 sm:grid sm:grid-cols-2 lg:grid-cols-4" role="region" aria-label={t("dashboard.ariaStats")}>
         <StatCard title={t("dashboard.stats.projects")} value={userStats.projectCount}
           description={t("dashboard.stats.ofTotal", { total: platformStats.projectCount })}
           icon={<FolderOpen className="h-4 w-4 text-muted-foreground" />} />

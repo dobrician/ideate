@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import { useLocale } from "@/lib/use-locale";
 
 interface PaginationProps {
   currentPage: number;
@@ -16,6 +17,7 @@ interface PaginationProps {
 export function Pagination({ currentPage, totalPages }: PaginationProps) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
+  const { t } = useLocale();
 
   if (totalPages <= 1) return null;
 
@@ -33,7 +35,7 @@ export function Pagination({ currentPage, totalPages }: PaginationProps) {
   return (
     <nav
       className="flex items-center justify-center gap-1"
-      aria-label="Pagination"
+      aria-label={t("pagination.ariaNav")}
     >
       <Button
         variant="outline"
@@ -41,7 +43,7 @@ export function Pagination({ currentPage, totalPages }: PaginationProps) {
         className="h-8 w-8 min-h-[44px] min-w-[44px]"
         asChild
         disabled={currentPage <= 1}
-        aria-label="Previous page"
+        aria-label={t("pagination.ariaPrev")}
       >
         {currentPage > 1 ? (
           <Link href={buildHref(currentPage - 1)}>
@@ -61,7 +63,7 @@ export function Pagination({ currentPage, totalPages }: PaginationProps) {
           size="icon"
           className="h-8 w-8 min-h-[44px] min-w-[44px]"
           asChild={page !== currentPage}
-          aria-label={`Page ${page}`}
+          aria-label={t("pagination.ariaPage", { page })}
           aria-current={page === currentPage ? "page" : undefined}
         >
           {page === currentPage ? (
@@ -78,7 +80,7 @@ export function Pagination({ currentPage, totalPages }: PaginationProps) {
         className="h-8 w-8 min-h-[44px] min-w-[44px]"
         asChild
         disabled={currentPage >= totalPages}
-        aria-label="Next page"
+        aria-label={t("pagination.ariaNext")}
       >
         {currentPage < totalPages ? (
           <Link href={buildHref(currentPage + 1)}>

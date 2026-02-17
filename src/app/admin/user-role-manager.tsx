@@ -99,7 +99,7 @@ export function UserRoleManager({
         >
           <option value="all">{t("admin.allRoles")}</option>
           {ROLES.map((r) => (
-            <option key={r} value={r}>{r}</option>
+            <option key={r} value={r}>{t(`role.${r}`)}</option>
           ))}
         </select>
       </div>
@@ -138,7 +138,7 @@ export function UserRoleManager({
                           className={ROLE_COLORS[u.role] || ""}
                           variant="outline"
                         >
-                          {u.role} {t("admin.you")}
+                          {t(`role.${u.role}`)} {t("admin.you")}
                         </Badge>
                       ) : (
                         <select
@@ -149,7 +149,7 @@ export function UserRoleManager({
                         >
                           {ROLES.map((r) => (
                             <option key={r} value={r}>
-                              {r}
+                              {t(`role.${r}`)}
                             </option>
                           ))}
                         </select>
