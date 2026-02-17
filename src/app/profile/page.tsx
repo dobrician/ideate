@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
 import { FolderOpen, Lightbulb } from "lucide-react";
 import { ProfileForm } from "./profile-form";
+import { ChangePasswordForm } from "./change-password-form";
 import { getTranslations } from "@/lib/i18n-server";
 import { statusBadgeClass, statusLabel } from "@/lib/status-utils";
 
@@ -89,6 +90,8 @@ export default async function ProfilePage() {
           firstName={user.firstName ?? ""}
           lastName={user.lastName ?? ""}
         />
+
+        {user.passwordHash && <ChangePasswordForm />}
 
         <Card>
           <CardHeader>

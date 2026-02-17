@@ -12,6 +12,7 @@ type AuditAction =
   | "verify_email"
   | "password_reset_request"
   | "password_reset"
+  | "change_password"
   | "magic_link_request"
   | "magic_link_verify"
   | "resend_verification"

@@ -195,6 +195,16 @@ export const en: Record<string, string> = {
   "profile.noProjects": "No projects yet.",
   "profile.noProposals": "No proposals yet.",
   "profile.updateFailed": "Failed to update profile",
+  "profile.changePassword": "Change Password",
+  "profile.currentPassword": "Current Password",
+  "profile.newPassword": "New Password",
+  "profile.confirmNewPassword": "Confirm New Password",
+  "profile.changePasswordBtn": "Change Password",
+  "profile.changingPassword": "Changing...",
+  "profile.passwordChanged": "Password changed successfully!",
+  "profile.passwordChangeFailed": "Failed to change password",
+  "profile.incorrectPassword": "Current password is incorrect",
+  "profile.noPasswordSet": "No password set on this account",
 
   // Admin
   "admin.title": "Admin Panel",

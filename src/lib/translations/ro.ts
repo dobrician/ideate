@@ -205,6 +205,16 @@ export const ro: Record<string, string> = {
   "profile.noProjects": "Niciun proiect încă.",
   "profile.noProposals": "Nicio propunere încă.",
   "profile.updateFailed": "Actualizarea profilului a eșuat",
+  "profile.changePassword": "Schimbă Parola",
+  "profile.currentPassword": "Parola Curentă",
+  "profile.newPassword": "Parolă Nouă",
+  "profile.confirmNewPassword": "Confirmă Parola Nouă",
+  "profile.changePasswordBtn": "Schimbă Parola",
+  "profile.changingPassword": "Se schimbă...",
+  "profile.passwordChanged": "Parola a fost schimbată cu succes!",
+  "profile.passwordChangeFailed": "Schimbarea parolei a eșuat",
+  "profile.incorrectPassword": "Parola curentă este incorectă",
+  "profile.noPasswordSet": "Nicio parolă setată pentru acest cont",
 
   // Admin
   "admin.title": "Panou de Administrare",

@@ -8,6 +8,7 @@ import { requireAuth } from "@/lib/auth";
 import { eq } from "drizzle-orm";
 import { logAudit } from "@/lib/audit";
 import { requireCsrfToken } from "@/lib/csrf";
+import { validatePassword, verifyPassword, hashPassword } from "@/lib/password";
 
 const profileSchema = z.object({
   firstName: z.string().max(100, "First name too long").optional(),
@@ -55,5 +56,76 @@ export async function updateProfile(formData: FormData) {
       return { error: "You must be logged in" };
     }
     return { error: "Failed to update profile" };
+  }
+}
+
+const changePasswordSchema = z.object({
+  currentPassword: z.string().min(1, "Current password is required"),
+  newPassword: z.string().min(1, "New password is required"),
+  confirmPassword: z.string().min(1, "Please confirm your password"),
+});
+
+/**
+ * Change user password (requires current password verification)
+ */
+export async function changePassword(formData: FormData) {
+  try {
+    await requireCsrfToken(formData.get("csrfToken") as string);
+    const user = await requireAuth();
+
+    const data = {
+      currentPassword: formData.get("currentPassword") as string,
+      newPassword: formData.get("newPassword") as string,
+      confirmPassword: formData.get("confirmPassword") as string,
+    };
+
+    const parsed = changePasswordSchema.safeParse(data);
+    if (!parsed.success) {
+      return { error: parsed.error.issues[0].message };
+    }
+
+    const { currentPassword, newPassword, confirmPassword } = parsed.data;
+
+    if (newPassword !== confirmPassword) {
+      return { error: "passwordMismatch" };
+    }
+
+    const validation = validatePassword(newPassword);
+    if (!validation.valid) {
+      return { error: validation.error };
+    }
+
+    if (!user.passwordHash) {
+      return { error: "noPasswordSet" };
+    }
+
+    const isValid = await verifyPassword(currentPassword, user.passwordHash);
+    if (!isValid) {
+      return { error: "incorrectPassword" };
+    }
+
+    const newHash = await hashPassword(newPassword);
+
+    await db
+      .update(users)
+      .set({
+        passwordHash: newHash,
+        updatedAt: new Date(),
+      })
+      .where(eq(users.id, user.id));
+
+    await logAudit({
+      userId: user.id,
+      action: "change_password",
+      entity: "user",
+      entityId: user.id,
+    });
+
+    return { success: true };
+  } catch (error) {
+    if (error instanceof Error && error.message === "Unauthorized") {
+      return { error: "You must be logged in" };
+    }
+    return { error: "Failed to change password" };
   }
 }
