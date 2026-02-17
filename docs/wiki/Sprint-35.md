@@ -13,7 +13,7 @@
 
 - [x] **Goal 4: SSE heartbeat + reconnection** — Add 30-second heartbeat pings to the SSE vote stream to prevent proxy timeouts. Add exponential backoff reconnection on the client side if connection drops. Test with unit tests.
 
-- [ ] **Goal 5: Database backup automation** — Create a backup script (scripts/backup-db.sh) that copies the SQLite DB + WAL to a timestamped backup file. Add retention (keep last 7 daily backups). Make it runnable via npm script (`npm run db:backup`). Document in README.
+- [x] **Goal 5: Database backup automation** — Create a backup script (scripts/backup-db.sh) that copies the SQLite DB + WAL to a timestamped backup file. Add retention (keep last 7 daily backups). Make it runnable via npm script (`npm run db:backup`). Document in README.
 
 - [ ] **Goal 6: User invitation flow** — Add ability for admins to invite users by email. Create /api/admin/invite endpoint. Send invitation email with a link to register. Track pending invitations in a new `invitations` table. Show pending invitations in admin panel. Add tests.
 
