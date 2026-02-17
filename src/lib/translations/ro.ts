@@ -126,6 +126,7 @@ export const ro: Record<string, string> = {
   "vote.pro": "Pro",
   "vote.contra": "Contra",
   "vote.remove": "Șterge vot",
+  "vote.loading": "Se votează...",
 
   // Comments / Discussion
   "comments.title": "Discuție",

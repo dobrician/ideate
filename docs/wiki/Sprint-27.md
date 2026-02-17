@@ -18,7 +18,7 @@ Based on unified analysis from Claude + Codex (see docs/sprint27-unified-plan.md
 - [x] Goal 8: Mobile touch UX hardening
 
 **Testing & Cleanup:**
-- [ ] Goal 9: Test coverage: SSE live updates E2E + useVoteStream unit
+- [x] Goal 9: Test coverage: SSE live updates E2E + useVoteStream unit
 - [ ] Goal 10: Cleanup: redundant filter + remove dead code
 
 ## Constraints

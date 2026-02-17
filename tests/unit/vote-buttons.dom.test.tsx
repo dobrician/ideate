@@ -133,4 +133,12 @@ describe("VoteButtons", () => {
     );
     expect(screen.getByRole("group")).toHaveAttribute("aria-label", "Vote on this proposal");
   });
+
+  it("has WCAG 2.5.5 min touch target height (44px)", () => {
+    render(
+      <VoteButtons proposalId="p1" projectId="proj1" upvotes={0} downvotes={0} userVote={null} />
+    );
+    const buttons = screen.getAllByRole("button");
+    buttons.forEach((btn) => expect(btn.className).toContain("min-h-[44px]"));
+  });
 });

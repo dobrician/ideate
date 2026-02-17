@@ -120,6 +120,7 @@ export const en: Record<string, string> = {
   "vote.pro": "Pro",
   "vote.contra": "Contra",
   "vote.remove": "Remove vote",
+  "vote.loading": "Voting...",
 
   // Comments / Discussion
   "comments.title": "Discussion",
