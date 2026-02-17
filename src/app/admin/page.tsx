@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { db } from "@/db";
-import { users, projects, proposals, votes, comments, auditLogs, invitations, tags, webhooks } from "@/db/schema";
+import { users, projects, proposals, votes, comments, auditLogs, invitations, tags, webhooks, projectTemplates } from "@/db/schema";
 import { getCurrentUser } from "@/lib/auth";
 import { hasPermission } from "@/lib/rbac";
 import type { Role } from "@/lib/rbac";
@@ -21,6 +21,7 @@ import { InvitationPanel } from "./invitation-panel";
 import { ProjectManager } from "./project-manager";
 import { TagManager } from "./tag-manager";
 import { WebhookManager } from "./webhook-manager";
+import { TemplateManager } from "./template-manager";
 import { StatCard } from "@/components/stat-card";
 import { getTranslations } from "@/lib/i18n-server";
 
@@ -49,7 +50,7 @@ export default async function AdminPage() {
   }
   // locale used for date formatting via formatDateTime
 
-  const [allUsers, stats, recentAudit, pendingInvitations, allProjects, allTags, allWebhooks] = await Promise.all([
+  const [allUsers, stats, recentAudit, pendingInvitations, allProjects, allTags, allWebhooks, allTemplates] = await Promise.all([
     db
       .select({
         id: users.id,
@@ -119,6 +120,11 @@ export default async function AdminPage() {
       .select()
       .from(webhooks)
       .orderBy(desc(webhooks.createdAt)),
+
+    db
+      .select()
+      .from(projectTemplates)
+      .orderBy(desc(projectTemplates.createdAt)),
   ]);
 
   const s = stats[0];
@@ -210,6 +216,22 @@ export default async function AdminPage() {
                 secret: wh.secret.slice(0, 8) + "...",
                 active: Boolean(wh.active),
                 createdAt: wh.createdAt?.toISOString() ?? null,
+              }))}
+            />
+          </CardContent>
+        </Card>
+
+        {/* Project Templates */}
+        <Card className="lg:col-span-2">
+          <CardHeader>
+            <CardTitle>{t("templates.title")}</CardTitle>
+            <CardDescription>{t("templates.description")}</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <TemplateManager
+              initialTemplates={allTemplates.map((tpl) => ({
+                ...tpl,
+                defaultTags: tpl.defaultTags ? JSON.parse(tpl.defaultTags) as string[] : [],
               }))}
             />
           </CardContent>

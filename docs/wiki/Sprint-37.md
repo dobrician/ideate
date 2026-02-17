@@ -18,7 +18,7 @@
 
 - [x] **Goal 6: Email digest / weekly summary** — Add a weekly digest email option in notification preferences. Aggregate: new projects, top voted proposals, recent activity stats. Generate HTML email with summary. Add a cron-compatible endpoint that can be called to send digests. Add tests.
 
-- [ ] **Goal 7: Project templates** — Allow admins to create project templates with pre-filled title prefix, description, default tags, and deadline offset (e.g., "+30 days"). Users can create a project from a template. Add `project_templates` table. Admin UI to manage templates. Add tests.
+- [x] **Goal 7: Project templates** — Allow admins to create project templates with pre-filled title prefix, description, default tags, and deadline offset (e.g., "+30 days"). Users can create a project from a template. Add `project_templates` table. Admin UI to manage templates. Add tests.
 
 - [ ] **Goal 8: Data export improvements** — Add full platform data export for admins (all projects + proposals + votes + comments as ZIP). Add per-user data export (GDPR compliance — user can download all their data). Add date range filter to existing project exports. Add tests.
 

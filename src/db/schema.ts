@@ -277,3 +277,22 @@ export const llmCache = sqliteTable("llm_cache", {
     sql`(unixepoch())`
   ),
 });
+
+// ─── Project Templates ───────────────────────────────────────────────────
+
+export const projectTemplates = sqliteTable("project_templates", {
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => randomUUID()),
+  name: text("name").notNull(),
+  description: text("description"),
+  titlePrefix: text("title_prefix"),
+  deadlineOffset: integer("deadline_offset"), // days
+  defaultTags: text("default_tags"), // JSON array of tag IDs
+  createdAt: integer("created_at", { mode: "timestamp" }).default(
+    sql`(unixepoch())`
+  ),
+  updatedAt: integer("updated_at", { mode: "timestamp" }).default(
+    sql`(unixepoch())`
+  ),
+});
