@@ -254,6 +254,33 @@ describe("Middleware", () => {
     });
   });
 
+  describe("security headers", () => {
+    it("includes HSTS header on public paths", () => {
+      const request = createRequest("/");
+      const response = middleware(request);
+      expect(response.headers.get("Strict-Transport-Security")).toBe(
+        "max-age=63072000; includeSubDomains"
+      );
+    });
+
+    it("includes HSTS header on protected paths", () => {
+      const request = createRequest("/projects", { sessionCookie: validSessionJwt() });
+      const response = middleware(request);
+      expect(response.headers.get("Strict-Transport-Security")).toBe(
+        "max-age=63072000; includeSubDomains"
+      );
+    });
+
+    it("includes HSTS header on redirect responses", () => {
+      const request = createRequest("/projects");
+      const response = middleware(request);
+      expect(response.status).toBe(307);
+      expect(response.headers.get("Strict-Transport-Security")).toBe(
+        "max-age=63072000; includeSubDomains"
+      );
+    });
+  });
+
   describe("redirect URL", () => {
     it("should include the original path as redirect param", () => {
       const request = createRequest("/projects");

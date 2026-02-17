@@ -10,7 +10,7 @@
 
 - [x] **Goal 2: Zod validation on AI endpoints** — Add proper Zod schema validation to `api/proposals/suggest/route.ts` and `api/proposals/similarity/route.ts`. Validate input types, enforce max array lengths, reject oversized payloads. Add tests.
 
-- [ ] **Goal 3: Add HSTS header** — Add `Strict-Transport-Security: max-age=63072000; includeSubDomains` in middleware security headers.
+- [x] **Goal 3: Add HSTS header** — Add `Strict-Transport-Security: max-age=63072000; includeSubDomains` in middleware security headers.
 
 - [ ] **Goal 4: Fix middleware dot-check bypass** — Replace `pathname.includes(".")` with a check for specific static file extensions (`.css`, `.js`, `.ico`, `.png`, `.jpg`, `.svg`, `.woff`, `.woff2`). Add test for the bypass scenario.
 
