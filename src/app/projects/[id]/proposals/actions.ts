@@ -26,6 +26,17 @@ async function isDeadlinePassed(projectId: string): Promise<boolean> {
   return new Date(project[0].deadline).getTime() < Date.now();
 }
 
+async function resolveProposalProject(
+  proposalId: string
+): Promise<string | null> {
+  const row = await db
+    .select({ projectId: proposals.projectId })
+    .from(proposals)
+    .where(eq(proposals.id, proposalId))
+    .limit(1);
+  return row[0]?.projectId ?? null;
+}
+
 async function emitVoteUpdate(
   proposalId: string,
   projectId: string
@@ -175,7 +186,7 @@ export async function deleteProposal(
 export async function castVote(
   proposalId: string,
   value: number,
-  projectId: string,
+  _projectId: string,
   csrfToken: string
 ) {
   try {
@@ -188,6 +199,11 @@ export async function castVote(
 
     if (value !== 1 && value !== -1) {
       return { error: "Invalid vote value — must be 1 or -1" };
+    }
+
+    const projectId = await resolveProposalProject(proposalId);
+    if (!projectId) {
+      return { error: "Proposal not found" };
     }
 
     if (await isDeadlinePassed(projectId)) {
@@ -224,7 +240,7 @@ export async function castVote(
 
 export async function removeVote(
   proposalId: string,
-  projectId: string,
+  _projectId: string,
   csrfToken: string
 ) {
   try {
@@ -233,6 +249,11 @@ export async function removeVote(
 
     if (!hasPermission(user.role as Role, "vote:cast")) {
       return { error: "You don't have permission to vote" };
+    }
+
+    const projectId = await resolveProposalProject(proposalId);
+    if (!projectId) {
+      return { error: "Proposal not found" };
     }
 
     if (await isDeadlinePassed(projectId)) {

@@ -39,7 +39,8 @@ const mockOnConflictDoUpdate = vi.fn();
 const mockDeleteWhere = vi.fn();
 const mockSelectFrom = vi.fn();
 const mockSelectWhere = vi.fn();
-const mockSelectLimit = vi.fn();
+const mockSelectResults: Array<Promise<unknown[]>> = [];
+let selectCallIndex = 0;
 
 vi.mock("@/db", () => ({
   db: {
@@ -71,7 +72,12 @@ vi.mock("@/db", () => ({
         return {
           where: (...whereArgs: unknown[]) => {
             mockSelectWhere(...whereArgs);
-            return { limit: () => mockSelectLimit() };
+            return {
+              limit: () => {
+                const idx = selectCallIndex++;
+                return mockSelectResults[idx] ?? Promise.resolve([]);
+              },
+            };
           },
         };
       },
@@ -99,6 +105,11 @@ import {
   removeVote,
 } from "@/app/projects/[id]/proposals/actions";
 
+function setSelectResults(...results: unknown[][]) {
+  mockSelectResults.length = 0;
+  results.forEach((r) => mockSelectResults.push(Promise.resolve(r)));
+}
+
 beforeEach(() => {
   mockRevalidatePath.mockClear();
   mockRequireAuth.mockReset();
@@ -107,10 +118,13 @@ beforeEach(() => {
   mockDeleteWhere.mockReset();
   mockSelectFrom.mockClear();
   mockSelectWhere.mockClear();
-  mockSelectLimit.mockReset();
   mockEmitVoteChange.mockClear();
+  selectCallIndex = 0;
+  mockSelectResults.length = 0;
   mockRequireAuth.mockResolvedValue(makeUser());
-  mockSelectLimit.mockReturnValue(Promise.resolve([]));
+  // Default for deleteProposal: 1st select → empty (proposal not found)
+  // Tests that need different results call setSelectResults()
+  setSelectResults([]);
 });
 
 describe("deleteProposal", () => {
@@ -128,24 +142,21 @@ describe("deleteProposal", () => {
 
   it("returns not found when proposal missing", async () => {
     mockRequireAuth.mockResolvedValue(makeUser({ role: "manager" }));
+    setSelectResults([]);
     const r = await deleteProposal("x", "proj-1", "csrf");
     expect(r).toEqual({ error: "Proposal not found" });
   });
 
   it("rejects non-owner manager", async () => {
     mockRequireAuth.mockResolvedValue(makeUser({ id: "u1", role: "manager" }));
-    mockSelectLimit.mockReturnValue(
-      Promise.resolve([{ id: "prop-1", userId: "other" }])
-    );
+    setSelectResults([{ id: "prop-1", userId: "other" }]);
     const r = await deleteProposal("prop-1", "proj-1", "csrf");
     expect(r).toEqual({ error: "You don't have permission to delete this proposal" });
   });
 
   it("allows owner manager to delete", async () => {
     mockRequireAuth.mockResolvedValue(makeUser({ id: "u1", role: "manager" }));
-    mockSelectLimit.mockReturnValue(
-      Promise.resolve([{ id: "prop-1", userId: "u1" }])
-    );
+    setSelectResults([{ id: "prop-1", userId: "u1" }]);
     const r = await deleteProposal("prop-1", "proj-1", "csrf");
     expect(r).toEqual({ success: true });
     expect(mockDeleteWhere).toHaveBeenCalled();
@@ -153,16 +164,17 @@ describe("deleteProposal", () => {
 
   it("allows admin to delete regardless of ownership", async () => {
     mockRequireAuth.mockResolvedValue(makeUser({ id: "a1", role: "admin" }));
-    mockSelectLimit.mockReturnValue(
-      Promise.resolve([{ id: "prop-1", userId: "other" }])
-    );
+    setSelectResults([{ id: "prop-1", userId: "other" }]);
     const r = await deleteProposal("prop-1", "proj-1", "csrf");
     expect(r).toEqual({ success: true });
   });
 
   it("returns generic error on non-auth failure", async () => {
     mockRequireAuth.mockResolvedValue(makeUser({ role: "admin" }));
-    mockSelectLimit.mockRejectedValue(new Error("DB connection lost"));
+    mockSelectResults.length = 0;
+    const rejection = Promise.reject(new Error("DB connection lost"));
+    rejection.catch(() => {}); // prevent unhandled rejection
+    mockSelectResults.push(rejection);
     const r = await deleteProposal("prop-1", "proj-1", "csrf");
     expect(r).toEqual({ error: "Failed to delete proposal" });
   });
@@ -182,6 +194,8 @@ describe("castVote", () => {
   });
 
   it("upserts a positive vote", async () => {
+    // 1st select: resolve proposal → proj-1, 2nd select: deadline → none
+    setSelectResults([{ projectId: "proj-1" }], []);
     const r = await castVote("prop-1", 1, "proj-1", "csrf");
     expect(r).toEqual({ success: true });
     expect(mockInsertValues).toHaveBeenCalledWith({
@@ -195,6 +209,7 @@ describe("castVote", () => {
   });
 
   it("upserts a negative vote", async () => {
+    setSelectResults([{ projectId: "proj-1" }], []);
     const r = await castVote("prop-1", -1, "proj-1", "csrf");
     expect(r).toEqual({ success: true });
     expect(mockInsertValues).toHaveBeenCalledWith(
@@ -209,12 +224,29 @@ describe("castVote", () => {
 
   it("rejects vote when project deadline has passed", async () => {
     const pastDate = new Date(Date.now() - 86400000).toISOString();
-    mockSelectLimit.mockReturnValue(Promise.resolve([{ deadline: pastDate }]));
+    // 1st: resolve proposal, 2nd: deadline passed
+    setSelectResults([{ projectId: "proj-1" }], [{ deadline: pastDate }]);
     const r = await castVote("prop-1", 1, "proj-1", "csrf");
     expect(r).toEqual({ error: "Voting is closed — the project deadline has passed" });
   });
 
+  it("uses server-resolved projectId for deadline check, ignoring client value", async () => {
+    const pastDate = new Date(Date.now() - 86400000).toISOString();
+    // Proposal belongs to proj-REAL which has expired deadline
+    setSelectResults([{ projectId: "proj-REAL" }], [{ deadline: pastDate }]);
+    // Client sends fake project id "proj-FAKE"
+    const r = await castVote("prop-1", 1, "proj-FAKE", "csrf");
+    expect(r).toEqual({ error: "Voting is closed — the project deadline has passed" });
+  });
+
+  it("returns error when proposal not found", async () => {
+    setSelectResults([]);
+    const r = await castVote("nonexistent", 1, "proj-1", "csrf");
+    expect(r).toEqual({ error: "Proposal not found" });
+  });
+
   it("returns error on DB failure", async () => {
+    setSelectResults([{ projectId: "proj-1" }], []);
     mockInsertValues.mockImplementation(() => {
       throw new Error("DB error");
     });
@@ -238,18 +270,26 @@ describe("removeVote", () => {
 
   it("rejects vote removal when project deadline has passed", async () => {
     const pastDate = new Date(Date.now() - 86400000).toISOString();
-    mockSelectLimit.mockReturnValue(Promise.resolve([{ deadline: pastDate }]));
+    setSelectResults([{ projectId: "proj-1" }], [{ deadline: pastDate }]);
     const r = await removeVote("prop-1", "proj-1", "csrf");
     expect(r).toEqual({ error: "Voting is closed — the project deadline has passed" });
   });
 
   it("deletes the vote", async () => {
+    setSelectResults([{ projectId: "proj-1" }], []);
     const r = await removeVote("prop-1", "proj-1", "csrf");
     expect(r).toEqual({ success: true });
     expect(mockDeleteWhere).toHaveBeenCalled();
   });
 
+  it("returns error when proposal not found", async () => {
+    setSelectResults([]);
+    const r = await removeVote("nonexistent", "proj-1", "csrf");
+    expect(r).toEqual({ error: "Proposal not found" });
+  });
+
   it("returns error on DB failure", async () => {
+    setSelectResults([{ projectId: "proj-1" }], []);
     mockDeleteWhere.mockImplementation(() => {
       throw new Error("DB error");
     });
