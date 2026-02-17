@@ -20,7 +20,7 @@
 
 - [x] **Goal 7: Remove all one-off className hacks** — Search entire codebase for buttons with manual `h-8`, `h-9`, `h-10`, `p-0`, `w-8`, `min-h-[44px]` overrides. Replace with proper size variant from button.tsx. If a needed size doesn't exist, add it to the variant system rather than using className hacks. Goal: zero manual size overrides on Button components.
 
-- [ ] **Goal 8: Visual consistency verification** — After all fixes, run the Playwright screenshot capture script (tests/visual-review/capture-all-pages.ts), resize screenshots, and visually verify buttons are consistent across all pages. List any remaining inconsistencies found.
+- [x] **Goal 8: Visual consistency verification** — After all fixes, run the Playwright screenshot capture script (tests/visual-review/capture-all-pages.ts), resize screenshots, and visually verify buttons are consistent across all pages. List any remaining inconsistencies found.
 
 ## Notes
 
