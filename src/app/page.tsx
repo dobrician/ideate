@@ -63,8 +63,8 @@ export default async function HomePage() {
         </Button>
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3" role="region" aria-label={t("home.ariaFeatures")}>
-        <Card className="transition-shadow duration-200 hover:shadow-md">
+      <div className="grid gap-4 sm:grid-cols-2 lg:flex lg:flex-wrap lg:justify-center" role="region" aria-label={t("home.ariaFeatures")}>
+        <Card className="transition-shadow duration-200 hover:shadow-md lg:w-[calc(33.333%-0.667rem)]">
           <CardHeader>
             <FolderOpen className="mb-2 h-6 w-6 text-muted-foreground" aria-hidden="true" />
             <CardTitle>{t("home.feature.projects")}</CardTitle>
@@ -72,7 +72,7 @@ export default async function HomePage() {
           </CardHeader>
         </Card>
 
-        <Card className="transition-shadow duration-200 hover:shadow-md">
+        <Card className="transition-shadow duration-200 hover:shadow-md lg:w-[calc(33.333%-0.667rem)]">
           <CardHeader>
             <Lightbulb className="mb-2 h-6 w-6 text-muted-foreground" aria-hidden="true" />
             <CardTitle>{t("home.feature.proposals")}</CardTitle>
@@ -80,7 +80,7 @@ export default async function HomePage() {
           </CardHeader>
         </Card>
 
-        <Card className="transition-shadow duration-200 hover:shadow-md">
+        <Card className="transition-shadow duration-200 hover:shadow-md lg:w-[calc(33.333%-0.667rem)]">
           <CardHeader>
             <BarChart3 className="mb-2 h-6 w-6 text-muted-foreground" aria-hidden="true" />
             <CardTitle>{t("home.feature.consensus")}</CardTitle>
@@ -88,7 +88,7 @@ export default async function HomePage() {
           </CardHeader>
         </Card>
 
-        <Card className="transition-shadow duration-200 hover:shadow-md">
+        <Card className="transition-shadow duration-200 hover:shadow-md lg:w-[calc(33.333%-0.667rem)]">
           <CardHeader>
             <Users className="mb-2 h-6 w-6 text-muted-foreground" aria-hidden="true" />
             <CardTitle>{t("home.feature.discussion")}</CardTitle>
@@ -96,7 +96,7 @@ export default async function HomePage() {
           </CardHeader>
         </Card>
 
-        <Card className="transition-shadow duration-200 hover:shadow-md">
+        <Card className="transition-shadow duration-200 hover:shadow-md lg:w-[calc(33.333%-0.667rem)]">
           <CardHeader>
             <LayoutDashboard className="mb-2 h-6 w-6 text-muted-foreground" aria-hidden="true" />
             <CardTitle>{t("home.feature.dashboardTitle")}</CardTitle>

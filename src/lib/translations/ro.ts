@@ -39,6 +39,7 @@ export const ro: Record<string, string> = {
   // Projects
   "projects.title": "Proiecte",
   "projects.total": "{count} proiect(e) în total",
+  "projects.showing": "Se afișează {from}–{to} din {total} proiecte",
   "projects.new": "Proiect Nou",
   "projects.createProject": "Creează Proiect",
   "projects.noProjects": "Niciun proiect încă",

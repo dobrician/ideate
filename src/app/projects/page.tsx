@@ -129,7 +129,7 @@ export default async function ProjectsPage({ searchParams }: ProjectsPageProps) 
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {allProjects.map((project) => (
               <Link key={project.id} href={`/projects/${project.id}`}>
-                <Card className="h-full transition-all duration-200 hover:shadow-lg hover:border-primary/20">
+                <Card className="h-full min-h-[180px] transition-all duration-200 hover:shadow-lg hover:border-primary/20">
                   <CardHeader>
                     <div className="flex items-start justify-between gap-2">
                       <CardTitle className="line-clamp-2 text-base" title={project.title}>
@@ -172,7 +172,16 @@ export default async function ProjectsPage({ searchParams }: ProjectsPageProps) 
             ))}
           </div>
 
-          <div className="mt-8">
+          <div className="mt-8 flex flex-col items-center gap-2">
+            {total > PAGE_SIZE && (
+              <p className="text-sm text-muted-foreground">
+                {t("projects.showing", {
+                  from: offset + 1,
+                  to: Math.min(offset + PAGE_SIZE, total),
+                  total,
+                })}
+              </p>
+            )}
             <Pagination currentPage={page} totalPages={totalPages} />
           </div>
         </>

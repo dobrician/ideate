@@ -39,6 +39,7 @@ export const en: Record<string, string> = {
   // Projects
   "projects.title": "Projects",
   "projects.total": "{count} project(s) total",
+  "projects.showing": "Showing {from}–{to} of {total} projects",
   "projects.new": "New Project",
   "projects.createProject": "Create Project",
   "projects.noProjects": "No projects yet",
