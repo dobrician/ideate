@@ -59,6 +59,14 @@ export const ro: Record<string, string> = {
   "projects.lastUpdated": "Ultima actualizare",
   "projects.never": "Niciodată",
   "projects.unknown": "Necunoscut",
+  "projects.searchPlaceholder": "Caută proiecte...",
+  "projects.sortBy": "Sortare",
+  "projects.sortNewest": "Cele mai noi",
+  "projects.sortOldest": "Cele mai vechi",
+  "projects.sortName": "Nume (A-Z)",
+  "projects.sortNameDesc": "Nume (Z-A)",
+  "projects.filterStatus": "Stare",
+  "projects.allStatuses": "Toate stările",
 
   // Project form
   "projectForm.createTitle": "Creează Proiect Nou",

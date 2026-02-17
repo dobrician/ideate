@@ -13,19 +13,25 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Pagination } from "@/components/pagination";
+import { ProjectFilters } from "@/components/project-filters";
 import { FolderOpen, Calendar, Clock } from "lucide-react";
-import { desc, count } from "drizzle-orm";
+import { desc, asc, count, like, eq, and, sql, type SQL } from "drizzle-orm";
 import { getTranslations } from "@/lib/i18n-server";
 import { statusBadgeClass, statusLabel } from "@/lib/status-utils";
 
-const PAGE_SIZE = 20;
+const PAGE_SIZE = 12;
 
 interface ProjectsPageProps {
-  searchParams: Promise<{ page?: string }>;
+  searchParams: Promise<{
+    page?: string;
+    q?: string;
+    sort?: string;
+    status?: string;
+  }>;
 }
 
 /**
- * Projects list page with pagination
+ * Projects list page with search, sort, filter, and pagination
  */
 export default async function ProjectsPage({ searchParams }: ProjectsPageProps) {
   const user = await getCurrentUser();
@@ -35,24 +41,53 @@ export default async function ProjectsPage({ searchParams }: ProjectsPageProps) 
 
   const params = await searchParams;
   const page = Math.max(1, parseInt(params.page || "1", 10) || 1);
+  const searchQuery = (params.q || "").trim();
+  const sortBy = params.sort || "newest";
+  const statusFilter = params.status || "all";
   const offset = (page - 1) * PAGE_SIZE;
+
+  // Build WHERE conditions
+  const conditions: SQL[] = [];
+  if (searchQuery) {
+    conditions.push(like(projects.title, `%${searchQuery}%`));
+  }
+  if (statusFilter !== "all") {
+    conditions.push(eq(projects.status, statusFilter as "active" | "archived" | "draft"));
+  }
+  const where = conditions.length > 0 ? and(...conditions) : undefined;
+
+  // Build ORDER BY
+  const orderBy = (() => {
+    switch (sortBy) {
+      case "oldest":
+        return asc(projects.createdAt);
+      case "name":
+        return asc(sql`lower(${projects.title})`);
+      case "name-desc":
+        return desc(sql`lower(${projects.title})`);
+      default:
+        return desc(projects.createdAt);
+    }
+  })();
 
   const [allProjects, totalResult] = await Promise.all([
     db
       .select()
       .from(projects)
-      .orderBy(desc(projects.createdAt))
+      .where(where)
+      .orderBy(orderBy)
       .limit(PAGE_SIZE)
       .offset(offset),
-    db.select({ total: count() }).from(projects),
+    db.select({ total: count() }).from(projects).where(where),
   ]);
 
   const total = totalResult[0]?.total ?? 0;
   const totalPages = Math.ceil(total / PAGE_SIZE);
+  const hasFilters = !!searchQuery || statusFilter !== "all";
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+      <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-bold sm:text-3xl">{t("projects.title")}</h1>
           <p className="text-muted-foreground">
@@ -64,7 +99,11 @@ export default async function ProjectsPage({ searchParams }: ProjectsPageProps) 
         </Button>
       </div>
 
-      {allProjects.length === 0 && page === 1 ? (
+      <div className="mb-6">
+        <ProjectFilters />
+      </div>
+
+      {allProjects.length === 0 && !hasFilters && page === 1 ? (
         <Card className="py-12 text-center">
           <CardContent className="flex flex-col items-center gap-4">
             <div className="rounded-full bg-muted p-4">
@@ -81,6 +120,10 @@ export default async function ProjectsPage({ searchParams }: ProjectsPageProps) 
             </Button>
           </CardContent>
         </Card>
+      ) : allProjects.length === 0 ? (
+        <div className="py-12 text-center text-muted-foreground">
+          {t("search.noResults")}
+        </div>
       ) : (
         <>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">

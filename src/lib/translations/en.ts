@@ -59,6 +59,14 @@ export const en: Record<string, string> = {
   "projects.lastUpdated": "Last Updated",
   "projects.never": "Never",
   "projects.unknown": "Unknown",
+  "projects.searchPlaceholder": "Search projects...",
+  "projects.sortBy": "Sort by",
+  "projects.sortNewest": "Newest",
+  "projects.sortOldest": "Oldest",
+  "projects.sortName": "Name (A-Z)",
+  "projects.sortNameDesc": "Name (Z-A)",
+  "projects.filterStatus": "Status",
+  "projects.allStatuses": "All statuses",
 
   // Project form
   "projectForm.createTitle": "Create New Project",

@@ -20,7 +20,7 @@
 
 - [x] **Goal 7: Mobile & responsive fixes** — PWA install banner must not overlap content (reposition or make dismissible). AI suggestions modal must be scrollable and fit small screens. Test all modals/dialogs on mobile viewports.
 
-- [ ] **Goal 8: Projects list UX** — Add search bar, sorting (by date, name, status), and filtering (by status). Add pagination or infinite scroll for >10 projects.
+- [x] **Goal 8: Projects list UX** — Add search bar, sorting (by date, name, status), and filtering (by status). Add pagination or infinite scroll for >10 projects.
 
 ## Notes
 
