@@ -1,5 +1,5 @@
 # Sprint 26 — Comments & Discussion (2026-02-17)
-**Status:** IN PROGRESS
+**Status:** COMPLETE
 
 ## Goals
 
@@ -10,7 +10,7 @@ Based on unified analysis from Claude + Codex (see docs/sprint26-unified-plan.md
 - [x] Goal 2: Hover-reveal timestamps
 - [x] Goal 6: Character count indicator
 - [x] Goal 9: Discussion sheet UX polish
-- [ ] Goal 10: Mobile keyboard + safe-area hardening
+- [x] Goal 10: Mobile keyboard + safe-area hardening
 
 **Backend:**
 - [x] Goal 5: parentId server-side validation

@@ -16,6 +16,12 @@ Reverse chronological. Click each sprint for full details.
 
 ---
 
+### ✅ [Sprint 26 — Comments & Discussion](Sprint-26) *(2026-02-17)*
+**Focus:** Avatar bubbles, hover timestamps, character count, smart polling, comments in export, discussion UX polish, mobile keyboard hardening, component + scroll tests, parentId validation
+**Stats:** 10 commits | 774 tests | Issue #47
+
+---
+
 ### ✅ [Sprint 25 — AI Features](Sprint-25) *(2026-02-16)*
 **Focus:** Structured LLM logging, graceful AI degradation, suggestion retry logic, dashboard query coverage, E2E AI tests, mobile AI dialogs, logo integration
 **Stats:** 7 commits | 718 tests | Issue #46, #40
