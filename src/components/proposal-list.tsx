@@ -150,9 +150,9 @@ function ProposalItem({
 
   const upvotes = liveUpvotes ?? proposal.upvotes;
   const downvotes = liveDownvotes ?? proposal.downvotes;
-  const voteWidth = maxTotalVotes > 0 ? 100 / maxTotalVotes : 0;
-  const greenWidth = Math.round(upvotes * voteWidth);
-  const redWidth = Math.round(downvotes * voteWidth);
+  const halfWidth = maxTotalVotes > 0 ? 50 / maxTotalVotes : 0;
+  const greenWidth = Math.round(upvotes * halfWidth);
+  const redWidth = Math.round(downvotes * halfWidth);
 
   async function handleDelete() {
     setIsDeleting(true);
@@ -177,17 +177,17 @@ function ProposalItem({
       className="rounded-lg border bg-card"
     >
       <AccordionTrigger className="relative overflow-hidden py-3 hover:no-underline">
-        <div className="pointer-events-none absolute inset-0 flex justify-between" aria-hidden="true">
-          {upvotes > 0 && (
+        <div className="pointer-events-none absolute inset-0" aria-hidden="true">
+          {redWidth > 0 && (
             <div
-              className="h-full bg-gradient-to-r from-green-500/20 to-green-500/5 transition-all duration-300"
-              style={{ width: `${greenWidth}%` }}
+              className="absolute right-1/2 top-0 h-full bg-gradient-to-l from-red-500/20 to-red-500/5 transition-all duration-300"
+              style={{ width: `${redWidth}%` }}
             />
           )}
-          {downvotes > 0 && (
+          {greenWidth > 0 && (
             <div
-              className="h-full ml-auto bg-gradient-to-l from-red-500/20 to-red-500/5 transition-all duration-300"
-              style={{ width: `${redWidth}%` }}
+              className="absolute left-1/2 top-0 h-full bg-gradient-to-r from-green-500/20 to-green-500/5 transition-all duration-300"
+              style={{ width: `${greenWidth}%` }}
             />
           )}
         </div>

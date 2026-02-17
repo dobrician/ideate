@@ -162,11 +162,11 @@ describe("ProposalList", () => {
         widths.push((el as HTMLElement).style.width);
       });
     });
-    // maxTotalVotes = 5 (A: 3+2), voteWidth = 20% per vote
-    // A: green=60%, red=40%. B: green=40%, red=20%. C: red=20%
-    expect(widths).toContain("60%");
-    expect(widths).toContain("40%");
+    // maxTotalVotes = 5 (A: 3+2), halfWidth = 10% per vote (center-anchored)
+    // A: green=30%, red=20%. B: green=20%, red=10%. C: red=10%
+    expect(widths).toContain("30%");
     expect(widths).toContain("20%");
+    expect(widths).toContain("10%");
     // No 0% width bar should be rendered
     expect(widths).not.toContain("0%");
   });
