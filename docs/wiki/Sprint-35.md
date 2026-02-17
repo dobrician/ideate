@@ -11,7 +11,7 @@
 
 - [x] **Goal 3: Fix flaky password-auth smoke test** — The "full register -> verify -> login flow via API" test fails intermittently. Investigate the verification URL timing issue. Add proper retry/wait logic. Ensure the test passes 10/10 runs locally.
 
-- [ ] **Goal 4: SSE heartbeat + reconnection** — Add 30-second heartbeat pings to the SSE vote stream to prevent proxy timeouts. Add exponential backoff reconnection on the client side if connection drops. Test with unit tests.
+- [x] **Goal 4: SSE heartbeat + reconnection** — Add 30-second heartbeat pings to the SSE vote stream to prevent proxy timeouts. Add exponential backoff reconnection on the client side if connection drops. Test with unit tests.
 
 - [ ] **Goal 5: Database backup automation** — Create a backup script (scripts/backup-db.sh) that copies the SQLite DB + WAL to a timestamped backup file. Add retention (keep last 7 daily backups). Make it runnable via npm script (`npm run db:backup`). Document in README.
 
