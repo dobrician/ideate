@@ -189,20 +189,17 @@ describe("Password Module", () => {
       ).rejects.toThrow("Email already registered");
     });
 
-    it("should add password to existing magic-link user", async () => {
+    it("should reject registration for existing magic-link user", async () => {
       mockDbSelectResult.push({
         id: "magic-user",
         email: "magic@example.com",
         passwordHash: null,
       });
-      mockDbUpdateWhere.mockResolvedValue(undefined);
 
       const { registerUser } = await import("@/lib/password");
-      const result = await registerUser("magic@example.com", "Password123");
-
-      expect(result.userId).toBe("magic-user");
-      expect(result.verificationToken).toBeDefined();
-      expect(mockDbUpdateSet).toHaveBeenCalledTimes(1);
+      await expect(
+        registerUser("magic@example.com", "Password123")
+      ).rejects.toThrow("Email already registered");
     });
   });
 

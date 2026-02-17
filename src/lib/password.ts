@@ -84,7 +84,10 @@ export async function registerUser(
     .where(eq(users.email, normalizedEmail))
     .limit(1);
 
-  if (existing.length > 0 && existing[0].passwordHash) {
+  if (existing.length > 0) {
+    // Reject all registrations for existing accounts — whether they have a
+    // password or not.  Magic-link-only users must use "forgot password" to
+    // add a password, which proves email ownership (fixes account-takeover).
     throw new Error("Email already registered");
   }
 
@@ -94,19 +97,6 @@ export async function registerUser(
   const verificationExpires = new Date(
     Date.now() + VERIFICATION_TOKEN_EXPIRY_MS
   );
-
-  if (existing.length > 0) {
-    // User exists from magic link flow - add password
-    await db
-      .update(users)
-      .set({
-        passwordHash,
-        verificationToken: hashedVerificationToken,
-        verificationTokenExpires: verificationExpires,
-      })
-      .where(eq(users.id, existing[0].id));
-    return { userId: existing[0].id, verificationToken };
-  }
 
   // Create new user
   const userId = randomUUID();
