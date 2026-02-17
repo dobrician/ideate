@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { useLocale } from "@/lib/use-locale";
+import { formatDate } from "@/lib/utils";
 import { getCsrfTokenClient } from "@/lib/csrf-client";
 import { Search, ChevronLeft, ChevronRight } from "lucide-react";
 
@@ -159,9 +160,7 @@ export function UserRoleManager({
                     </td>
                     <td className="py-2 text-muted-foreground">
                       {u.createdAt
-                        ? new Date(u.createdAt).toLocaleDateString(
-                            locale === "ro" ? "ro-RO" : "en-US"
-                          )
+                        ? formatDate(u.createdAt, locale, "short")
                         : "\u2014"}
                     </td>
                   </tr>

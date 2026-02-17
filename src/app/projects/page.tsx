@@ -18,6 +18,7 @@ import { FolderOpen, Calendar, Clock } from "lucide-react";
 import { desc, asc, count, like, eq, and, sql, type SQL } from "drizzle-orm";
 import { getTranslations } from "@/lib/i18n-server";
 import { statusBadgeClass, statusLabel } from "@/lib/status-utils";
+import { formatDate } from "@/lib/utils";
 
 const PAGE_SIZE = 12;
 
@@ -37,7 +38,6 @@ export default async function ProjectsPage({ searchParams }: ProjectsPageProps) 
   const user = await getCurrentUser();
   if (!user) redirect("/auth/login");
   const { t, locale } = await getTranslations();
-  const dateFmt = locale === "ro" ? "ro-RO" : "en-US";
 
   const params = await searchParams;
   const page = Math.max(1, parseInt(params.page || "1", 10) || 1);
@@ -152,7 +152,7 @@ export default async function ProjectsPage({ searchParams }: ProjectsPageProps) 
                         <span>
                           {t("projects.deadline")}:{" "}
                           {project.deadline
-                            ? new Date(project.deadline).toLocaleDateString(dateFmt)
+                            ? formatDate(project.deadline, locale, "short")
                             : t("projects.deadlineNotSet")}
                         </span>
                       </div>
@@ -161,7 +161,7 @@ export default async function ProjectsPage({ searchParams }: ProjectsPageProps) 
                         <span>
                           {t("projects.created")}:{" "}
                           {project.createdAt
-                            ? new Date(project.createdAt).toLocaleDateString(dateFmt)
+                            ? formatDate(project.createdAt, locale, "short")
                             : t("projects.unknown")}
                         </span>
                       </div>

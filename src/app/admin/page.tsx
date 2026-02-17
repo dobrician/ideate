@@ -18,6 +18,7 @@ import { Users, FolderOpen, Lightbulb, ThumbsUp, ShieldX } from "lucide-react";
 import { UserRoleManager } from "./user-role-manager";
 import { StatCard } from "@/components/stat-card";
 import { getTranslations } from "@/lib/i18n-server";
+import { formatDateTime } from "@/lib/utils";
 
 /**
  * Admin panel — user management, system stats, audit log
@@ -42,7 +43,7 @@ export default async function AdminPage() {
       </div>
     );
   }
-  const dateFmt = locale === "ro" ? "ro-RO" : "en-US";
+  // locale used for date formatting via formatDateTime
 
   const [allUsers, stats, recentAudit] = await Promise.all([
     db
@@ -160,7 +161,7 @@ export default async function AdminPage() {
                     </span>
                     <span className="ml-auto shrink-0 text-xs text-muted-foreground">
                       {entry.createdAt
-                        ? new Date(entry.createdAt).toLocaleString(dateFmt)
+                        ? formatDateTime(entry.createdAt, locale)
                         : ""}
                     </span>
                   </div>

@@ -32,6 +32,7 @@ import { toast } from "sonner";
 import { useLocale } from "@/lib/use-locale";
 import { getCsrfTokenClient } from "@/lib/csrf-client";
 import { MarkdownRenderer } from "@/components/markdown-renderer";
+import { formatDate } from "@/lib/utils";
 import type { Comment } from "@/components/comment-thread";
 
 interface ProposalWithStats {
@@ -248,10 +249,7 @@ function ProposalItem({
           <div className="flex items-center justify-between text-xs text-muted-foreground">
             <span>
               {proposal.createdAt
-                ? new Date(proposal.createdAt).toLocaleDateString(
-                    locale === "ro" ? "ro-RO" : "en-US",
-                    { year: "numeric", month: "short", day: "numeric" }
-                  )
+                ? formatDate(proposal.createdAt, locale, "short")
                 : ""}
             </span>
             {canDelete && (

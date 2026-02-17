@@ -11,6 +11,7 @@ import { ProfileForm } from "./profile-form";
 import { ChangePasswordForm } from "./change-password-form";
 import { getTranslations } from "@/lib/i18n-server";
 import { statusBadgeClass, statusLabel } from "@/lib/status-utils";
+import { formatDate } from "@/lib/utils";
 
 /**
  * User profile page showing user info, their projects and proposals
@@ -23,7 +24,6 @@ export default async function ProfilePage() {
   }
 
   const { t, locale } = await getTranslations();
-  const dateFmt = locale === "ro" ? "ro-RO" : "en-US";
 
   // Fetch user's projects
   const userProjects = await db
@@ -48,11 +48,7 @@ export default async function ProfilePage() {
 
   const displayName = [user.firstName, user.lastName].filter(Boolean).join(" ") || user.email;
   const memberSince = user.createdAt
-    ? new Date(user.createdAt).toLocaleDateString(dateFmt, {
-        year: "numeric",
-        month: "long",
-        day: "numeric",
-      })
+    ? formatDate(user.createdAt, locale)
     : t("projects.unknown");
 
   return (

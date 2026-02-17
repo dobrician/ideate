@@ -27,6 +27,7 @@ import { Pagination } from "@/components/pagination";
 import { ProjectComments } from "@/components/project-comments";
 import { getTranslations } from "@/lib/i18n-server";
 import { statusBadgeClass, statusLabel } from "@/lib/status-utils";
+import { formatDate } from "@/lib/utils";
 import { RegenerateSummaryButton } from "@/components/regenerate-summary-button";
 import { SuggestProposalsButton } from "@/components/suggest-proposals";
 import { MarkdownRenderer } from "@/components/markdown-renderer";
@@ -81,7 +82,6 @@ export default async function ProjectPage({ params, searchParams }: ProjectPageP
 
   const { id } = await params;
   const { t, locale } = await getTranslations();
-  const dateFmt = locale === "ro" ? "ro-RO" : "en-US";
   const role = user.role as Role;
 
   const project = await db
@@ -176,10 +176,7 @@ export default async function ProjectPage({ params, searchParams }: ProjectPageP
               </h3>
               <p>
                 {projectData.createdAt
-                  ? new Date(projectData.createdAt).toLocaleDateString(
-                      dateFmt,
-                      { year: "numeric", month: "long", day: "numeric" }
-                    )
+                  ? formatDate(projectData.createdAt, locale)
                   : t("projects.unknown")}
               </p>
             </div>
@@ -189,10 +186,7 @@ export default async function ProjectPage({ params, searchParams }: ProjectPageP
               </h3>
               <p>
                 {projectData.updatedAt
-                  ? new Date(projectData.updatedAt).toLocaleDateString(
-                      dateFmt,
-                      { year: "numeric", month: "long", day: "numeric" }
-                    )
+                  ? formatDate(projectData.updatedAt, locale)
                   : t("projects.never")}
               </p>
             </div>
