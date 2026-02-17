@@ -14,7 +14,7 @@
 
 - [x] **Goal 4: Dashboard mobile optimization** — Dashboard is long on mobile. Limit visible items to 3 per section with "Show more" / "View all" links. Add project name context below each voted proposal in "Recent Votes".
 
-- [ ] **Goal 5: Auth & form polish** — Center forgot-password card vertically on mobile. Equalize spacing between register form fields. Move "Submit Proposal" button closer to form fields in sidebar (or make full-width). Add `title` attribute with full author name to truncated proposal author text.
+- [x] **Goal 5: Auth & form polish** — Center forgot-password card vertically on mobile. Equalize spacing between register form fields. Move "Submit Proposal" button closer to form fields in sidebar (or make full-width). Add `title` attribute with full author name to truncated proposal author text.
 
 - [ ] **Goal 6: 404 page auth redirect fix** — Unauthenticated users hitting a non-existent route get redirected to login instead of seeing 404. Exempt the 404/not-found page from auth redirect in middleware so it renders for everyone.
 

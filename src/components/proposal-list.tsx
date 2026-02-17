@@ -181,7 +181,7 @@ function ProposalItem({
           <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
             <div className="min-w-0 flex-1 text-left">
               <span className="truncate font-medium" title={proposal.title}>{proposal.title}</span>
-              <span className="ml-2 inline-flex max-w-[8rem] text-xs text-muted-foreground sm:max-w-none" title={proposal.authorName}>
+              <span className="ml-2 inline-flex max-w-[8rem] text-xs text-muted-foreground sm:max-w-none" title={`${t("proposals.by")} ${proposal.authorName}`}>
                 <span className="truncate">{t("proposals.by")} {proposal.authorName}</span>
               </span>
             </div>
