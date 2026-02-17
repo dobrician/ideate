@@ -35,7 +35,7 @@ export default async function HomePage() {
   const { t } = await getTranslations();
 
   return (
-    <main className="mx-auto max-w-4xl space-y-8 px-4 py-8" role="main">
+    <main className="mx-auto max-w-4xl space-y-6 py-4 sm:space-y-8 sm:py-8" role="main">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}

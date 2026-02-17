@@ -52,8 +52,8 @@ export default async function ProfilePage() {
     : t("projects.unknown");
 
   return (
-    <div className="container mx-auto max-w-3xl px-4 py-8">
-      <h1 className="mb-6 text-2xl font-bold">{t("profile.title")}</h1>
+    <div className="mx-auto max-w-3xl py-4 sm:py-8">
+      <h1 className="mb-4 text-2xl font-bold sm:mb-6">{t("profile.title")}</h1>
 
       <div className="space-y-6">
         <Card>

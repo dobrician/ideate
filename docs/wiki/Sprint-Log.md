@@ -16,9 +16,15 @@ Reverse chronological. Click each sprint for full details.
 
 ---
 
-### 🔄 [Sprint 31 — Design Polish & Layout Improvements](Sprint-31) *(2026-02-17)*
+### 🔄 [Sprint 32 — Visual Review P1+P2 Fixes](Sprint-32) *(2026-02-17)*
+**Focus:** Dark mode button contrast, duplicate proposal form, profile tabs, admin mobile table, navbar tap targets, form consistency, branding, truncation, audit log readability
+**Source:** Automated visual review (56 screenshots, docs/visual-review-report.md)
+
+---
+
+### ✅ [Sprint 31 — Design Polish & Layout Improvements](Sprint-31) *(2026-02-17)*
 **Focus:** Project detail layout restructure, proposal button truncation, author name wrapping, vote bar tooltip, locale dates, expand UX, equal-vote sorting, mobile spacing
-**Source:** Manual mobile testing by Ciprian
+**Stats:** 8 commits | Source: manual mobile testing by Ciprian
 
 ---
 

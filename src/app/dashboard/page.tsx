@@ -35,8 +35,8 @@ export default async function DashboardPage() {
   } = await getDashboardData(user.id);
 
   return (
-    <div className="container mx-auto max-w-6xl px-4 py-8">
-      <div className="mb-8">
+    <div className="mx-auto max-w-6xl py-4 sm:py-8">
+      <div className="mb-5 sm:mb-8">
         <h1 className="text-2xl font-bold sm:text-3xl">{t("dashboard.title")}</h1>
         <p className="text-muted-foreground">
           {t("dashboard.welcomeBack", { name: user.firstName || user.email })}
@@ -60,7 +60,7 @@ export default async function DashboardPage() {
       </div>
 
       {/* Desktop stat cards */}
-      <div className="mb-8 hidden gap-4 sm:grid sm:grid-cols-2 lg:grid-cols-4" role="region" aria-label={t("dashboard.ariaStats")}>
+      <div className="mb-6 hidden gap-4 sm:mb-8 sm:grid sm:grid-cols-2 lg:grid-cols-4" role="region" aria-label={t("dashboard.ariaStats")}>
         <StatCard title={t("dashboard.stats.projects")} value={userStats.projectCount}
           description={t("dashboard.stats.ofTotal", { total: platformStats.projectCount })}
           icon={<FolderOpen className="h-4 w-4 text-muted-foreground" />} />
@@ -76,7 +76,7 @@ export default async function DashboardPage() {
       </div>
 
       {/* Quick Actions */}
-      <div className="mb-8 flex flex-wrap gap-3" role="region" aria-label={t("dashboard.quickActions")}>
+      <div className="mb-5 flex flex-wrap gap-2 sm:mb-8 sm:gap-3" role="region" aria-label={t("dashboard.quickActions")}>
         <Button asChild>
           <Link href="/projects/new">
             <Plus className="mr-2 h-4 w-4" />{t("dashboard.newProject")}

@@ -3,12 +3,12 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 
 export default function DashboardLoading() {
   return (
-    <div className="container mx-auto max-w-6xl px-4 py-8">
-      <div className="mb-8">
+    <div className="mx-auto max-w-6xl py-4 sm:py-8">
+      <div className="mb-5 sm:mb-8">
         <Skeleton className="h-9 w-48" />
         <Skeleton className="mt-2 h-5 w-64" />
       </div>
-      <div className="mb-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="mb-5 grid gap-3 grid-cols-2 sm:mb-8 sm:gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {Array.from({ length: 4 }).map((_, i) => (
           <Card key={i}>
             <CardHeader className="pb-2">
@@ -20,7 +20,7 @@ export default function DashboardLoading() {
           </Card>
         ))}
       </div>
-      <div className="mb-8 flex gap-3">
+      <div className="mb-5 flex gap-2 sm:mb-8 sm:gap-3">
         <Skeleton className="h-9 w-32" />
         <Skeleton className="h-9 w-36" />
       </div>

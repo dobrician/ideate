@@ -87,8 +87,8 @@ export default async function AdminPage() {
   const s = stats[0];
 
   return (
-    <div className="container mx-auto max-w-6xl px-4 py-8">
-      <div className="mb-8">
+    <div className="mx-auto max-w-6xl py-4 sm:py-8">
+      <div className="mb-5 sm:mb-8">
         <h1 className="text-2xl font-bold sm:text-3xl">{t("admin.title")}</h1>
         <p className="text-muted-foreground">
           {t("admin.subtitle")}
@@ -96,7 +96,7 @@ export default async function AdminPage() {
       </div>
 
       {/* Stats */}
-      <div className="mb-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="mb-6 grid gap-3 grid-cols-2 sm:mb-8 sm:gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <StatCard
           title={t("admin.users")}
           value={Number(s?.userCount ?? 0)}
@@ -147,15 +147,15 @@ export default async function AdminPage() {
                 {recentAudit.map((entry) => (
                   <div
                     key={entry.id}
-                    className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm"
+                    className="flex min-w-0 items-center gap-2 text-sm sm:gap-3"
                   >
                     <span className="shrink-0 rounded bg-muted px-2 py-0.5 text-xs font-medium">
                       {entry.action}
                     </span>
-                    <span className="truncate font-medium">
+                    <span className="min-w-0 truncate font-medium">
                       {entry.userEmail || "System"}
                     </span>
-                    <span className="truncate text-muted-foreground">
+                    <span className="hidden min-w-0 truncate text-muted-foreground sm:inline">
                       {entry.entity}
                       {entry.entityId ? ` #${entry.entityId.substring(0, 8)}` : ""}
                     </span>

@@ -110,7 +110,7 @@ export default async function ProjectPage({ params, searchParams }: ProjectPageP
   const proposalTotalPages = Math.ceil(proposalTotal / PROPOSALS_PAGE_SIZE);
 
   return (
-    <div className="container mx-auto max-w-4xl px-4 py-4 sm:py-6 lg:max-w-6xl lg:grid lg:grid-cols-[1.6fr_1fr] lg:items-start lg:gap-6">
+    <div className="mx-auto max-w-4xl py-4 sm:py-6 lg:max-w-6xl lg:grid lg:grid-cols-[1.6fr_1fr] lg:items-start lg:gap-6">
       <div className="mb-3 lg:col-span-2">
         <Link href="/projects" className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground transition-colors">
           &larr; {t("projects.back")}
@@ -193,10 +193,11 @@ export default async function ProjectPage({ params, searchParams }: ProjectPageP
           </div>
 
           <div className="border-t pt-6">
-            <div className="mb-4 grid grid-cols-[1fr_auto] items-center gap-2">
+            <div className="mb-4 flex flex-wrap items-center gap-2">
               <h2 className="text-lg font-semibold">
                 {t("proposals.count", { count: proposalTotal })}
               </h2>
+              <div className="flex-1" />
               {canCreateProposal && (
                 <div className="flex gap-2">
                   <SuggestProposalsButton
