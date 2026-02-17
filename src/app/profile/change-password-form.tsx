@@ -88,7 +88,7 @@ export function ChangePasswordForm() {
             />
           </div>
 
-          <Button type="submit" className="min-h-[44px]" disabled={isLoading}>
+          <Button type="submit" disabled={isLoading}>
             {isLoading ? t("profile.changingPassword") : t("profile.changePasswordBtn")}
           </Button>
         </form>

@@ -14,7 +14,7 @@
 
 - [x] **Goal 4: Standardize proposal section buttons** — "+ New Proposal" button, "AI Suggestions" button, vote buttons (👍/👎), expand/collapse chevrons, "Submit" in proposal form, "Cancel" — all should follow consistent sizing. Vote buttons specifically should be identical size. Dialog action buttons (Save/Cancel) should follow a consistent pattern: primary right, outline left.
 
-- [ ] **Goal 5: Standardize dashboard and profile buttons** — Dashboard "View all" / "Show more" links should use consistent variant+size. Profile tabs should have consistent styling. "Save" buttons on forms (edit profile, change password) should be identical pattern. Collapsible sections "Show more/less" should use same button style everywhere.
+- [x] **Goal 5: Standardize dashboard and profile buttons** — Dashboard "View all" / "Show more" links should use consistent variant+size. Profile tabs should have consistent styling. "Save" buttons on forms (edit profile, change password) should be identical pattern. Collapsible sections "Show more/less" should use same button style everywhere.
 
 - [ ] **Goal 6: Standardize admin panel buttons** — Role dropdown styling, search input, pagination buttons, "Show more" on audit log — all should follow the established conventions. Stat card links should use consistent pattern.
 
