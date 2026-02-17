@@ -7,7 +7,7 @@ Based on unified analysis from Claude + Codex (see docs/sprint28-unified-plan.md
 
 **Fixes:**
 - [x] Goal 1: Admin table mobile fix
-- [ ] Goal 2: Fix all select elements for iOS auto-zoom
+- [x] Goal 2: Fix all select elements for iOS auto-zoom
 - [ ] Goal 3: Header & navigation touch targets
 - [ ] Goal 4: Fix undersized action buttons (pagination, export, delete)
 - [ ] Goal 5: Form & dialog button touch targets
