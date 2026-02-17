@@ -137,6 +137,30 @@ describe("Middleware", () => {
 
       expect(isNextResponse(response)).toBe(true);
     });
+
+    it("should allow access to .woff2 font files", () => {
+      const request = createRequest("/fonts/inter.woff2");
+      const response = middleware(request);
+
+      expect(isNextResponse(response)).toBe(true);
+    });
+
+    it("should NOT treat paths with dots as static if extension is unknown", () => {
+      const request = createRequest("/admin/export.csv");
+      const response = middleware(request);
+
+      // Should require auth and redirect to login
+      expect(response.status).toBe(307);
+      const redirectUrl = getRedirectUrl(response);
+      expect(redirectUrl!.pathname).toBe("/auth/login");
+    });
+
+    it("should NOT bypass auth for paths with arbitrary dots", () => {
+      const request = createRequest("/admin/user.settings");
+      const response = middleware(request);
+
+      expect(response.status).toBe(307);
+    });
   });
 
   describe("protected paths without session cookie", () => {

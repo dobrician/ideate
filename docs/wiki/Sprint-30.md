@@ -12,7 +12,7 @@
 
 - [x] **Goal 3: Add HSTS header** — Add `Strict-Transport-Security: max-age=63072000; includeSubDomains` in middleware security headers.
 
-- [ ] **Goal 4: Fix middleware dot-check bypass** — Replace `pathname.includes(".")` with a check for specific static file extensions (`.css`, `.js`, `.ico`, `.png`, `.jpg`, `.svg`, `.woff`, `.woff2`). Add test for the bypass scenario.
+- [x] **Goal 4: Fix middleware dot-check bypass** — Replace `pathname.includes(".")` with a check for specific static file extensions (`.css`, `.js`, `.ico`, `.png`, `.jpg`, `.svg`, `.woff`, `.woff2`). Add test for the bypass scenario.
 
 - [ ] **Goal 5: Accessibility critical fixes** — Add skip-to-main-content link + `id="main-content"` on `<main>`. Fix heading hierarchy (h1 on home, login, register pages). Replace `title` with `aria-label` on all icon-only buttons. Add `aria-label` to unlabeled `<select>` elements. Add `role="alert"` to error message containers. Wire `aria-describedby` on proposal form errors.
 

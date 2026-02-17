@@ -76,7 +76,7 @@ function isPublicPath(pathname: string): boolean {
     pathname.startsWith("/_next/") ||
     pathname.startsWith("/favicon") ||
     pathname.startsWith("/icons/") ||
-    pathname.includes(".")
+    /\.(css|js|ico|png|jpg|jpeg|svg|woff|woff2|webp|avif|gif|map|txt|xml|json|webmanifest)$/i.test(pathname)
   ) {
     return true;
   }
