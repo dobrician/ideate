@@ -575,6 +575,19 @@ export const ro: Record<string, string> = {
   "notifications.saved": "Preferințe de notificare salvate",
   "profile.tabNotifications": "Notificări",
 
+  // Tags
+  "tags.management": "Gestionare Etichete",
+  "tags.managementDesc": "Creează și gestionează etichete pentru categorizarea proiectelor",
+  "tags.created": "Etichetă creată",
+  "tags.deleted": "Etichetă ștearsă",
+  "tags.namePlaceholder": "Numele etichetei...",
+  "tags.creating": "Se creează...",
+  "tags.add": "Adaugă Etichetă",
+  "tags.noTags": "Nicio etichetă încă. Creează una mai sus.",
+  "tags.deleteTag": "Șterge eticheta {name}",
+  "tags.allTags": "Toate etichetele",
+  "a11y.filterByTag": "Filtrare după etichetă",
+
   // Archive
   "archive.banner": "Acest proiect este arhivat și doar pentru citire.",
   "archive.unarchive": "Dezarhivează",

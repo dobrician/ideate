@@ -15,7 +15,11 @@ const SORT_OPTIONS = [
 
 const STATUS_OPTIONS = ["active", "archived", "draft"] as const;
 
-export function ProjectFilters() {
+interface ProjectFiltersProps {
+  tags?: { id: string; name: string }[];
+}
+
+export function ProjectFilters({ tags = [] }: ProjectFiltersProps) {
   const { t } = useLocale();
   const router = useRouter();
   const pathname = usePathname();
@@ -24,6 +28,7 @@ export function ProjectFilters() {
   const currentSearch = searchParams.get("q") ?? "";
   const currentSort = searchParams.get("sort") ?? "newest";
   const currentStatus = searchParams.get("status") ?? "all";
+  const currentTag = searchParams.get("tag") ?? "all";
 
   const updateParams = useCallback(
     (updates: Record<string, string>) => {
@@ -86,6 +91,21 @@ export function ProjectFilters() {
           </option>
         ))}
       </select>
+      {tags.length > 0 && (
+        <select
+          value={currentTag}
+          onChange={(e) => updateParams({ tag: e.target.value })}
+          aria-label={t("a11y.filterByTag")}
+          className="h-10 rounded-md border border-input bg-background px-3 py-2 text-base text-foreground md:text-sm"
+        >
+          <option value="all">{t("tags.allTags")}</option>
+          {tags.map((tag) => (
+            <option key={tag.id} value={tag.id}>
+              {tag.name}
+            </option>
+          ))}
+        </select>
+      )}
     </div>
   );
 }

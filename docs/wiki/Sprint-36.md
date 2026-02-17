@@ -16,7 +16,7 @@
 
 - [x] **Goal 5: Advanced proposal sorting** — Add sort options to proposal list: by votes (most popular), by date (newest/oldest), by comments (most discussed), by controversy (closest pro/contra ratio). Persist sort preference in URL params. Add tests.
 
-- [ ] **Goal 6: Project categories/tags** — Allow projects to have tags (e.g., "Tech", "Design", "Business"). Add `tags` table and `project_tags` junction table. Show tags on project cards. Allow filtering projects by tag. Admin can manage available tags. Add tests.
+- [x] **Goal 6: Project categories/tags** — Allow projects to have tags (e.g., "Tech", "Design", "Business"). Add `tags` table and `project_tags` junction table. Show tags on project cards. Allow filtering projects by tag. Admin can manage available tags. Add tests.
 
 - [ ] **Goal 7: Rich text proposals** — Replace plain textarea with a simple markdown editor for proposal descriptions. Support bold, italic, lists, links. Render markdown in proposal cards. Use a lightweight library (e.g., react-markdown). Sanitize output. Add tests.
 

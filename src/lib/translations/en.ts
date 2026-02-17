@@ -557,6 +557,19 @@ export const en: Record<string, string> = {
   "notifications.saved": "Notification preferences saved",
   "profile.tabNotifications": "Notifications",
 
+  // Tags
+  "tags.management": "Tag Management",
+  "tags.managementDesc": "Create and manage tags for project categorization",
+  "tags.created": "Tag created",
+  "tags.deleted": "Tag deleted",
+  "tags.namePlaceholder": "Tag name...",
+  "tags.creating": "Creating...",
+  "tags.add": "Add Tag",
+  "tags.noTags": "No tags yet. Create one above.",
+  "tags.deleteTag": "Delete tag {name}",
+  "tags.allTags": "All tags",
+  "a11y.filterByTag": "Filter by tag",
+
   "archive.banner": "This project is archived and read-only.",
   "archive.unarchive": "Unarchive",
   "archive.unarchiving": "Unarchiving...",

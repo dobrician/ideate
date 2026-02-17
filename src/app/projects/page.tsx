@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { db } from "@/db";
-import { projects } from "@/db/schema";
+import { projects, tags, projectTags } from "@/db/schema";
 import { getCurrentUser } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { Button } from "@/components/ui/button";
@@ -15,7 +15,7 @@ import {
 import { Pagination } from "@/components/pagination";
 import { ProjectFilters } from "@/components/project-filters";
 import { FolderOpen, Calendar, Clock } from "lucide-react";
-import { desc, asc, count, like, eq, and, sql, type SQL } from "drizzle-orm";
+import { desc, asc, count, like, eq, and, sql, inArray, type SQL } from "drizzle-orm";
 import { getTranslations } from "@/lib/i18n-server";
 import { statusBadgeClass, statusLabel } from "@/lib/status-utils";
 import { formatDate } from "@/lib/utils";
@@ -28,6 +28,7 @@ interface ProjectsPageProps {
     q?: string;
     sort?: string;
     status?: string;
+    tag?: string;
   }>;
 }
 
@@ -44,6 +45,7 @@ export default async function ProjectsPage({ searchParams }: ProjectsPageProps) 
   const searchQuery = (params.q || "").trim();
   const sortBy = params.sort || "newest";
   const statusFilter = params.status || "all";
+  const tagFilter = params.tag || "all";
   const offset = (page - 1) * PAGE_SIZE;
 
   // Build WHERE conditions
@@ -53,6 +55,13 @@ export default async function ProjectsPage({ searchParams }: ProjectsPageProps) 
   }
   if (statusFilter !== "all") {
     conditions.push(eq(projects.status, statusFilter as "active" | "archived" | "draft"));
+  }
+  if (tagFilter !== "all") {
+    const taggedProjectIds = db
+      .select({ projectId: projectTags.projectId })
+      .from(projectTags)
+      .where(eq(projectTags.tagId, tagFilter));
+    conditions.push(inArray(projects.id, taggedProjectIds));
   }
   const where = conditions.length > 0 ? and(...conditions) : undefined;
 
@@ -70,7 +79,7 @@ export default async function ProjectsPage({ searchParams }: ProjectsPageProps) 
     }
   })();
 
-  const [allProjects, totalResult] = await Promise.all([
+  const [allProjects, totalResult, allTags, allProjectTags] = await Promise.all([
     db
       .select()
       .from(projects)
@@ -79,11 +88,23 @@ export default async function ProjectsPage({ searchParams }: ProjectsPageProps) 
       .limit(PAGE_SIZE)
       .offset(offset),
     db.select({ total: count() }).from(projects).where(where),
+    db.select({ id: tags.id, name: tags.name }).from(tags).orderBy(asc(tags.name)),
+    db.select({ projectId: projectTags.projectId, tagId: projectTags.tagId, tagName: tags.name })
+      .from(projectTags)
+      .innerJoin(tags, eq(projectTags.tagId, tags.id)),
   ]);
+
+  // Build a map of projectId -> tags
+  const projectTagsMap = new Map<string, { id: string; name: string }[]>();
+  for (const pt of allProjectTags) {
+    const arr = projectTagsMap.get(pt.projectId) || [];
+    arr.push({ id: pt.tagId, name: pt.tagName });
+    projectTagsMap.set(pt.projectId, arr);
+  }
 
   const total = totalResult[0]?.total ?? 0;
   const totalPages = Math.ceil(total / PAGE_SIZE);
-  const hasFilters = !!searchQuery || statusFilter !== "all";
+  const hasFilters = !!searchQuery || statusFilter !== "all" || tagFilter !== "all";
 
   return (
     <div className="mx-auto max-w-6xl py-4 sm:py-8">
@@ -100,7 +121,7 @@ export default async function ProjectsPage({ searchParams }: ProjectsPageProps) 
       </div>
 
       <div className="mb-6">
-        <ProjectFilters />
+        <ProjectFilters tags={allTags} />
       </div>
 
       {allProjects.length === 0 && !hasFilters && page === 1 ? (
@@ -166,6 +187,15 @@ export default async function ProjectsPage({ searchParams }: ProjectsPageProps) 
                         </span>
                       </div>
                     </div>
+                    {(projectTagsMap.get(project.id) ?? []).length > 0 && (
+                      <div className="mt-2 flex flex-wrap gap-1">
+                        {projectTagsMap.get(project.id)!.map((tag) => (
+                          <Badge key={tag.id} variant="outline" className="text-xs">
+                            {tag.name}
+                          </Badge>
+                        ))}
+                      </div>
+                    )}
                   </CardContent>
                 </Card>
               </Link>

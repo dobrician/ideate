@@ -197,3 +197,28 @@ export const comments = sqliteTable("comments", {
   ),
   userId: text("user_id").references(() => users.id, { onDelete: "set null" }),
 });
+
+// ─── Tags ─────────────────────────────────────────────────────────────────
+
+export const tags = sqliteTable("tags", {
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => randomUUID()),
+  name: text("name").notNull().unique(),
+  createdAt: integer("created_at", { mode: "timestamp" }).default(
+    sql`(unixepoch())`
+  ),
+});
+
+export const projectTags = sqliteTable(
+  "project_tags",
+  {
+    projectId: text("project_id")
+      .notNull()
+      .references(() => projects.id, { onDelete: "cascade" }),
+    tagId: text("tag_id")
+      .notNull()
+      .references(() => tags.id, { onDelete: "cascade" }),
+  },
+  (table) => [primaryKey({ columns: [table.projectId, table.tagId] })]
+);

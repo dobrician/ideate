@@ -33,7 +33,8 @@ type AuditEntity =
   | "user"
   | "invitation"
   | "session"
-  | "attachment";
+  | "attachment"
+  | "tag";
 
 interface AuditEntry {
   userId: string | null;
