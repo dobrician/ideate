@@ -12,7 +12,7 @@
 
 - [x] **Goal 3: Standardize project detail action buttons** — The action bar (PDF, CSV, Edit, ⋯ menu) should use consistent size and variant. All icon+text buttons same size. The "⋯" more menu trigger should match the other action buttons visually. "← Back" link should be a consistent ghost button or text link pattern.
 
-- [ ] **Goal 4: Standardize proposal section buttons** — "+ New Proposal" button, "AI Suggestions" button, vote buttons (👍/👎), expand/collapse chevrons, "Submit" in proposal form, "Cancel" — all should follow consistent sizing. Vote buttons specifically should be identical size. Dialog action buttons (Save/Cancel) should follow a consistent pattern: primary right, outline left.
+- [x] **Goal 4: Standardize proposal section buttons** — "+ New Proposal" button, "AI Suggestions" button, vote buttons (👍/👎), expand/collapse chevrons, "Submit" in proposal form, "Cancel" — all should follow consistent sizing. Vote buttons specifically should be identical size. Dialog action buttons (Save/Cancel) should follow a consistent pattern: primary right, outline left.
 
 - [ ] **Goal 5: Standardize dashboard and profile buttons** — Dashboard "View all" / "Show more" links should use consistent variant+size. Profile tabs should have consistent styling. "Save" buttons on forms (edit profile, change password) should be identical pattern. Collapsible sections "Show more/less" should use same button style everywhere.
 

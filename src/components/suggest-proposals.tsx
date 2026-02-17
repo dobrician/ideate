@@ -150,7 +150,7 @@ export function SuggestProposalsButton({
 
   return (
     <>
-      <Button onClick={generate} variant="outline" size="sm" className="min-h-[44px] gap-1">
+      <Button onClick={generate} variant="outline" size="sm">
         <Sparkles className="h-4 w-4" />
         {t("suggestions.cta")}
       </Button>
@@ -285,7 +285,7 @@ function SuggestionCard({
             size="sm"
             aria-label={t("vote.pro")}
             aria-pressed={suggestion.vote === 1}
-            className={`min-h-[44px] sm:min-h-0 sm:h-7 gap-1 px-2.5 sm:px-2 ${suggestion.vote === 1 ? "bg-green-600 hover:bg-green-700" : ""}`}
+            className={suggestion.vote === 1 ? "bg-green-600 hover:bg-green-700" : ""}
             onClick={() => onVote(1)}
           >
             <ThumbsUp className="h-3.5 w-3.5" aria-hidden="true" />
@@ -295,7 +295,7 @@ function SuggestionCard({
             size="sm"
             aria-label={t("vote.contra")}
             aria-pressed={suggestion.vote === -1}
-            className={`min-h-[44px] sm:min-h-0 sm:h-7 gap-1 px-2.5 sm:px-2 ${suggestion.vote === -1 ? "bg-red-600 hover:bg-red-700" : ""}`}
+            className={suggestion.vote === -1 ? "bg-red-600 hover:bg-red-700" : ""}
             onClick={() => onVote(-1)}
           >
             <ThumbsDown className="h-3.5 w-3.5" aria-hidden="true" />
@@ -303,7 +303,6 @@ function SuggestionCard({
           <Button
             variant="ghost"
             size="sm"
-            className="min-h-[44px] sm:min-h-0 sm:h-7 gap-1 px-2.5 sm:px-2"
             onClick={onViewDetails}
             aria-label={t("suggestions.viewDetails")}
           >

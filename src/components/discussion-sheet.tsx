@@ -33,7 +33,7 @@ export function DiscussionSheet({
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
-        <Button variant="ghost" size="sm" className="min-h-[44px] text-muted-foreground" aria-label={t("comments.open")}>
+        <Button variant="ghost" size="sm" className="text-muted-foreground" aria-label={t("comments.open")}>
           <MessageSquare className="mr-1 h-4 w-4" />
           <span className="rounded-full bg-muted px-1.5 py-0.5 text-xs font-medium">{commentCount}</span>
         </Button>

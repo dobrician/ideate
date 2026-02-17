@@ -141,6 +141,6 @@ describe("VoteButtons", () => {
       <VoteButtons proposalId="p1" projectId="proj1" upvotes={0} downvotes={0} userVote={null} />
     );
     const buttons = screen.getAllByRole("button");
-    buttons.forEach((btn) => expect(btn.className).toContain("min-h-[44px]"));
+    buttons.forEach((btn) => expect(btn.className).toContain("min-h-11"));
   });
 });

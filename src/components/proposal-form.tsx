@@ -111,14 +111,14 @@ function ProposalFormFields({
             onClick={() => setInitialVote("1")}
             aria-pressed={initialVote === "1"}
             aria-label={t("vote.pro")}
-            className={`min-h-[44px] ${initialVote === "1" ? "bg-green-600 hover:bg-green-700" : ""}`}>
+            className={initialVote === "1" ? "bg-green-600 hover:bg-green-700" : ""}>
             <ThumbsUp className="mr-1 h-4 w-4" aria-hidden="true" /> {t("vote.pro")}
           </Button>
           <Button type="button" variant={initialVote === "-1" ? "default" : "outline"} size="sm"
             onClick={() => setInitialVote("-1")}
             aria-pressed={initialVote === "-1"}
             aria-label={t("vote.contra")}
-            className={`min-h-[44px] ${initialVote === "-1" ? "bg-red-600 hover:bg-red-700" : ""}`}>
+            className={initialVote === "-1" ? "bg-red-600 hover:bg-red-700" : ""}>
             <ThumbsDown className="mr-1 h-4 w-4" aria-hidden="true" /> {t("vote.contra")}
           </Button>
         </div>
@@ -132,7 +132,7 @@ function ProposalFormFields({
 
       <div className={showCancel ? "flex justify-end gap-2" : ""}>
         {showCancel && onCancel}
-        <Button type="submit" size="sm" className={`min-h-[44px] ${showCancel ? "" : "w-full"}`} disabled={isPending}>
+        <Button type="submit" size="sm" className={showCancel ? "" : "w-full"} disabled={isPending}>
           {isPending ? t("proposalForm.submitting") : t("proposalForm.submit")}
         </Button>
       </div>

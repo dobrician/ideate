@@ -85,7 +85,7 @@ export function VoteButtons({
         aria-label={`${t("vote.pro")} (${optimistic.upvotes})${optimistic.userVote === 1 ? " - " + t("vote.remove") : ""}`}
         aria-pressed={optimistic.userVote === 1}
         className={cn(
-          "min-h-[44px] transition-all duration-150 active:scale-95",
+          "transition-all duration-150 active:scale-95",
           optimistic.userVote === 1
             ? "bg-emerald-100 text-emerald-700 hover:bg-emerald-200 dark:bg-emerald-900/50 dark:text-emerald-300 dark:hover:bg-emerald-900/70"
             : "text-muted-foreground hover:text-emerald-600 dark:hover:text-emerald-400"
@@ -112,7 +112,7 @@ export function VoteButtons({
         aria-label={`${t("vote.contra")} (${optimistic.downvotes})${optimistic.userVote === -1 ? " - " + t("vote.remove") : ""}`}
         aria-pressed={optimistic.userVote === -1}
         className={cn(
-          "min-h-[44px] transition-all duration-150 active:scale-95",
+          "transition-all duration-150 active:scale-95",
           optimistic.userVote === -1
             ? "bg-red-100 text-red-700 hover:bg-red-200 dark:bg-red-900/50 dark:text-red-300 dark:hover:bg-red-900/70"
             : "text-muted-foreground hover:text-red-600 dark:hover:text-red-400"
