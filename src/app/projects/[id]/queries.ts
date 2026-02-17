@@ -22,6 +22,7 @@ export interface ProposalWithStats {
     userId: string | null;
     userEmail?: string;
     userName?: string;
+    avatarUrl?: string;
     createdAt: Date | null;
   }[];
   authorName: string;
@@ -81,6 +82,7 @@ export async function getProjectProposals(
     createdAt: Date | null;
     userEmail: string | null;
     userName: string | null;
+    avatarUrl: string | null;
   }[] = [];
 
   if (proposalIds.length > 0) {
@@ -94,6 +96,7 @@ export async function getProjectProposals(
         createdAt: comments.createdAt,
         userEmail: users.email,
         userName: users.firstName,
+        avatarUrl: users.avatarUrl,
       })
       .from(comments)
       .leftJoin(users, eq(comments.userId, users.id))
@@ -139,6 +142,7 @@ export async function getProjectProposals(
         userId: c.userId,
         userEmail: c.userEmail ?? undefined,
         userName: c.userName ?? undefined,
+        avatarUrl: c.avatarUrl ?? undefined,
         createdAt: c.createdAt,
       })),
       authorName,

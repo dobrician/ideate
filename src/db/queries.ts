@@ -9,6 +9,7 @@ export interface ProjectComment {
   userId: string | null;
   userEmail?: string;
   userName?: string;
+  avatarUrl?: string;
   createdAt: Date | null;
 }
 
@@ -28,6 +29,7 @@ export async function getProjectComments(
       createdAt: comments.createdAt,
       userEmail: users.email,
       userName: users.firstName,
+      avatarUrl: users.avatarUrl,
     })
     .from(comments)
     .leftJoin(users, eq(comments.userId, users.id))
@@ -41,6 +43,7 @@ export async function getProjectComments(
     userId: r.userId,
     userEmail: r.userEmail ?? undefined,
     userName: r.userName ?? undefined,
+    avatarUrl: r.avatarUrl ?? undefined,
     createdAt: r.createdAt,
   }));
 }

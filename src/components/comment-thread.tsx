@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { addComment } from "@/app/projects/[id]/proposals/comment-actions";
 import { Send, ChevronDown } from "lucide-react";
 import { useLocale } from "@/lib/use-locale";
@@ -19,6 +19,7 @@ export interface Comment {
   userId: string | null;
   userEmail?: string;
   userName?: string;
+  avatarUrl?: string;
   createdAt: Date | null;
 }
 
@@ -84,6 +85,9 @@ function ChatBubble({
     <div className={`flex gap-2 ${isOwn ? "flex-row-reverse" : "flex-row"}`}>
       {showAvatar ? (
         <Avatar size="sm" className="mt-1 shrink-0">
+          {comment.avatarUrl && (
+            <AvatarImage src={comment.avatarUrl} alt={displayName} />
+          )}
           <AvatarFallback className={`${colorClass} text-white`}>{initials}</AvatarFallback>
         </Avatar>
       ) : (
