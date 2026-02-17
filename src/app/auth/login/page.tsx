@@ -179,12 +179,13 @@ export default function LoginPage() {
               <p className="text-sm text-green-800 dark:text-green-200">
                 {t("auth.emailVerified")}
               </p>
-              <button
+              <Button
+                variant="link"
                 onClick={() => setVerifiedBanner(false)}
-                className="mt-1 inline-flex min-h-[44px] items-center text-xs text-green-600 underline dark:text-green-300"
+                className="mt-1 px-0 text-xs text-green-600 dark:text-green-300"
               >
                 {t("auth.dismiss")}
-              </button>
+              </Button>
             </div>
           )}
 
@@ -264,7 +265,7 @@ export default function LoginPage() {
                     <Button
                       type="button"
                       variant="link"
-                      className="mt-1 min-h-[44px] px-0 text-xs text-red-700 dark:text-red-300"
+                      className="mt-1 px-0 text-xs text-red-700 dark:text-red-300"
                       onClick={handleResendVerification}
                       disabled={resendLoading}
                     >
