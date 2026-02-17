@@ -115,8 +115,14 @@ export default function LoginPage() {
       if (!response.ok) {
         if (data.code === "EMAIL_NOT_VERIFIED") {
           setNeedsVerification(true);
+          setError(t("auth.verifyEmailFirst"));
+        } else if (response.status === 401) {
+          setError(t("auth.invalidCredentials"));
+        } else if (response.status === 429) {
+          setError(t("auth.tooManyAttempts"));
+        } else {
+          setError(data.error || t("common.errorOccurred"));
         }
-        setError(data.error || "Failed to sign in");
         return;
       }
       window.location.href = searchParams.get("redirect") || "/";

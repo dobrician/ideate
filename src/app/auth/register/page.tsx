@@ -92,7 +92,13 @@ export default function RegisterPage() {
       const data = await response.json();
 
       if (!response.ok) {
-        setError(data.error || "Registration failed");
+        if (response.status === 409) {
+          setError(t("auth.emailAlreadyExists"));
+        } else if (response.status === 429) {
+          setError(t("auth.tooManyAttempts"));
+        } else {
+          setError(data.error || t("common.errorOccurred"));
+        }
         return;
       }
 

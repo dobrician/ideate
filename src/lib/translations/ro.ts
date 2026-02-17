@@ -287,6 +287,10 @@ export const ro: Record<string, string> = {
   "auth.confirmPasswordRequired": "Confirmă parola",
   "auth.passwordRequirements":
     "Minim 8 caractere cu majusculă, literă mică și cifră",
+  "auth.invalidCredentials": "Email sau parolă incorectă",
+  "auth.verifyEmailFirst": "Te rugăm să verifici email-ul înainte de autentificare",
+  "auth.emailAlreadyExists": "Un cont cu acest email există deja",
+  "auth.tooManyAttempts": "Prea multe încercări. Încearcă din nou mai târziu.",
   "auth.backToLogin": "Înapoi la Autentificare",
   "auth.invalidLink": "Link Invalid",
   "auth.invalidLinkDesc":

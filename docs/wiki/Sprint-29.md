@@ -12,7 +12,7 @@
 
 - [x] **Goal 3: Styled form validation across all forms** — Replace browser-default validation tooltips with styled inline error messages on: login, registration, forgot password, create project, create proposal, comments. Include: required fields, email format, password mismatch, min length. Fix the "Creeează" typo → "Creează".
 
-- [ ] **Goal 4: Auth flow error feedback** — Login: show styled error for wrong credentials. Registration: show error if email exists, success message + redirect on creation. Forgot password: show confirmation message regardless of email existence (security). All auth forms must have visible feedback for every outcome.
+- [x] **Goal 4: Auth flow error feedback** — Login: show styled error for wrong credentials. Registration: show error if email exists, success message + redirect on creation. Forgot password: show confirmation message regardless of email existence (security). All auth forms must have visible feedback for every outcome.
 
 - [ ] **Goal 5: Admin panel UX** — Add toast confirmation when role is changed. Add search/filter to user table. Add pagination (or virtual scroll) if >20 users.
 
