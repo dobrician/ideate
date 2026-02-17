@@ -193,6 +193,14 @@ export const en: Record<string, string> = {
   "dashboard.projectComments": "{count} comments",
   "dashboard.showMore": "Show {count} more",
   "dashboard.showLess": "Show less",
+  "dashboard.analytics": "Analytics",
+
+  // Charts
+  "charts.votesOverTime": "Votes Over Time",
+  "charts.topProposals": "Top Proposals",
+  "charts.activityHeatmap": "Activity (Last 30 Days)",
+  "charts.actions": "Actions",
+  "charts.noData": "No data available yet",
 
   // Profile
   "profile.title": "Profile",

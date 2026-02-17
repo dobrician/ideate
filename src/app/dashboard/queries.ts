@@ -1,6 +1,6 @@
 import { db } from "@/db";
 import { projects, proposals, votes, comments, users } from "@/db/schema";
-import { eq, desc, asc, sql, count, or, inArray } from "drizzle-orm";
+import { eq, desc, asc, sql, count, or, inArray, gte } from "drizzle-orm";
 
 /**
  * Fetch all data needed for the dashboard page in parallel.
@@ -152,4 +152,72 @@ async function getRecentActivity(userId: string) {
     .leftJoin(proposals, eq(comments.proposalId, proposals.id))
     .orderBy(desc(comments.createdAt))
     .limit(10);
+}
+
+/**
+ * Fetch chart data for the dashboard analytics section.
+ */
+export async function getChartData() {
+  const thirtyDaysAgo = new Date();
+  thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+  const [votesOverTime, topProposals, activityHeatmap] = await Promise.all([
+    // Votes per day (last 30 days)
+    db
+      .select({
+        date: sql<string>`date(${votes.createdAt}, 'unixepoch')`.as("date"),
+        pro: sql<number>`SUM(CASE WHEN ${votes.value} = 1 THEN 1 ELSE 0 END)`.as("pro"),
+        contra: sql<number>`SUM(CASE WHEN ${votes.value} = -1 THEN 1 ELSE 0 END)`.as("contra"),
+      })
+      .from(votes)
+      .where(gte(votes.createdAt, thirtyDaysAgo))
+      .groupBy(sql`date(${votes.createdAt}, 'unixepoch')`)
+      .orderBy(asc(sql`date(${votes.createdAt}, 'unixepoch')`)),
+
+    // Top 8 proposals by total votes
+    db
+      .select({
+        title: proposals.title,
+        pro: sql<number>`SUM(CASE WHEN ${votes.value} = 1 THEN 1 ELSE 0 END)`.as("pro"),
+        contra: sql<number>`SUM(CASE WHEN ${votes.value} = -1 THEN 1 ELSE 0 END)`.as("contra"),
+      })
+      .from(proposals)
+      .innerJoin(votes, eq(votes.proposalId, proposals.id))
+      .groupBy(proposals.id)
+      .orderBy(desc(sql`COUNT(*)`))
+      .limit(8),
+
+    // Activity heatmap: actions per day (last 30 days) — votes + comments
+    db
+      .select({
+        date: sql<string>`date(created_at, 'unixepoch')`.as("date"),
+        count: sql<number>`COUNT(*)`.as("count"),
+      })
+      .from(
+        sql`(
+          SELECT ${votes.createdAt} as created_at FROM ${votes} WHERE ${votes.createdAt} >= ${thirtyDaysAgo}
+          UNION ALL
+          SELECT ${comments.createdAt} as created_at FROM ${comments} WHERE ${comments.createdAt} >= ${thirtyDaysAgo}
+        )`
+      )
+      .groupBy(sql`date(created_at, 'unixepoch')`)
+      .orderBy(asc(sql`date(created_at, 'unixepoch')`)),
+  ]);
+
+  return {
+    votesOverTime: votesOverTime.map((r) => ({
+      date: r.date,
+      pro: Number(r.pro),
+      contra: Number(r.contra),
+    })),
+    topProposals: topProposals.map((r) => ({
+      title: r.title.length > 25 ? r.title.slice(0, 25) + "..." : r.title,
+      pro: Number(r.pro),
+      contra: Number(r.contra),
+    })),
+    activityHeatmap: activityHeatmap.map((r) => ({
+      date: r.date,
+      count: Number(r.count),
+    })),
+  };
 }

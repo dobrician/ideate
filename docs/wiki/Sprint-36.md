@@ -20,7 +20,7 @@
 
 - [x] **Goal 7: Rich text proposals** — Replace plain textarea with a simple markdown editor for proposal descriptions. Support bold, italic, lists, links. Render markdown in proposal cards. Use a lightweight library (e.g., react-markdown). Sanitize output. Add tests.
 
-- [ ] **Goal 8: Dashboard analytics charts** — Add visual charts to dashboard: votes over time (line chart), top proposals (bar chart), activity heatmap (last 30 days). Use a lightweight chart library (e.g., recharts). Make charts responsive. Add tests.
+- [x] **Goal 8: Dashboard analytics charts** — Add visual charts to dashboard: votes over time (line chart), top proposals (bar chart), activity heatmap (last 30 days). Use a lightweight chart library (e.g., recharts). Make charts responsive. Add tests.
 
 ## Notes
 

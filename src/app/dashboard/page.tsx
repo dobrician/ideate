@@ -13,8 +13,9 @@ import {
 import { StatCard, formatRelativeTime } from "@/components/stat-card";
 import { getTranslations } from "@/lib/i18n-server";
 import { statusBadgeClass, statusLabel, deadlineBadge } from "@/lib/status-utils";
-import { getDashboardData } from "./queries";
+import { getDashboardData, getChartData } from "./queries";
 import { CollapsibleList } from "./collapsible-list";
+import { VotesOverTimeChart, TopProposalsChart, ActivityHeatmapChart } from "./charts";
 
 function EmptyState({ icon, text }: { icon: React.ReactNode; text: React.ReactNode }) {
   return (
@@ -30,10 +31,13 @@ export default async function DashboardPage() {
   if (!user) redirect("/auth/login");
   const { t } = await getTranslations();
 
-  const {
+  const [{
     userProjects, userProposals, userVoteCount, recentVotes, recentActivity,
     userStats, platformStats,
-  } = await getDashboardData(user.id);
+  }, chartData] = await Promise.all([
+    getDashboardData(user.id),
+    getChartData(),
+  ]);
 
   return (
     <div className="mx-auto max-w-6xl py-4 sm:py-8">
@@ -247,6 +251,16 @@ export default async function DashboardPage() {
             )}
           </CardContent>
         </Card>
+      </div>
+
+      {/* Analytics Charts */}
+      <div className="mt-6 sm:mt-8">
+        <h2 className="mb-4 text-xl font-bold">{t("dashboard.analytics")}</h2>
+        <div className="grid gap-6 lg:grid-cols-2">
+          <VotesOverTimeChart data={chartData.votesOverTime} />
+          <TopProposalsChart data={chartData.topProposals} />
+          <ActivityHeatmapChart data={chartData.activityHeatmap} />
+        </div>
       </div>
     </div>
   );

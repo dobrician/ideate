@@ -203,6 +203,14 @@ export const ro: Record<string, string> = {
   "dashboard.projectComments": "{count} comentarii",
   "dashboard.showMore": "Arată încă {count}",
   "dashboard.showLess": "Arată mai puțin",
+  "dashboard.analytics": "Analiză",
+
+  // Charts
+  "charts.votesOverTime": "Voturi în Timp",
+  "charts.topProposals": "Cele Mai Votate Propuneri",
+  "charts.activityHeatmap": "Activitate (Ultimele 30 Zile)",
+  "charts.actions": "Acțiuni",
+  "charts.noData": "Nu sunt date disponibile încă",
 
   // Profile
   "profile.title": "Profil",
