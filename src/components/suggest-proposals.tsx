@@ -171,7 +171,7 @@ export function SuggestProposalsButton({
           )}
 
           {error && !loading && (
-            <div className="py-4 sm:py-6 text-center text-sm text-muted-foreground">
+            <div className="py-4 sm:py-6 text-center text-sm text-muted-foreground" role="alert">
               {error}
             </div>
           )}

@@ -9,7 +9,7 @@
 
 - [x] **Goal 2: Replace hardcoded "en-US" fallback in export formatDate** — `lib/export-types.ts` uses `locale ?? "en-US"`. Fall back to `process.env.LOCALE || "en-US"` to match the locale strategy used in `lib/ai.ts`.
 
-- [ ] **Goal 3: Add role="alert" to remaining dynamic error containers** — `reset-password`, `forgot-password`, `projects/new`, `edit-project-dialog`, and `suggest-proposals` have dynamic error divs without `role="alert"`. Add it for screen reader announcements.
+- [x] **Goal 3: Add role="alert" to remaining dynamic error containers** — `reset-password`, `forgot-password`, `projects/new`, `edit-project-dialog`, and `suggest-proposals` have dynamic error divs without `role="alert"`. Add it for screen reader announcements.
 
 - [ ] **Goal 4: Rename buildCommentTree to buildThreadedCommentTree** — The function in `lib/comment-utils.ts` sorts then builds a parent-child tree. Rename to `buildThreadedCommentTree` for clarity. Update all import sites.
 
