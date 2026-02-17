@@ -43,5 +43,7 @@ CREATE INDEX IF NOT EXISTS idx_comments_project_id ON comments(project_id);
 CREATE INDEX IF NOT EXISTS idx_comments_parent_id ON comments(parent_id);
 --> statement-breakpoint
 
--- 3. Add updated_at to votes table
-ALTER TABLE votes ADD COLUMN `updated_at` integer DEFAULT (unixepoch());
+-- 3. Add updated_at to votes table (SQLite requires constant default for ALTER TABLE ADD COLUMN)
+ALTER TABLE votes ADD COLUMN `updated_at` integer DEFAULT 0;
+--> statement-breakpoint
+UPDATE votes SET updated_at = CAST(strftime('%s', 'now') AS INTEGER) WHERE updated_at = 0;
