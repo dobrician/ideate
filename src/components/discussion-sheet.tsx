@@ -47,7 +47,7 @@ export function DiscussionSheet({
             {t("comments.sheetDescription")}
           </SheetDescription>
         </SheetHeader>
-        <div className="mt-2 flex-1 overflow-hidden px-2 pb-[env(safe-area-inset-bottom)] sm:mt-3 sm:px-4">
+        <div className="mt-2 flex-1 overflow-hidden px-2 pb-[max(env(safe-area-inset-bottom),var(--kb-inset,0px))] sm:mt-3 sm:px-4">
           <CommentThread
             comments={comments}
             hiddenFields={{ proposalId }}

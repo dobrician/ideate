@@ -9,6 +9,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { addComment } from "@/app/projects/[id]/proposals/comment-actions";
 import { Send, ChevronDown, MessageSquare } from "lucide-react";
 import { useLocale } from "@/lib/use-locale";
+import { useKeyboardInset } from "@/lib/use-keyboard-inset";
 import { getCsrfTokenClient } from "@/lib/csrf-client";
 import { MarkdownRenderer } from "@/components/markdown-renderer";
 
@@ -51,11 +52,7 @@ export function getInitials(name: string): string {
     .toUpperCase();
 }
 
-const AVATAR_COLORS = [
-  "bg-blue-600", "bg-emerald-600", "bg-violet-600",
-  "bg-amber-600", "bg-rose-600", "bg-cyan-600",
-  "bg-pink-600", "bg-indigo-600",
-];
+const AVATAR_COLORS = ["bg-blue-600", "bg-emerald-600", "bg-violet-600", "bg-amber-600", "bg-rose-600", "bg-cyan-600", "bg-pink-600", "bg-indigo-600"];
 
 export function avatarColor(userId: string | null): string {
   if (!userId) return AVATAR_COLORS[0];
@@ -161,6 +158,7 @@ export function CommentThread({ comments, hiddenFields, currentUserId }: Comment
         createdAt: null,
       });
     }
+    setCharCount(0);
     return baseFormAction(formData);
   }
 
@@ -180,10 +178,11 @@ export function CommentThread({ comments, hiddenFields, currentUserId }: Comment
     if (state?.success) {
       formRef.current?.reset();
       if (textareaRef.current) textareaRef.current.style.height = "";
-      setCharCount(0);
       router.refresh();
     }
   }, [state, router]);
+
+  useKeyboardInset();
 
   useEffect(() => {
     const el = getViewport();
@@ -251,7 +250,7 @@ export function CommentThread({ comments, hiddenFields, currentUserId }: Comment
           </button>
         )}
       </div>
-      <div className="border-t pt-2 pb-[env(safe-area-inset-bottom)] sm:pt-3">
+      <div className="border-t pt-2 pb-[max(env(safe-area-inset-bottom),0.5rem)] sm:pt-3">
         <form ref={formRef} action={formAction}>
           {Object.entries(hiddenFields).map(([name, value]) => (
             <input key={name} type="hidden" name={name} value={value} />
