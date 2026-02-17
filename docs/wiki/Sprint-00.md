@@ -15,7 +15,7 @@
 
 - [x] **Goal 5: Search keyboard navigation** — Add ArrowUp/Down/Enter handlers to search combobox, fix `aria-selected` tracking, remove misleading static ARIA attributes.
 
-- [ ] **Goal 6: Profile change-password flow** — Add change-password form to profile page with current-password verification.
+- [x] **Goal 6: Profile change-password flow** — Add change-password form to profile page with current-password verification.
 
 - [ ] **Goal 7: SSO foundation (OIDC)** — Add OpenID Connect login with a configurable provider (Google as default), linking OIDC accounts to existing users by email.
 
