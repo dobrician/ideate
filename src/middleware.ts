@@ -65,6 +65,18 @@ const PUBLIC_PATHS = [
 ];
 
 /**
+ * Route prefixes that require authentication.
+ * Any path not matching these prefixes (and not an API route) will be allowed
+ * through — if it doesn't match a real page, Next.js renders the 404 page.
+ */
+const PROTECTED_PREFIXES = [
+  "/dashboard",
+  "/admin",
+  "/profile",
+  "/projects",
+];
+
+/**
  * Check if a path matches public routes (exact or prefix match)
  */
 function isPublicPath(pathname: string): boolean {
@@ -81,6 +93,20 @@ function isPublicPath(pathname: string): boolean {
     return true;
   }
   return false;
+}
+
+/**
+ * Check if a path requires authentication.
+ * Only known protected prefixes and non-public API routes require auth.
+ * Unknown paths are let through so Next.js can render 404 for everyone.
+ */
+function isProtectedPath(pathname: string): boolean {
+  // Non-public API routes require auth
+  if (pathname.startsWith("/api/")) return true;
+  // Known protected page routes
+  return PROTECTED_PREFIXES.some(
+    (prefix) => pathname === prefix || pathname.startsWith(prefix + "/")
+  );
 }
 
 /**
@@ -123,7 +149,8 @@ export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const locale = request.cookies.get("locale")?.value || "en";
 
-  if (isPublicPath(pathname)) {
+  // Public paths and unknown routes (will 404) pass through without auth
+  if (isPublicPath(pathname) || !isProtectedPath(pathname)) {
     const response = NextResponse.next({
       request: { headers: new Headers(request.headers) },
     });

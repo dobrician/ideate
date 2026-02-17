@@ -16,7 +16,7 @@
 
 - [x] **Goal 5: Auth & form polish** — Center forgot-password card vertically on mobile. Equalize spacing between register form fields. Move "Submit Proposal" button closer to form fields in sidebar (or make full-width). Add `title` attribute with full author name to truncated proposal author text.
 
-- [ ] **Goal 6: 404 page auth redirect fix** — Unauthenticated users hitting a non-existent route get redirected to login instead of seeing 404. Exempt the 404/not-found page from auth redirect in middleware so it renders for everyone.
+- [x] **Goal 6: 404 page auth redirect fix** — Unauthenticated users hitting a non-existent route get redirected to login instead of seeing 404. Exempt the 404/not-found page from auth redirect in middleware so it renders for everyone.
 
 ## Notes
 
