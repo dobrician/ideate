@@ -19,7 +19,7 @@ Based on unified analysis from Claude + Codex (see docs/sprint26-unified-plan.md
 
 **Testing:**
 - [x] Goal 3: CommentThread + ChatBubble component render tests
-- [ ] Goal 4: Scroll and new-message indicator tests
+- [x] Goal 4: Scroll and new-message indicator tests
 
 ## Constraints
 - Commit + push after EACH goal

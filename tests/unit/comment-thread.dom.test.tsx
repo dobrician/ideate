@@ -1,6 +1,7 @@
 // @vitest-environment jsdom
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen, within } from "@testing-library/react";
+import { render, screen, within, act } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom/vitest";
 
 // ── Mocks ──────────────────────────────────────────────────────
@@ -283,5 +284,161 @@ describe("CommentThread rendering", () => {
     );
     const bubble = container.querySelector(".bg-muted.rounded-2xl");
     expect(bubble).toBeInTheDocument();
+  });
+});
+
+/* ------------------------------------------------------------------ */
+/*  Goal 4: Scroll and new-message indicator tests                     */
+/* ------------------------------------------------------------------ */
+
+function mockViewportScroll(container: HTMLElement, opts: {
+  scrollHeight: number;
+  scrollTop: number;
+  clientHeight: number;
+}) {
+  const viewport = container.querySelector("[data-slot='scroll-area-viewport']");
+  if (viewport) {
+    Object.defineProperty(viewport, "scrollHeight", { value: opts.scrollHeight, configurable: true });
+    Object.defineProperty(viewport, "scrollTop", { value: opts.scrollTop, writable: true, configurable: true });
+    Object.defineProperty(viewport, "clientHeight", { value: opts.clientHeight, configurable: true });
+  }
+  return viewport;
+}
+
+describe("Scroll and new-message indicator", () => {
+  // Mock requestAnimationFrame to execute callbacks synchronously
+  beforeEach(() => {
+    vi.spyOn(window, "requestAnimationFrame").mockImplementation((cb) => {
+      cb(0);
+      return 0;
+    });
+  });
+
+  it("auto-scrolls to bottom on initial render", () => {
+    const comments = [
+      makeComment({ id: "c1", createdAt: new Date("2026-01-15T12:00:00Z") }),
+      makeComment({ id: "c2", content: "Second", createdAt: new Date("2026-01-15T12:01:00Z") }),
+    ];
+    const { container } = render(
+      <CommentThread comments={comments} hiddenFields={{ projectId: "p1" }} />
+    );
+    const viewport = container.querySelector("[data-slot='scroll-area-viewport']");
+    expect(viewport).toBeInTheDocument();
+  });
+
+  it("does not show new-messages pill on initial render", () => {
+    const comments = [makeComment()];
+    render(
+      <CommentThread comments={comments} hiddenFields={{ projectId: "p1" }} />
+    );
+    expect(screen.queryByText("New messages")).not.toBeInTheDocument();
+  });
+
+  it("shows new-messages pill when scrolled up and new comment arrives", () => {
+    const initial = [
+      makeComment({ id: "c1", createdAt: new Date("2026-01-15T12:00:00Z") }),
+    ];
+    const { container, rerender } = render(
+      <CommentThread comments={initial} hiddenFields={{ projectId: "p1" }} />
+    );
+
+    // Simulate user scrolled up (scrollHeight - scrollTop - clientHeight > 100)
+    mockViewportScroll(container, {
+      scrollHeight: 1000,
+      scrollTop: 200,
+      clientHeight: 400,
+    });
+
+    // Add a new comment via rerender
+    const updated = [
+      ...initial,
+      makeComment({ id: "c2", content: "New!", createdAt: new Date("2026-01-15T12:02:00Z") }),
+    ];
+    rerender(
+      <CommentThread comments={updated} hiddenFields={{ projectId: "p1" }} />
+    );
+
+    expect(screen.getByText("New messages")).toBeInTheDocument();
+  });
+
+  it("scrolls to bottom when new-messages pill is clicked", async () => {
+    const initial = [
+      makeComment({ id: "c1", createdAt: new Date("2026-01-15T12:00:00Z") }),
+    ];
+    const { container, rerender } = render(
+      <CommentThread comments={initial} hiddenFields={{ projectId: "p1" }} />
+    );
+
+    // Simulate scrolled up
+    mockViewportScroll(container, {
+      scrollHeight: 1000,
+      scrollTop: 200,
+      clientHeight: 400,
+    });
+
+    // New comment arrives
+    const updated = [
+      ...initial,
+      makeComment({ id: "c2", content: "Incoming!", createdAt: new Date("2026-01-15T12:02:00Z") }),
+    ];
+    rerender(
+      <CommentThread comments={updated} hiddenFields={{ projectId: "p1" }} />
+    );
+
+    // Click the pill
+    const pill = screen.getByText("New messages");
+    await userEvent.click(pill);
+
+    // Pill should disappear after click
+    expect(screen.queryByText("New messages")).not.toBeInTheDocument();
+  });
+
+  it("auto-scrolls (no pill) when near bottom and new comment arrives", () => {
+    const initial = [
+      makeComment({ id: "c1", createdAt: new Date("2026-01-15T12:00:00Z") }),
+    ];
+    const { container, rerender } = render(
+      <CommentThread comments={initial} hiddenFields={{ projectId: "p1" }} />
+    );
+
+    // Simulate near bottom (scrollHeight - scrollTop - clientHeight < 100)
+    mockViewportScroll(container, {
+      scrollHeight: 500,
+      scrollTop: 350,
+      clientHeight: 100,
+    });
+
+    const updated = [
+      ...initial,
+      makeComment({ id: "c2", content: "Near bottom", createdAt: new Date("2026-01-15T12:02:00Z") }),
+    ];
+    rerender(
+      <CommentThread comments={updated} hiddenFields={{ projectId: "p1" }} />
+    );
+
+    // Should NOT show new-messages pill (auto-scrolled instead)
+    expect(screen.queryByText("New messages")).not.toBeInTheDocument();
+  });
+
+  it("new-messages pill has proper styling", () => {
+    const initial = [makeComment({ id: "c1", createdAt: new Date("2026-01-15T12:00:00Z") })];
+    const { container, rerender } = render(
+      <CommentThread comments={initial} hiddenFields={{ projectId: "p1" }} />
+    );
+
+    mockViewportScroll(container, { scrollHeight: 1000, scrollTop: 200, clientHeight: 400 });
+
+    const updated = [
+      ...initial,
+      makeComment({ id: "c2", content: "Notify!", createdAt: new Date("2026-01-15T12:02:00Z") }),
+    ];
+    rerender(
+      <CommentThread comments={updated} hiddenFields={{ projectId: "p1" }} />
+    );
+
+    const pill = screen.getByText("New messages").closest("button");
+    expect(pill).toBeInTheDocument();
+    expect(pill?.className).toContain("rounded-full");
+    expect(pill?.className).toContain("bg-primary");
   });
 });
