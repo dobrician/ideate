@@ -4,6 +4,12 @@ Reverse chronological. Click each sprint for full details.
 
 ---
 
+### 🔄 [Sprint 40 — Security Hardening, Accessibility & Tech Debt](Sprint-40) *(2026-02-17)*
+**Focus:** Account takeover fix, JWT revocation, auth logging, error text contrast, vote icon a11y, dialog focus, rate limiting, schema+hook cleanup
+**Stats:** 0/8 goals | 1096 tests | In progress
+
+---
+
 ### ✅ [Sprint 39 — Code Quality, Coverage Gaps & Accessibility](Sprint-39) *(2026-02-17)*
 **Focus:** Fix lint warnings, close coverage gaps (search-d1/actions/db), split oversized files, remove dead code, localize export dates, proposal form a11y
 **Stats:** 8/8 goals | 1096 tests | 6 files split, dead code removed, locale-aware exports, a11y fix
