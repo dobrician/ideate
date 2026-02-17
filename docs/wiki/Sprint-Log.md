@@ -16,8 +16,9 @@ Reverse chronological. Click each sprint for full details.
 
 ---
 
-### 🔄 [Sprint 35 — Production Hardening & DevOps](Sprint-35) *(2026-02-17)*
+### ✅ [Sprint 35 — Production Hardening & DevOps](Sprint-35) *(2026-02-17)*
 **Focus:** Sentry error tracking, E2E in CI, flaky test fix, SSE heartbeat, DB backup, user invitations, audit export, middleware→proxy migration
+**Stats:** 8 commits | 869 tests | Sentry integrated | E2E in CI | Invitations + audit export features
 
 ---
 
