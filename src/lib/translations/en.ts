@@ -416,6 +416,7 @@ export const en: Record<string, string> = {
   "search.noResults": "No results found",
   "search.typeProject": "Project",
   "search.typeProposal": "Proposal",
+  "search.typeComment": "Comment",
   "search.ariaResults": "Search results",
 
   // Export

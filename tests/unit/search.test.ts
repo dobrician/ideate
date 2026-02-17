@@ -3,6 +3,7 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 // ── Mocks ──────────────────────────────────────────────────────────────────
 
 const mockAll = vi.fn();
+const mockGet = vi.fn();
 const mockPrepare = vi.fn();
 const mockExec = vi.fn();
 const mockPragma = vi.fn();
@@ -28,7 +29,8 @@ import { search, rebuildSearchIndex } from "@/lib/search";
 beforeEach(() => {
   vi.clearAllMocks();
   mockAll.mockReturnValue([]);
-  mockPrepare.mockReturnValue({ all: mockAll });
+  mockGet.mockReturnValue(undefined);
+  mockPrepare.mockReturnValue({ all: mockAll, get: mockGet });
 });
 
 // ── Tests ──────────────────────────────────────────────────────────────────
@@ -77,7 +79,8 @@ describe("Search Library", () => {
 
       mockAll
         .mockReturnValueOnce(projectResults)
-        .mockReturnValueOnce(proposalResults);
+        .mockReturnValueOnce(proposalResults)
+        .mockReturnValueOnce([]); // comments
 
       const results = search("React");
 
@@ -93,8 +96,55 @@ describe("Search Library", () => {
         type: "proposal",
       });
 
-      expect(mockPrepare).toHaveBeenCalledTimes(2);
+      // projects + proposals + comments FTS = 3 prepare calls
+      expect(mockPrepare).toHaveBeenCalledTimes(3);
       expect(mockClose).toHaveBeenCalled();
+    });
+
+    it("should include comment results from FTS search", () => {
+      mockAll
+        .mockReturnValueOnce([]) // projects
+        .mockReturnValueOnce([]) // proposals
+        .mockReturnValueOnce([
+          {
+            id: "comm-1",
+            content: "This is a great idea about React",
+            projectId: "proj-1",
+            proposalId: null,
+            snippet: "great idea about <mark>React</mark>",
+          },
+        ]); // comments
+
+      const results = search("React");
+
+      expect(results).toHaveLength(1);
+      expect(results[0]).toMatchObject({
+        id: "comm-1",
+        type: "comment",
+        projectId: "proj-1",
+      });
+    });
+
+    it("should resolve projectId for proposal-level comments", () => {
+      mockAll
+        .mockReturnValueOnce([]) // projects
+        .mockReturnValueOnce([]) // proposals
+        .mockReturnValueOnce([
+          {
+            id: "comm-1",
+            content: "Nice proposal",
+            projectId: null,
+            proposalId: "prop-1",
+            snippet: "Nice <mark>proposal</mark>",
+          },
+        ]); // comments
+
+      mockGet.mockReturnValueOnce({ project_id: "proj-99" });
+
+      const results = search("proposal");
+
+      expect(results).toHaveLength(1);
+      expect(results[0].projectId).toBe("proj-99");
     });
 
     it("should respect custom limit parameter", () => {
@@ -130,7 +180,8 @@ describe("Search Library", () => {
 
       mockAll
         .mockReturnValueOnce(projectResults)
-        .mockReturnValueOnce(proposalResults);
+        .mockReturnValueOnce(proposalResults)
+        .mockReturnValueOnce([]); // comments
 
       const results = search("test", 20);
 
@@ -144,7 +195,7 @@ describe("Search Library", () => {
         .mockImplementationOnce(() => {
           throw new Error("no such table: projects_fts");
         })
-        .mockImplementation(() => ({ all: mockAll }));
+        .mockImplementation(() => ({ all: mockAll, get: mockGet }));
 
       mockAll
         .mockReturnValueOnce([
@@ -160,7 +211,8 @@ describe("Search Library", () => {
             title: "Test Proposal",
             description: "A proposal",
           },
-        ]);
+        ])
+        .mockReturnValueOnce([]); // comment fallback
 
       const results = search("test");
 
@@ -169,6 +221,31 @@ describe("Search Library", () => {
       expect(results[0].snippet).toBe("Test Project");
       expect(results[1].type).toBe("proposal");
       expect(results[1].snippet).toBe("Test Proposal");
+    });
+
+    it("should include comment fallback results via LIKE", () => {
+      mockPrepare
+        .mockImplementationOnce(() => {
+          throw new Error("no such table: projects_fts");
+        })
+        .mockImplementation(() => ({ all: mockAll, get: mockGet }));
+
+      mockAll
+        .mockReturnValueOnce([]) // projects fallback
+        .mockReturnValueOnce([]) // proposals fallback
+        .mockReturnValueOnce([
+          {
+            id: "comm-1",
+            content: "A comment about testing",
+            project_id: "proj-1",
+          },
+        ]); // comments fallback
+
+      const results = search("test");
+
+      expect(results).toHaveLength(1);
+      expect(results[0].type).toBe("comment");
+      expect(results[0].projectId).toBe("proj-1");
     });
 
     it("should close database connection after successful search", () => {
@@ -211,11 +288,61 @@ describe("Search Library", () => {
             snippet: "<mark>No</mark> Description",
           },
         ])
-        .mockReturnValueOnce([]);
+        .mockReturnValueOnce([])
+        .mockReturnValueOnce([]); // comments
 
       const results = search("no");
 
       expect(results[0].description).toBeNull();
+    });
+
+    it("should truncate long comment content for title", () => {
+      const longContent = "A".repeat(100);
+      mockAll
+        .mockReturnValueOnce([]) // projects
+        .mockReturnValueOnce([]) // proposals
+        .mockReturnValueOnce([
+          {
+            id: "comm-1",
+            content: longContent,
+            projectId: "proj-1",
+            proposalId: null,
+            snippet: "AAA...",
+          },
+        ]); // comments
+
+      const results = search("AA");
+
+      expect(results[0].title.length).toBeLessThanOrEqual(83); // 80 + "..."
+      expect(results[0].title).toContain("...");
+    });
+
+    it("should gracefully handle missing comments_fts table", () => {
+      // projects + proposals succeed, comments FTS throws
+      let callCount = 0;
+      mockPrepare.mockImplementation(() => {
+        callCount++;
+        if (callCount === 3) {
+          throw new Error("no such table: comments_fts");
+        }
+        return { all: mockAll, get: mockGet };
+      });
+
+      mockAll
+        .mockReturnValueOnce([
+          {
+            id: "proj-1",
+            title: "Test",
+            description: null,
+            snippet: "<mark>Test</mark>",
+          },
+        ])
+        .mockReturnValueOnce([]); // proposals
+
+      const results = search("Test");
+
+      expect(results).toHaveLength(1);
+      expect(results[0].type).toBe("project");
     });
   });
 

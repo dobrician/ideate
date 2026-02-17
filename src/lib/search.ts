@@ -7,13 +7,13 @@ interface SearchResult {
   id: string;
   title: string;
   description: string | null;
-  type: "project" | "proposal";
+  type: "project" | "proposal" | "comment";
   snippet: string;
   projectId?: string;
 }
 
 /**
- * Full-text search across projects and proposals using SQLite FTS5.
+ * Full-text search across projects, proposals, and comments using SQLite FTS5.
  * Falls back to LIKE queries if FTS tables don't exist.
  *
  * @param query - Search terms
@@ -85,6 +85,30 @@ function searchFts(
     snippet: string;
   }>;
 
+  let commentResults: Array<{
+    id: string;
+    content: string;
+    projectId: string | null;
+    proposalId: string | null;
+    snippet: string;
+  }> = [];
+
+  try {
+    commentResults = sqlite
+      .prepare(
+        `SELECT c.id, c.content, c.project_id as projectId, c.proposal_id as proposalId,
+                snippet(comments_fts, 0, '<mark>', '</mark>', '...', 32) as snippet
+         FROM comments_fts
+         JOIN comments c ON c.rowid = comments_fts.rowid
+         WHERE comments_fts MATCH ?
+         ORDER BY rank
+         LIMIT ?`
+      )
+      .all(ftsQuery, limit) as typeof commentResults;
+  } catch {
+    // comments_fts may not exist yet — skip gracefully
+  }
+
   const results: SearchResult[] = [
     ...projectResults.map((r) => ({
       ...r,
@@ -95,6 +119,28 @@ function searchFts(
       type: "proposal" as const,
       projectId: r.projectId,
     })),
+    ...commentResults.map((r) => {
+      // Resolve the projectId for comment navigation
+      let projectId = r.projectId ?? undefined;
+      if (!projectId && r.proposalId) {
+        try {
+          const row = sqlite
+            .prepare("SELECT project_id FROM proposals WHERE id = ?")
+            .get(r.proposalId) as { project_id: string } | undefined;
+          projectId = row?.project_id;
+        } catch {
+          // ignore
+        }
+      }
+      return {
+        id: r.id,
+        title: r.content.slice(0, 80) + (r.content.length > 80 ? "..." : ""),
+        description: r.content,
+        type: "comment" as const,
+        snippet: r.snippet,
+        projectId,
+      };
+    }),
   ];
 
   return results.slice(0, limit);
@@ -134,6 +180,25 @@ function searchFallback(
     projectId: string;
   }>;
 
+  let commentResults: Array<{
+    id: string;
+    content: string;
+    project_id: string | null;
+  }> = [];
+
+  try {
+    commentResults = sqlite
+      .prepare(
+        `SELECT id, content, project_id
+         FROM comments
+         WHERE content LIKE ?
+         LIMIT ?`
+      )
+      .all(pattern, limit) as typeof commentResults;
+  } catch {
+    // comments table may not exist in test environments
+  }
+
   return [
     ...projectResults.map((r) => ({
       ...r,
@@ -145,6 +210,14 @@ function searchFallback(
       type: "proposal" as const,
       snippet: r.title,
       projectId: r.projectId,
+    })),
+    ...commentResults.map((r) => ({
+      id: r.id,
+      title: r.content.slice(0, 80) + (r.content.length > 80 ? "..." : ""),
+      description: r.content,
+      type: "comment" as const,
+      snippet: r.content.slice(0, 100),
+      projectId: r.project_id ?? undefined,
     })),
   ].slice(0, limit);
 }
@@ -162,6 +235,13 @@ export function rebuildSearchIndex(): void {
       INSERT INTO projects_fts(projects_fts) VALUES('rebuild');
       INSERT INTO proposals_fts(proposals_fts) VALUES('rebuild');
     `);
+    try {
+      sqlite.exec(
+        `INSERT INTO comments_fts(comments_fts) VALUES('rebuild');`
+      );
+    } catch {
+      // comments_fts may not exist yet
+    }
   } finally {
     sqlite.close();
   }

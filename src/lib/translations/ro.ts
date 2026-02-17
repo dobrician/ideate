@@ -435,6 +435,7 @@ export const ro: Record<string, string> = {
   "search.noResults": "Niciun rezultat găsit",
   "search.typeProject": "Proiect",
   "search.typeProposal": "Propunere",
+  "search.typeComment": "Comentariu",
   "search.ariaResults": "Rezultate căutare",
 
   // Export
