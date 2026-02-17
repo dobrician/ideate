@@ -71,7 +71,7 @@ export function UserRoleManager({
 
             return (
               <tr key={u.id} className="border-b last:border-0">
-                <td className="py-2 pr-4">{u.email}</td>
+                <td className="max-w-[150px] truncate py-2 pr-4">{u.email}</td>
                 <td className="py-2 pr-4">{name}</td>
                 <td className="py-2 pr-4">
                   {isSelf ? (
@@ -86,7 +86,7 @@ export function UserRoleManager({
                       value={u.role}
                       onChange={(e) => handleRoleChange(u.id, e.target.value)}
                       disabled={loadingId === u.id}
-                      className="rounded border border-input bg-background px-2 py-1 text-xs text-foreground"
+                      className="rounded border border-input bg-background px-2 py-2 text-base text-foreground md:text-xs"
                     >
                       {ROLES.map((r) => (
                         <option key={r} value={r}>
