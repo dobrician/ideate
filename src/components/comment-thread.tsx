@@ -7,7 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { addComment } from "@/app/projects/[id]/proposals/comment-actions";
-import { Send, ChevronDown } from "lucide-react";
+import { Send, ChevronDown, MessageSquare } from "lucide-react";
 import { useLocale } from "@/lib/use-locale";
 import { getCsrfTokenClient } from "@/lib/csrf-client";
 import { MarkdownRenderer } from "@/components/markdown-renderer";
@@ -216,9 +216,12 @@ export function CommentThread({ comments, hiddenFields, currentUserId }: Comment
       <div className="relative flex-1">
         <ScrollArea ref={scrollRef} className="h-full pr-2">
           {sorted.length === 0 ? (
-            <p className="py-8 text-center text-sm text-muted-foreground">
-              {t("comments.noComments")}
-            </p>
+            <div className="flex h-full flex-col items-center justify-center gap-2 py-12">
+              <MessageSquare className="h-8 w-8 text-muted-foreground/40" />
+              <p className="text-center text-sm text-muted-foreground">
+                {t("comments.noComments")}
+              </p>
+            </div>
           ) : (
             <div className="space-y-1 pb-2">
               {sorted.map((c, i) => {

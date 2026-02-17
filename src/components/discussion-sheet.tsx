@@ -38,16 +38,16 @@ export function DiscussionSheet({
           <span className="rounded-full bg-muted px-1.5 py-0.5 text-xs font-medium">{commentCount}</span>
         </Button>
       </SheetTrigger>
-      <SheetContent className="w-full sm:max-w-lg">
-        <SheetHeader>
+      <SheetContent className="flex w-full flex-col sm:max-w-lg">
+        <SheetHeader className="shrink-0">
           <SheetTitle className="text-left">
             {t("comments.title")}: {proposalTitle}
           </SheetTitle>
-          <SheetDescription className="text-left">
+          <SheetDescription className="text-left text-xs">
             {t("comments.sheetDescription")}
           </SheetDescription>
         </SheetHeader>
-        <div className="mt-2 h-[calc(100dvh-8rem)] px-2 pb-[env(safe-area-inset-bottom)] sm:mt-4 sm:h-[calc(100vh-10rem)] sm:px-4">
+        <div className="mt-2 flex-1 overflow-hidden px-2 pb-[env(safe-area-inset-bottom)] sm:mt-3 sm:px-4">
           <CommentThread
             comments={comments}
             hiddenFields={{ proposalId }}
