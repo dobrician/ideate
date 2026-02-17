@@ -1,15 +1,23 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { updateUserRole } from "./actions";
+import { updateUserRole, bulkUpdateUserRole, bulkDeleteUsers } from "./actions";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { useLocale } from "@/lib/use-locale";
 import { formatDate } from "@/lib/utils";
 import { getCsrfTokenClient } from "@/lib/csrf-client";
-import { Search, ChevronLeft, ChevronRight } from "lucide-react";
+import { Search, ChevronLeft, ChevronRight, Trash2 } from "lucide-react";
 
 interface UserData {
   id: string;
@@ -35,9 +43,6 @@ const ROLE_COLORS: Record<string, string> = {
   viewer: "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200",
 };
 
-/**
- * User role management with responsive card layout (mobile) and table (desktop)
- */
 export function UserRoleManager({
   users,
   currentUserId,
@@ -47,6 +52,12 @@ export function UserRoleManager({
   const [search, setSearch] = useState("");
   const [roleFilter, setRoleFilter] = useState<string>("all");
   const [page, setPage] = useState(1);
+  const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [bulkLoading, setBulkLoading] = useState(false);
+  const [confirmDialog, setConfirmDialog] = useState<{
+    type: "delete";
+    ids: string[];
+  } | null>(null);
 
   const filtered = useMemo(() => {
     const q = search.toLowerCase().trim();
@@ -68,6 +79,32 @@ export function UserRoleManager({
     safePage * PAGE_SIZE
   );
 
+  const selectableOnPage = paginated.filter((u) => u.id !== currentUserId);
+  const allOnPageSelected =
+    selectableOnPage.length > 0 &&
+    selectableOnPage.every((u) => selected.has(u.id));
+
+  function toggleSelect(userId: string) {
+    setSelected((prev) => {
+      const next = new Set(prev);
+      if (next.has(userId)) next.delete(userId);
+      else next.add(userId);
+      return next;
+    });
+  }
+
+  function toggleSelectAll() {
+    setSelected((prev) => {
+      const next = new Set(prev);
+      if (allOnPageSelected) {
+        selectableOnPage.forEach((u) => next.delete(u.id));
+      } else {
+        selectableOnPage.forEach((u) => next.add(u.id));
+      }
+      return next;
+    });
+  }
+
   async function handleRoleChange(userId: string, newRole: string) {
     setLoadingId(userId);
     const result = await updateUserRole(userId, newRole, getCsrfTokenClient());
@@ -77,6 +114,37 @@ export function UserRoleManager({
       toast.error(result.error);
     } else {
       toast.success(t("admin.roleUpdated"));
+    }
+  }
+
+  async function handleBulkRoleChange(newRole: string) {
+    const ids = Array.from(selected);
+    if (ids.length === 0) return;
+    setBulkLoading(true);
+    const result = await bulkUpdateUserRole(ids, newRole, getCsrfTokenClient());
+    setBulkLoading(false);
+
+    if (result.error) {
+      toast.error(result.error);
+    } else {
+      toast.success(t("admin.bulkRoleUpdated", { count: result.count ?? ids.length }));
+      setSelected(new Set());
+    }
+  }
+
+  async function handleBulkDelete() {
+    if (!confirmDialog) return;
+    const ids = confirmDialog.ids;
+    setBulkLoading(true);
+    setConfirmDialog(null);
+    const result = await bulkDeleteUsers(ids, getCsrfTokenClient());
+    setBulkLoading(false);
+
+    if (result.error) {
+      toast.error(result.error);
+    } else {
+      toast.success(t("admin.bulkDeleted", { count: result.count ?? ids.length }));
+      setSelected(new Set());
     }
   }
 
@@ -111,8 +179,48 @@ export function UserRoleManager({
     );
   }
 
+  const selectedCount = selected.size;
+
   return (
     <div className="space-y-4">
+      {/* Bulk action bar */}
+      {selectedCount > 0 && (
+        <div className="flex flex-wrap items-center gap-2 rounded-lg border border-primary/20 bg-primary/5 px-3 py-2">
+          <span className="text-sm font-medium">
+            {t("admin.selected", { count: selectedCount })}
+          </span>
+          <select
+            onChange={(e) => {
+              if (e.target.value) handleBulkRoleChange(e.target.value);
+              e.target.value = "";
+            }}
+            disabled={bulkLoading}
+            defaultValue=""
+            className="h-8 rounded border border-input bg-background px-2 text-sm"
+          >
+            <option value="" disabled>
+              {t("admin.bulkChangeRole")}
+            </option>
+            {ROLES.map((r) => (
+              <option key={r} value={r}>
+                {t(`role.${r}`)}
+              </option>
+            ))}
+          </select>
+          <Button
+            variant="destructive"
+            size="sm"
+            disabled={bulkLoading}
+            onClick={() =>
+              setConfirmDialog({ type: "delete", ids: Array.from(selected) })
+            }
+          >
+            <Trash2 className="mr-1 h-3.5 w-3.5" />
+            {t("admin.bulkDelete")}
+          </Button>
+        </div>
+      )}
+
       {/* Search & filter bar */}
       <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
         <div className="relative flex-1">
@@ -147,11 +255,22 @@ export function UserRoleManager({
           <div className="space-y-3 md:hidden">
             {paginated.map((u) => {
               const name = getUserName(u);
+              const isSelf = u.id === currentUserId;
               return (
                 <div key={u.id} className="rounded-lg border p-3 space-y-2">
-                  <div className="flex items-start justify-between gap-2">
-                    <p className="min-w-0 break-all text-sm font-medium">{u.email}</p>
-                    {renderRoleControl(u)}
+                  <div className="flex items-start gap-2">
+                    {!isSelf && (
+                      <input
+                        type="checkbox"
+                        checked={selected.has(u.id)}
+                        onChange={() => toggleSelect(u.id)}
+                        className="mt-1 h-4 w-4 shrink-0 rounded border-gray-300"
+                      />
+                    )}
+                    <div className="flex flex-1 items-start justify-between gap-2">
+                      <p className="min-w-0 break-all text-sm font-medium">{u.email}</p>
+                      {renderRoleControl(u)}
+                    </div>
                   </div>
                   {name && (
                     <p className="text-xs text-muted-foreground">{name}</p>
@@ -169,6 +288,15 @@ export function UserRoleManager({
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b text-left">
+                  <th className="pb-2 pr-2 font-medium w-8">
+                    <input
+                      type="checkbox"
+                      checked={allOnPageSelected}
+                      onChange={toggleSelectAll}
+                      aria-label={t("admin.selectAll")}
+                      className="h-4 w-4 rounded border-gray-300"
+                    />
+                  </th>
                   <th className="pb-2 font-medium">{t("admin.email")}</th>
                   <th className="pb-2 font-medium">{t("admin.name")}</th>
                   <th className="pb-2 font-medium">{t("admin.role")}</th>
@@ -178,8 +306,19 @@ export function UserRoleManager({
               <tbody>
                 {paginated.map((u) => {
                   const name = getUserName(u);
+                  const isSelf = u.id === currentUserId;
                   return (
                     <tr key={u.id} className="border-b last:border-0">
+                      <td className="py-2 pr-2">
+                        {!isSelf && (
+                          <input
+                            type="checkbox"
+                            checked={selected.has(u.id)}
+                            onChange={() => toggleSelect(u.id)}
+                            className="h-4 w-4 rounded border-gray-300"
+                          />
+                        )}
+                      </td>
                       <td className="max-w-[200px] truncate py-2 pr-4" title={u.email}>
                         {u.email}
                       </td>
@@ -237,6 +376,32 @@ export function UserRoleManager({
           </div>
         </div>
       )}
+
+      {/* Confirm delete dialog */}
+      <Dialog
+        open={!!confirmDialog}
+        onOpenChange={(open) => !open && setConfirmDialog(null)}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>
+              {confirmDialog &&
+                t("admin.bulkDeleteConfirmTitle", { count: confirmDialog.ids.length })}
+            </DialogTitle>
+            <DialogDescription>
+              {t("admin.bulkDeleteConfirmDesc")}
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setConfirmDialog(null)}>
+              {t("admin.cancel")}
+            </Button>
+            <Button variant="destructive" onClick={handleBulkDelete}>
+              {t("admin.confirm")}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

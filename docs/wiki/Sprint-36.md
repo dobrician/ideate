@@ -10,7 +10,7 @@
 
 - [x] **Goal 2: Project archival with read-only mode** — When a project is archived, it becomes fully read-only: no new proposals, no voting, no comments. Show a clear "Archived" banner. Allow admins to unarchive. Ensure all mutation endpoints check project status. Add tests.
 
-- [ ] **Goal 3: Bulk operations for admin** — Add checkboxes to admin user table for bulk role change and bulk delete. Add checkboxes to projects list for bulk archive/delete. Confirmation dialog before destructive bulk operations. Add tests.
+- [x] **Goal 3: Bulk operations for admin** — Add checkboxes to admin user table for bulk role change and bulk delete. Add checkboxes to projects list for bulk archive/delete. Confirmation dialog before destructive bulk operations. Add tests.
 
 - [ ] **Goal 4: Notification preferences** — Add a notifications settings section to user profile. Options: email on new proposal in my projects, email on vote on my proposals, email on comment reply. Store preferences in a `notification_preferences` table. Respect preferences when sending emails. Add tests.
 

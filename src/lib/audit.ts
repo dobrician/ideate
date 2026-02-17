@@ -20,7 +20,10 @@ type AuditAction =
   | "unvote"
   | "comment"
   | "project_comment"
-  | "upload";
+  | "upload"
+  | "bulk_update"
+  | "bulk_delete"
+  | "bulk_archive";
 
 type AuditEntity =
   | "project"

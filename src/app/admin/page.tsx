@@ -18,6 +18,7 @@ import { Users, FolderOpen, Lightbulb, ThumbsUp, ShieldX } from "lucide-react";
 import { UserRoleManager } from "./user-role-manager";
 import { AuditLog } from "./audit-log";
 import { InvitationPanel } from "./invitation-panel";
+import { ProjectManager } from "./project-manager";
 import { StatCard } from "@/components/stat-card";
 import { getTranslations } from "@/lib/i18n-server";
 
@@ -46,7 +47,7 @@ export default async function AdminPage() {
   }
   // locale used for date formatting via formatDateTime
 
-  const [allUsers, stats, recentAudit, pendingInvitations] = await Promise.all([
+  const [allUsers, stats, recentAudit, pendingInvitations, allProjects] = await Promise.all([
     db
       .select({
         id: users.id,
@@ -96,6 +97,16 @@ export default async function AdminPage() {
       .from(invitations)
       .leftJoin(users, eq(invitations.invitedBy, users.id))
       .orderBy(desc(invitations.createdAt)),
+
+    db
+      .select({
+        id: projects.id,
+        title: projects.title,
+        status: projects.status,
+        createdAt: projects.createdAt,
+      })
+      .from(projects)
+      .orderBy(desc(projects.createdAt)),
   ]);
 
   const s = stats[0];
@@ -146,6 +157,19 @@ export default async function AdminPage() {
           </CardHeader>
           <CardContent>
             <UserRoleManager users={allUsers} currentUserId={user.id} />
+          </CardContent>
+        </Card>
+
+        {/* Project Management */}
+        <Card className="lg:col-span-2">
+          <CardHeader>
+            <CardTitle>{t("admin.projectManagement")}</CardTitle>
+            <CardDescription>
+              {t("admin.projectCount", { count: allProjects.length })}
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <ProjectManager projects={allProjects} />
           </CardContent>
         </Card>
 
