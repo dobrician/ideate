@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
 import { projects, proposals, votes, comments, users } from "@/db/schema";
 import { getCurrentUser } from "@/lib/auth";
-import { eq, sql } from "drizzle-orm";
+import { eq, sql, and, gte, lte } from "drizzle-orm";
 import { generateCsv, generatePdf } from "@/lib/export";
 import { logger } from "@/lib/logger";
 
@@ -23,12 +23,36 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
 
     const { id } = await params;
     const format = request.nextUrl.searchParams.get("format") || "pdf";
+    const fromDate = request.nextUrl.searchParams.get("from");
+    const toDate = request.nextUrl.searchParams.get("to");
 
     if (format !== "pdf" && format !== "csv") {
       return NextResponse.json(
         { error: "Invalid format. Use 'pdf' or 'csv'." },
         { status: 400 }
       );
+    }
+
+    // Parse optional date range filters
+    let fromTimestamp: Date | null = null;
+    let toTimestamp: Date | null = null;
+    if (fromDate) {
+      fromTimestamp = new Date(fromDate);
+      if (isNaN(fromTimestamp.getTime())) {
+        return NextResponse.json(
+          { error: "Invalid 'from' date format. Use YYYY-MM-DD." },
+          { status: 400 }
+        );
+      }
+    }
+    if (toDate) {
+      toTimestamp = new Date(toDate + "T23:59:59.999Z");
+      if (isNaN(toTimestamp.getTime())) {
+        return NextResponse.json(
+          { error: "Invalid 'to' date format. Use YYYY-MM-DD." },
+          { status: 400 }
+        );
+      }
     }
 
     const project = await db
@@ -42,6 +66,15 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
     }
 
     const projectData = project[0];
+
+    // Build proposal filter conditions with optional date range
+    const proposalConditions = [eq(proposals.projectId, id)];
+    if (fromTimestamp) {
+      proposalConditions.push(gte(proposals.createdAt, fromTimestamp));
+    }
+    if (toTimestamp) {
+      proposalConditions.push(lte(proposals.createdAt, toTimestamp));
+    }
 
     const proposalRows = await db
       .select({
@@ -60,7 +93,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
       .from(proposals)
       .leftJoin(votes, eq(proposals.id, votes.proposalId))
       .leftJoin(users, eq(proposals.userId, users.id))
-      .where(eq(proposals.projectId, id))
+      .where(and(...proposalConditions))
       .groupBy(proposals.id);
 
     const proposalIds = proposalRows.map((p) => p.id);

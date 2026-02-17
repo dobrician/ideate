@@ -26,6 +26,7 @@
   "dependencies": {
     "@sentry/nextjs": "^10.39.0",
     "@tailwindcss/typography": "^0.5.19",
+    "archiver": "^7.0.1",
     "bcryptjs": "^3.0.3",
     "better-sqlite3": "^12.6.2",
     "class-variance-authority": "^0.7.1",
@@ -56,6 +57,7 @@
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.2",
     "@testing-library/user-event": "^14.6.1",
+    "@types/archiver": "^7.0.0",
     "@types/bcryptjs": "^2.4.6",
     "@types/better-sqlite3": "^7.6.13",
     "@types/jsonwebtoken": "^9.0.10",
