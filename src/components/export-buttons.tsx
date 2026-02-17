@@ -29,6 +29,7 @@ export function ExportButtons({ projectId }: ExportButtonsProps) {
       <Button
         variant="outline"
         size="sm"
+        className="min-h-[44px]"
         onClick={() => handleExport("pdf")}
         title={t("export.pdfTooltip")}
       >
@@ -38,6 +39,7 @@ export function ExportButtons({ projectId }: ExportButtonsProps) {
       <Button
         variant="outline"
         size="sm"
+        className="min-h-[44px]"
         onClick={() => handleExport("csv")}
         title={t("export.csvTooltip")}
       >

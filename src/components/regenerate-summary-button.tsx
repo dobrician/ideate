@@ -48,7 +48,7 @@ export function RegenerateSummaryButton({ projectId }: Props) {
       size="sm"
       onClick={handleRegenerate}
       disabled={loading}
-      className="h-7 gap-1 px-2 text-xs text-muted-foreground"
+      className="h-7 min-h-[44px] gap-1 px-2 text-xs text-muted-foreground"
     >
       <RefreshCw className={`h-3 w-3 ${loading ? "animate-spin" : ""}`} />
       {loading ? t("projectSummary.regenerating") : t("projectSummary.regenerate")}

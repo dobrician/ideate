@@ -66,7 +66,7 @@ export function PwaInstall() {
       <Button
         variant="ghost"
         size="icon"
-        className="h-6 w-6"
+        className="h-6 w-6 min-h-[40px] min-w-[40px]"
         onClick={dismiss}
       >
         <X className="h-3 w-3" />

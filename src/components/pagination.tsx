@@ -38,7 +38,7 @@ export function Pagination({ currentPage, totalPages }: PaginationProps) {
       <Button
         variant="outline"
         size="icon"
-        className="h-8 w-8"
+        className="h-8 w-8 min-h-[44px] min-w-[44px]"
         asChild
         disabled={currentPage <= 1}
         aria-label="Previous page"
@@ -59,7 +59,7 @@ export function Pagination({ currentPage, totalPages }: PaginationProps) {
           key={page}
           variant={page === currentPage ? "default" : "outline"}
           size="icon"
-          className="h-8 w-8"
+          className="h-8 w-8 min-h-[44px] min-w-[44px]"
           asChild={page !== currentPage}
           aria-label={`Page ${page}`}
           aria-current={page === currentPage ? "page" : undefined}
@@ -75,7 +75,7 @@ export function Pagination({ currentPage, totalPages }: PaginationProps) {
       <Button
         variant="outline"
         size="icon"
-        className="h-8 w-8"
+        className="h-8 w-8 min-h-[44px] min-w-[44px]"
         asChild
         disabled={currentPage >= totalPages}
         aria-label="Next page"
