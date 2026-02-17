@@ -272,7 +272,7 @@ export function CommentThread({ comments, hiddenFields, currentUserId }: Comment
               type="submit"
               size="icon"
               disabled={isPending}
-              title={t("comments.submit")}
+              aria-label={t("comments.submit")}
               className="h-[44px] w-[44px] shrink-0"
             >
               <Send className="h-4 w-4" />
@@ -289,7 +289,7 @@ export function CommentThread({ comments, hiddenFields, currentUserId }: Comment
             </p>
           )}
           {state?.error && (
-            <p className="mt-1 text-xs text-red-600 dark:text-red-300">{state.error}</p>
+            <p className="mt-1 text-xs text-red-600 dark:text-red-300" role="alert">{state.error}</p>
           )}
         </form>
       </div>

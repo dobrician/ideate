@@ -145,9 +145,9 @@ export default function RegisterPage() {
       <Card className="w-full max-w-md shadow-lg">
         <CardHeader className="space-y-1 text-center">
           <p className="text-3xl font-bold tracking-tight">Ideate</p>
-          <CardTitle className="text-2xl font-bold">
+          <h1 className="text-2xl font-bold leading-none">
             {t("auth.registerTitle")}
-          </CardTitle>
+          </h1>
           <CardDescription>{t("auth.registerDesc")}</CardDescription>
         </CardHeader>
         <CardContent>
@@ -226,7 +226,7 @@ export default function RegisterPage() {
             </div>
 
             {error && (
-              <div className="rounded-md bg-red-50 p-3 dark:bg-red-950">
+              <div className="rounded-md bg-red-50 p-3 dark:bg-red-950" role="alert">
                 <p className="text-sm text-red-800 dark:text-red-200">{error}</p>
               </div>
             )}

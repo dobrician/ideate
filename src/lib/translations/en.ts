@@ -382,6 +382,7 @@ export const en: Record<string, string> = {
   "pwa.install": "Install Ideate",
   "pwa.installDesc": "Add to your home screen for quick access",
   "pwa.installButton": "Install",
+  "pwa.dismiss": "Dismiss",
 
   // Deadline
   "deadline.closed": "Voting Closed",
@@ -435,4 +436,13 @@ export const en: Record<string, string> = {
   "similarity.score": "{score}% similar",
   "similarity.explanation": "{explanation}",
   "similarity.highOverlap": "High overlap detected — consider reviewing existing proposals",
+
+  // Accessibility
+  "a11y.skipToMain": "Skip to main content",
+  "a11y.sortBy": "Sort by",
+  "a11y.filterByStatus": "Filter by status",
+  "a11y.filterByRole": "Filter by role",
+  "a11y.dismissBanner": "Dismiss",
+  "a11y.submitComment": "Submit comment",
+  "a11y.changeRoleFor": "Change role for {email}",
 };

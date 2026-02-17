@@ -14,7 +14,7 @@
 
 - [x] **Goal 4: Fix middleware dot-check bypass** — Replace `pathname.includes(".")` with a check for specific static file extensions (`.css`, `.js`, `.ico`, `.png`, `.jpg`, `.svg`, `.woff`, `.woff2`). Add test for the bypass scenario.
 
-- [ ] **Goal 5: Accessibility critical fixes** — Add skip-to-main-content link + `id="main-content"` on `<main>`. Fix heading hierarchy (h1 on home, login, register pages). Replace `title` with `aria-label` on all icon-only buttons. Add `aria-label` to unlabeled `<select>` elements. Add `role="alert"` to error message containers. Wire `aria-describedby` on proposal form errors.
+- [x] **Goal 5: Accessibility critical fixes** — Add skip-to-main-content link + `id="main-content"` on `<main>`. Fix heading hierarchy (h1 on home, login, register pages). Replace `title` with `aria-label` on all icon-only buttons. Add `aria-label` to unlabeled `<select>` elements. Add `role="alert"` to error message containers. Wire `aria-describedby` on proposal form errors.
 
 - [ ] **Goal 6: Code quality deduplication** — Extract shared `isDeadlinePassed` to `lib/project-utils.ts`. Remove duplicate `escapeHtml` from `export.ts` (import from `sanitize.ts`). Extract duplicate `Comment` type to shared types. Remove verified unused exports from rbac, sanitize, ai, llm modules (verify they're truly unused first).
 

@@ -401,6 +401,7 @@ export const ro: Record<string, string> = {
   "pwa.install": "Instalează Ideate",
   "pwa.installDesc": "Adaugă pe ecranul principal pentru acces rapid",
   "pwa.installButton": "Instalează",
+  "pwa.dismiss": "Închide",
 
   // Deadline
   "deadline.closed": "Votare Închisă",
@@ -454,4 +455,13 @@ export const ro: Record<string, string> = {
   "similarity.score": "{score}% similar",
   "similarity.explanation": "{explanation}",
   "similarity.highOverlap": "Suprapunere ridicată detectată — verifică propunerile existente",
+
+  // Accessibility
+  "a11y.skipToMain": "Sari la conținutul principal",
+  "a11y.sortBy": "Sortare după",
+  "a11y.filterByStatus": "Filtrare după stare",
+  "a11y.filterByRole": "Filtrare după rol",
+  "a11y.dismissBanner": "Închide",
+  "a11y.submitComment": "Trimite comentariu",
+  "a11y.changeRoleFor": "Schimbă rolul pentru {email}",
 };

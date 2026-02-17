@@ -232,11 +232,11 @@ describe("CommentThread rendering", () => {
     expect(textarea).toHaveAttribute("maxLength", "2000");
   });
 
-  it("renders send button with title", () => {
+  it("renders send button with aria-label", () => {
     render(
       <CommentThread comments={[]} hiddenFields={{ projectId: "p1" }} />
     );
-    const btn = screen.getByTitle("Send");
+    const btn = screen.getByRole("button", { name: "Send" });
     expect(btn).toBeInTheDocument();
     expect(btn).toHaveAttribute("type", "submit");
   });

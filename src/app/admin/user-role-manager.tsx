@@ -95,6 +95,7 @@ export function UserRoleManager({
         <select
           value={roleFilter}
           onChange={(e) => { setRoleFilter(e.target.value); setPage(1); }}
+          aria-label={t("a11y.filterByRole")}
           className="h-10 rounded-md border border-input bg-background px-3 py-2 text-base text-foreground md:text-sm"
         >
           <option value="all">{t("admin.allRoles")}</option>
@@ -145,6 +146,7 @@ export function UserRoleManager({
                           value={u.role}
                           onChange={(e) => handleRoleChange(u.id, e.target.value)}
                           disabled={loadingId === u.id}
+                          aria-label={t("a11y.changeRoleFor", { email: u.email })}
                           className="rounded border border-input bg-background px-2 py-2 text-base text-foreground md:text-xs"
                         >
                           {ROLES.map((r) => (

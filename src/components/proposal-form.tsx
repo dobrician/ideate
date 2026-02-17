@@ -64,9 +64,10 @@ function ProposalFormFields({
           onChange={(e) => { setTitle(e.target.value); handleFieldChange(e.target.value, description); }}
           onBlur={() => setTitleTouched(true)}
           aria-invalid={!!titleError}
+          aria-describedby={titleError ? "proposal-title-error" : undefined}
         />
         {titleError && (
-          <p className="text-xs text-red-600 dark:text-red-300">{titleError}</p>
+          <p id="proposal-title-error" className="text-xs text-red-600 dark:text-red-300">{titleError}</p>
         )}
       </div>
 
@@ -124,7 +125,7 @@ function ProposalFormFields({
       </div>
 
       {state?.error && (
-        <div className="rounded-md bg-red-50 p-3 dark:bg-red-950">
+        <div className="rounded-md bg-red-50 p-3 dark:bg-red-950" role="alert">
           <p className="text-sm text-red-800 dark:text-red-200">{state.error}</p>
         </div>
       )}

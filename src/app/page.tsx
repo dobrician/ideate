@@ -41,9 +41,9 @@ export default async function HomePage() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
       <div className="text-center sm:text-left">
-        <h2 className="text-2xl font-bold tracking-tight sm:text-3xl">
+        <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">
           {t("home.welcome")}
-        </h2>
+        </h1>
         <p className="mt-2 text-muted-foreground">
           {t("home.description")}
         </p>

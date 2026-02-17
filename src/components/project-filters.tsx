@@ -64,6 +64,7 @@ export function ProjectFilters() {
       <select
         value={currentSort}
         onChange={(e) => updateParams({ sort: e.target.value })}
+        aria-label={t("a11y.sortBy")}
         className="h-10 rounded-md border border-input bg-background px-3 py-2 text-base text-foreground md:text-sm"
       >
         {SORT_OPTIONS.map((opt) => (
@@ -75,6 +76,7 @@ export function ProjectFilters() {
       <select
         value={currentStatus}
         onChange={(e) => updateParams({ status: e.target.value })}
+        aria-label={t("a11y.filterByStatus")}
         className="h-10 rounded-md border border-input bg-background px-3 py-2 text-base text-foreground md:text-sm"
       >
         <option value="all">{t("projects.allStatuses")}</option>

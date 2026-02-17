@@ -68,6 +68,7 @@ export function PwaInstall() {
         size="icon"
         className="h-6 w-6 min-h-[40px] min-w-[40px]"
         onClick={dismiss}
+        aria-label={t("pwa.dismiss")}
       >
         <X className="h-3 w-3" />
       </Button>
