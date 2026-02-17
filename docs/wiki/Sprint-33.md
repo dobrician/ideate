@@ -6,7 +6,7 @@
 
 ## Goals
 
-- [ ] **Goal 1: Fix duplicate form + discussion on project detail** — A second "Project Discussion" and "New Proposal" form appear below the fold. Desktop shows sidebar form AND bottom form simultaneously. Remove the bottom-of-page duplicate sections. Show sidebar form on desktop only, dialog/sheet on mobile only. Render discussion section once inside the project card. This is the biggest visual issue remaining.
+- [x] **Goal 1: Fix duplicate form + discussion on project detail** — A second "Project Discussion" and "New Proposal" form appear below the fold. Desktop shows sidebar form AND bottom form simultaneously. Remove the bottom-of-page duplicate sections. Show sidebar form on desktop only, dialog/sheet on mobile only. Render discussion section once inside the project card. This is the biggest visual issue remaining.
 
 - [ ] **Goal 2: Admin panel mobile card layout** — User emails truncated to unreadable fragments on mobile. Implement responsive card layout for mobile: show email prominently, role as badge, hide Name when empty. Add "Show more" to audit log (limit to 5 entries by default). Fix admin search to filter the user table, not the global nav search. Standardize on relative timestamps ("2h ago") in audit log.
 

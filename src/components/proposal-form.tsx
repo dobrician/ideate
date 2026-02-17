@@ -194,7 +194,7 @@ export function ProposalFormInline(props: ProposalFormProps) {
   }, [form.state, form.t, form.resetForm]);
 
   return (
-    <div className="rounded-lg border bg-card p-4">
+    <div data-rsc-content className="rounded-lg border bg-card p-4">
       <h3 className="mb-3 text-sm font-semibold">{form.t("proposalForm.title")}</h3>
       <ProposalFormFields form={form} />
     </div>

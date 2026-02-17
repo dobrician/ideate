@@ -101,4 +101,9 @@
   body {
     @apply bg-background text-foreground;
   }
+  /* Hide orphaned RSC streaming chunks that leak as direct body children */
+  body > [data-rsc-content],
+  body > aside {
+    display: none !important;
+  }
 }
