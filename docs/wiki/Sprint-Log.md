@@ -16,6 +16,12 @@ Reverse chronological. Click each sprint for full details.
 
 ---
 
+### 🔄 [Sprint 31 — Design Polish & Layout Improvements](Sprint-31) *(2026-02-17)*
+**Focus:** Project detail layout restructure, proposal button truncation, author name wrapping, vote bar tooltip, locale dates, expand UX, equal-vote sorting, mobile spacing
+**Source:** Manual mobile testing by Ciprian
+
+---
+
 ### ✅ [Sprint 30 — Security & Accessibility Hardening](Sprint-30) *(2026-02-17)*
 **Focus:** Open redirect fix, Zod on AI endpoints, HSTS, middleware bypass fix, a11y critical (skip-link, headings, aria), code dedup, DB indexes/schema, change password in profile
 **Stats:** 862 tests | 8 security+a11y fixes | Source: deep analysis report
