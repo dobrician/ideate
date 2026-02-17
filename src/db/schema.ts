@@ -134,6 +134,25 @@ export const invitations = sqliteTable("invitations", {
   ),
 });
 
+// ─── Attachments ──────────────────────────────────────────────────────────
+
+export const attachments = sqliteTable("attachments", {
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => randomUUID()),
+  proposalId: text("proposal_id")
+    .notNull()
+    .references(() => proposals.id, { onDelete: "cascade" }),
+  filename: text("filename").notNull(),
+  mimeType: text("mime_type").notNull(),
+  size: integer("size").notNull(),
+  storagePath: text("storage_path").notNull(),
+  userId: text("user_id").references(() => users.id, { onDelete: "set null" }),
+  createdAt: integer("created_at", { mode: "timestamp" }).default(
+    sql`(unixepoch())`
+  ),
+});
+
 // ─── Comments ──────────────────────────────────────────────────────────────
 
 export const comments = sqliteTable("comments", {

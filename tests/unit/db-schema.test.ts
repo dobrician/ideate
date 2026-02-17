@@ -8,5 +8,6 @@ describe("database schema", () => {
     expect(schema.proposals).toBeDefined();
     expect(schema.votes).toBeDefined();
     expect(schema.comments).toBeDefined();
+    expect(schema.attachments).toBeDefined();
   });
 });

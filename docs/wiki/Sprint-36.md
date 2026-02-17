@@ -6,7 +6,7 @@
 
 ## Goals
 
-- [ ] **Goal 1: File attachments on proposals** — Allow users to attach images or files to proposals. Add `attachments` table (id, proposalId, filename, mimeType, size, storagePath, userId, createdAt). Store files in `data/uploads/`. Show attachments on proposal cards with download links. Limit: 5MB per file, 3 files per proposal. Add upload UI with drag-and-drop or file picker. Add tests.
+- [x] **Goal 1: File attachments on proposals** — Allow users to attach images or files to proposals. Add `attachments` table (id, proposalId, filename, mimeType, size, storagePath, userId, createdAt). Store files in `data/uploads/`. Show attachments on proposal cards with download links. Limit: 5MB per file, 3 files per proposal. Add upload UI with drag-and-drop or file picker. Add tests.
 
 - [ ] **Goal 2: Project archival with read-only mode** — When a project is archived, it becomes fully read-only: no new proposals, no voting, no comments. Show a clear "Archived" banner. Allow admins to unarchive. Ensure all mutation endpoints check project status. Add tests.
 

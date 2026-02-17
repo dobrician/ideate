@@ -1,8 +1,15 @@
 import { db } from "@/db";
-import { projects, proposals, votes, comments, users } from "@/db/schema";
+import { projects, proposals, votes, comments, users, attachments } from "@/db/schema";
 import { eq, desc, sql, count } from "drizzle-orm";
 
 export const PROPOSALS_PAGE_SIZE = 20;
+
+export interface AttachmentInfo {
+  id: string;
+  filename: string;
+  mimeType: string;
+  size: number;
+}
 
 export interface ProposalWithStats {
   id: string;
@@ -26,6 +33,7 @@ export interface ProposalWithStats {
     createdAt: Date | null;
   }[];
   authorName: string;
+  attachments: AttachmentInfo[];
 }
 
 /**
@@ -120,6 +128,41 @@ export async function getProjectProposals(
     commentsByProposal.set(c.proposalId, list);
   }
 
+  // Fetch attachments for all proposals on this page
+  let allAttachments: {
+    id: string;
+    proposalId: string;
+    filename: string;
+    mimeType: string;
+    size: number;
+  }[] = [];
+
+  if (proposalIds.length > 0) {
+    allAttachments = await db
+      .select({
+        id: attachments.id,
+        proposalId: attachments.proposalId,
+        filename: attachments.filename,
+        mimeType: attachments.mimeType,
+        size: attachments.size,
+      })
+      .from(attachments)
+      .where(
+        sql`${attachments.proposalId} IN (${sql.join(
+          proposalIds.map((pid) => sql`${pid}`),
+          sql`, `
+        )})`
+      )
+      .orderBy(attachments.createdAt);
+  }
+
+  const attachmentsByProposal = new Map<string, AttachmentInfo[]>();
+  for (const a of allAttachments) {
+    const list = attachmentsByProposal.get(a.proposalId) || [];
+    list.push({ id: a.id, filename: a.filename, mimeType: a.mimeType, size: a.size });
+    attachmentsByProposal.set(a.proposalId, list);
+  }
+
   return { total, proposals: proposalRows.map((p) => {
     const pComments = commentsByProposal.get(p.id) || [];
     const authorName =
@@ -149,6 +192,7 @@ export async function getProjectProposals(
         createdAt: c.createdAt,
       })),
       authorName,
+      attachments: attachmentsByProposal.get(p.id) || [],
     };
   }) };
 }

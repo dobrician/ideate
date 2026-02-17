@@ -516,4 +516,20 @@ export const ro: Record<string, string> = {
   "admin.inviteStatusPending": "În așteptare",
   "admin.inviteStatusAccepted": "Acceptată",
   "admin.inviteStatusExpired": "Expirată",
+
+  // Attachments
+  "attachments.title": "Atașamente",
+  "attachments.upload": "Atașează Fișier",
+  "attachments.uploading": "Se încarcă...",
+  "attachments.uploaded": "Fișier încărcat",
+  "attachments.delete": "Șterge atașamentul",
+  "attachments.deleted": "Atașament șters",
+  "attachments.download": "Descarcă",
+  "attachments.tooLarge": "Fișierul trebuie să fie sub 5MB",
+  "attachments.tooMany": "Maximum 3 fișiere per propunere",
+  "attachments.uploadFailed": "Încărcarea fișierului a eșuat",
+  "attachments.deleteFailed": "Ștergerea atașamentului a eșuat",
+  "attachments.dropzone": "Trage fișierul aici sau apasă pentru a căuta",
+  "attachments.limit": "Max 5MB per fișier, 3 fișiere per propunere",
+  "attachments.count": "{count} atașament(e)",
 };

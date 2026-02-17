@@ -27,13 +27,21 @@ import {
 } from "@/components/ui/tooltip";
 import { deleteProposal } from "@/app/projects/[id]/proposals/actions";
 import { useVoteStream } from "@/lib/use-vote-stream";
-import { Trash2, Lightbulb } from "lucide-react";
+import { Trash2, Lightbulb, Paperclip } from "lucide-react";
 import { toast } from "sonner";
 import { useLocale } from "@/lib/use-locale";
 import { getCsrfTokenClient } from "@/lib/csrf-client";
 import { MarkdownRenderer } from "@/components/markdown-renderer";
+import { AttachmentUpload } from "@/components/attachment-upload";
 import { formatDate } from "@/lib/utils";
 import type { Comment } from "@/components/comment-thread";
+
+interface AttachmentInfo {
+  id: string;
+  filename: string;
+  mimeType: string;
+  size: number;
+}
 
 interface ProposalWithStats {
   id: string;
@@ -48,6 +56,7 @@ interface ProposalWithStats {
   commentCount: number;
   comments: Comment[];
   authorName: string;
+  attachments: AttachmentInfo[];
 }
 
 interface ProposalListProps {
@@ -220,6 +229,12 @@ function ProposalItem({
               {proposal.summary || proposal.description}
             </p>
           )}
+          {proposal.attachments.length > 0 && (
+            <span className="inline-flex items-center gap-1 text-left text-[11px] text-muted-foreground/60">
+              <Paperclip className="h-3 w-3" />
+              {proposal.attachments.length}
+            </span>
+          )}
           <span className="text-left text-[11px] text-muted-foreground/50">
             {t("proposals.details")} ↓
           </span>
@@ -243,6 +258,12 @@ function ProposalItem({
                 {showFull ? t("proposals.showSummary") : t("proposals.showFull")}
               </Button>
             )}
+
+          <AttachmentUpload
+            proposalId={proposal.id}
+            attachments={proposal.attachments}
+            canEdit={proposal.userId === currentUserId || isAdmin}
+          />
 
           <div className="flex items-center justify-between text-xs text-muted-foreground">
             <span>

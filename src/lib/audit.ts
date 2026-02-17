@@ -19,7 +19,8 @@ type AuditAction =
   | "vote"
   | "unvote"
   | "comment"
-  | "project_comment";
+  | "project_comment"
+  | "upload";
 
 type AuditEntity =
   | "project"
@@ -28,7 +29,8 @@ type AuditEntity =
   | "comment"
   | "user"
   | "invitation"
-  | "session";
+  | "session"
+  | "attachment";
 
 interface AuditEntry {
   userId: string | null;

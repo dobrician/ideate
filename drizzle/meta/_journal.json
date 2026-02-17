@@ -50,6 +50,20 @@
       "when": 1771271600000,
       "tag": "0006_sprint30_indexes_schema",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "6",
+      "when": 1771272000000,
+      "tag": "0007_sprint35_invitations",
+      "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "6",
+      "when": 1771272400000,
+      "tag": "0008_sprint36_attachments",
+      "breakpoints": true
     }
   ]
 }

@@ -497,4 +497,20 @@ export const en: Record<string, string> = {
   "admin.inviteStatusPending": "Pending",
   "admin.inviteStatusAccepted": "Accepted",
   "admin.inviteStatusExpired": "Expired",
+
+  // Attachments
+  "attachments.title": "Attachments",
+  "attachments.upload": "Attach File",
+  "attachments.uploading": "Uploading...",
+  "attachments.uploaded": "File uploaded",
+  "attachments.delete": "Remove attachment",
+  "attachments.deleted": "Attachment removed",
+  "attachments.download": "Download",
+  "attachments.tooLarge": "File must be under 5MB",
+  "attachments.tooMany": "Maximum 3 files per proposal",
+  "attachments.uploadFailed": "Failed to upload file",
+  "attachments.deleteFailed": "Failed to remove attachment",
+  "attachments.dropzone": "Drop file here or click to browse",
+  "attachments.limit": "Max 5MB per file, 3 files per proposal",
+  "attachments.count": "{count} attachment(s)",
 };
