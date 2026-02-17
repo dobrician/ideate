@@ -218,17 +218,19 @@ export function UserRoleManager({
           <div className="flex gap-1">
             <Button
               variant="outline"
-              size="sm"
+              size="icon"
               disabled={safePage <= 1}
               onClick={() => setPage(safePage - 1)}
+              aria-label={t("pagination.previous")}
             >
               <ChevronLeft className="h-4 w-4" />
             </Button>
             <Button
               variant="outline"
-              size="sm"
+              size="icon"
               disabled={safePage >= totalPages}
               onClick={() => setPage(safePage + 1)}
+              aria-label={t("pagination.next")}
             >
               <ChevronRight className="h-4 w-4" />
             </Button>

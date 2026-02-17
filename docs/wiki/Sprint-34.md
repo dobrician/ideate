@@ -16,7 +16,7 @@
 
 - [x] **Goal 5: Standardize dashboard and profile buttons** — Dashboard "View all" / "Show more" links should use consistent variant+size. Profile tabs should have consistent styling. "Save" buttons on forms (edit profile, change password) should be identical pattern. Collapsible sections "Show more/less" should use same button style everywhere.
 
-- [ ] **Goal 6: Standardize admin panel buttons** — Role dropdown styling, search input, pagination buttons, "Show more" on audit log — all should follow the established conventions. Stat card links should use consistent pattern.
+- [x] **Goal 6: Standardize admin panel buttons** — Role dropdown styling, search input, pagination buttons, "Show more" on audit log — all should follow the established conventions. Stat card links should use consistent pattern.
 
 - [ ] **Goal 7: Remove all one-off className hacks** — Search entire codebase for buttons with manual `h-8`, `h-9`, `h-10`, `p-0`, `w-8`, `min-h-[44px]` overrides. Replace with proper size variant from button.tsx. If a needed size doesn't exist, add it to the variant system rather than using className hacks. Goal: zero manual size overrides on Button components.
 
