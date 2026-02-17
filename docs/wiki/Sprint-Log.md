@@ -4,6 +4,12 @@ Reverse chronological. Click each sprint for full details.
 
 ---
 
+### 🔄 [Sprint 00 — Coverage, Accessibility, Security & UX Features](Sprint-00) *(2026-02-17)*
+**Focus:** Push branch coverage past 95%, dark mode WCAG AA, icon aria-labels, account lockout, proposal tags, onboarding modal, Sentry integration
+**Stats:** 0/8 goals | In progress
+
+---
+
 ### ✅ [Sprint 30 — Docs Hygiene, Coverage Gaps & Production Hardening](Sprint-30) *(2026-02-17)*
 **Focus:** Update stale docs (Known-Issues, Nice-to-Have), close coverage gaps (vote-update.ts, export.ts, llm.ts), Cloudflare deployment spike, push branch coverage past 93%
 **Stats:** 8/8 goals | 808 tests | 93.85% branch coverage | 1 open issue (#13 Cloudflare — spike complete)
