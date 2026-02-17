@@ -12,7 +12,7 @@
 
 - [x] **Goal 3: Comment threading UI** — Comments already store `parentId` but display as flat list. Render threaded/nested comments with visual indentation (max 3 levels deep). Add "Reply" button on each comment. Collapse deep threads with "Show more replies". Add tests.
 
-- [ ] **Goal 4: LLM response caching** — Cache AI suggestion responses to avoid re-querying for identical prompts. Add `llm_cache` table (hash of prompt → response, ttl, createdAt). TTL: 24 hours. Check cache before calling LLM. Add cache hit/miss logging. Add tests.
+- [x] **Goal 4: LLM response caching** — Cache AI suggestion responses to avoid re-querying for identical prompts. Add `llm_cache` table (hash of prompt → response, ttl, createdAt). TTL: 24 hours. Check cache before calling LLM. Add cache hit/miss logging. Add tests.
 
 - [ ] **Goal 5: Interactive API documentation** — Generate OpenAPI/Swagger spec from existing API routes. Serve interactive docs at /api/docs using swagger-ui or similar. Document all endpoints with request/response schemas. Auth endpoints, CRUD, AI, export, admin, webhooks.
 

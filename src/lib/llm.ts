@@ -7,6 +7,7 @@
  */
 
 import { logger } from "@/lib/logger";
+import { getCachedResponse, setCachedResponse } from "@/lib/llm-cache";
 
 const llmLog = logger.child({ module: "llm" });
 
@@ -240,6 +241,16 @@ export async function completeWithFallback(
   prompt: string,
   opts: LLMOptions = {}
 ): Promise<{ text: string | null; modelUsed: string | null }> {
+  // Check cache first
+  try {
+    const cached = await getCachedResponse(prompt);
+    if (cached) {
+      return { text: cached.response, modelUsed: cached.modelUsed };
+    }
+  } catch {
+    // Cache check failed — proceed without cache
+  }
+
   if (isRateLimited()) {
     llmLog.warn({ requests: usage.requests, tokens: usage.tokens }, "LLM rate limited");
     return { text: null, modelUsed: null };
@@ -258,6 +269,8 @@ export async function completeWithFallback(
     if (result.status === 429) continue;
     if (result.text) {
       trackUsage(candidate.key, result.tokensUsed ?? 0);
+      // Cache the successful response (fire-and-forget)
+      setCachedResponse(prompt, result.text, candidate.key).catch(() => {});
       return { text: result.text, modelUsed: candidate.key };
     }
     if (candidate.key !== candidates[candidates.length - 1]?.key) {

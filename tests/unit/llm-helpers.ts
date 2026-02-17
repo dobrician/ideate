@@ -15,6 +15,11 @@ vi.mock("@/lib/logger", () => ({
   },
 }));
 
+vi.mock("@/lib/llm-cache", () => ({
+  getCachedResponse: vi.fn().mockResolvedValue(null),
+  setCachedResponse: vi.fn().mockResolvedValue(undefined),
+}));
+
 /**
  * Helper: set env vars, reset modules, dynamically import the real LLM module.
  */

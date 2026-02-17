@@ -261,3 +261,16 @@ export const webhookDeliveries = sqliteTable("webhook_deliveries", {
     sql`(unixepoch())`
   ),
 });
+
+// ─── LLM Cache ────────────────────────────────────────────────────────────
+
+export const llmCache = sqliteTable("llm_cache", {
+  hash: text("hash").primaryKey(),
+  prompt: text("prompt").notNull(),
+  response: text("response").notNull(),
+  modelUsed: text("model_used"),
+  ttl: integer("ttl").notNull().default(86400), // seconds, default 24h
+  createdAt: integer("created_at", { mode: "timestamp" }).default(
+    sql`(unixepoch())`
+  ),
+});
