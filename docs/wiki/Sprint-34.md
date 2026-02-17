@@ -6,7 +6,7 @@
 
 ## Goals
 
-- [ ] **Goal 1: Define and document button usage rules** — Create `docs/ui-conventions.md` with clear rules: which button variant+size to use where, when to use icon-only vs text vs icon+text, minimum touch target (44px), spacing conventions. Audit `src/components/ui/button.tsx` — ensure all size variants enforce min-h-[44px] for touch targets (currently only manually added on some buttons). Update the button component so ALL interactive sizes meet 44px minimum.
+- [x] **Goal 1: Define and document button usage rules** — Create `docs/ui-conventions.md` with clear rules: which button variant+size to use where, when to use icon-only vs text vs icon+text, minimum touch target (44px), spacing conventions. Audit `src/components/ui/button.tsx` — ensure all size variants enforce min-h-[44px] for touch targets (currently only manually added on some buttons). Update the button component so ALL interactive sizes meet 44px minimum.
 
 - [ ] **Goal 2: Standardize auth page buttons** — All auth pages (login, register, forgot-password, reset-password, verify-email) should use identical button patterns: primary CTA = `w-full` + default size, secondary actions = `variant="outline" w-full`, back links = `variant="ghost"`. Remove any one-off className overrides. Ensure consistent vertical spacing between buttons.
 
