@@ -22,12 +22,12 @@ const PasswordInput = forwardRef<HTMLInputElement, PasswordInputProps>(
 
     return (
       <div className="relative">
-        <Input {...props} ref={ref} type={visible ? "text" : "password"} className={`pr-10 ${props.className || ""}`} />
+        <Input {...props} ref={ref} type={visible ? "text" : "password"} className={`pr-11 ${props.className || ""}`} />
         <Button
           type="button"
           variant="ghost"
           size="icon"
-          className="absolute right-0 top-0 h-full w-10 px-2 text-muted-foreground hover:text-foreground"
+          className="absolute right-0 top-0 h-full w-11 text-muted-foreground hover:text-foreground"
           onClick={() => setVisible((v) => !v)}
           tabIndex={-1}
           aria-label={visible ? t("auth.hidePassword") : t("auth.showPassword")}

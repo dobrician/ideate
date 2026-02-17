@@ -90,7 +90,7 @@ export function Header() {
             <Button
               variant="ghost"
               size="icon"
-              className="min-h-[44px] min-w-[44px] md:hidden"
+              className="md:hidden"
               aria-label={t("search.placeholder")}
               onClick={() => setMobileSearchOpen((o) => !o)}
             >
@@ -103,7 +103,7 @@ export function Header() {
           </div>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" className="min-h-[44px] min-w-[44px]" aria-label={t("nav.profile")} title={t("nav.profile")}>
+              <Button variant="ghost" size="icon" aria-label={t("nav.profile")} title={t("nav.profile")}>
                 <User className="h-4 w-4" />
                 <span className="sr-only">{t("nav.profile")}</span>
               </Button>
