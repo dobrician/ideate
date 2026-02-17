@@ -253,6 +253,8 @@ export const ro: Record<string, string> = {
   "admin.nameNotSet": "Nesetat",
   "admin.showMore": "Arată mai mult",
   "admin.showLess": "Arată mai puțin",
+  "admin.exportCsvTooltip": "Descarcă jurnalul de audit ca CSV",
+  "admin.exportJsonTooltip": "Descarcă jurnalul de audit ca JSON",
 
   // Auth
   "auth.signIn": "Autentifică-te pe Ideate",

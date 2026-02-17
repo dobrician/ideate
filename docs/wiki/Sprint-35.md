@@ -17,7 +17,7 @@
 
 - [x] **Goal 6: User invitation flow** — Add ability for admins to invite users by email. Create /api/admin/invite endpoint. Send invitation email with a link to register. Track pending invitations in a new `invitations` table. Show pending invitations in admin panel. Add tests.
 
-- [ ] **Goal 7: Audit log export** — Add CSV and JSON export buttons to the admin audit log section. Export all audit entries (with pagination/date range filter). Use the existing export patterns from project export. Add tests.
+- [x] **Goal 7: Audit log export** — Add CSV and JSON export buttons to the admin audit log section. Export all audit entries (with pagination/date range filter). Use the existing export patterns from project export. Add tests.
 
 - [ ] **Goal 8: Middleware → proxy migration** — Migrate from deprecated Next.js `middleware.ts` to the new `proxy` convention. This removes the build warning "The middleware file convention is deprecated." Keep all existing functionality (auth, security headers, CSRF, rate limiting). Test thoroughly.
 

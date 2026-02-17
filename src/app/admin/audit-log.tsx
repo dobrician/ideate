@@ -2,8 +2,10 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import { Download } from "lucide-react";
 import { useLocale } from "@/lib/use-locale";
 import { formatRelativeTime } from "@/lib/utils";
+import { toast } from "sonner";
 
 interface AuditEntry {
   id: string;
@@ -21,6 +23,14 @@ export function AuditLog({ entries }: { entries: AuditEntry[] }) {
   const { t, locale } = useLocale();
   const [expanded, setExpanded] = useState(false);
 
+  function handleExport(format: "csv" | "json") {
+    try {
+      window.open(`/api/admin/audit-export?format=${format}`, "_blank");
+    } catch {
+      toast.error(t("export.failed"));
+    }
+  }
+
   if (entries.length === 0) {
     return (
       <p className="text-sm text-muted-foreground">{t("admin.noActivity")}</p>
@@ -31,6 +41,26 @@ export function AuditLog({ entries }: { entries: AuditEntry[] }) {
 
   return (
     <div className="space-y-2">
+      <div className="flex justify-end gap-1">
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => handleExport("csv")}
+          title={t("admin.exportCsvTooltip")}
+        >
+          <Download className="mr-1 h-3 w-3" />
+          {t("export.csv")}
+        </Button>
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => handleExport("json")}
+          title={t("admin.exportJsonTooltip")}
+        >
+          <Download className="mr-1 h-3 w-3" />
+          JSON
+        </Button>
+      </div>
       {visible.map((entry) => (
         <div
           key={entry.id}

@@ -243,6 +243,8 @@ export const en: Record<string, string> = {
   "admin.nameNotSet": "Not set",
   "admin.showMore": "Show more",
   "admin.showLess": "Show less",
+  "admin.exportCsvTooltip": "Download audit log as CSV",
+  "admin.exportJsonTooltip": "Download audit log as JSON",
 
   // Auth
   "auth.signIn": "Sign in to Ideate",
