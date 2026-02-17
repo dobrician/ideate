@@ -17,7 +17,7 @@ export const MAX_THREAD_DEPTH = 3;
 
 export type TranslateFn = (key: string, vars?: Record<string, string | number>) => string;
 
-export function buildCommentTree(comments: Comment[]): CommentNode[] {
+export function buildThreadedCommentTree(comments: Comment[]): CommentNode[] {
   const sorted = [...comments].sort(
     (a, b) => (a.createdAt?.getTime() ?? 0) - (b.createdAt?.getTime() ?? 0)
   );

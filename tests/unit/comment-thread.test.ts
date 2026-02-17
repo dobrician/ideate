@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 import {
-  buildCommentTree,
+  buildThreadedCommentTree,
   formatTimeAgo,
   getInitials,
   avatarColor,
@@ -29,11 +29,11 @@ function flattenIds(nodes: CommentNode[]): string[] {
 }
 
 /* ------------------------------------------------------------------ */
-/*  buildCommentTree                                                   */
+/*  buildThreadedCommentTree                                                   */
 /* ------------------------------------------------------------------ */
-describe("buildCommentTree", () => {
+describe("buildThreadedCommentTree", () => {
   it("returns empty array for no comments", () => {
-    expect(buildCommentTree([])).toEqual([]);
+    expect(buildThreadedCommentTree([])).toEqual([]);
   });
 
   it("sorts root comments oldest-first", () => {
@@ -42,7 +42,7 @@ describe("buildCommentTree", () => {
       makeComment({ id: "c1", createdAt: new Date("2026-01-15T00:00:00Z") }),
       makeComment({ id: "c3", createdAt: new Date("2026-01-17T00:00:00Z") }),
     ];
-    const tree = buildCommentTree(comments);
+    const tree = buildThreadedCommentTree(comments);
     expect(tree.map((c) => c.id)).toEqual(["c1", "c2", "c3"]);
   });
 
@@ -51,7 +51,7 @@ describe("buildCommentTree", () => {
       makeComment({ id: "c2", createdAt: new Date("2026-01-15T00:00:00Z") }),
       makeComment({ id: "c1", createdAt: null }),
     ];
-    const tree = buildCommentTree(comments);
+    const tree = buildThreadedCommentTree(comments);
     expect(tree[0].id).toBe("c1");
   });
 
@@ -61,7 +61,7 @@ describe("buildCommentTree", () => {
       makeComment({ id: "c1", createdAt: new Date("2026-01-15T00:00:00Z") }),
     ];
     const originalOrder = comments.map((c) => c.id);
-    buildCommentTree(comments);
+    buildThreadedCommentTree(comments);
     expect(comments.map((c) => c.id)).toEqual(originalOrder);
   });
 
@@ -71,7 +71,7 @@ describe("buildCommentTree", () => {
       makeComment({ id: "a", createdAt: ts }),
       makeComment({ id: "b", createdAt: ts }),
     ];
-    const tree = buildCommentTree(comments);
+    const tree = buildThreadedCommentTree(comments);
     expect(tree.map((c) => c.id)).toEqual(["a", "b"]);
   });
 
@@ -81,7 +81,7 @@ describe("buildCommentTree", () => {
       makeComment({ id: "reply1", parentId: "root", createdAt: new Date("2026-01-15T01:00:00Z") }),
       makeComment({ id: "reply2", parentId: "root", createdAt: new Date("2026-01-15T02:00:00Z") }),
     ];
-    const tree = buildCommentTree(comments);
+    const tree = buildThreadedCommentTree(comments);
     expect(tree).toHaveLength(1);
     expect(tree[0].id).toBe("root");
     expect(tree[0].children).toHaveLength(2);
@@ -94,7 +94,7 @@ describe("buildCommentTree", () => {
       makeComment({ id: "child", parentId: "root", createdAt: new Date("2026-01-15T01:00:00Z") }),
       makeComment({ id: "grandchild", parentId: "child", createdAt: new Date("2026-01-15T02:00:00Z") }),
     ];
-    const tree = buildCommentTree(comments);
+    const tree = buildThreadedCommentTree(comments);
     expect(tree).toHaveLength(1);
     expect(tree[0].children).toHaveLength(1);
     expect(tree[0].children[0].children).toHaveLength(1);
@@ -106,7 +106,7 @@ describe("buildCommentTree", () => {
       makeComment({ id: "c1", createdAt: new Date("2026-01-15T00:00:00Z") }),
       makeComment({ id: "orphan", parentId: "nonexistent", createdAt: new Date("2026-01-15T01:00:00Z") }),
     ];
-    const tree = buildCommentTree(comments);
+    const tree = buildThreadedCommentTree(comments);
     expect(tree).toHaveLength(2);
     expect(tree.map((c) => c.id)).toEqual(["c1", "orphan"]);
   });
@@ -115,7 +115,7 @@ describe("buildCommentTree", () => {
     const comments: Comment[] = [
       makeComment({ id: "c1" }),
     ];
-    const tree = buildCommentTree(comments);
+    const tree = buildThreadedCommentTree(comments);
     expect(tree[0].children).toEqual([]);
   });
 
@@ -127,7 +127,7 @@ describe("buildCommentTree", () => {
       makeComment({ id: "r2-a", parentId: "r2", createdAt: new Date("2026-01-15T03:00:00Z") }),
       makeComment({ id: "r1-a-i", parentId: "r1-a", createdAt: new Date("2026-01-15T04:00:00Z") }),
     ];
-    const tree = buildCommentTree(comments);
+    const tree = buildThreadedCommentTree(comments);
     expect(tree).toHaveLength(2);
     expect(tree[0].id).toBe("r1");
     expect(tree[1].id).toBe("r2");
@@ -147,7 +147,7 @@ describe("buildCommentTree", () => {
       makeComment({ id: "a2", parentId: "a", createdAt: new Date("2026-01-15T03:00:00Z") }),
       makeComment({ id: "a1i", parentId: "a1", createdAt: new Date("2026-01-15T04:00:00Z") }),
     ];
-    const tree = buildCommentTree(comments);
+    const tree = buildThreadedCommentTree(comments);
     expect(flattenIds(tree)).toEqual(["a", "a1", "a1i", "a2", "b"]);
   });
 });

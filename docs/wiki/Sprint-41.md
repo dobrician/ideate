@@ -11,7 +11,7 @@
 
 - [x] **Goal 3: Add role="alert" to remaining dynamic error containers** — `reset-password`, `forgot-password`, `projects/new`, `edit-project-dialog`, and `suggest-proposals` have dynamic error divs without `role="alert"`. Add it for screen reader announcements.
 
-- [ ] **Goal 4: Rename buildCommentTree to buildThreadedCommentTree** — The function in `lib/comment-utils.ts` sorts then builds a parent-child tree. Rename to `buildThreadedCommentTree` for clarity. Update all import sites.
+- [x] **Goal 4: Rename buildCommentTree to buildThreadedCommentTree** — The function in `lib/comment-utils.ts` sorts then builds a parent-child tree. Rename to `buildThreadedCommentTree` for clarity. Update all import sites.
 
 - [ ] **Goal 5: Remove re-export shim from comment-thread.tsx** — Lines 17-19 re-export `buildCommentTree`, `formatTimeAgo`, `getInitials`, `avatarColor` and types from `comment-utils`. Migrate the one external importer (`proposal-item.tsx`) to import directly from `lib/comment-utils`, then remove the shim.
 

@@ -10,12 +10,12 @@ import { Send, ChevronDown, MessageSquare, Reply } from "lucide-react";
 import { useLocale } from "@/lib/use-locale";
 import { useKeyboardInset } from "@/lib/use-keyboard-inset";
 import { getCsrfTokenClient } from "@/lib/csrf-client";
-import { buildCommentTree, isNearBottom } from "@/lib/comment-utils";
+import { buildThreadedCommentTree, isNearBottom } from "@/lib/comment-utils";
 import { ThreadedCommentNode } from "@/components/chat-bubble";
 import type { Comment } from "@/lib/comment-utils";
 
 // Re-export public API so existing imports from this module keep working
-export { buildCommentTree, formatTimeAgo, getInitials, avatarColor } from "@/lib/comment-utils";
+export { buildThreadedCommentTree, formatTimeAgo, getInitials, avatarColor } from "@/lib/comment-utils";
 export type { Comment, CommentNode } from "@/lib/comment-utils";
 
 interface CommentThreadProps {
@@ -39,7 +39,7 @@ export function CommentThread({ comments, hiddenFields, currentUserId }: Comment
     comments,
     (current: Comment[], newComment: Comment) => [...current, newComment]
   );
-  const tree = buildCommentTree(optimisticComments);
+  const tree = buildThreadedCommentTree(optimisticComments);
 
   const replyToComment = replyToId
     ? optimisticComments.find((c) => c.id === replyToId)
