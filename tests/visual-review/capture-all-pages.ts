@@ -299,7 +299,7 @@ test("capture all pages for visual review", async ({ page }) => {
   // --- AI Suggestions modal ---
   await setTheme(page, "light");
   await withViewport(page, DESKTOP, async () => {
-    const suggestBtn = page.getByRole("button", { name: /suggest|ai/i });
+    const suggestBtn = page.getByRole("button", { name: /ai suggest/i });
     if (await suggestBtn.isVisible()) {
       await suggestBtn.click();
       await page.waitForTimeout(1000); // wait for modal + potential API call
@@ -310,7 +310,7 @@ test("capture all pages for visual review", async ({ page }) => {
     }
   });
   await withViewport(page, MOBILE, async () => {
-    const suggestBtn = page.getByRole("button", { name: /suggest|ai/i });
+    const suggestBtn = page.getByRole("button", { name: /ai suggest/i });
     if (await suggestBtn.isVisible()) {
       await suggestBtn.click();
       await page.waitForTimeout(1000);

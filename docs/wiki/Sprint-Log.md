@@ -16,6 +16,12 @@ Reverse chronological. Click each sprint for full details.
 
 ---
 
+### 🔄 [Sprint 33 — Visual Review v2 Remaining Fixes](Sprint-33) *(2026-02-17)*
+**Focus:** Duplicate form/discussion removal, admin mobile cards, navbar tap targets, dashboard mobile, auth/form polish, 404 auth redirect
+**Source:** Visual review v2 (docs/visual-review-report-v2.md)
+
+---
+
 ### ✅ [Sprint 32 — Visual Review P1+P2 Fixes](Sprint-32) *(2026-02-17)*
 **Focus:** Dark mode button contrast, duplicate proposal form, profile tabs, admin mobile table, navbar tap targets, form consistency, branding, truncation, audit log readability, P3 quick wins
 **Stats:** 8 commits | 869 tests | 20+ visual issues fixed | Source: automated visual review (56 screenshots)
