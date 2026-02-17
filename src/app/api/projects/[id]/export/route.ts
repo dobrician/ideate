@@ -99,12 +99,28 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
       commentsByProposal.set(c.proposalId, list);
     }
 
+    const projectCommentRows = await db
+      .select({
+        content: comments.content,
+        createdAt: comments.createdAt,
+        userName: users.firstName,
+        userEmail: users.email,
+      })
+      .from(comments)
+      .leftJoin(users, eq(comments.userId, users.id))
+      .where(eq(comments.projectId, id));
+
     const exportData = {
       title: projectData.title,
       description: projectData.description,
       status: projectData.status,
       deadline: projectData.deadline,
       createdAt: projectData.createdAt,
+      projectComments: projectCommentRows.map((c) => ({
+        content: c.content,
+        authorName: c.userName || c.userEmail || "Anonymous",
+        createdAt: c.createdAt,
+      })),
       proposals: proposalRows.map((p) => ({
         title: p.title,
         description: p.description,

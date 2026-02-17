@@ -26,6 +26,7 @@ interface ExportProject {
   deadline: Date | null;
   createdAt: Date | null;
   proposals: ExportProposal[];
+  projectComments?: ExportComment[];
 }
 
 /**
@@ -53,6 +54,18 @@ export function generateCsv(project: ExportProject): string {
     "",
     formatDate(project.createdAt),
   ]);
+
+  for (const pc of project.projectComments ?? []) {
+    rows.push([
+      "ProjectComment",
+      project.title,
+      pc.authorName,
+      pc.content,
+      "",
+      "",
+      formatDate(pc.createdAt),
+    ]);
+  }
 
   for (const proposal of project.proposals) {
     rows.push([
@@ -92,7 +105,7 @@ export function generateReportHtml(project: ExportProject): string {
   const totalComments = project.proposals.reduce(
     (sum, p) => sum + p.comments.length,
     0
-  );
+  ) + (project.projectComments?.length ?? 0);
 
   let proposalsHtml = "";
   for (const proposal of project.proposals) {
@@ -151,6 +164,12 @@ export function generateReportHtml(project: ExportProject): string {
     <div><strong>${totalVotes}</strong> votes</div>
     <div><strong>${totalComments}</strong> comments</div>
   </div>
+  ${(project.projectComments?.length ?? 0) > 0 ? `<h2>Project Discussion</h2>${project.projectComments!.map((c) => `
+      <div style="margin-left:20px;padding:8px 0;border-bottom:1px solid #f0f0f0;">
+        <strong>${escapeHtml(c.authorName)}</strong>
+        <span style="color:#666;font-size:12px;margin-left:8px;">${formatDate(c.createdAt)}</span>
+        <p style="margin:4px 0 0;">${escapeHtml(c.content)}</p>
+      </div>`).join("")}` : ""}
   <h2>Proposals</h2>
   ${proposalsHtml || "<p>No proposals yet.</p>"}
   <footer style="margin-top:40px;padding-top:16px;border-top:1px solid #e0e0e0;color:#999;font-size:12px;">

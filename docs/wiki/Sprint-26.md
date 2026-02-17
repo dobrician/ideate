@@ -15,7 +15,7 @@ Based on unified analysis from Claude + Codex (see docs/sprint26-unified-plan.md
 **Backend:**
 - [x] Goal 5: parentId server-side validation
 - [x] Goal 7: Smart polling — only when discussion is visible
-- [ ] Goal 8: Include project comments in export
+- [x] Goal 8: Include project comments in export
 
 **Testing:**
 - [x] Goal 3: CommentThread + ChatBubble component render tests
