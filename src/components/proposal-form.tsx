@@ -74,13 +74,13 @@ function ProposalFormFields({
       </div>
 
       <div className="space-y-1.5">
-        <div className="flex items-center justify-between">
-          <Label htmlFor="proposal-description">{t("proposalForm.description")}</Label>
+        <div className="flex flex-wrap items-center justify-between gap-1">
+          <Label htmlFor="proposal-description" className="shrink-0">{t("proposalForm.description")}</Label>
           <div className="flex gap-1">
             <button
               type="button"
               onClick={() => setShowPreview(false)}
-              className={`inline-flex items-center gap-1 rounded px-2 py-0.5 text-xs ${!showPreview ? "bg-muted font-medium" : "text-muted-foreground hover:text-foreground"}`}
+              className={`inline-flex shrink-0 items-center gap-1 rounded px-2 py-0.5 text-xs ${!showPreview ? "bg-muted font-medium" : "text-muted-foreground hover:text-foreground"}`}
               aria-pressed={!showPreview}
             >
               <Pencil className="h-3 w-3" /> {t("proposalForm.write")}
@@ -88,7 +88,7 @@ function ProposalFormFields({
             <button
               type="button"
               onClick={() => setShowPreview(true)}
-              className={`inline-flex items-center gap-1 rounded px-2 py-0.5 text-xs ${showPreview ? "bg-muted font-medium" : "text-muted-foreground hover:text-foreground"}`}
+              className={`inline-flex shrink-0 items-center gap-1 rounded px-2 py-0.5 text-xs ${showPreview ? "bg-muted font-medium" : "text-muted-foreground hover:text-foreground"}`}
               aria-pressed={showPreview}
             >
               <Eye className="h-3 w-3" /> {t("proposalForm.preview")}
@@ -113,7 +113,7 @@ function ProposalFormFields({
             aria-describedby={`proposal-description-hint${state?.error ? " proposal-form-error" : ""}`}
           />
         )}
-        <p id="proposal-description-hint" className="text-xs text-muted-foreground">{t("proposalForm.markdownHint")}</p>
+        <p id="proposal-description-hint" className="break-words text-xs text-muted-foreground">{t("proposalForm.markdownHint")}</p>
         {showPreview && <input type="hidden" name="description" value={description} />}
       </div>
 
@@ -231,8 +231,8 @@ export function ProposalFormInline(props: ProposalFormProps) {
   }, [inlineState, inlineT, inlineResetForm]);
 
   return (
-    <div data-rsc-content className="rounded-lg border bg-card p-4">
-      <h3 className="mb-3 text-sm font-semibold">{form.t("proposalForm.title")}</h3>
+    <div data-rsc-content className="min-w-0 overflow-hidden rounded-lg border bg-card p-4">
+      <h3 className="mb-3 truncate text-sm font-semibold">{form.t("proposalForm.title")}</h3>
       <ProposalFormFields form={form} />
     </div>
   );

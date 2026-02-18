@@ -112,8 +112,8 @@ export default function RegisterPage() {
 
   if (success) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-background px-4">
-        <Card className="w-full max-w-md shadow-lg">
+      <div className="flex min-h-screen items-center justify-center bg-background px-4 sm:px-6">
+        <Card className="w-full max-w-md px-2 shadow-lg sm:px-0">
           <CardHeader className="space-y-1 text-center">
             <CardTitle className="text-2xl font-bold">
               {t("auth.verifyEmailTitle")}
@@ -141,8 +141,8 @@ export default function RegisterPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background px-4">
-      <Card className="w-full max-w-md shadow-lg">
+    <div className="flex min-h-screen items-center justify-center bg-background px-4 sm:px-6">
+      <Card className="w-full max-w-md px-2 shadow-lg sm:px-0">
         <CardHeader className="space-y-1 text-center">
           <p className="text-3xl font-bold tracking-tight">Ideate</p>
           <h1 className="text-2xl font-bold leading-none">

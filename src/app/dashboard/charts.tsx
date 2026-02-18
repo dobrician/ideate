@@ -48,16 +48,17 @@ export function VotesOverTimeChart({ data }: { data: VoteOverTimePoint[] }) {
         <CardTitle className="text-lg">{t("charts.votesOverTime")}</CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="h-64 w-full">
+        <div className="h-64 w-full" role="img" aria-label={t("charts.votesOverTime")}>
           <ResponsiveContainer width="100%" height="100%">
-            <LineChart data={data} margin={{ top: 5, right: 10, left: 0, bottom: 5 }}>
+            <LineChart data={data} margin={{ top: 5, right: 10, left: -10, bottom: 5 }}>
               <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
               <XAxis
                 dataKey="date"
-                tick={{ fontSize: 12 }}
+                tick={{ fontSize: 11 }}
                 tickFormatter={(v: string) => v.slice(5)}
+                interval="preserveStartEnd"
               />
-              <YAxis tick={{ fontSize: 12 }} allowDecimals={false} />
+              <YAxis tick={{ fontSize: 11 }} allowDecimals={false} width={35} />
               <Tooltip
                 contentStyle={{ borderRadius: 8, fontSize: 12 }}
                 labelFormatter={(label) => String(label)}
@@ -103,14 +104,15 @@ export function TopProposalsChart({ data }: { data: TopProposal[] }) {
         <CardTitle className="text-lg">{t("charts.topProposals")}</CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="h-64 w-full">
+        <div className="h-64 w-full" role="img" aria-label={t("charts.topProposals")}>
           <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={data} layout="vertical" margin={{ top: 5, right: 10, left: 0, bottom: 5 }}>
+            <BarChart data={data} layout="vertical" margin={{ top: 5, right: 10, left: -10, bottom: 5 }}>
               <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
-              <XAxis type="number" tick={{ fontSize: 12 }} allowDecimals={false} />
+              <XAxis type="number" tick={{ fontSize: 11 }} allowDecimals={false} />
               <YAxis
                 dataKey="title" type="category"
-                tick={{ fontSize: 11 }} width={120}
+                tick={{ fontSize: 10 }} width={80}
+                tickFormatter={(v: string) => v.length > 15 ? `${v.slice(0, 15)}...` : v}
               />
               <Tooltip contentStyle={{ borderRadius: 8, fontSize: 12 }} />
               <Legend wrapperStyle={{ fontSize: 12 }} />
@@ -146,16 +148,17 @@ export function ActivityHeatmapChart({ data }: { data: ActivityPoint[] }) {
         <CardTitle className="text-lg">{t("charts.activityHeatmap")}</CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="h-64 w-full">
+        <div className="h-64 w-full" role="img" aria-label={t("charts.activityHeatmap")}>
           <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={data} margin={{ top: 5, right: 10, left: 0, bottom: 5 }}>
+            <BarChart data={data} margin={{ top: 5, right: 10, left: -10, bottom: 5 }}>
               <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
               <XAxis
                 dataKey="date"
-                tick={{ fontSize: 12 }}
+                tick={{ fontSize: 11 }}
                 tickFormatter={(v: string) => v.slice(5)}
+                interval="preserveStartEnd"
               />
-              <YAxis tick={{ fontSize: 12 }} allowDecimals={false} />
+              <YAxis tick={{ fontSize: 11 }} allowDecimals={false} width={35} />
               <Tooltip
                 contentStyle={{ borderRadius: 8, fontSize: 12 }}
                 labelFormatter={(label) => String(label)}

@@ -123,11 +123,11 @@ describe("status-utils", () => {
       expect(badge.className).toContain("text-amber-800");
     });
 
-    it("returns green badge for deadline more than 7 days away", () => {
+    it("returns blue/neutral badge for deadline more than 7 days away", () => {
       const future = new Date("2026-03-10T12:00:00Z");
       const badge = deadlineBadge(future, t)!;
-      expect(badge.className).toContain("bg-emerald-100");
-      expect(badge.className).toContain("text-emerald-800");
+      expect(badge.className).toContain("bg-blue-100");
+      expect(badge.className).toContain("text-blue-800");
     });
 
     it("returns amber badge for exactly 7 days", () => {
@@ -138,10 +138,10 @@ describe("status-utils", () => {
     });
 
     it("returns correct day count near boundary", () => {
-      // 8 days away → green
+      // 8 days away → blue/neutral
       const eightDays = new Date("2026-02-24T13:00:00Z");
       const badge = deadlineBadge(eightDays, t)!;
-      expect(badge.className).toContain("emerald");
+      expect(badge.className).toContain("blue");
     });
   });
 });

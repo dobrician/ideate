@@ -11,7 +11,10 @@ const defaultLocaleEnv =
 const translations: Record<Locale, Record<string, string>> = { en, ro };
 
 /**
- * Translate a key with optional variable interpolation
+ * Translate a key with optional variable interpolation.
+ * Supports pluralization via {count} variable: when a key has a
+ * companion key ending in "_one", it is used when count === 1.
+ * Example: "projects.total" for plural, "projects.total_one" for singular.
  */
 export function t(
   locale: Locale,
@@ -19,7 +22,17 @@ export function t(
   vars?: Record<string, string | number>
 ): string {
   const table = translations[locale] || translations.en;
-  const phrase = table[key] || translations.en[key] || key;
+
+  // Pluralization: if count === 1 and a _one variant exists, use it
+  let resolvedKey = key;
+  if (vars && "count" in vars && Number(vars.count) === 1) {
+    const oneKey = `${key}_one`;
+    if (table[oneKey] || translations.en[oneKey]) {
+      resolvedKey = oneKey;
+    }
+  }
+
+  const phrase = table[resolvedKey] || translations.en[resolvedKey] || resolvedKey;
   if (!vars) return phrase;
 
   let result = phrase;

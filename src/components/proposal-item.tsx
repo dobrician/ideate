@@ -116,21 +116,21 @@ export function ProposalItem({
               <div className="pointer-events-none absolute inset-0" aria-hidden="true">
                 {greenWidth > 0 && (
                   <div
-                    className="absolute left-0 top-0 h-full bg-gradient-to-r from-green-500/15 to-transparent transition-all duration-300"
+                    className="absolute left-0 top-0 h-full bg-gradient-to-r from-green-500/8 to-transparent transition-all duration-300"
                     style={{ width: `${greenWidth}%` }}
                   />
                 )}
                 {redWidth > 0 && (
                   <div
-                    className="absolute right-0 top-0 h-full bg-gradient-to-l from-red-500/15 to-transparent transition-all duration-300"
+                    className="absolute right-0 top-0 h-full bg-gradient-to-l from-red-500/8 to-transparent transition-all duration-300"
                     style={{ width: `${redWidth}%` }}
                   />
                 )}
               </div>
               <div className="relative z-10 px-2 py-1">
-                <span className="line-clamp-2 font-medium" title={proposal.title}>{proposal.title}</span>
-                <span className="block text-xs text-muted-foreground" title={`${t("proposals.by")} ${proposal.authorName}`}>
-                  <span className="truncate">{t("proposals.by")} {proposal.authorName}</span>
+                <span className="line-clamp-2 break-words font-medium" title={proposal.title}>{proposal.title}</span>
+                <span className="block truncate text-xs text-muted-foreground" title={`${t("proposals.by")} ${proposal.authorName}`}>
+                  {t("proposals.by")} {proposal.authorName}
                 </span>
               </div>
             </div>
@@ -175,7 +175,7 @@ export function ProposalItem({
               {proposal.attachments.length}
             </span>
           )}
-          <span className="text-left text-[11px] text-muted-foreground/50">
+          <span className="inline-flex items-center gap-1 text-left text-xs font-medium text-primary/80 hover:text-primary">
             {t("proposals.details")} ↓
           </span>
         </div>

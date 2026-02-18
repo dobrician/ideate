@@ -105,13 +105,16 @@ export function ProfileTabs({ user, projects, proposals, notificationPrefs }: Pr
 
   return (
     <Tabs defaultValue="account" className="w-full">
-      <TabsList className="w-full">
-        <TabsTrigger value="account">{t("profile.tabAccount")}</TabsTrigger>
-        <TabsTrigger value="security">{t("profile.tabSecurity")}</TabsTrigger>
-        <TabsTrigger value="notifications">{t("profile.tabNotifications")}</TabsTrigger>
-        <TabsTrigger value="projects">{t("profile.tabProjects")}</TabsTrigger>
-        <TabsTrigger value="proposals">{t("profile.tabProposals")}</TabsTrigger>
-      </TabsList>
+      <div className="relative">
+        <TabsList className="w-full justify-start overflow-x-auto" style={{ scrollbarWidth: "none", WebkitOverflowScrolling: "touch" }}>
+          <TabsTrigger value="account" className="shrink-0">{t("profile.tabAccount")}</TabsTrigger>
+          <TabsTrigger value="security" className="shrink-0">{t("profile.tabSecurity")}</TabsTrigger>
+          <TabsTrigger value="notifications" className="shrink-0">{t("profile.tabNotifications")}</TabsTrigger>
+          <TabsTrigger value="projects" className="shrink-0">{t("profile.tabProjects")}</TabsTrigger>
+          <TabsTrigger value="proposals" className="shrink-0">{t("profile.tabProposals")}</TabsTrigger>
+        </TabsList>
+        <div className="pointer-events-none absolute inset-y-0 right-0 w-8 bg-gradient-to-l from-background to-transparent sm:hidden" aria-hidden="true" />
+      </div>
 
       <TabsContent value="account" className="space-y-6">
         <Card>

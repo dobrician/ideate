@@ -118,8 +118,8 @@ export function CommentThread({ comments, hiddenFields, currentUserId }: Comment
       <div className="relative flex-1">
         <ScrollArea ref={scrollRef} className="h-full pr-2">
           {tree.length === 0 ? (
-            <div className="flex h-full flex-col items-center justify-center gap-2 py-12">
-              <MessageSquare className="h-8 w-8 text-muted-foreground/40" />
+            <div className="flex flex-col items-center justify-center gap-2 py-6">
+              <MessageSquare className="h-6 w-6 text-muted-foreground/40" />
               <p className="text-center text-sm text-muted-foreground">
                 {t("comments.noComments")}
               </p>

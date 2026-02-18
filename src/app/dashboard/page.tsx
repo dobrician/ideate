@@ -102,7 +102,7 @@ export default async function DashboardPage() {
               <CardTitle className="text-lg">{t("dashboard.yourProjects")}</CardTitle>
               <CardDescription>{t("projects.total", { count: userProjects.length })}</CardDescription>
             </div>
-            <Link href="/projects" className="text-xs font-medium text-primary hover:underline">
+            <Link href="/projects" className="shrink-0 whitespace-nowrap text-xs font-medium text-primary hover:underline">
               {t("dashboard.viewAll")}
             </Link>
           </CardHeader>
