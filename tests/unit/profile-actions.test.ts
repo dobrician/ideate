@@ -155,7 +155,7 @@ describe("changePassword", () => {
     const result = await changePassword(makeFormData({
       currentPassword: "old", newPassword: "newPass1!", confirmPassword: "newPass1!",
     }));
-    expect(result).toEqual({ error: "Failed to change password" });
+    expect(result).toEqual({ error: "An unexpected error occurred" });
   });
 
   it("returns validation error for empty fields", async () => {
@@ -191,7 +191,7 @@ describe("updateNotificationPreferences", () => {
       { emailNewProposal: true, emailVoteOnMine: true, emailCommentReply: true, emailWeeklyDigest: true },
       "csrf-tok",
     );
-    expect(result).toEqual({ error: "Failed to update notification preferences" });
+    expect(result).toEqual({ error: "An unexpected error occurred" });
   });
 });
 
@@ -227,7 +227,7 @@ describe("requestEmailChange", () => {
   it("returns generic error on unexpected failure", async () => {
     mockRequireAuth.mockRejectedValue(new Error("DB down"));
     const result = await requestEmailChange(makeFormData({ newEmail: "new@test.com" }));
-    expect(result).toEqual({ error: "Failed to request email change" });
+    expect(result).toEqual({ error: "An unexpected error occurred" });
   });
 
   it("uses JWT_SECRET and APP_URL env vars when set", async () => {

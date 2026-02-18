@@ -5,16 +5,13 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 import { db } from "@/db";
 import { projects } from "@/db/schema";
-import { requireAuth } from "@/lib/auth";
-import { hasPermission, canManageResource } from "@/lib/rbac";
+import { canManageResource } from "@/lib/rbac";
 import type { Role } from "@/lib/rbac";
 import { eq } from "drizzle-orm";
 import { randomUUID } from "crypto";
 import { logAudit } from "@/lib/audit";
-import { requireCsrfToken } from "@/lib/csrf";
 import { fireWebhookEvent } from "@/lib/webhooks";
-import { checkRateLimit } from "@/lib/rate-limit";
-import { getActionClientIp } from "@/lib/request-utils";
+import { withActionAuth } from "@/lib/action-wrapper";
 
 /**
  * Project validation schema
@@ -36,18 +33,11 @@ const projectSchema = z.object({
  * Create a new project
  */
 export async function createProject(formData: FormData) {
-  try {
-    await requireCsrfToken(formData.get("csrfToken") as string);
-    const user = await requireAuth();
-
-    const ip = await getActionClientIp();
-    const rl = checkRateLimit(`project:create:${ip}`, 10, 15 * 60_000);
-    if (!rl.allowed) return { error: "Too many requests — please try again later" };
-
-    if (!hasPermission(user.role as Role, "project:create")) {
-      return { error: "You don't have permission to create projects" };
-    }
-
+  return withActionAuth(formData.get("csrfToken") as string, {
+    permission: "project:create",
+    rateLimitKey: "project:create",
+    rateLimitMax: 10,
+  }, async (user) => {
     const data = {
       title: formData.get("title") as string,
       description: formData.get("description") as string,
@@ -85,33 +75,18 @@ export async function createProject(formData: FormData) {
 
     revalidatePath("/projects");
     redirect(`/projects/${projectId}`);
-  } catch (error) {
-    if (error instanceof Error && error.message === "Unauthorized") {
-      redirect("/auth/login");
-    }
-    if (error instanceof Error && error.message.includes("NEXT_REDIRECT")) {
-      throw error;
-    }
-    return { error: "Failed to create project. Please try again." };
-  }
+  });
 }
 
 /**
  * Update an existing project
  */
 export async function updateProject(projectId: string, formData: FormData) {
-  try {
-    await requireCsrfToken(formData.get("csrfToken") as string);
-    const user = await requireAuth();
-
-    const ip = await getActionClientIp();
-    const rl = checkRateLimit(`project:update:${ip}`, 20, 15 * 60_000);
-    if (!rl.allowed) return { error: "Too many requests — please try again later" };
-
-    if (!hasPermission(user.role as Role, "project:update")) {
-      return { error: "You don't have permission to update projects" };
-    }
-
+  return withActionAuth(formData.get("csrfToken") as string, {
+    permission: "project:update",
+    rateLimitKey: "project:update",
+    rateLimitMax: 20,
+  }, async (user) => {
     const data = {
       title: formData.get("title") as string,
       description: formData.get("description") as string,
@@ -168,30 +143,18 @@ export async function updateProject(projectId: string, formData: FormData) {
     revalidatePath("/projects");
 
     return { success: true };
-  } catch (error) {
-    if (error instanceof Error && error.message === "Unauthorized") {
-      redirect("/auth/login");
-    }
-    return { error: "Failed to update project. Please try again." };
-  }
+  });
 }
 
 /**
  * Unarchive a project (admin only) — sets status back to active
  */
 export async function unarchiveProject(projectId: string, csrfToken: string) {
-  try {
-    await requireCsrfToken(csrfToken);
-    const user = await requireAuth();
-
-    const ip = await getActionClientIp();
-    const rl = checkRateLimit(`project:unarchive:${ip}`, 10, 15 * 60_000);
-    if (!rl.allowed) return { error: "Too many requests — please try again later" };
-
-    if (!hasPermission(user.role as Role, "project:manage_all")) {
-      return { error: "Only admins can unarchive projects" };
-    }
-
+  return withActionAuth(csrfToken, {
+    permission: "project:manage_all",
+    rateLimitKey: "project:unarchive",
+    rateLimitMax: 10,
+  }, async (user) => {
     const existingProject = await db
       .select()
       .from(projects)
@@ -223,30 +186,18 @@ export async function unarchiveProject(projectId: string, csrfToken: string) {
     revalidatePath("/projects");
 
     return { success: true };
-  } catch (error) {
-    if (error instanceof Error && error.message === "Unauthorized") {
-      redirect("/auth/login");
-    }
-    return { error: "Failed to unarchive project" };
-  }
+  });
 }
 
 /**
  * Delete a project
  */
 export async function deleteProject(projectId: string, csrfToken: string) {
-  try {
-    await requireCsrfToken(csrfToken);
-    const user = await requireAuth();
-
-    const ip = await getActionClientIp();
-    const rl = checkRateLimit(`project:delete:${ip}`, 10, 15 * 60_000);
-    if (!rl.allowed) return { error: "Too many requests — please try again later" };
-
-    if (!hasPermission(user.role as Role, "project:delete")) {
-      return { error: "You don't have permission to delete projects" };
-    }
-
+  return withActionAuth(csrfToken, {
+    permission: "project:delete",
+    rateLimitKey: "project:delete",
+    rateLimitMax: 10,
+  }, async (user) => {
     const existingProject = await db
       .select()
       .from(projects)
@@ -272,13 +223,5 @@ export async function deleteProject(projectId: string, csrfToken: string) {
 
     revalidatePath("/projects");
     redirect("/projects");
-  } catch (error) {
-    if (error instanceof Error && error.message === "Unauthorized") {
-      redirect("/auth/login");
-    }
-    if (error instanceof Error && error.message.includes("NEXT_REDIRECT")) {
-      throw error;
-    }
-    return { error: "Failed to delete project. Please try again." };
-  }
+  });
 }

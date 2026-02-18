@@ -89,14 +89,14 @@ describe("addComment", () => {
   it("rejects unauthenticated users", async () => {
     mockRequireAuth.mockRejectedValue(new Error("Unauthorized"));
     const r = await addComment(null, proposalForm());
-    expect(r).toEqual({ error: "You must be logged in to comment" });
+    expect(r).toEqual({ error: "You must be logged in" });
     expect(mockInsertValues).not.toHaveBeenCalled();
   });
 
   it("rejects viewers", async () => {
     mockRequireAuth.mockResolvedValue(makeUser({ role: "viewer" }));
     const r = await addComment(null, proposalForm());
-    expect(r).toEqual({ error: "You don't have permission to comment" });
+    expect(r).toEqual({ error: "You don't have permission to perform this action" });
   });
 
   it("rejects empty content", async () => {
@@ -225,7 +225,7 @@ describe("addComment", () => {
       throw new Error("DB error");
     });
     const r = await addComment(null, proposalForm());
-    expect(r).toEqual({ error: "Failed to post comment" });
+    expect(r).toEqual({ error: "An unexpected error occurred" });
   });
 
   it("rejects proposal comment when project deadline has passed", async () => {

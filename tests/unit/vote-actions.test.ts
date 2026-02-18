@@ -128,7 +128,7 @@ describe("deleteProposal", () => {
 
   it("rejects members (no delete permission)", async () => {
     const r = await deleteProposal("prop-1", "proj-1", "csrf");
-    expect(r).toEqual({ error: "You don't have permission to delete proposals" });
+    expect(r).toEqual({ error: "You don't have permission to perform this action" });
   });
 
   it("returns not found when proposal missing", async () => {
@@ -167,7 +167,7 @@ describe("deleteProposal", () => {
     rejection.catch(() => {}); // prevent unhandled rejection
     mockSelectResults.push(rejection);
     const r = await deleteProposal("prop-1", "proj-1", "csrf");
-    expect(r).toEqual({ error: "Failed to delete proposal" });
+    expect(r).toEqual({ error: "An unexpected error occurred" });
   });
 });
 
@@ -175,13 +175,13 @@ describe("castVote", () => {
   it("rejects unauthenticated users", async () => {
     mockRequireAuth.mockRejectedValue(new Error("Unauthorized"));
     const r = await castVote("prop-1", 1, "proj-1", "csrf");
-    expect(r).toEqual({ error: "You must be logged in to vote" });
+    expect(r).toEqual({ error: "You must be logged in" });
   });
 
   it("rejects viewers", async () => {
     mockRequireAuth.mockResolvedValue(makeUser({ role: "viewer" }));
     const r = await castVote("prop-1", 1, "proj-1", "csrf");
-    expect(r).toEqual({ error: "You don't have permission to vote" });
+    expect(r).toEqual({ error: "You don't have permission to perform this action" });
   });
 
   it("upserts a positive vote", async () => {
@@ -244,7 +244,7 @@ describe("castVote", () => {
       throw new Error("DB error");
     });
     const r = await castVote("prop-1", 1, "proj-1", "csrf");
-    expect(r).toEqual({ error: "Failed to cast vote" });
+    expect(r).toEqual({ error: "An unexpected error occurred" });
   });
 });
 
@@ -258,7 +258,7 @@ describe("removeVote", () => {
   it("rejects viewers", async () => {
     mockRequireAuth.mockResolvedValue(makeUser({ role: "viewer" }));
     const r = await removeVote("prop-1", "proj-1", "csrf");
-    expect(r).toEqual({ error: "You don't have permission to vote" });
+    expect(r).toEqual({ error: "You don't have permission to perform this action" });
   });
 
   it("rejects vote removal when project deadline has passed", async () => {
@@ -293,6 +293,6 @@ describe("removeVote", () => {
       throw new Error("DB error");
     });
     const r = await removeVote("prop-1", "proj-1", "csrf");
-    expect(r).toEqual({ error: "Failed to remove vote" });
+    expect(r).toEqual({ error: "An unexpected error occurred" });
   });
 });

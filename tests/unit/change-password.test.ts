@@ -241,7 +241,7 @@ describe("changePassword", () => {
 
     const result = await changePassword(fd);
 
-    expect(result).toEqual({ error: "Failed to change password" });
+    expect(result).toEqual({ error: "An unexpected error occurred" });
   });
 
   it("should return validation error when currentPassword is empty", async () => {

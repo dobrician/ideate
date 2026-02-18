@@ -4,17 +4,12 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { db } from "@/db";
 import { proposals, comments } from "@/db/schema";
-import { requireAuth } from "@/lib/auth";
-import { hasPermission } from "@/lib/rbac";
-import type { Role } from "@/lib/rbac";
 import { eq } from "drizzle-orm";
 import { randomUUID } from "crypto";
 import { logAudit } from "@/lib/audit";
 import { notifyComment } from "@/lib/notifications";
-import { requireCsrfToken } from "@/lib/csrf";
 import { isDeadlinePassed, isProjectArchived } from "@/lib/project-utils";
-import { checkRateLimit } from "@/lib/rate-limit";
-import { getActionClientIp } from "@/lib/request-utils";
+import { withActionAuth } from "@/lib/action-wrapper";
 
 /**
  * Comment validation schema — exactly one of proposalId or projectId required
@@ -40,18 +35,11 @@ export async function addComment(
   prevState: { error?: string; success?: boolean } | null,
   formData: FormData
 ): Promise<{ error?: string; success?: boolean }> {
-  try {
-    await requireCsrfToken(formData.get("csrfToken") as string);
-    const user = await requireAuth();
-
-    const ip = await getActionClientIp();
-    const rl = checkRateLimit(`comment:create:${ip}`, 30, 15 * 60_000);
-    if (!rl.allowed) return { error: "Too many requests — please try again later" };
-
-    if (!hasPermission(user.role as Role, "comment:create")) {
-      return { error: "You don't have permission to comment" };
-    }
-
+  return withActionAuth(formData.get("csrfToken") as string, {
+    permission: "comment:create",
+    rateLimitKey: "comment:create",
+    rateLimitMax: 30,
+  }, async (user) => {
     const rawProjectId = (formData.get("projectId") as string) || undefined;
     const rawProposalId = (formData.get("proposalId") as string) || undefined;
 
@@ -138,10 +126,5 @@ export async function addComment(
       revalidatePath(`/projects/${revalidateProjectId}`);
     }
     return { success: true };
-  } catch (error) {
-    if (error instanceof Error && error.message === "Unauthorized") {
-      return { error: "You must be logged in to comment" };
-    }
-    return { error: "Failed to post comment" };
-  }
+  });
 }

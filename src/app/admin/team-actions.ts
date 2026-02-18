@@ -3,12 +3,9 @@
 import { revalidatePath } from "next/cache";
 import { db } from "@/db";
 import { teams, teamMembers, users } from "@/db/schema";
-import { requireAuth } from "@/lib/auth";
-import { hasPermission } from "@/lib/rbac";
-import type { Role } from "@/lib/rbac";
 import { eq, and } from "drizzle-orm";
 import { logAudit } from "@/lib/audit";
-import { requireCsrfToken } from "@/lib/csrf";
+import { withActionAuth } from "@/lib/action-wrapper";
 
 function slugify(name: string): string {
   return name
@@ -23,12 +20,7 @@ export async function createTeam(
   description: string,
   csrfToken: string
 ): Promise<{ error?: string; success?: boolean }> {
-  try {
-    await requireCsrfToken(csrfToken);
-    const user = await requireAuth();
-    if (!hasPermission(user.role as Role, "user:manage")) {
-      return { error: "Only admins can create teams" };
-    }
+  return withActionAuth(csrfToken, { permission: "user:manage" }, async (user) => {
     if (!name.trim()) return { error: "Team name is required" };
 
     const slug = slugify(name);
@@ -60,22 +52,14 @@ export async function createTeam(
 
     revalidatePath("/admin");
     return { success: true };
-  } catch {
-    return { error: "Failed to create team" };
-  }
+  });
 }
 
 export async function deleteTeam(
   teamId: string,
   csrfToken: string
 ): Promise<{ error?: string; success?: boolean }> {
-  try {
-    await requireCsrfToken(csrfToken);
-    const user = await requireAuth();
-    if (!hasPermission(user.role as Role, "user:manage")) {
-      return { error: "Only admins can delete teams" };
-    }
-
+  return withActionAuth(csrfToken, { permission: "user:manage" }, async (user) => {
     await db.delete(teams).where(eq(teams.id, teamId));
     await logAudit({
       userId: user.id,
@@ -86,9 +70,7 @@ export async function deleteTeam(
 
     revalidatePath("/admin");
     return { success: true };
-  } catch {
-    return { error: "Failed to delete team" };
-  }
+  });
 }
 
 export async function addTeamMember(
@@ -97,12 +79,7 @@ export async function addTeamMember(
   role: string,
   csrfToken: string
 ): Promise<{ error?: string; success?: boolean }> {
-  try {
-    await requireCsrfToken(csrfToken);
-    const user = await requireAuth();
-    if (!hasPermission(user.role as Role, "user:manage")) {
-      return { error: "Only admins can manage team members" };
-    }
+  return withActionAuth(csrfToken, { permission: "user:manage" }, async (user) => {
     if (!email.trim()) return { error: "Email is required" };
 
     const target = await db.select().from(users).where(eq(users.email, email.toLowerCase().trim())).limit(1);
@@ -132,9 +109,7 @@ export async function addTeamMember(
 
     revalidatePath("/admin");
     return { success: true };
-  } catch {
-    return { error: "Failed to add member" };
-  }
+  });
 }
 
 export async function removeTeamMember(
@@ -142,13 +117,7 @@ export async function removeTeamMember(
   memberId: string,
   csrfToken: string
 ): Promise<{ error?: string; success?: boolean }> {
-  try {
-    await requireCsrfToken(csrfToken);
-    const user = await requireAuth();
-    if (!hasPermission(user.role as Role, "user:manage")) {
-      return { error: "Only admins can manage team members" };
-    }
-
+  return withActionAuth(csrfToken, { permission: "user:manage" }, async (user) => {
     await db.delete(teamMembers).where(
       and(eq(teamMembers.teamId, teamId), eq(teamMembers.userId, memberId))
     );
@@ -163,7 +132,5 @@ export async function removeTeamMember(
 
     revalidatePath("/admin");
     return { success: true };
-  } catch {
-    return { error: "Failed to remove member" };
-  }
+  });
 }

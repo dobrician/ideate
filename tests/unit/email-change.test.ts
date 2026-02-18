@@ -178,6 +178,6 @@ describe("requestEmailChange", () => {
     mockSendEmailChangeEmail.mockRejectedValue(new Error("SMTP down"));
     const fd = makeFormData({ newEmail: "new@test.com" });
     const result = await requestEmailChange(fd);
-    expect(result).toEqual({ error: "Failed to request email change" });
+    expect(result).toEqual({ error: "An unexpected error occurred" });
   });
 });

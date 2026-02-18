@@ -5,14 +5,11 @@ import { z } from "zod";
 import jwt from "jsonwebtoken";
 import { db } from "@/db";
 import { users, notificationPreferences } from "@/db/schema";
-import { requireAuth } from "@/lib/auth";
 import { eq } from "drizzle-orm";
 import { logAudit } from "@/lib/audit";
-import { requireCsrfToken } from "@/lib/csrf";
 import { validatePassword, verifyPassword, hashPassword } from "@/lib/password";
 import { sendEmailChangeEmail } from "@/lib/mail";
-import { checkRateLimit } from "@/lib/rate-limit";
-import { getActionClientIp } from "@/lib/request-utils";
+import { withActionAuth } from "@/lib/action-wrapper";
 
 const profileSchema = z.object({
   firstName: z.string().max(100, "First name too long").optional(),
@@ -23,14 +20,10 @@ const profileSchema = z.object({
  * Update user profile (first name, last name)
  */
 export async function updateProfile(formData: FormData) {
-  try {
-    await requireCsrfToken(formData.get("csrfToken") as string);
-    const user = await requireAuth();
-
-    const ip = await getActionClientIp();
-    const rl = checkRateLimit(`profile:update:${ip}`, 20, 15 * 60_000);
-    if (!rl.allowed) return { error: "Too many requests — please try again later" };
-
+  return withActionAuth(formData.get("csrfToken") as string, {
+    rateLimitKey: "profile:update",
+    rateLimitMax: 20,
+  }, async (user) => {
     const data = {
       firstName: (formData.get("firstName") as string) || undefined,
       lastName: (formData.get("lastName") as string) || undefined,
@@ -59,12 +52,7 @@ export async function updateProfile(formData: FormData) {
 
     revalidatePath("/profile");
     return { success: true };
-  } catch (error) {
-    if (error instanceof Error && error.message === "Unauthorized") {
-      return { error: "You must be logged in" };
-    }
-    return { error: "Failed to update profile" };
-  }
+  });
 }
 
 const changePasswordSchema = z.object({
@@ -77,14 +65,10 @@ const changePasswordSchema = z.object({
  * Change user password (requires current password verification)
  */
 export async function changePassword(formData: FormData) {
-  try {
-    await requireCsrfToken(formData.get("csrfToken") as string);
-    const user = await requireAuth();
-
-    const ip = await getActionClientIp();
-    const rl = checkRateLimit(`profile:changePassword:${ip}`, 5, 15 * 60_000);
-    if (!rl.allowed) return { error: "Too many requests — please try again later" };
-
+  return withActionAuth(formData.get("csrfToken") as string, {
+    rateLimitKey: "profile:changePassword",
+    rateLimitMax: 5,
+  }, async (user) => {
     const data = {
       currentPassword: formData.get("currentPassword") as string,
       newPassword: formData.get("newPassword") as string,
@@ -134,12 +118,7 @@ export async function changePassword(formData: FormData) {
     });
 
     return { success: true };
-  } catch (error) {
-    if (error instanceof Error && error.message === "Unauthorized") {
-      return { error: "You must be logged in" };
-    }
-    return { error: "Failed to change password" };
-  }
+  });
 }
 
 /**
@@ -154,14 +133,10 @@ export async function updateNotificationPreferences(
   },
   csrfToken: string
 ): Promise<{ error?: string; success?: boolean }> {
-  try {
-    await requireCsrfToken(csrfToken);
-    const user = await requireAuth();
-
-    const ip = await getActionClientIp();
-    const rl = checkRateLimit(`profile:notifications:${ip}`, 20, 15 * 60_000);
-    if (!rl.allowed) return { error: "Too many requests — please try again later" };
-
+  return withActionAuth(csrfToken, {
+    rateLimitKey: "profile:notifications",
+    rateLimitMax: 20,
+  }, async (user) => {
     await db
       .insert(notificationPreferences)
       .values({
@@ -185,12 +160,7 @@ export async function updateNotificationPreferences(
 
     revalidatePath("/profile");
     return { success: true };
-  } catch (error) {
-    if (error instanceof Error && error.message === "Unauthorized") {
-      return { error: "You must be logged in" };
-    }
-    return { error: "Failed to update notification preferences" };
-  }
+  });
 }
 
 const emailChangeSchema = z.object({
@@ -201,14 +171,10 @@ const emailChangeSchema = z.object({
  * Request email change — sends verification link to the new email address
  */
 export async function requestEmailChange(formData: FormData) {
-  try {
-    await requireCsrfToken(formData.get("csrfToken") as string);
-    const user = await requireAuth();
-
-    const ip = await getActionClientIp();
-    const rl = checkRateLimit(`profile:emailChange:${ip}`, 3, 15 * 60_000);
-    if (!rl.allowed) return { error: "Too many requests — please try again later" };
-
+  return withActionAuth(formData.get("csrfToken") as string, {
+    rateLimitKey: "profile:emailChange",
+    rateLimitMax: 3,
+  }, async (user) => {
     const parsed = emailChangeSchema.safeParse({
       newEmail: (formData.get("newEmail") as string)?.toLowerCase().trim(),
     });
@@ -253,10 +219,5 @@ export async function requestEmailChange(formData: FormData) {
     });
 
     return { success: true };
-  } catch (error) {
-    if (error instanceof Error && error.message === "Unauthorized") {
-      return { error: "You must be logged in" };
-    }
-    return { error: "Failed to request email change" };
-  }
+  });
 }

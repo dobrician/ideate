@@ -3,12 +3,11 @@
 import { revalidatePath } from "next/cache";
 import { db } from "@/db";
 import { customRoles } from "@/db/schema";
-import { requireAuth } from "@/lib/auth";
-import { hasPermission, invalidateRoleCache, ALL_PERMISSIONS, BUILT_IN_ROLES } from "@/lib/rbac";
+import { invalidateRoleCache, ALL_PERMISSIONS, BUILT_IN_ROLES } from "@/lib/rbac";
 import type { Role, Permission } from "@/lib/rbac";
 import { eq } from "drizzle-orm";
 import { logAudit } from "@/lib/audit";
-import { requireCsrfToken } from "@/lib/csrf";
+import { withActionAuth } from "@/lib/action-wrapper";
 
 type Result = { error?: string; success?: boolean };
 
@@ -18,12 +17,7 @@ export async function createCustomRole(
   permissions: string[],
   csrfToken: string
 ): Promise<Result> {
-  try {
-    await requireCsrfToken(csrfToken);
-    const user = await requireAuth();
-    if (!hasPermission(user.role as Role, "user:manage")) {
-      return { error: "Only admins can manage roles" };
-    }
+  return withActionAuth(csrfToken, { permission: "user:manage" }, async (user) => {
     const trimmed = name.trim().toLowerCase();
     if (!trimmed || trimmed.length < 2) return { error: "Role name must be at least 2 characters" };
     if (BUILT_IN_ROLES.includes(trimmed as Role)) {
@@ -50,9 +44,7 @@ export async function createCustomRole(
     });
     revalidatePath("/admin");
     return { success: true };
-  } catch {
-    return { error: "Failed to create role" };
-  }
+  });
 }
 
 export async function updateCustomRole(
@@ -61,13 +53,7 @@ export async function updateCustomRole(
   description: string,
   csrfToken: string
 ): Promise<Result> {
-  try {
-    await requireCsrfToken(csrfToken);
-    const user = await requireAuth();
-    if (!hasPermission(user.role as Role, "user:manage")) {
-      return { error: "Only admins can manage roles" };
-    }
-
+  return withActionAuth(csrfToken, { permission: "user:manage" }, async (user) => {
     const valid = permissions.filter((p): p is Permission =>
       ALL_PERMISSIONS.includes(p as Permission)
     );
@@ -83,22 +69,14 @@ export async function updateCustomRole(
     });
     revalidatePath("/admin");
     return { success: true };
-  } catch {
-    return { error: "Failed to update role" };
-  }
+  });
 }
 
 export async function deleteCustomRole(
   roleId: string,
   csrfToken: string
 ): Promise<Result> {
-  try {
-    await requireCsrfToken(csrfToken);
-    const user = await requireAuth();
-    if (!hasPermission(user.role as Role, "user:manage")) {
-      return { error: "Only admins can manage roles" };
-    }
-
+  return withActionAuth(csrfToken, { permission: "user:manage" }, async (user) => {
     const role = await db.select().from(customRoles).where(eq(customRoles.id, roleId)).limit(1);
     if (role.length === 0) return { error: "Role not found" };
     if (role[0].isSystem) return { error: "Cannot delete system roles" };
@@ -112,7 +90,5 @@ export async function deleteCustomRole(
     });
     revalidatePath("/admin");
     return { success: true };
-  } catch {
-    return { error: "Failed to delete role" };
-  }
+  });
 }

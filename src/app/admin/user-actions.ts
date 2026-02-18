@@ -3,12 +3,10 @@
 import { revalidatePath } from "next/cache";
 import { db } from "@/db";
 import { users } from "@/db/schema";
-import { requireAuth } from "@/lib/auth";
-import { hasPermission } from "@/lib/rbac";
 import type { Role } from "@/lib/rbac";
 import { eq, inArray } from "drizzle-orm";
 import { logAudit } from "@/lib/audit";
-import { requireCsrfToken } from "@/lib/csrf";
+import { withActionAuth } from "@/lib/action-wrapper";
 
 const VALID_ROLES: Role[] = ["admin", "manager", "member", "viewer"];
 
@@ -20,14 +18,7 @@ export async function updateUserRole(
   newRole: string,
   csrfToken: string
 ): Promise<{ error?: string; success?: boolean }> {
-  try {
-    await requireCsrfToken(csrfToken);
-    const user = await requireAuth();
-
-    if (!hasPermission(user.role as Role, "user:manage")) {
-      return { error: "You don't have permission to manage users" };
-    }
-
+  return withActionAuth(csrfToken, { permission: "user:manage" }, async (user) => {
     if (!VALID_ROLES.includes(newRole as Role)) {
       return { error: "Invalid role" };
     }
@@ -64,12 +55,7 @@ export async function updateUserRole(
 
     revalidatePath("/admin");
     return { success: true };
-  } catch (error) {
-    if (error instanceof Error && error.message === "Unauthorized") {
-      return { error: "You must be logged in" };
-    }
-    return { error: "Failed to update user role" };
-  }
+  });
 }
 
 /**
@@ -80,14 +66,7 @@ export async function bulkUpdateUserRole(
   newRole: string,
   csrfToken: string
 ): Promise<{ error?: string; success?: boolean; count?: number }> {
-  try {
-    await requireCsrfToken(csrfToken);
-    const user = await requireAuth();
-
-    if (!hasPermission(user.role as Role, "user:manage")) {
-      return { error: "You don't have permission to manage users" };
-    }
-
+  return withActionAuth(csrfToken, { permission: "user:manage" }, async (user) => {
     if (!VALID_ROLES.includes(newRole as Role)) {
       return { error: "Invalid role" };
     }
@@ -116,12 +95,7 @@ export async function bulkUpdateUserRole(
 
     revalidatePath("/admin");
     return { success: true, count: ids.length };
-  } catch (error) {
-    if (error instanceof Error && error.message === "Unauthorized") {
-      return { error: "You must be logged in" };
-    }
-    return { error: "Failed to update user roles" };
-  }
+  });
 }
 
 /**
@@ -131,14 +105,7 @@ export async function bulkDeleteUsers(
   targetUserIds: string[],
   csrfToken: string
 ): Promise<{ error?: string; success?: boolean; count?: number }> {
-  try {
-    await requireCsrfToken(csrfToken);
-    const user = await requireAuth();
-
-    if (!hasPermission(user.role as Role, "user:manage")) {
-      return { error: "You don't have permission to manage users" };
-    }
-
+  return withActionAuth(csrfToken, { permission: "user:manage" }, async (user) => {
     if (targetUserIds.length === 0) {
       return { error: "No users selected" };
     }
@@ -159,10 +126,5 @@ export async function bulkDeleteUsers(
 
     revalidatePath("/admin");
     return { success: true, count: ids.length };
-  } catch (error) {
-    if (error instanceof Error && error.message === "Unauthorized") {
-      return { error: "You must be logged in" };
-    }
-    return { error: "Failed to delete users" };
-  }
+  });
 }

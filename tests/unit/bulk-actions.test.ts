@@ -113,7 +113,7 @@ describe("bulkUpdateUserRole", () => {
   it("rejects non-admin users", async () => {
     mockRequireAuth.mockResolvedValue(makeAdmin({ role: "member" }));
     const r = await bulkUpdateUserRole(["u1"], "member", "csrf");
-    expect(r).toEqual({ error: "You don't have permission to manage users" });
+    expect(r).toEqual({ error: "You don't have permission to perform this action" });
   });
 
   it("rejects invalid role", async () => {
@@ -154,7 +154,7 @@ describe("bulkDeleteUsers", () => {
   it("rejects non-admin users", async () => {
     mockRequireAuth.mockResolvedValue(makeAdmin({ role: "member" }));
     const r = await bulkDeleteUsers(["u1"], "csrf");
-    expect(r).toEqual({ error: "You don't have permission to manage users" });
+    expect(r).toEqual({ error: "You don't have permission to perform this action" });
   });
 
   it("rejects empty user list", async () => {
@@ -185,7 +185,7 @@ describe("bulkArchiveProjects", () => {
   it("rejects non-admin users", async () => {
     mockRequireAuth.mockResolvedValue(makeAdmin({ role: "manager" }));
     const r = await bulkArchiveProjects(["p1"], "csrf");
-    expect(r).toEqual({ error: "Only admins can bulk archive projects" });
+    expect(r).toEqual({ error: "You don't have permission to perform this action" });
   });
 
   it("rejects empty project list", async () => {
@@ -212,7 +212,7 @@ describe("bulkDeleteProjects", () => {
   it("rejects non-admin users", async () => {
     mockRequireAuth.mockResolvedValue(makeAdmin({ role: "manager" }));
     const r = await bulkDeleteProjects(["p1"], "csrf");
-    expect(r).toEqual({ error: "Only admins can bulk delete projects" });
+    expect(r).toEqual({ error: "You don't have permission to perform this action" });
   });
 
   it("rejects empty project list", async () => {

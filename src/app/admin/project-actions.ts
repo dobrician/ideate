@@ -3,13 +3,11 @@
 import { revalidatePath } from "next/cache";
 import { db } from "@/db";
 import { projects, tags, projectTags } from "@/db/schema";
-import { requireAuth } from "@/lib/auth";
-import { hasPermission } from "@/lib/rbac";
 import type { Role } from "@/lib/rbac";
 import { eq, inArray, and } from "drizzle-orm";
 import { logAudit } from "@/lib/audit";
-import { requireCsrfToken } from "@/lib/csrf";
 import { fireWebhookEvent } from "@/lib/webhooks";
+import { withActionAuth } from "@/lib/action-wrapper";
 
 /**
  * Bulk archive projects (admin only)
@@ -18,14 +16,7 @@ export async function bulkArchiveProjects(
   projectIds: string[],
   csrfToken: string
 ): Promise<{ error?: string; success?: boolean; count?: number }> {
-  try {
-    await requireCsrfToken(csrfToken);
-    const user = await requireAuth();
-
-    if (!hasPermission(user.role as Role, "project:manage_all")) {
-      return { error: "Only admins can bulk archive projects" };
-    }
-
+  return withActionAuth(csrfToken, { permission: "project:manage_all" }, async (user) => {
     if (projectIds.length === 0) {
       return { error: "No projects selected" };
     }
@@ -49,12 +40,7 @@ export async function bulkArchiveProjects(
     revalidatePath("/admin");
     revalidatePath("/projects");
     return { success: true, count: projectIds.length };
-  } catch (error) {
-    if (error instanceof Error && error.message === "Unauthorized") {
-      return { error: "You must be logged in" };
-    }
-    return { error: "Failed to archive projects" };
-  }
+  });
 }
 
 /**
@@ -64,14 +50,7 @@ export async function bulkDeleteProjects(
   projectIds: string[],
   csrfToken: string
 ): Promise<{ error?: string; success?: boolean; count?: number }> {
-  try {
-    await requireCsrfToken(csrfToken);
-    const user = await requireAuth();
-
-    if (!hasPermission(user.role as Role, "project:manage_all")) {
-      return { error: "Only admins can bulk delete projects" };
-    }
-
+  return withActionAuth(csrfToken, { permission: "project:manage_all" }, async (user) => {
     if (projectIds.length === 0) {
       return { error: "No projects selected" };
     }
@@ -88,12 +67,7 @@ export async function bulkDeleteProjects(
     revalidatePath("/admin");
     revalidatePath("/projects");
     return { success: true, count: projectIds.length };
-  } catch (error) {
-    if (error instanceof Error && error.message === "Unauthorized") {
-      return { error: "You must be logged in" };
-    }
-    return { error: "Failed to delete projects" };
-  }
+  });
 }
 
 /**
@@ -103,14 +77,7 @@ export async function createTag(
   name: string,
   csrfToken: string
 ): Promise<{ error?: string; success?: boolean; id?: string }> {
-  try {
-    await requireCsrfToken(csrfToken);
-    const user = await requireAuth();
-
-    if (!hasPermission(user.role as Role, "project:manage_all")) {
-      return { error: "Only admins can manage tags" };
-    }
-
+  return withActionAuth(csrfToken, { permission: "project:manage_all" }, async (user) => {
     const trimmed = name.trim();
     if (!trimmed || trimmed.length > 50) {
       return { error: "Tag name must be 1-50 characters" };
@@ -142,12 +109,7 @@ export async function createTag(
     revalidatePath("/admin");
     revalidatePath("/projects");
     return { success: true, id: tag.id };
-  } catch (error) {
-    if (error instanceof Error && error.message === "Unauthorized") {
-      return { error: "You must be logged in" };
-    }
-    return { error: "Failed to create tag" };
-  }
+  });
 }
 
 /**
@@ -157,14 +119,7 @@ export async function deleteTag(
   tagId: string,
   csrfToken: string
 ): Promise<{ error?: string; success?: boolean }> {
-  try {
-    await requireCsrfToken(csrfToken);
-    const user = await requireAuth();
-
-    if (!hasPermission(user.role as Role, "project:manage_all")) {
-      return { error: "Only admins can manage tags" };
-    }
-
+  return withActionAuth(csrfToken, { permission: "project:manage_all" }, async (user) => {
     await db.delete(tags).where(eq(tags.id, tagId));
 
     await logAudit({
@@ -177,12 +132,7 @@ export async function deleteTag(
     revalidatePath("/admin");
     revalidatePath("/projects");
     return { success: true };
-  } catch (error) {
-    if (error instanceof Error && error.message === "Unauthorized") {
-      return { error: "You must be logged in" };
-    }
-    return { error: "Failed to delete tag" };
-  }
+  });
 }
 
 /**
@@ -193,14 +143,7 @@ export async function addProjectTag(
   tagId: string,
   csrfToken: string
 ): Promise<{ error?: string; success?: boolean }> {
-  try {
-    await requireCsrfToken(csrfToken);
-    const user = await requireAuth();
-
-    if (!hasPermission(user.role as Role, "project:manage_all")) {
-      return { error: "Only admins can manage project tags" };
-    }
-
+  return withActionAuth(csrfToken, { permission: "project:manage_all" }, async () => {
     await db
       .insert(projectTags)
       .values({ projectId, tagId })
@@ -209,12 +152,7 @@ export async function addProjectTag(
     revalidatePath("/projects");
     revalidatePath(`/projects/${projectId}`);
     return { success: true };
-  } catch (error) {
-    if (error instanceof Error && error.message === "Unauthorized") {
-      return { error: "You must be logged in" };
-    }
-    return { error: "Failed to add tag to project" };
-  }
+  });
 }
 
 /**
@@ -225,14 +163,7 @@ export async function removeProjectTag(
   tagId: string,
   csrfToken: string
 ): Promise<{ error?: string; success?: boolean }> {
-  try {
-    await requireCsrfToken(csrfToken);
-    const user = await requireAuth();
-
-    if (!hasPermission(user.role as Role, "project:manage_all")) {
-      return { error: "Only admins can manage project tags" };
-    }
-
+  return withActionAuth(csrfToken, { permission: "project:manage_all" }, async () => {
     await db
       .delete(projectTags)
       .where(
@@ -242,10 +173,5 @@ export async function removeProjectTag(
     revalidatePath("/projects");
     revalidatePath(`/projects/${projectId}`);
     return { success: true };
-  } catch (error) {
-    if (error instanceof Error && error.message === "Unauthorized") {
-      return { error: "You must be logged in" };
-    }
-    return { error: "Failed to remove tag from project" };
-  }
+  });
 }

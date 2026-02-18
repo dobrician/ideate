@@ -4,8 +4,7 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { db } from "@/db";
 import { proposals, votes } from "@/db/schema";
-import { requireAuth } from "@/lib/auth";
-import { hasPermission, canManageResource } from "@/lib/rbac";
+import { canManageResource } from "@/lib/rbac";
 import type { Role } from "@/lib/rbac";
 import { buildProposalSummary } from "@/lib/ai";
 import { emitVoteUpdate } from "@/lib/vote-update";
@@ -13,11 +12,9 @@ import { eq, and } from "drizzle-orm";
 import { randomUUID } from "crypto";
 import { logAudit } from "@/lib/audit";
 import { notifyVote } from "@/lib/notifications";
-import { requireCsrfToken } from "@/lib/csrf";
 import { isDeadlinePassed, isProjectArchived } from "@/lib/project-utils";
 import { fireWebhookEvent } from "@/lib/webhooks";
-import { checkRateLimit } from "@/lib/rate-limit";
-import { getActionClientIp } from "@/lib/request-utils";
+import { withActionAuth } from "@/lib/action-wrapper";
 
 async function resolveProposalProject(
   proposalId: string
@@ -44,18 +41,11 @@ export async function createProposal(
   prevState: { error?: string; success?: boolean } | null,
   formData: FormData
 ): Promise<{ error?: string; success?: boolean }> {
-  try {
-    await requireCsrfToken(formData.get("csrfToken") as string);
-    const user = await requireAuth();
-
-    const ip = await getActionClientIp();
-    const rl = checkRateLimit(`proposal:create:${ip}`, 20, 15 * 60_000);
-    if (!rl.allowed) return { error: "Too many requests — please try again later" };
-
-    if (!hasPermission(user.role as Role, "proposal:create")) {
-      return { error: "You don't have permission to create proposals" };
-    }
-
+  return withActionAuth(formData.get("csrfToken") as string, {
+    permission: "proposal:create",
+    rateLimitKey: "proposal:create",
+    rateLimitMax: 20,
+  }, async (user) => {
     const data = {
       projectId: formData.get("projectId") as string,
       title: formData.get("title") as string,
@@ -108,15 +98,7 @@ export async function createProposal(
 
     revalidatePath(`/projects/${projectId}`);
     return { success: true };
-  } catch (error) {
-    if (error instanceof Error && error.message === "Unauthorized") {
-      return { error: "You must be logged in to create a proposal" };
-    }
-    if (error instanceof Error && error.message.startsWith("Forbidden:")) {
-      return { error: error.message };
-    }
-    return { error: "Failed to create proposal. Please try again." };
-  }
+  });
 }
 
 export async function deleteProposal(
@@ -124,18 +106,11 @@ export async function deleteProposal(
   projectId: string,
   csrfToken: string
 ) {
-  try {
-    await requireCsrfToken(csrfToken);
-    const user = await requireAuth();
-
-    const ip = await getActionClientIp();
-    const rl = checkRateLimit(`proposal:delete:${ip}`, 20, 15 * 60_000);
-    if (!rl.allowed) return { error: "Too many requests — please try again later" };
-
-    if (!hasPermission(user.role as Role, "proposal:delete")) {
-      return { error: "You don't have permission to delete proposals" };
-    }
-
+  return withActionAuth(csrfToken, {
+    permission: "proposal:delete",
+    rateLimitKey: "proposal:delete",
+    rateLimitMax: 20,
+  }, async (user) => {
     const existing = await db
       .select()
       .from(proposals)
@@ -162,12 +137,7 @@ export async function deleteProposal(
 
     revalidatePath(`/projects/${projectId}`);
     return { success: true };
-  } catch (error) {
-    if (error instanceof Error && error.message === "Unauthorized") {
-      return { error: "You must be logged in" };
-    }
-    return { error: "Failed to delete proposal" };
-  }
+  });
 }
 
 export async function castVote(
@@ -176,18 +146,11 @@ export async function castVote(
   _projectId: string,
   csrfToken: string
 ) {
-  try {
-    await requireCsrfToken(csrfToken);
-    const user = await requireAuth();
-
-    const ip = await getActionClientIp();
-    const rl = checkRateLimit(`vote:cast:${ip}`, 60, 15 * 60_000);
-    if (!rl.allowed) return { error: "Too many requests — please try again later" };
-
-    if (!hasPermission(user.role as Role, "vote:cast")) {
-      return { error: "You don't have permission to vote" };
-    }
-
+  return withActionAuth(csrfToken, {
+    permission: "vote:cast",
+    rateLimitKey: "vote:cast",
+    rateLimitMax: 60,
+  }, async (user) => {
     if (value !== 1 && value !== -1) {
       return { error: "Invalid vote value — must be 1 or -1" };
     }
@@ -226,12 +189,7 @@ export async function castVote(
     fireWebhookEvent("vote.cast", { proposalId, projectId, userId: user.id, value }).catch(() => {});
     revalidatePath(`/projects/${projectId}`);
     return { success: true };
-  } catch (error) {
-    if (error instanceof Error && error.message === "Unauthorized") {
-      return { error: "You must be logged in to vote" };
-    }
-    return { error: "Failed to cast vote" };
-  }
+  });
 }
 
 export async function removeVote(
@@ -239,18 +197,11 @@ export async function removeVote(
   _projectId: string,
   csrfToken: string
 ) {
-  try {
-    await requireCsrfToken(csrfToken);
-    const user = await requireAuth();
-
-    const ip = await getActionClientIp();
-    const rl = checkRateLimit(`vote:remove:${ip}`, 60, 15 * 60_000);
-    if (!rl.allowed) return { error: "Too many requests — please try again later" };
-
-    if (!hasPermission(user.role as Role, "vote:cast")) {
-      return { error: "You don't have permission to vote" };
-    }
-
+  return withActionAuth(csrfToken, {
+    permission: "vote:cast",
+    rateLimitKey: "vote:remove",
+    rateLimitMax: 60,
+  }, async (user) => {
     const projectId = await resolveProposalProject(proposalId);
     if (!projectId) {
       return { error: "Proposal not found" };
@@ -281,10 +232,5 @@ export async function removeVote(
     await emitVoteUpdate(proposalId, projectId);
     revalidatePath(`/projects/${projectId}`);
     return { success: true };
-  } catch (error) {
-    if (error instanceof Error && error.message === "Unauthorized") {
-      return { error: "You must be logged in" };
-    }
-    return { error: "Failed to remove vote" };
-  }
+  });
 }

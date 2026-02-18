@@ -191,7 +191,7 @@ describe("updateProfile", () => {
 
     const result = await updateProfile(fd);
 
-    expect(result).toEqual({ error: "Failed to update profile" });
+    expect(result).toEqual({ error: "An unexpected error occurred" });
   });
 
   it("should update profile for the authenticated user only", async () => {

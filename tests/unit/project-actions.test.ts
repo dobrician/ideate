@@ -55,12 +55,11 @@ describe("createProject", () => {
 
   it("rejects unauthenticated", async () => {
     mockAuth.mockRejectedValue(new Error("Unauthorized"));
-    await expect(createProject(vfd())).rejects.toThrow("NEXT_REDIRECT");
-    expect(mockRedirect).toHaveBeenCalledWith("/auth/login");
+    expect(await createProject(vfd())).toEqual({ error: "You must be logged in" });
   });
   it("rejects viewers", async () => {
     mockAuth.mockResolvedValue(mkUser({ role: "viewer" }));
-    expect(await createProject(vfd())).toEqual({ error: "You don't have permission to create projects" });
+    expect(await createProject(vfd())).toEqual({ error: "You don't have permission to perform this action" });
   });
   it("rejects short title", async () => {
     expect(await createProject(mkFD({ title: "Hi", description: "", deadline: futureDate }))).toEqual({ error: "Title must be at least 3 characters" });
@@ -82,7 +81,7 @@ describe("createProject", () => {
   });
   it("returns generic error on DB failure", async () => {
     mockInsert.mockImplementation(() => { throw new Error("DB"); });
-    expect(await createProject(vfd())).toEqual({ error: "Failed to create project. Please try again." });
+    expect(await createProject(vfd())).toEqual({ error: "An unexpected error occurred" });
   });
   it("succeeds even when webhook rejects", async () => {
     mockFireWebhook.mockRejectedValue(new Error("webhook down"));
@@ -96,11 +95,11 @@ describe("updateProject", () => {
 
   it("rejects unauthenticated", async () => {
     mockAuth.mockRejectedValue(new Error("Unauthorized"));
-    await expect(updateProject("p1", vfd())).rejects.toThrow("NEXT_REDIRECT");
+    expect(await updateProject("p1", vfd())).toEqual({ error: "You must be logged in" });
   });
   it("rejects viewers", async () => {
     mockAuth.mockResolvedValue(mkUser({ role: "viewer" }));
-    expect(await updateProject("p1", vfd())).toEqual({ error: "You don't have permission to update projects" });
+    expect(await updateProject("p1", vfd())).toEqual({ error: "You don't have permission to perform this action" });
   });
   it("rejects short title", async () => {
     expect(await updateProject("p1", mkFD({ title: "Hi", description: "", deadline: futureDate }))).toEqual({ error: "Title must be at least 3 characters" });
@@ -142,7 +141,7 @@ describe("updateProject", () => {
   it("returns generic error on DB failure", async () => {
     mockSelLim.mockResolvedValueOnce([ownedProj]);
     mockSet.mockImplementation(() => { throw new Error("DB"); });
-    expect(await updateProject("p1", vfd())).toEqual({ error: "Failed to update project. Please try again." });
+    expect(await updateProject("p1", vfd())).toEqual({ error: "An unexpected error occurred" });
   });
 });
 
@@ -151,11 +150,11 @@ describe("deleteProject", () => {
 
   it("rejects unauthenticated", async () => {
     mockAuth.mockRejectedValue(new Error("Unauthorized"));
-    await expect(deleteProject("p1", "t")).rejects.toThrow("NEXT_REDIRECT");
+    expect(await deleteProject("p1", "t")).toEqual({ error: "You must be logged in" });
   });
   it("rejects viewers", async () => {
     mockAuth.mockResolvedValue(mkUser({ role: "viewer" }));
-    expect(await deleteProject("p1", "t")).toEqual({ error: "You don't have permission to delete projects" });
+    expect(await deleteProject("p1", "t")).toEqual({ error: "You don't have permission to perform this action" });
   });
   it("returns not found", async () => {
     mockSelLim.mockResolvedValueOnce([]);
@@ -179,7 +178,7 @@ describe("deleteProject", () => {
   it("returns generic error on DB failure", async () => {
     mockSelLim.mockResolvedValueOnce([ownedProj]);
     mockDelWhere.mockImplementation(() => { throw new Error("DB"); });
-    expect(await deleteProject("p1", "t")).toEqual({ error: "Failed to delete project. Please try again." });
+    expect(await deleteProject("p1", "t")).toEqual({ error: "An unexpected error occurred" });
   });
 });
 
@@ -187,7 +186,7 @@ describe("unarchiveProject", () => {
   const archived = { ...ownedProj, status: "archived" };
 
   it("rejects non-admin", async () => {
-    expect(await unarchiveProject("p1", "t")).toEqual({ error: "Only admins can unarchive projects" });
+    expect(await unarchiveProject("p1", "t")).toEqual({ error: "You don't have permission to perform this action" });
   });
   it("returns not found", async () => {
     mockAuth.mockResolvedValue(mkUser({ role: "admin" }));
@@ -205,14 +204,14 @@ describe("unarchiveProject", () => {
     expect(await unarchiveProject("p1", "t")).toEqual({ success: true });
     expect(mockSet).toHaveBeenCalledWith(expect.objectContaining({ status: "active" }));
   });
-  it("redirects unauthenticated to login", async () => {
+  it("rejects unauthenticated", async () => {
     mockAuth.mockRejectedValue(new Error("Unauthorized"));
-    await expect(unarchiveProject("p1", "t")).rejects.toThrow("NEXT_REDIRECT");
+    expect(await unarchiveProject("p1", "t")).toEqual({ error: "You must be logged in" });
   });
   it("returns generic error on DB failure", async () => {
     mockAuth.mockResolvedValue(mkUser({ role: "admin" }));
     mockSelLim.mockResolvedValueOnce([archived]);
     mockSet.mockImplementation(() => { throw new Error("DB"); });
-    expect(await unarchiveProject("p1", "t")).toEqual({ error: "Failed to unarchive project" });
+    expect(await unarchiveProject("p1", "t")).toEqual({ error: "An unexpected error occurred" });
   });
 });
