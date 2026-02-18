@@ -124,6 +124,21 @@ describe("Digest", () => {
       expect(html).toContain("preferences");
       expect(html).toContain('name="viewport"');
     });
+
+    it("uses APP_URL in project links", () => {
+      const html = generateDigestHtml(digestData);
+      expect(html).toContain("http://localhost:3000/projects/proj-1");
+    });
+
+    it("uses APP_URL in proposal links", () => {
+      const html = generateDigestHtml(digestData);
+      expect(html).toContain("http://localhost:3000/projects/proj-1");
+    });
+
+    it("includes Ideate branding in footer", () => {
+      const html = generateDigestHtml(digestData);
+      expect(html).toMatch(/Ideate/);
+    });
   });
 
   describe("gatherDigestData", () => {
