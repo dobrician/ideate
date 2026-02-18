@@ -162,6 +162,17 @@ describe("Notifications", () => {
       expect(mockSendMail).not.toHaveBeenCalled();
     });
 
+    it("should skip when user opted out of vote notifications", async () => {
+      mockDbLimit
+        .mockResolvedValueOnce([{ title: "Test Proposal", userId: "owner-123" }])
+        .mockResolvedValueOnce([{ emailVoteOnMine: false }]); // prefs: opted out
+
+      const { notifyVote } = await import("@/lib/notifications");
+      await notifyVote("prop-optout-v", "proj-1", "voter-456", 1);
+
+      expect(mockSendMail).not.toHaveBeenCalled();
+    });
+
     it("should use 'there' when owner firstName is null", async () => {
       mockDbLimit
         .mockResolvedValueOnce([{ title: "Test Proposal", userId: "owner-123" }])
@@ -241,6 +252,17 @@ describe("Notifications", () => {
 
       const { notifyComment } = await import("@/lib/notifications");
       await notifyComment("prop-c-nosmtp", "proj-1", "commenter-456", "Test");
+
+      expect(mockSendMail).not.toHaveBeenCalled();
+    });
+
+    it("should skip when user opted out of comment notifications", async () => {
+      mockDbLimit
+        .mockResolvedValueOnce([{ title: "Test Proposal", userId: "owner-123" }])
+        .mockResolvedValueOnce([{ emailCommentReply: false }]); // prefs: opted out
+
+      const { notifyComment } = await import("@/lib/notifications");
+      await notifyComment("prop-c-optout", "proj-1", "commenter-456", "Test");
 
       expect(mockSendMail).not.toHaveBeenCalled();
     });
