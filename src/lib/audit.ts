@@ -27,7 +27,9 @@ type AuditAction =
   | "oidc_login"
   | "oidc_register"
   | "request_email_change"
-  | "change_email";
+  | "change_email"
+  | "add_member"
+  | "remove_member";
 
 type AuditEntity =
   | "project"
@@ -38,7 +40,8 @@ type AuditEntity =
   | "invitation"
   | "session"
   | "attachment"
-  | "tag";
+  | "tag"
+  | "team";
 
 interface AuditEntry {
   userId: string | null;

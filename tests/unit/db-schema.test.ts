@@ -9,5 +9,7 @@ describe("database schema", () => {
     expect(schema.votes).toBeDefined();
     expect(schema.comments).toBeDefined();
     expect(schema.attachments).toBeDefined();
+    expect(schema.teams).toBeDefined();
+    expect(schema.teamMembers).toBeDefined();
   });
 });
