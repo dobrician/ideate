@@ -22,6 +22,7 @@ import { ProjectManager } from "./project-manager";
 import { TagManager } from "./tag-manager";
 import { WebhookManager } from "./webhook-manager";
 import { TemplateManager } from "./template-manager";
+import { RateLimitPanel } from "./rate-limit-panel";
 import { StatCard } from "@/components/stat-card";
 import { getTranslations } from "@/lib/i18n-server";
 
@@ -251,6 +252,17 @@ export default async function AdminPage() {
                 createdAt: inv.createdAt?.toISOString() ?? null,
               }))}
             />
+          </CardContent>
+        </Card>
+
+        {/* Rate Limits */}
+        <Card className="lg:col-span-2">
+          <CardHeader>
+            <CardTitle>Rate Limits</CardTitle>
+            <CardDescription>Active in-memory rate-limit entries (15-min window)</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <RateLimitPanel />
           </CardContent>
         </Card>
 

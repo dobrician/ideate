@@ -84,3 +84,24 @@ export function checkRateLimit(
 export function resetRateLimits(): void {
   store.clear();
 }
+
+export interface RateLimitStats {
+  totalKeys: number;
+  keys: { key: string; hitCount: number; oldestHit: number }[];
+}
+
+/**
+ * Get current rate-limit store stats for admin visibility.
+ */
+export function getRateLimitStats(): RateLimitStats {
+  const now = Date.now();
+  const keys: RateLimitStats["keys"] = [];
+  for (const [key, entry] of store) {
+    const recent = entry.timestamps.filter((t) => t > now - 15 * 60_000);
+    if (recent.length > 0) {
+      keys.push({ key, hitCount: recent.length, oldestHit: recent[0] });
+    }
+  }
+  keys.sort((a, b) => b.hitCount - a.hitCount);
+  return { totalKeys: keys.length, keys: keys.slice(0, 50) };
+}
