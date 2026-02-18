@@ -12,7 +12,7 @@
 - [x] **Goal 5: Close branch gaps on `lib/auth.ts`, `lib/oidc.ts`, `lib/password.ts`** — test tokens without exp/jti, missing APP_URL+OIDC_REDIRECT_URI, null emailVerified (Testing)
 - [x] **Goal 6: Resolve `lib/export.ts` coverage false positive** — exclude barrel re-export file from coverage config or add smoke import test (Testing)
 - [x] **Goal 7: Split `lib/openapi-spec.ts` (835 lines) into modules** — each under 300 lines, maintain all existing exports (Code Quality)
-- [ ] **Goal 8: Verify branch coverage above 99%** — confirm all gaps closed, overall branch coverage ≥ 99% (Testing)
+- [x] **Goal 8: Verify branch coverage above 99%** — confirm all gaps closed, overall branch coverage ≥ 99% (Testing)
 
 ## Notes
 
