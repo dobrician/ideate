@@ -24,3 +24,22 @@ export function getClientIp(request: Request): string {
 
   return "unknown";
 }
+
+/**
+ * Extract client IP from Next.js headers() for server actions.
+ * Same trust model as getClientIp but works without a Request object.
+ */
+export async function getActionClientIp(): Promise<string> {
+  const { headers } = await import("next/headers");
+  const h = await headers();
+
+  if (isTrustedProxy()) {
+    const forwarded = h.get("x-forwarded-for")?.split(",")[0]?.trim();
+    if (forwarded) return forwarded;
+
+    const realIp = h.get("x-real-ip");
+    if (realIp) return realIp;
+  }
+
+  return "unknown";
+}

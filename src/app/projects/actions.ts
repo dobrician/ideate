@@ -13,6 +13,8 @@ import { randomUUID } from "crypto";
 import { logAudit } from "@/lib/audit";
 import { requireCsrfToken } from "@/lib/csrf";
 import { fireWebhookEvent } from "@/lib/webhooks";
+import { checkRateLimit } from "@/lib/rate-limit";
+import { getActionClientIp } from "@/lib/request-utils";
 
 /**
  * Project validation schema
@@ -37,6 +39,10 @@ export async function createProject(formData: FormData) {
   try {
     await requireCsrfToken(formData.get("csrfToken") as string);
     const user = await requireAuth();
+
+    const ip = await getActionClientIp();
+    const rl = checkRateLimit(`project:create:${ip}`, 10, 15 * 60_000);
+    if (!rl.allowed) return { error: "Too many requests — please try again later" };
 
     if (!hasPermission(user.role as Role, "project:create")) {
       return { error: "You don't have permission to create projects" };
@@ -97,6 +103,10 @@ export async function updateProject(projectId: string, formData: FormData) {
   try {
     await requireCsrfToken(formData.get("csrfToken") as string);
     const user = await requireAuth();
+
+    const ip = await getActionClientIp();
+    const rl = checkRateLimit(`project:update:${ip}`, 20, 15 * 60_000);
+    if (!rl.allowed) return { error: "Too many requests — please try again later" };
 
     if (!hasPermission(user.role as Role, "project:update")) {
       return { error: "You don't have permission to update projects" };
@@ -174,6 +184,10 @@ export async function unarchiveProject(projectId: string, csrfToken: string) {
     await requireCsrfToken(csrfToken);
     const user = await requireAuth();
 
+    const ip = await getActionClientIp();
+    const rl = checkRateLimit(`project:unarchive:${ip}`, 10, 15 * 60_000);
+    if (!rl.allowed) return { error: "Too many requests — please try again later" };
+
     if (!hasPermission(user.role as Role, "project:manage_all")) {
       return { error: "Only admins can unarchive projects" };
     }
@@ -224,6 +238,10 @@ export async function deleteProject(projectId: string, csrfToken: string) {
   try {
     await requireCsrfToken(csrfToken);
     const user = await requireAuth();
+
+    const ip = await getActionClientIp();
+    const rl = checkRateLimit(`project:delete:${ip}`, 10, 15 * 60_000);
+    if (!rl.allowed) return { error: "Too many requests — please try again later" };
 
     if (!hasPermission(user.role as Role, "project:delete")) {
       return { error: "You don't have permission to delete projects" };

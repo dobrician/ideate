@@ -16,6 +16,8 @@ import { notifyVote } from "@/lib/notifications";
 import { requireCsrfToken } from "@/lib/csrf";
 import { isDeadlinePassed, isProjectArchived } from "@/lib/project-utils";
 import { fireWebhookEvent } from "@/lib/webhooks";
+import { checkRateLimit } from "@/lib/rate-limit";
+import { getActionClientIp } from "@/lib/request-utils";
 
 async function resolveProposalProject(
   proposalId: string
@@ -45,6 +47,10 @@ export async function createProposal(
   try {
     await requireCsrfToken(formData.get("csrfToken") as string);
     const user = await requireAuth();
+
+    const ip = await getActionClientIp();
+    const rl = checkRateLimit(`proposal:create:${ip}`, 20, 15 * 60_000);
+    if (!rl.allowed) return { error: "Too many requests — please try again later" };
 
     if (!hasPermission(user.role as Role, "proposal:create")) {
       return { error: "You don't have permission to create proposals" };
@@ -122,6 +128,10 @@ export async function deleteProposal(
     await requireCsrfToken(csrfToken);
     const user = await requireAuth();
 
+    const ip = await getActionClientIp();
+    const rl = checkRateLimit(`proposal:delete:${ip}`, 20, 15 * 60_000);
+    if (!rl.allowed) return { error: "Too many requests — please try again later" };
+
     if (!hasPermission(user.role as Role, "proposal:delete")) {
       return { error: "You don't have permission to delete proposals" };
     }
@@ -169,6 +179,10 @@ export async function castVote(
   try {
     await requireCsrfToken(csrfToken);
     const user = await requireAuth();
+
+    const ip = await getActionClientIp();
+    const rl = checkRateLimit(`vote:cast:${ip}`, 60, 15 * 60_000);
+    if (!rl.allowed) return { error: "Too many requests — please try again later" };
 
     if (!hasPermission(user.role as Role, "vote:cast")) {
       return { error: "You don't have permission to vote" };
@@ -228,6 +242,10 @@ export async function removeVote(
   try {
     await requireCsrfToken(csrfToken);
     const user = await requireAuth();
+
+    const ip = await getActionClientIp();
+    const rl = checkRateLimit(`vote:remove:${ip}`, 60, 15 * 60_000);
+    if (!rl.allowed) return { error: "Too many requests — please try again later" };
 
     if (!hasPermission(user.role as Role, "vote:cast")) {
       return { error: "You don't have permission to vote" };

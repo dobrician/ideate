@@ -1,15 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 
-interface MockUser {
-  id: string;
-  email: string;
-  firstName: string | null;
-  lastName: string | null;
-  avatarUrl: string | null;
-  role: "admin" | "manager" | "member" | "viewer";
-  createdAt: Date | null;
-  updatedAt: Date | null;
-}
+interface MockUser { id: string; email: string; firstName: string | null; lastName: string | null; avatarUrl: string | null; role: "admin" | "manager" | "member" | "viewer"; createdAt: Date | null; updatedAt: Date | null; }
 
 const mockRevalidatePath = vi.fn();
 vi.mock("next/cache", () => ({
@@ -84,6 +75,8 @@ vi.mock("@/db", () => ({
     }),
   },
 }));
+vi.mock("@/lib/rate-limit", () => ({ checkRateLimit: vi.fn().mockReturnValue({ allowed: true, remaining: 10, retryAfterMs: 0 }) }));
+vi.mock("@/lib/request-utils", () => ({ getActionClientIp: vi.fn().mockResolvedValue("127.0.0.1") }));
 
 function makeUser(overrides: Partial<MockUser> = {}): MockUser {
   return {
@@ -122,8 +115,6 @@ beforeEach(() => {
   selectCallIndex = 0;
   mockSelectResults.length = 0;
   mockRequireAuth.mockResolvedValue(makeUser());
-  // Default for deleteProposal: 1st select → empty (proposal not found)
-  // Tests that need different results call setSelectResults()
   setSelectResults([]);
 });
 
@@ -194,7 +185,6 @@ describe("castVote", () => {
   });
 
   it("upserts a positive vote", async () => {
-    // 1st select: resolve proposal → proj-1, 2nd: archived check, 3rd: deadline → none
     setSelectResults([{ projectId: "proj-1" }], [{ status: "active" }], []);
     const r = await castVote("prop-1", 1, "proj-1", "csrf");
     expect(r).toEqual({ success: true });
@@ -224,14 +214,12 @@ describe("castVote", () => {
 
   it("rejects vote when project deadline has passed", async () => {
     const pastDate = new Date(Date.now() - 86400000).toISOString();
-    // 1st: resolve proposal, 2nd: archived check, 3rd: deadline passed
     setSelectResults([{ projectId: "proj-1" }], [{ status: "active" }], [{ deadline: pastDate }]);
     const r = await castVote("prop-1", 1, "proj-1", "csrf");
     expect(r).toEqual({ error: "Voting is closed — the project deadline has passed" });
   });
 
   it("rejects vote when project is archived", async () => {
-    // 1st: resolve proposal, 2nd: archived check → archived
     setSelectResults([{ projectId: "proj-1" }], [{ status: "archived" }]);
     const r = await castVote("prop-1", 1, "proj-1", "csrf");
     expect(r).toEqual({ error: "This project is archived and read-only" });
@@ -239,9 +227,7 @@ describe("castVote", () => {
 
   it("uses server-resolved projectId for deadline check, ignoring client value", async () => {
     const pastDate = new Date(Date.now() - 86400000).toISOString();
-    // Proposal belongs to proj-REAL which has expired deadline
     setSelectResults([{ projectId: "proj-REAL" }], [{ status: "active" }], [{ deadline: pastDate }]);
-    // Client sends fake project id "proj-FAKE"
     const r = await castVote("prop-1", 1, "proj-FAKE", "csrf");
     expect(r).toEqual({ error: "Voting is closed — the project deadline has passed" });
   });

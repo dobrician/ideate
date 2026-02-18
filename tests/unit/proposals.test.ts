@@ -32,6 +32,8 @@ vi.mock("@/db", () => ({
     select: () => ({ from: () => ({ where: () => ({ limit: () => mockSelLim() }) }) }),
   },
 }));
+vi.mock("@/lib/rate-limit", () => ({ checkRateLimit: vi.fn().mockReturnValue({ allowed: true, remaining: 10, retryAfterMs: 0 }) }));
+vi.mock("@/lib/request-utils", () => ({ getActionClientIp: vi.fn().mockResolvedValue("127.0.0.1") }));
 
 const mkUser = (o: Partial<MockUser> = {}): MockUser => ({
   id: "user-1", email: "a@t.com", firstName: "A", lastName: "T",

@@ -71,6 +71,8 @@ vi.mock("@/lib/password", () => ({
   verifyPassword: () => Promise.resolve(true),
   hashPassword: () => Promise.resolve("$2a$12$newhash"),
 }));
+vi.mock("@/lib/rate-limit", () => ({ checkRateLimit: vi.fn().mockReturnValue({ allowed: true, remaining: 10, retryAfterMs: 0 }) }));
+vi.mock("@/lib/request-utils", () => ({ getActionClientIp: vi.fn().mockResolvedValue("127.0.0.1") }));
 
 // ── Helpers ────────────────────────────────────────────────────────────────
 

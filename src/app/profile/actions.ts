@@ -11,6 +11,8 @@ import { logAudit } from "@/lib/audit";
 import { requireCsrfToken } from "@/lib/csrf";
 import { validatePassword, verifyPassword, hashPassword } from "@/lib/password";
 import { sendEmailChangeEmail } from "@/lib/mail";
+import { checkRateLimit } from "@/lib/rate-limit";
+import { getActionClientIp } from "@/lib/request-utils";
 
 const profileSchema = z.object({
   firstName: z.string().max(100, "First name too long").optional(),
@@ -24,6 +26,10 @@ export async function updateProfile(formData: FormData) {
   try {
     await requireCsrfToken(formData.get("csrfToken") as string);
     const user = await requireAuth();
+
+    const ip = await getActionClientIp();
+    const rl = checkRateLimit(`profile:update:${ip}`, 20, 15 * 60_000);
+    if (!rl.allowed) return { error: "Too many requests — please try again later" };
 
     const data = {
       firstName: (formData.get("firstName") as string) || undefined,
@@ -74,6 +80,10 @@ export async function changePassword(formData: FormData) {
   try {
     await requireCsrfToken(formData.get("csrfToken") as string);
     const user = await requireAuth();
+
+    const ip = await getActionClientIp();
+    const rl = checkRateLimit(`profile:changePassword:${ip}`, 5, 15 * 60_000);
+    if (!rl.allowed) return { error: "Too many requests — please try again later" };
 
     const data = {
       currentPassword: formData.get("currentPassword") as string,
@@ -148,6 +158,10 @@ export async function updateNotificationPreferences(
     await requireCsrfToken(csrfToken);
     const user = await requireAuth();
 
+    const ip = await getActionClientIp();
+    const rl = checkRateLimit(`profile:notifications:${ip}`, 20, 15 * 60_000);
+    if (!rl.allowed) return { error: "Too many requests — please try again later" };
+
     await db
       .insert(notificationPreferences)
       .values({
@@ -190,6 +204,10 @@ export async function requestEmailChange(formData: FormData) {
   try {
     await requireCsrfToken(formData.get("csrfToken") as string);
     const user = await requireAuth();
+
+    const ip = await getActionClientIp();
+    const rl = checkRateLimit(`profile:emailChange:${ip}`, 3, 15 * 60_000);
+    if (!rl.allowed) return { error: "Too many requests — please try again later" };
 
     const parsed = emailChangeSchema.safeParse({
       newEmail: (formData.get("newEmail") as string)?.toLowerCase().trim(),

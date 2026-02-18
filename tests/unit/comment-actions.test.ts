@@ -1,24 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 
-interface MockUser {
-  id: string;
-  email: string;
-  firstName: string | null;
-  lastName: string | null;
-  avatarUrl: string | null;
-  role: "admin" | "manager" | "member" | "viewer";
-  createdAt: Date | null;
-  updatedAt: Date | null;
-}
-
-interface CommentInsertValues {
-  id: string;
-  proposalId: string | null;
-  projectId: string | null;
-  parentId: string | null;
-  content: string;
-  userId: string;
-}
+interface MockUser { id: string; email: string; firstName: string | null; lastName: string | null; avatarUrl: string | null; role: "admin" | "manager" | "member" | "viewer"; createdAt: Date | null; updatedAt: Date | null; }
+interface CommentInsertValues { id: string; proposalId: string | null; projectId: string | null; parentId: string | null; content: string; userId: string; }
 
 const mockRevalidatePath = vi.fn();
 vi.mock("next/cache", () => ({
@@ -60,6 +43,8 @@ vi.mock("@/db", () => ({
     }),
   },
 }));
+vi.mock("@/lib/rate-limit", () => ({ checkRateLimit: vi.fn().mockReturnValue({ allowed: true, remaining: 10, retryAfterMs: 0 }) }));
+vi.mock("@/lib/request-utils", () => ({ getActionClientIp: vi.fn().mockResolvedValue("127.0.0.1") }));
 
 function makeUser(overrides: Partial<MockUser> = {}): MockUser {
   return {
@@ -173,118 +158,63 @@ describe("addComment", () => {
   });
 
   it("creates threaded reply with valid parentId (proposal)", async () => {
-    // 1. Proposal lookup for deadline → projectId
     mockSelectLimit.mockResolvedValueOnce([{ projectId: "proj-1" }]);
-    // 2. Archived check → not archived
     mockSelectLimit.mockResolvedValueOnce([{ status: "active" }]);
-    // 3. Deadline check → no deadline
     mockSelectLimit.mockResolvedValueOnce([]);
-    // 4. Parent comment lookup → same scope
-    mockSelectLimit.mockResolvedValueOnce([
-      { id: "parent-1", proposalId: "prop-1", projectId: null },
-    ]);
-    const fd = makeFormData({
-      proposalId: "prop-1",
-      content: "reply",
-      parentId: "parent-1",
-    });
+    mockSelectLimit.mockResolvedValueOnce([{ id: "parent-1", proposalId: "prop-1", projectId: null }]);
+    const fd = makeFormData({ proposalId: "prop-1", content: "reply", parentId: "parent-1" });
     const r = await addComment(null, fd);
     expect(r).toEqual({ success: true });
-    const v = mockInsertValues.mock.calls[0][0] as CommentInsertValues;
-    expect(v.parentId).toBe("parent-1");
+    expect((mockInsertValues.mock.calls[0][0] as CommentInsertValues).parentId).toBe("parent-1");
   });
 
   it("creates threaded reply with valid parentId (project)", async () => {
-    // 1. Archived check → not archived
     mockSelectLimit.mockResolvedValueOnce([{ status: "active" }]);
-    // 2. Deadline check → no deadline
     mockSelectLimit.mockResolvedValueOnce([]);
-    // 3. Parent comment lookup → same scope
-    mockSelectLimit.mockResolvedValueOnce([
-      { id: "parent-1", proposalId: null, projectId: "proj-1" },
-    ]);
-    const fd = makeFormData({
-      projectId: "proj-1",
-      content: "project reply",
-      parentId: "parent-1",
-    });
+    mockSelectLimit.mockResolvedValueOnce([{ id: "parent-1", proposalId: null, projectId: "proj-1" }]);
+    const fd = makeFormData({ projectId: "proj-1", content: "project reply", parentId: "parent-1" });
     const r = await addComment(null, fd);
     expect(r).toEqual({ success: true });
-    const v = mockInsertValues.mock.calls[0][0] as CommentInsertValues;
-    expect(v.parentId).toBe("parent-1");
+    expect((mockInsertValues.mock.calls[0][0] as CommentInsertValues).parentId).toBe("parent-1");
   });
 
   it("rejects parentId that does not exist (proposal)", async () => {
-    // 1. Proposal lookup → projectId
     mockSelectLimit.mockResolvedValueOnce([{ projectId: "proj-1" }]);
-    // 2. Archived check → not archived
     mockSelectLimit.mockResolvedValueOnce([{ status: "active" }]);
-    // 3. Deadline check → no deadline
     mockSelectLimit.mockResolvedValueOnce([]);
-    // 4. Parent comment lookup → not found (default [])
     mockSelectLimit.mockResolvedValueOnce([]);
-    const fd = makeFormData({
-      proposalId: "prop-1",
-      content: "reply to ghost",
-      parentId: "nonexistent",
-    });
+    const fd = makeFormData({ proposalId: "prop-1", content: "reply to ghost", parentId: "nonexistent" });
     const r = await addComment(null, fd);
     expect(r).toEqual({ error: "Parent comment not found" });
     expect(mockInsertValues).not.toHaveBeenCalled();
   });
 
   it("rejects parentId that does not exist (project)", async () => {
-    // 1. Archived check → not archived
     mockSelectLimit.mockResolvedValueOnce([{ status: "active" }]);
-    // 2. Deadline check → no deadline
     mockSelectLimit.mockResolvedValueOnce([]);
-    // 3. Parent comment lookup → not found
     mockSelectLimit.mockResolvedValueOnce([]);
-    const fd = makeFormData({
-      projectId: "proj-1",
-      content: "reply to ghost",
-      parentId: "nonexistent",
-    });
+    const fd = makeFormData({ projectId: "proj-1", content: "reply to ghost", parentId: "nonexistent" });
     const r = await addComment(null, fd);
     expect(r).toEqual({ error: "Parent comment not found" });
     expect(mockInsertValues).not.toHaveBeenCalled();
   });
 
   it("rejects parentId from different proposal scope", async () => {
-    // 1. Proposal lookup → projectId
     mockSelectLimit.mockResolvedValueOnce([{ projectId: "proj-1" }]);
-    // 2. Archived check → not archived
     mockSelectLimit.mockResolvedValueOnce([{ status: "active" }]);
-    // 3. Deadline check → no deadline
     mockSelectLimit.mockResolvedValueOnce([]);
-    // 4. Parent comment → different proposal
-    mockSelectLimit.mockResolvedValueOnce([
-      { id: "parent-1", proposalId: "prop-OTHER", projectId: null },
-    ]);
-    const fd = makeFormData({
-      proposalId: "prop-1",
-      content: "cross-scope reply",
-      parentId: "parent-1",
-    });
+    mockSelectLimit.mockResolvedValueOnce([{ id: "parent-1", proposalId: "prop-OTHER", projectId: null }]);
+    const fd = makeFormData({ proposalId: "prop-1", content: "cross-scope reply", parentId: "parent-1" });
     const r = await addComment(null, fd);
     expect(r).toEqual({ error: "Parent comment belongs to a different scope" });
     expect(mockInsertValues).not.toHaveBeenCalled();
   });
 
   it("rejects parentId from different project scope", async () => {
-    // 1. Archived check → not archived
     mockSelectLimit.mockResolvedValueOnce([{ status: "active" }]);
-    // 2. Deadline check → no deadline
     mockSelectLimit.mockResolvedValueOnce([]);
-    // 3. Parent comment → different project
-    mockSelectLimit.mockResolvedValueOnce([
-      { id: "parent-1", proposalId: null, projectId: "proj-OTHER" },
-    ]);
-    const fd = makeFormData({
-      projectId: "proj-1",
-      content: "cross-scope reply",
-      parentId: "parent-1",
-    });
+    mockSelectLimit.mockResolvedValueOnce([{ id: "parent-1", proposalId: null, projectId: "proj-OTHER" }]);
+    const fd = makeFormData({ projectId: "proj-1", content: "cross-scope reply", parentId: "parent-1" });
     const r = await addComment(null, fd);
     expect(r).toEqual({ error: "Parent comment belongs to a different scope" });
     expect(mockInsertValues).not.toHaveBeenCalled();
@@ -299,31 +229,19 @@ describe("addComment", () => {
   });
 
   it("rejects proposal comment when project deadline has passed", async () => {
-    const pastDeadline = new Date(Date.now() - 86400000); // yesterday
-    // First select: proposal lookup returns projectId
     mockSelectLimit.mockResolvedValueOnce([{ projectId: "proj-1" }]);
-    // Second select: archived check → not archived
     mockSelectLimit.mockResolvedValueOnce([{ status: "active" }]);
-    // Third select: project deadline lookup returns past deadline
-    mockSelectLimit.mockResolvedValueOnce([{ deadline: pastDeadline }]);
-
+    mockSelectLimit.mockResolvedValueOnce([{ deadline: new Date(Date.now() - 86400000) }]);
     const fd = makeFormData({ proposalId: "prop-1", content: "Late comment" });
     const r = await addComment(null, fd);
-    expect(r).toEqual({
-      error: "Comments are closed — the project deadline has passed",
-    });
+    expect(r).toEqual({ error: "Comments are closed — the project deadline has passed" });
     expect(mockInsertValues).not.toHaveBeenCalled();
   });
 
   it("allows proposal comment when project deadline is in the future", async () => {
-    const futureDeadline = new Date(Date.now() + 86400000); // tomorrow
-    // First select: proposal lookup returns projectId
     mockSelectLimit.mockResolvedValueOnce([{ projectId: "proj-1" }]);
-    // Second select: archived check → not archived
     mockSelectLimit.mockResolvedValueOnce([{ status: "active" }]);
-    // Third select: project deadline lookup returns future deadline
-    mockSelectLimit.mockResolvedValueOnce([{ deadline: futureDeadline }]);
-
+    mockSelectLimit.mockResolvedValueOnce([{ deadline: new Date(Date.now() + 86400000) }]);
     const fd = makeFormData({ proposalId: "prop-1", content: "Timely comment" });
     const r = await addComment(null, fd);
     expect(r).toEqual({ success: true });
