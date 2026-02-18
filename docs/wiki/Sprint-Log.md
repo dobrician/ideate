@@ -4,9 +4,15 @@ Reverse chronological. Click each sprint for full details.
 
 ---
 
-### ⬜ [Sprint 00 — Coverage Gaps: request-utils, search, rate-limit, digest, notifications, llm, sanitize, auth](Sprint-00) *(2026-02-18)*
-**Focus:** Close remaining branch/statement coverage gaps across 8 library modules
+### ⬜ [Sprint 01 — Export Coverage, Sentry, E2E CI, Proxy Migration & Dead Code](Sprint-01) *(2026-02-18)*
+**Focus:** Add export.ts tests, close rate-limit/digest branch gaps, integrate Sentry, add E2E to CI, complete proxy migration, remove unused exports
 **Stats:** 0/8 goals | TBD tests
+
+---
+
+### ✅ [Sprint 00 — Coverage Gaps: request-utils, search, rate-limit, digest, notifications, llm, sanitize, auth](Sprint-00) *(2026-02-18)*
+**Focus:** Close remaining branch/statement coverage gaps across 8 library modules
+**Stats:** 8/8 goals | 1244 tests | Branch coverage 91.87% → 96.66%
 
 ---
 
