@@ -15,7 +15,7 @@
 
 - [x] **Goal 5: Add Docker image push to CI pipeline** — Add a `docker-push` job to `.github/workflows/ci.yml` that builds and pushes the Docker image to GitHub Container Registry on main branch pushes.
 
-- [ ] **Goal 6: Add database backup automation to CI** — Add a scheduled GitHub Actions workflow that runs the existing backup script weekly.
+- [x] **Goal 6: Add database backup automation to CI** — Add a scheduled GitHub Actions workflow that runs the existing backup script weekly.
 
 - [ ] **Goal 7: Add email change flow to profile page** — Add an email change form with verification. User enters new email, receives verification link, email updates after confirmation.
 

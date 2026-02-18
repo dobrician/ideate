@@ -1,0 +1,43 @@
+name: Database Backup
+
+on:
+  schedule:
+    # Run every Sunday at 02:00 UTC
+    - cron: "0 2 * * 0"
+  workflow_dispatch:
+
+jobs:
+  backup:
+    name: Backup SQLite Database
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install SQLite
+        run: sudo apt-get update && sudo apt-get install -y sqlite3
+
+      - name: Download database from server
+        run: |
+          mkdir -p data
+          if [ -n "${{ secrets.BACKUP_SSH_HOST }}" ]; then
+            sshpass -p "${{ secrets.BACKUP_SSH_PASS }}" \
+              scp -o StrictHostKeyChecking=no \
+              "${{ secrets.BACKUP_SSH_USER }}@${{ secrets.BACKUP_SSH_HOST }}:${{ secrets.BACKUP_DB_PATH }}" \
+              data/ideate.db
+          else
+            echo "::warning::BACKUP_SSH_HOST not configured — skipping remote download"
+            echo "Configure secrets: BACKUP_SSH_HOST, BACKUP_SSH_USER, BACKUP_SSH_PASS, BACKUP_DB_PATH"
+            exit 0
+          fi
+
+      - name: Create backup
+        run: |
+          chmod +x scripts/backup-db.sh
+          ./scripts/backup-db.sh ./backups data/ideate.db
+
+      - name: Upload backup artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: db-backup-${{ github.run_id }}
+          path: backups/
+          retention-days: 30
