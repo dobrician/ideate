@@ -140,6 +140,43 @@ describe("Mail", () => {
     });
   });
 
+  describe("sendEmailChangeEmail", () => {
+    it("sends email change verification with correct content", async () => {
+      mockSendMail.mockResolvedValue({});
+      const { sendEmailChangeEmail } = await import("@/lib/mail");
+      await sendEmailChangeEmail("new@example.com", "https://app.test/api/auth/confirm-email?token=abc123");
+      const opts = mockSendMail.mock.calls[0][0];
+      expect(opts.to).toBe("new@example.com");
+      expect(opts.subject).toContain("Confirm your new email");
+      expect(opts.html).toContain("Confirm Email");
+      expect(opts.html).toContain('href="https://app.test/api/auth/confirm-email?token=abc123"');
+    });
+
+    it("includes verify link in plain text", async () => {
+      mockSendMail.mockResolvedValue({});
+      const { sendEmailChangeEmail } = await import("@/lib/mail");
+      await sendEmailChangeEmail("new@e.com", "https://link.test/confirm");
+      const opts = mockSendMail.mock.calls[0][0];
+      expect(opts.text).toContain("https://link.test/confirm");
+    });
+
+    it("mentions 1-hour expiry", async () => {
+      mockSendMail.mockResolvedValue({});
+      const { sendEmailChangeEmail } = await import("@/lib/mail");
+      await sendEmailChangeEmail("new@e.com", "https://l.t");
+      const opts = mockSendMail.mock.calls[0][0];
+      expect(opts.text).toContain("1 hour");
+      expect(opts.html).toContain("1 hour");
+    });
+
+    it("throws on sendMail failure", async () => {
+      mockSendMail.mockRejectedValue(new Error("SMTP error"));
+      const { sendEmailChangeEmail } = await import("@/lib/mail");
+      await expect(sendEmailChangeEmail("n@e.com", "https://l.t"))
+        .rejects.toThrow("Failed to send email change verification");
+    });
+  });
+
   describe("verifySmtpConnection", () => {
     it("returns true on success", async () => {
       mockVerify.mockResolvedValue(true);
