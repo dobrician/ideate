@@ -4,6 +4,12 @@ Reverse chronological. Click each sprint for full details.
 
 ---
 
+### ✅ [Sprint 00 — Cloudflare, Coverage, Accessibility & SSO](Sprint-00) *(2026-02-18)*
+**Focus:** Cloudflare deployment, close coverage gaps (digest/utils/mail), search keyboard a11y, change-password, OIDC SSO, webhook resilience
+**Stats:** 8/8 goals | Cloudflare Pages + D1 config, full test coverage, OIDC SSO, keyboard a11y
+
+---
+
 ### ✅ [Sprint 00 — PDF Locale Fix, PWA iOS, Server Action Rate Limiting, Admin Dashboard & Data Retention](Sprint-00) *(2026-02-18)*
 **Focus:** Fix hardcoded PDF locale, PWA safe-area iOS overlap, rate limiting on all server actions, admin rate-limit visibility, audit log data retention
 **Stats:** 8/8 goals | 1223 tests | Admin dashboard, data retention cron, full rate-limit test coverage

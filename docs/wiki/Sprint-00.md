@@ -1,18 +1,18 @@
-# Sprint 00 — PDF Locale Fix, PWA iOS, Server Action Rate Limiting, Admin Dashboard & Data Retention
+# Sprint 00 — Cloudflare, Coverage, Accessibility & SSO
 
 **Date:** 2026-02-18
-**Focus:** Fix hardcoded PDF locale, PWA safe-area iOS overlap, rate limiting on all server actions, admin rate-limit visibility, audit log data retention
+**Focus:** Cloudflare deployment, close coverage gaps (digest/utils/mail), search keyboard a11y, change-password, OIDC SSO, webhook resilience
 
 ## Goals
 
-- [x] **Goal 1: Fix hardcoded `en-US` locale in PDF export** — replace fallback with env-aware locale resolution in `export-pdf.ts` (Code Quality, Section 3)
-- [x] **Goal 2: PWA safe-area-inset for iOS home bar** — add `safe-area-inset-bottom` padding to PWA install banner to prevent overlap on notched devices (UX, Section 7)
-- [x] **Goal 3: Rate limiting on server actions** — add `checkRateLimit` to proposal/vote/comment/project/profile server actions (Security, Section 4)
-- [x] **Goal 4: Admin rate-limit visibility dashboard** — expose rate-limit stats (active keys, hit counts) via admin API + UI panel (Enterprise, Section 10)
-- [x] **Goal 5: Data retention policy — auto-prune old audit logs** — add configurable TTL-based cleanup for audit log entries via cron endpoint (Enterprise, Section 10)
-- [x] **Goal 6: Tests for server action rate limiting** — unit tests verifying rate-limit enforcement on proposals/votes/comments/projects/profile actions
-- [x] **Goal 7: Tests for data retention policy** — unit tests for audit log pruning logic, TTL config, and cron endpoint
-- [x] **Goal 8: Tests for admin rate-limit dashboard** — unit tests for rate-limit stats API endpoint and admin UI component
+- [ ] **Goal 1: Cloudflare deployment** — Pages + D1 migration, wrangler config, deploy pipeline (DevOps, Section 13)
+- [ ] **Goal 2: Close coverage gap on `lib/digest.ts`** — unit tests for digest aggregation, HTML generation, and cron endpoint (Testing, Section 13)
+- [ ] **Goal 3: Close coverage gap on `lib/utils.ts`** — tests for `formatDate`, `formatDateTime`, `formatRelativeTime` (Testing, Section 13)
+- [ ] **Goal 4: Close coverage gap on `lib/mail.ts`** — test HTML email template rendering and edge cases on lines 212-243 (Testing, Section 13)
+- [ ] **Goal 5: Search keyboard navigation** — ArrowUp/Down/Enter handlers, fix `aria-selected` tracking, remove misleading static ARIA (Accessibility, Section 13)
+- [ ] **Goal 6: Profile change-password flow** — change-password form with current-password verification (Feature, Section 13)
+- [ ] **Goal 7: SSO foundation (OIDC)** — OpenID Connect login with configurable provider, link accounts by email (Feature, Section 13)
+- [ ] **Goal 8: Improve webhook resilience** — cover error retry paths in tests, dead-letter logging for failed deliveries (Testing + Reliability, Section 13)
 
 ## Notes
 
