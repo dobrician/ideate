@@ -139,6 +139,9 @@ export function CommentThread({ comments, hiddenFields, currentUserId }: Comment
             </div>
           )}
         </ScrollArea>
+        <div aria-live="polite" aria-atomic="true" className="sr-only" role="status">
+          {showNewIndicator ? t("comments.newCommentsAria") : ""}
+        </div>
         {showNewIndicator && (
           <button
             type="button"

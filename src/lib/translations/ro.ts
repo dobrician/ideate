@@ -167,6 +167,7 @@ export const ro: Record<string, string> = {
   "comments.projectDiscussion": "Discuție Proiect",
   "comments.you": "Tu",
   "comments.newMessages": "Mesaje noi",
+  "comments.newCommentsAria": "Comentarii noi disponibile mai jos",
   "comments.reply": "Răspunde",
   "comments.replyPlaceholder": "Scrie un răspuns...",
   "comments.replyingTo": "Răspuns la {name}",
@@ -761,6 +762,7 @@ export const ro: Record<string, string> = {
   "roles.noRoles": "Niciun rol personalizat încă",
   "roles.permCount": "permisiuni",
   "roles.save": "Salvează Modificările",
+  "roles.permissions": "Permisiuni",
 
   // Analytics
   "analytics.title": "Analiză",

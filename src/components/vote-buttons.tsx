@@ -76,6 +76,9 @@ export function VoteButtons({
 
   return (
     <div className="flex items-center gap-1" role="group" aria-label={t("vote.ariaGroup")}>
+      <span className="sr-only" aria-live="polite" aria-atomic="true">
+        {t("vote.pro")} {optimistic.upvotes}, {t("vote.contra")} {optimistic.downvotes}
+      </span>
       <Button
         variant="ghost"
         size="sm"

@@ -160,6 +160,7 @@ export const en: Record<string, string> = {
   "comments.projectDiscussion": "Project Discussion",
   "comments.you": "You",
   "comments.newMessages": "New messages",
+  "comments.newCommentsAria": "New comments available below",
   "comments.reply": "Reply",
   "comments.replyPlaceholder": "Write a reply...",
   "comments.replyingTo": "Replying to {name}",
@@ -742,6 +743,7 @@ export const en: Record<string, string> = {
   "roles.noRoles": "No custom roles yet",
   "roles.permCount": "permissions",
   "roles.save": "Save Changes",
+  "roles.permissions": "Permissions",
 
   // Analytics
   "analytics.title": "Analytics",

@@ -91,10 +91,15 @@ export function RoleManager({ initialRoles }: { initialRoles: CustomRole[] }) {
             <Plus className="mr-1 h-4 w-4" />{t("roles.create")}
           </Button>
         </div>
-        <div className="flex flex-wrap gap-1">
+        <div className="flex flex-wrap gap-1" role="group" aria-label={t("roles.permissions")}>
           {ALL_PERMISSIONS.map((p) => (
             <Badge key={p} variant={newPerms.has(p) ? "default" : "outline"}
-              className="cursor-pointer text-xs" onClick={() => setNewPerms(togglePerm(newPerms, p))}>
+              className="cursor-pointer text-xs"
+              role="checkbox"
+              aria-checked={newPerms.has(p)}
+              tabIndex={0}
+              onClick={() => setNewPerms(togglePerm(newPerms, p))}
+              onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setNewPerms(togglePerm(newPerms, p)); } }}>
               {p}
             </Badge>
           ))}
@@ -109,10 +114,12 @@ export function RoleManager({ initialRoles }: { initialRoles: CustomRole[] }) {
             <li key={role.id} className="rounded-lg border p-3">
               <div className="flex items-center justify-between">
                 <button type="button" className="flex items-center gap-1 text-left"
-                  onClick={() => expandRole(role.id)}>
+                  onClick={() => expandRole(role.id)}
+                  aria-expanded={expanded === role.id}
+                  aria-controls={`role-panel-${role.id}`}>
                   {expanded === role.id
-                    ? <ChevronDown className="h-4 w-4" />
-                    : <ChevronRight className="h-4 w-4" />}
+                    ? <ChevronDown className="h-4 w-4" aria-hidden="true" />
+                    : <ChevronRight className="h-4 w-4" aria-hidden="true" />}
                   <span className="font-medium">{role.name}</span>
                   <span className="ml-1 text-xs text-muted-foreground">
                     ({role.permissions.length} {t("roles.permCount")})
@@ -129,22 +136,27 @@ export function RoleManager({ initialRoles }: { initialRoles: CustomRole[] }) {
                 <p className="mt-1 text-xs text-muted-foreground">{role.description}</p>
               )}
               {expanded === role.id && (
-                <div className="mt-3 space-y-3 border-t pt-3">
+                <div id={`role-panel-${role.id}`} className="mt-3 space-y-3 border-t pt-3" role="region" aria-label={`${role.name} ${t("roles.permissions")}`}>
                   <Input placeholder={t("roles.descriptionLabel")}
                     value={editDesc.get(role.id) ?? role.description ?? ""}
                     onChange={(e) => setEditDesc((prev) => new Map(prev).set(role.id, e.target.value))}
                     aria-label={t("roles.descriptionLabel")} />
-                  <div className="flex flex-wrap gap-1">
+                  <div className="flex flex-wrap gap-1" role="group" aria-label={t("roles.permissions")}>
                     {ALL_PERMISSIONS.map((p) => {
                       const perms = editPerms.get(role.id) ?? new Set(role.permissions);
+                      const checked = perms.has(p);
                       return (
-                        <Badge key={p} variant={perms.has(p) ? "default" : "outline"}
+                        <Badge key={p} variant={checked ? "default" : "outline"}
                           className="cursor-pointer text-xs"
+                          role="checkbox"
+                          aria-checked={checked}
+                          tabIndex={0}
                           onClick={() => setEditPerms((prev) => {
                             const next = new Map(prev);
                             next.set(role.id, togglePerm(perms, p));
                             return next;
-                          })}>
+                          })}
+                          onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setEditPerms((prev) => { const next = new Map(prev); next.set(role.id, togglePerm(perms, p)); return next; }); } }}>
                           {p}
                         </Badge>
                       );
