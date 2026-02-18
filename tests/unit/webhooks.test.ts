@@ -84,6 +84,24 @@ describe("Webhook Library", () => {
       globalThis.fetch = origFetch;
     });
 
+    it("catches deliverWebhook rejection via fire-and-forget", async () => {
+      const origFetch = globalThis.fetch;
+      globalThis.fetch = async () => { throw new Error("Network fail"); };
+      // Make the db.update inside deliverWebhook's catch block also fail,
+      // so deliverWebhook's promise rejects and .catch(() => {}) fires
+      mockSet.mockReturnValue({ where: vi.fn().mockRejectedValue(new Error("DB down")) });
+      mockFrom.mockReturnValue({
+        where: vi.fn().mockResolvedValue([
+          { id: "wh-1", url: URL, events: JSON.stringify(["project.created"]), secret: "s", active: true },
+        ]),
+      });
+      // fireWebhookEvent should not throw even when deliverWebhook rejects
+      await expect(fireWebhookEvent("project.created", { projectId: "p1" })).resolves.not.toThrow();
+      // Wait for fire-and-forget to settle
+      await new Promise((r) => setTimeout(r, 100));
+      globalThis.fetch = origFetch;
+    });
+
     it("logs error on insert failure", async () => {
       const origFetch = globalThis.fetch;
       globalThis.fetch = async () => new Response("OK", { status: 200 });

@@ -5,7 +5,7 @@
 
 ## Goals
 
-- [ ] **Goal 1: Close function/branch gap on `lib/webhooks.ts`** — test `deliverWebhook` (success, retry, permanent failure paths); currently 83.33% function coverage (Testing)
+- [x] **Goal 1: Close function/branch gap on `lib/webhooks.ts`** — test `deliverWebhook` (success, retry, permanent failure paths); currently 83.33% function coverage (Testing)
 - [ ] **Goal 2: Close branch gap on `lib/llm-cache.ts`** — test null `createdAt` fallback on line 52; currently 85.71% branch (Testing)
 - [ ] **Goal 3: Close branch gaps on `lib/llm.ts`** — test OpenAI-only path (no GEMINI_KEY), undefined `tokensUsed`, cost-lookup null fallbacks; currently 91.66% branch (Testing)
 - [ ] **Goal 4: Close branch gaps on `lib/mail.ts`, `lib/comment-utils.ts`, `lib/search.ts`** — test SMTP_PORT/SMTP_FROM defaults, null `createdAt` sort, missing DATABASE_URL fallback (Testing)
