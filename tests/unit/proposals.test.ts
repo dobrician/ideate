@@ -92,6 +92,12 @@ describe("createProposal", () => {
     await createProposal(null, mkFD({ projectId: "p1", title: "No Desc Here", description: "", initialVote: "1" }));
     expect((mockInsert.mock.calls[0][0] as { description: string | null }).description).toBeNull();
   });
+  it("defaults initialVote to '1' when not provided", async () => {
+    const fd = mkFD({ projectId: "proj-1", title: "My Proposal Title", description: "Desc." });
+    expect(await createProposal(null, fd)).toEqual({ success: true });
+    const voteInsert = mockInsert.mock.calls[1][0] as { value: number };
+    expect(voteInsert.value).toBe(1);
+  });
   it("returns generic error on failure", async () => {
     mockBuildSummary.mockRejectedValue(new Error("LLM timeout"));
     expect(await createProposal(null, vfd())).toEqual({ error: "Failed to create proposal. Please try again." });
