@@ -135,6 +135,15 @@ describe("getCachedResponse", () => {
     expect(result).toEqual({ response: "recent answer", modelUsed: "gemini" });
   });
 
+  it("treats null createdAt as epoch zero (expired)", async () => {
+    (mockLimit as unknown as { _result: unknown[] })._result = [
+      { response: "answer", modelUsed: "gemini", createdAt: null, ttl: 86400 },
+    ];
+    const result = await getCachedResponse("null-date prompt");
+    expect(result).toBeNull();
+    expect(mockDelete).toHaveBeenCalled();
+  });
+
   it("returns null on database error", async () => {
     mockSelect.mockImplementationOnce(() => { throw new Error("DB error"); });
     const result = await getCachedResponse("error prompt");
