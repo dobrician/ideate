@@ -4,6 +4,12 @@ Reverse chronological. Click each sprint for full details.
 
 ---
 
+### 🔄 [Sprint 00 — Enterprise Features: Teams, Custom Roles & Analytics](Sprint-00) *(2026-02-18)*
+**Focus:** Multi-tenant teams/organizations, configurable roles (dynamic RBAC), advanced analytics dashboard
+**Stats:** 0/3 goals | 1269 tests
+
+---
+
 ### ✅ [Sprint 03 — 100% Coverage Ceiling & Test Fix](Sprint-03) *(2026-02-18)*
 **Focus:** Fix broken proposal-list bar chart test, close all remaining branch coverage gaps (proxy, email-deliverability, search route, profile actions, proposal actions, db/index)
 **Stats:** 8/8 goals | 1269 tests | Branch coverage 99.18% → 100% across all metrics

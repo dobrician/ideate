@@ -1,18 +1,13 @@
-# Sprint 00 — Coverage Gaps: request-utils, search, rate-limit, digest, notifications, llm, sanitize, auth
+# Sprint 00 — Enterprise Features: Teams, Custom Roles & Analytics
 
 **Date:** 2026-02-18
-**Focus:** Close remaining branch/statement coverage gaps across 8 library modules identified in the deep analysis report
+**Focus:** Implement the 3 remaining enterprise features from deep analysis Section 10: multi-tenant teams/organizations, configurable roles (dynamic RBAC), and advanced analytics dashboard
 
 ## Goals
 
-- [x] **Goal 1: Close coverage gap on `lib/request-utils.ts`** — add tests for getClientIp and getActionClientIp with trusted/untrusted proxy scenarios (Testing, Section 1)
-- [x] **Goal 2: Close coverage gap on `lib/search.ts`** — test uncovered branches on lines 4, 216-220 (Testing, Section 1)
-- [x] **Goal 3: Close coverage gap on `lib/rate-limit.ts`** — test uncovered branches on lines 26, 101 (Testing, Section 1)
-- [x] **Goal 4: Close coverage gap on `lib/digest.ts`** — test uncovered branches on lines 22-23 (Testing, Section 1)
-- [x] **Goal 5: Close coverage gap on `lib/notifications.ts`** — test uncovered lines 80, 138 (Testing, Section 1)
-- [x] **Goal 6: Close coverage gap on `lib/llm.ts`** — test uncovered branch/func on line 248, push branch coverage past 90% (Testing, Section 1)
-- [x] **Goal 7: Close coverage gap on `lib/sanitize.ts`** — test uncovered branch on line 20, push branch coverage past 90% (Testing, Section 1)
-- [x] **Goal 8: Close coverage gap on `lib/auth.ts`** — test uncovered branches on lines 29, 192, 245 (Testing, Section 1)
+- [ ] **Goal 1: Add Teams/Organizations** — multi-tenancy with team schema, team CRUD, team membership, project scoping by team, team switcher UI (Feature, Section 10)
+- [ ] **Goal 2: Add Configurable Roles** — dynamic RBAC with custom role definitions stored in DB, admin UI for role/permission management, migration from hard-coded roles (Feature, Section 10)
+- [ ] **Goal 3: Add Advanced Analytics dashboard** — admin analytics page with charts (recharts) for proposal trends, vote activity, user engagement, and project health over time (Feature, Section 10)
 
 ## Notes
 
