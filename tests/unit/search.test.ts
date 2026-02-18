@@ -248,6 +248,35 @@ describe("Search Library", () => {
       expect(results[0].projectId).toBe("proj-1");
     });
 
+    it("should truncate long comment content and handle null project_id in fallback", () => {
+      const longContent = "B".repeat(100);
+      mockPrepare
+        .mockImplementationOnce(() => {
+          throw new Error("no such table: projects_fts");
+        })
+        .mockImplementation(() => ({ all: mockAll, get: mockGet }));
+
+      mockAll
+        .mockReturnValueOnce([]) // projects fallback
+        .mockReturnValueOnce([]) // proposals fallback
+        .mockReturnValueOnce([
+          {
+            id: "comm-2",
+            content: longContent,
+            project_id: null,
+          },
+        ]); // comments fallback
+
+      const results = search("BB");
+
+      expect(results).toHaveLength(1);
+      expect(results[0].type).toBe("comment");
+      expect(results[0].title.length).toBeLessThanOrEqual(83);
+      expect(results[0].title).toContain("...");
+      expect(results[0].projectId).toBeUndefined();
+      expect(results[0].snippet).toBe(longContent.slice(0, 100));
+    });
+
     it("should close database connection after successful search", () => {
       mockAll.mockReturnValue([]);
 
