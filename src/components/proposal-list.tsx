@@ -24,6 +24,16 @@ export function ProposalList({
   const { t } = useLocale();
   const voteUpdates = useVoteStream(projectId);
 
+  const maxTotalVotes = useMemo(() => {
+    let max = 0;
+    for (const p of proposals) {
+      const live = voteUpdates.get(p.id);
+      const total = (live?.upvotes ?? p.upvotes) + (live?.downvotes ?? p.downvotes);
+      max = Math.max(max, total);
+    }
+    return max;
+  }, [proposals, voteUpdates]);
+
   const sorted = useMemo(() => {
     return [...proposals].sort((a, b) => {
       const aLive = voteUpdates.get(a.id);
@@ -64,6 +74,7 @@ export function ProposalList({
             isAdmin={isAdmin}
             liveUpvotes={live?.upvotes}
             liveDownvotes={live?.downvotes}
+            maxTotalVotes={maxTotalVotes}
           />
         );
       })}

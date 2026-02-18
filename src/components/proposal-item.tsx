@@ -64,6 +64,7 @@ export function ProposalItem({
   isAdmin,
   liveUpvotes,
   liveDownvotes,
+  maxTotalVotes,
 }: {
   proposal: ProposalWithStats;
   projectId: string;
@@ -71,6 +72,7 @@ export function ProposalItem({
   isAdmin: boolean;
   liveUpvotes?: number;
   liveDownvotes?: number;
+  maxTotalVotes: number;
 }) {
   const { t, locale } = useLocale();
   const [showFull, setShowFull] = useState(false);
@@ -81,8 +83,9 @@ export function ProposalItem({
   const upvotes = liveUpvotes ?? proposal.upvotes;
   const downvotes = liveDownvotes ?? proposal.downvotes;
   const totalVotes = upvotes + downvotes;
-  const greenWidth = totalVotes > 0 ? Math.round((upvotes / totalVotes) * 100) : 0;
-  const redWidth = totalVotes > 0 ? Math.round((downvotes / totalVotes) * 100) : 0;
+  const voteUnit = maxTotalVotes > 0 ? 100 / maxTotalVotes : 0;
+  const greenWidth = Math.round(upvotes * voteUnit);
+  const redWidth = Math.round(downvotes * voteUnit);
 
   async function handleDelete() {
     setIsDeleting(true);

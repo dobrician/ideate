@@ -94,6 +94,11 @@ describe("proxy — JWT validation", () => {
   });
 
   it("allows a valid session JWT", () => expect(isPass(proxy(req("/projects", validJwt())))).toBe(true));
+
+  it("allows JWT without exp (non-number exp skips expiry check)", () => {
+    const jwt = fakeJwt({ userId: "u1", type: "session" });
+    expect(isPass(proxy(req("/projects", jwt)))).toBe(true);
+  });
 });
 
 describe("proxy — security headers", () => {
