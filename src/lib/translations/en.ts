@@ -768,4 +768,22 @@ export const en: Record<string, string> = {
   "dataExport.downloading": "Preparing...",
   "dataExport.dateFrom": "From date",
   "dataExport.dateTo": "To date",
+
+  // Onboarding
+  "onboarding.title": "Welcome to Ideate!",
+  "onboarding.subtitle": "Here's how to get the most out of the platform.",
+  "onboarding.profileTitle": "Set up your profile",
+  "onboarding.profileDesc": "Tell us your name so your team knows who you are.",
+  "onboarding.step1Title": "Create a Project",
+  "onboarding.step1Desc": "Projects are the starting point. Set a title, description, and deadline for your team to brainstorm around.",
+  "onboarding.step2Title": "Add Proposals",
+  "onboarding.step2Desc": "Submit ideas as proposals within a project. Each proposal can be voted on by the team.",
+  "onboarding.step3Title": "Vote & Discuss",
+  "onboarding.step3Desc": "Cast pro or contra votes and discuss proposals with your team to reach consensus.",
+  "onboarding.skip": "Skip",
+  "onboarding.back": "Back",
+  "onboarding.next": "Next",
+  "onboarding.finish": "Get Started",
+  "onboarding.finishing": "Saving...",
+  "onboarding.completed": "You're all set!",
 };

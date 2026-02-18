@@ -6,6 +6,7 @@ import { Toaster } from "@/components/ui/sonner";
 import { PwaInstall } from "@/components/pwa-install";
 import { ServiceWorkerRegistration } from "@/components/sw-register";
 import { getRequestLocale } from "@/lib/i18n-server";
+import { OnboardingCheck } from "@/components/onboarding-check";
 import "./globals.css";
 
 const inter = Inter({ subsets: ["latin", "latin-ext"] });
@@ -64,7 +65,10 @@ export default async function RootLayout({
       <head />
       <body className={`${inter.className} antialiased`}>
         <ThemeProvider>
-          <AppShell>{children}</AppShell>
+          <AppShell>
+            {children}
+            <OnboardingCheck />
+          </AppShell>
           <Toaster richColors closeButton position="bottom-right" />
           <PwaInstall />
           <ServiceWorkerRegistration />

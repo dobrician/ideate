@@ -141,6 +141,13 @@
       "when": 1771276800000,
       "tag": "0019_custom_roles",
       "breakpoints": true
+    },
+    {
+      "idx": 20,
+      "version": "6",
+      "when": 1771277200000,
+      "tag": "0020_onboarding",
+      "breakpoints": true
     }
   ]
 }

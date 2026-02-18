@@ -787,4 +787,22 @@ export const ro: Record<string, string> = {
   "dataExport.downloading": "Se pregătește...",
   "dataExport.dateFrom": "De la data",
   "dataExport.dateTo": "Până la data",
+
+  // Onboarding
+  "onboarding.title": "Bine ai venit pe Ideate!",
+  "onboarding.subtitle": "Iată cum să folosești platforma la maximum.",
+  "onboarding.profileTitle": "Configurează profilul",
+  "onboarding.profileDesc": "Spune-ne numele tău ca echipa să știe cine ești.",
+  "onboarding.step1Title": "Creează un Proiect",
+  "onboarding.step1Desc": "Proiectele sunt punctul de plecare. Setează un titlu, o descriere și un termen limită pentru echipa ta.",
+  "onboarding.step2Title": "Adaugă Propuneri",
+  "onboarding.step2Desc": "Depune idei ca propuneri într-un proiect. Fiecare propunere poate fi votată de echipă.",
+  "onboarding.step3Title": "Votează și Discută",
+  "onboarding.step3Desc": "Exprimă voturi pro sau contra și discută propunerile cu echipa ta pentru a ajunge la consens.",
+  "onboarding.skip": "Sari peste",
+  "onboarding.back": "Înapoi",
+  "onboarding.next": "Următorul",
+  "onboarding.finish": "Începe",
+  "onboarding.finishing": "Se salvează...",
+  "onboarding.completed": "Ești pregătit!",
 };

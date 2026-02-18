@@ -11,6 +11,39 @@ import { validatePassword, verifyPassword, hashPassword } from "@/lib/password";
 import { sendEmailChangeEmail } from "@/lib/mail";
 import { withActionAuth } from "@/lib/action-wrapper";
 
+/**
+ * Complete onboarding — save name and mark onboarding as done
+ */
+export async function completeOnboarding(formData: FormData) {
+  return withActionAuth(formData.get("csrfToken") as string, {
+    rateLimitKey: "profile:onboarding",
+    rateLimitMax: 10,
+  }, async (user) => {
+    const firstName = ((formData.get("firstName") as string) || "").trim().slice(0, 100) || null;
+    const lastName = ((formData.get("lastName") as string) || "").trim().slice(0, 100) || null;
+
+    await db
+      .update(users)
+      .set({
+        firstName,
+        lastName,
+        onboardingCompleted: true,
+        updatedAt: new Date(),
+      })
+      .where(eq(users.id, user.id));
+
+    await logAudit({
+      userId: user.id,
+      action: "complete_onboarding",
+      entity: "user",
+      entityId: user.id,
+    });
+
+    revalidatePath("/");
+    return { success: true };
+  });
+}
+
 const profileSchema = z.object({
   firstName: z.string().max(100, "First name too long").optional(),
   lastName: z.string().max(100, "Last name too long").optional(),

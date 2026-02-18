@@ -29,7 +29,8 @@ type AuditAction =
   | "request_email_change"
   | "change_email"
   | "add_member"
-  | "remove_member";
+  | "remove_member"
+  | "complete_onboarding";
 
 type AuditEntity =
   | "project"

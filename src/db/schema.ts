@@ -21,6 +21,7 @@ export const users = sqliteTable("users", {
   resetToken: text("reset_token"),
   resetTokenExpires: integer("reset_token_expires", { mode: "timestamp" }),
   role: text("role", { enum: ["admin", "manager", "member", "viewer"] }).notNull().default("member"),
+  onboardingCompleted: integer("onboarding_completed", { mode: "boolean" }).notNull().default(false),
   createdAt: ts(), updatedAt: tsUp(),
 });
 
