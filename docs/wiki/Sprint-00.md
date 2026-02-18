@@ -5,7 +5,7 @@
 
 ## Goals
 
-- [ ] **Goal 1: Cloudflare deployment completion** — resolve remaining D1 migration issues, test production deploy, close issue #13 (DevOps)
+- [x] **Goal 1: Cloudflare deployment completion** — resolve remaining D1 migration issues, test production deploy, close issue #13 (DevOps)
 - [ ] **Goal 2: Add `lib/export.ts` to test coverage** — currently at 0% stmts/branch (excluded from coverage config). Add unit tests for PDF, CSV, and HTML export generation (Testing)
 - [ ] **Goal 3: Close remaining branch gaps in `lib/rate-limit.ts`** — cover lines 26 and 101 (currently 80% branch) (Testing)
 - [ ] **Goal 4: Close remaining branch gaps in `lib/digest.ts`** — cover lines 22-23 (currently 83.3% branch) (Testing)

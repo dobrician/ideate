@@ -17,7 +17,7 @@ Future improvements and feature ideas. Prioritize during sprint planning.
 - [ ] **Anonymous voting mode** — Optional hide voter identity
 - [ ] **Delegation** — Delegate your vote to another user
 - [x] **Mobile app** — PWA with install prompt and offline page *(Sprint 6)*
-- [ ] **Cloudflare deployment** — Pages + D1 + Workers (Issue #13, spike in progress)
+- [x] **Cloudflare deployment** — Pages + D1 + Workers, Resend mail, edge logger *(Sprint 00)*
 
 ## Technical
 - [x] **GitHub Actions CI** — Automated testing on PR *(Sprint 5)*

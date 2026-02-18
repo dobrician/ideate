@@ -8,8 +8,6 @@ Track bugs, limitations, and technical debt here.
 2. **No JWT revocation store** — Compromised JWTs remain valid for up to 7 days until natural expiry. Acceptable risk at current user count but needs a revocation list for enterprise use.
 3. **Single-instance SQLite** — SQLite single-writer lock limits concurrency. Fine for current deployment but blocks horizontal scaling. PostgreSQL migration plan exists (`docs/postgres-migration-plan.md`) but is deferred.
 4. **No account lockout** — Rate limits reset per window; no permanent lockout after repeated auth failures.
-5. **Cloudflare deployment blocked** — Issue #13 remains open. D1 compatibility with Drizzle ORM and FTS5 support are unknown blockers.
-
 ## Resolved
 
 1. **CSRF protection** — Was dead code through Sprint 14. Fully wired in Sprint 15: double-submit cookie pattern with `timingSafeEqual`, all 10 mutation server actions protected, 10 dedicated tests. *(Sprint 15)*
@@ -22,3 +20,4 @@ Track bugs, limitations, and technical debt here.
 8. **Migration reliability** — Idempotent migrations with `IF NOT EXISTS`, retry logic, and fail-fast on errors. *(Sprint 21)*
 9. **Proposal bar chart regression** — Bar width calculated as upvotes/total instead of upvotes/max, fixed in Sprint 15. Component tests added in Sprint 16 to prevent recurrence. *(Sprints 14-16)*
 10. **Rate limiting on mutations** — Extended rate limiting from auth-only to proposals, votes, comments, and search endpoints. *(Sprint 18)*
+11. **Cloudflare deployment** — D1 adapter, Resend mail transport, edge logger, wrangler config, CI deploy stage all wired. Issue #13 closed. *(Sprint 00)*
