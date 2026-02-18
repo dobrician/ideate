@@ -88,10 +88,25 @@ function applyMigrations(): void {
   }
 }
 
+// Rebuild FTS5 indexes so pre-existing data is searchable.
+// This is idempotent and fast — FTS5 'rebuild' re-reads the content tables.
+function rebuildFtsIndexes(): void {
+  const ftsTables = ["projects_fts", "proposals_fts", "comments_fts"];
+  for (const table of ftsTables) {
+    try {
+      sqlite.exec(`INSERT INTO ${table}(${table}) VALUES('rebuild')`);
+    } catch {
+      // Table may not exist yet if its migration hasn't been applied
+    }
+  }
+  logger.info("FTS indexes rebuilt");
+}
+
 const MAX_RETRIES = 3;
 for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
   try {
     applyMigrations();
+    rebuildFtsIndexes();
     break;
   } catch (error) {
     const isBusy = error instanceof Error &&

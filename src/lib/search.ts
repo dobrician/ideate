@@ -168,7 +168,7 @@ function searchFallback(
 
   const proposalResults = sqlite
     .prepare(
-      `SELECT id, title, description, projectId
+      `SELECT id, title, description, project_id as projectId
        FROM proposals
        WHERE title LIKE ? OR description LIKE ?
        LIMIT ?`

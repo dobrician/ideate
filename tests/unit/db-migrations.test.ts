@@ -47,7 +47,8 @@ describe("db/index migration logic", () => {
     mockExistsSync.mockReturnValue(false);
     mockPrepare.mockReturnValue(prep(false));
     await import("@/db/index");
-    expect(mockExec).toHaveBeenCalledTimes(1);
+    // 1 = CREATE _migrations, +3 = FTS rebuild attempts
+    expect(mockExec).toHaveBeenCalledTimes(4);
     expect(mockExec.mock.calls[0][0]).toContain("_migrations");
   });
 
@@ -56,7 +57,8 @@ describe("db/index migration logic", () => {
     mockReadFileSync.mockReturnValue(journal([{ idx: 0, tag: "0000_init" }]));
     mockPrepare.mockReturnValue(prep(true));
     await import("@/db/index");
-    expect(mockExec).toHaveBeenCalledTimes(3);
+    // 3 = CREATE _migrations + BEGIN + COMMIT, +3 = FTS rebuild
+    expect(mockExec).toHaveBeenCalledTimes(6);
   });
 
   it("should skip migration file that does not exist on disk", async () => {
@@ -65,7 +67,8 @@ describe("db/index migration logic", () => {
     mockReadFileSync.mockReturnValue(journal([{ idx: 0, tag: "0000_missing" }]));
     mockPrepare.mockReturnValue(prep(false));
     await import("@/db/index");
-    expect(mockExec).toHaveBeenCalledTimes(3);
+    // 3 = CREATE _migrations + BEGIN + COMMIT, +3 = FTS rebuild
+    expect(mockExec).toHaveBeenCalledTimes(6);
   });
 
   it("should apply pending migration with statement breakpoints", async () => {
@@ -77,7 +80,8 @@ describe("db/index migration logic", () => {
     const p = prep(false);
     mockPrepare.mockReturnValue(p);
     await import("@/db/index");
-    expect(mockExec).toHaveBeenCalledTimes(5);
+    // 5 = CREATE _migrations + BEGIN + 2 stmts + COMMIT, +3 = FTS rebuild
+    expect(mockExec).toHaveBeenCalledTimes(8);
     expect(mockExec.mock.calls[1][0]).toBe("BEGIN IMMEDIATE");
     expect(mockExec.mock.calls[4][0]).toBe("COMMIT");
     expect(p.run).toHaveBeenCalledWith("0001_create.sql");
