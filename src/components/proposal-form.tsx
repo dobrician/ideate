@@ -201,7 +201,7 @@ export function ProposalForm(props: ProposalFormProps) {
           <span className="hidden sm:inline">{form.t("proposalForm.newProposal")}</span>
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-lg max-h-[90dvh] overflow-y-auto">
+      <DialogContent className="sm:max-w-lg">
         <DialogHeader>
           <DialogTitle>{form.t("proposalForm.title")}</DialogTitle>
         </DialogHeader>

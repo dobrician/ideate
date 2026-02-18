@@ -150,6 +150,41 @@ describe("Email Deliverability API Route", () => {
       process.env.SMTP_FROM = original;
     });
 
+    it("should use custom SMTP_FROM env var when set", async () => {
+      const original = process.env.SMTP_FROM;
+      process.env.SMTP_FROM = "noreply@custom.io";
+      vi.resetModules();
+
+      vi.doMock("@/lib/email-deliverability", () => ({
+        checkDeliverability: (...args: unknown[]) => mockCheckDeliverability(...args),
+      }));
+      vi.doMock("@/lib/auth", () => ({
+        getCurrentUser: () => Promise.resolve(adminUser),
+      }));
+      vi.doMock("@/lib/rbac", () => ({
+        hasPermission: () => true,
+      }));
+
+      mockCheckDeliverability.mockResolvedValue({
+        domain: "custom.io",
+        spf: { exists: true, records: [], valid: true },
+        dkim: { exists: true, records: [], selector: "default" },
+        mx: { exists: true, records: [] },
+        summary: "pass",
+        recommendations: [],
+      });
+
+      const { GET: GET3 } = await import("@/app/api/email/deliverability/route");
+      const response = await GET3();
+      const data = await response.json();
+
+      expect(response.status).toBe(200);
+      expect(mockCheckDeliverability).toHaveBeenCalledWith("custom.io");
+      expect(data.domain).toBe("custom.io");
+
+      process.env.SMTP_FROM = original;
+    });
+
     it("should include domain in response", async () => {
       mockCheckDeliverability.mockResolvedValue({
         domain: "surcod.ro",
