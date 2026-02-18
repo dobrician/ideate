@@ -1,18 +1,18 @@
-# Sprint 00 — Accessibility Polish, Locale Generics & Coverage Gaps
+# Sprint 00 — PDF Locale Fix, PWA iOS, Server Action Rate Limiting, Admin Dashboard & Data Retention
 
 **Date:** 2026-02-18
-**Focus:** Icon button a11y, redundant title cleanup, locale-generic date formatting, close coverage gaps (components/db/profile/projects), proxy.ts tests
+**Focus:** Fix hardcoded PDF locale, PWA safe-area iOS overlap, rate limiting on all server actions, admin rate-limit visibility, audit log data retention
 
 ## Goals
 
-- [x] **Goal 1: Icon-only button a11y** — add `aria-label` to `dark-mode-toggle`, `locale-switcher`, `export-buttons`, `attachment-upload` delete button (WCAG 4.1.2)
-- [x] **Goal 2: Remove redundant `title` from comment-thread send button** — already has `aria-label`, remove duplicate `title` attribute
-- [x] **Goal 3: Locale-generic date formatting** — replace hardcoded `en`/`ro` switch in `utils.ts` with BCP 47 locale tag support
-- [x] **Goal 4: Close coverage gap on `src/components`** — raise from 93.75% stmts / 90% branch to 100%
-- [x] **Goal 5: Close coverage gap on `src/db`** — raise from 88.88% branch to 100%
-- [x] **Goal 6: Close coverage gap on `src/app/profile`** — raise from 98.63% stmts / 93.47% branch
-- [x] **Goal 7: Add `proxy.ts` unit tests** — auth proxy currently has zero test coverage
-- [x] **Goal 8: Close coverage gap on `src/app/projects`** — raise from 71.42% funcs / 96.77% branch
+- [ ] **Goal 1: Fix hardcoded `en-US` locale in PDF export** — replace fallback with env-aware locale resolution in `export-pdf.ts` (Code Quality, Section 3)
+- [ ] **Goal 2: PWA safe-area-inset for iOS home bar** — add `safe-area-inset-bottom` padding to PWA install banner to prevent overlap on notched devices (UX, Section 7)
+- [ ] **Goal 3: Rate limiting on server actions** — add `checkRateLimit` to proposal/vote/comment/project/profile server actions (Security, Section 4)
+- [ ] **Goal 4: Admin rate-limit visibility dashboard** — expose rate-limit stats (active keys, hit counts) via admin API + UI panel (Enterprise, Section 10)
+- [ ] **Goal 5: Data retention policy — auto-prune old audit logs** — add configurable TTL-based cleanup for audit log entries via cron endpoint (Enterprise, Section 10)
+- [ ] **Goal 6: Tests for server action rate limiting** — unit tests verifying rate-limit enforcement on proposals/votes/comments/projects/profile actions
+- [ ] **Goal 7: Tests for data retention policy** — unit tests for audit log pruning logic, TTL config, and cron endpoint
+- [ ] **Goal 8: Tests for admin rate-limit dashboard** — unit tests for rate-limit stats API endpoint and admin UI component
 
 ## Notes
 

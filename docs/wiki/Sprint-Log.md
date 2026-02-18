@@ -4,6 +4,12 @@ Reverse chronological. Click each sprint for full details.
 
 ---
 
+### ⬜ [Sprint 00 — PDF Locale Fix, PWA iOS, Server Action Rate Limiting, Admin Dashboard & Data Retention](Sprint-00) *(2026-02-18)*
+**Focus:** Fix hardcoded PDF locale, PWA safe-area iOS overlap, rate limiting on all server actions, admin rate-limit visibility, audit log data retention
+**Stats:** 0/8 goals | TBD tests | Security + enterprise features from deep analysis
+
+---
+
 ### ✅ [Sprint 00 — Proxy Tests & Projects Coverage](Sprint-00) *(2026-02-18)*
 **Focus:** Add proxy.ts unit tests, close coverage gap on src/app/projects (funcs/branch)
 **Stats:** 2/2 goals | 1195 tests | 100% func coverage on projects + proposals
