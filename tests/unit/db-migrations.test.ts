@@ -1,39 +1,29 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 
-// Test the migration logic by mocking all dependencies
 const mockExec = vi.fn();
 const mockPrepare = vi.fn();
 const mockPragma = vi.fn();
-
 vi.mock("better-sqlite3", () => {
   const MockDb = vi.fn(function MockDb() {
     return { exec: mockExec, prepare: mockPrepare, pragma: mockPragma };
   });
   return { default: MockDb };
 });
-
-vi.mock("drizzle-orm/better-sqlite3", () => ({
-  drizzle: vi.fn(() => ({})),
-}));
-
+vi.mock("drizzle-orm/better-sqlite3", () => ({ drizzle: vi.fn(() => ({})) }));
 vi.mock("@/db/schema", () => ({}));
 
 const mockExistsSync = vi.fn();
 const mockReadFileSync = vi.fn();
-
 vi.mock("fs", () => ({
   existsSync: (...args: unknown[]) => mockExistsSync(...args),
   readFileSync: (...args: unknown[]) => mockReadFileSync(...args),
 }));
 
-const mockLogInfo = vi.fn();
-const mockLogFatal = vi.fn();
-
+const mockLogInfo = vi.fn(), mockLogFatal = vi.fn();
 vi.mock("@/lib/logger", () => ({
   logger: { info: mockLogInfo, fatal: mockLogFatal, error: vi.fn() },
 }));
 
-// Prevent process.exit from actually killing the test runner
 const mockExit = vi.spyOn(process, "exit").mockImplementation(() => {
   throw new Error("process.exit called");
 });
@@ -260,6 +250,31 @@ describe("db/index migration logic", () => {
     await import("@/db/index");
 
     expect(mockRun).toHaveBeenCalledWith("0004_create.sql");
+  });
+
+  it("should handle non-Error thrown value in isIdempotentError", async () => {
+    mockExistsSync.mockReturnValue(true);
+    mockReadFileSync.mockImplementation((path: string) => {
+      if (path.includes("_journal.json")) {
+        return JSON.stringify({ entries: [{ idx: 0, tag: "0005_str" }] });
+      }
+      return "CREATE TABLE bar (id TEXT);";
+    });
+    const mockRun = vi.fn();
+    mockPrepare.mockReturnValue({
+      get: vi.fn().mockReturnValue(null),
+      run: mockRun,
+    });
+    mockExec.mockImplementation((sql: string) => {
+      if (sql.includes("CREATE TABLE bar")) {
+        // eslint-disable-next-line no-throw-literal
+        throw "table bar already exists";
+      }
+    });
+
+    await import("@/db/index");
+
+    expect(mockRun).toHaveBeenCalledWith("0005_str.sql");
   });
 
   it("should abort after max retries on persistent SQLITE_BUSY", async () => {
