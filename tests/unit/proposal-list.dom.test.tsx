@@ -166,15 +166,15 @@ describe("ProposalList", () => {
         widths.push((el as HTMLElement).style.width);
       });
     });
-    // Vote bar uses actual pro/(pro+contra) ratio, scaled to 50% max per side
-    // A: 3up/5total → green=30%, 2/5 → red=20%
-    // B: 2up/3total → green=33%, 1/3 → red=17%
-    // C: 0up/1total → green not rendered, 1/1 → red=50%
-    expect(widths).toContain("30%");
-    expect(widths).toContain("20%");
+    // Vote bar uses actual pro/(pro+contra) ratio as full percentage
+    // A: 3up/5total → green=60%, 2/5 → red=40%
+    // B: 2up/3total → green=67%, 1/3 → red=33%
+    // C: 0up/1total → green not rendered, 1/1 → red=100%
+    expect(widths).toContain("60%");
+    expect(widths).toContain("40%");
+    expect(widths).toContain("67%");
     expect(widths).toContain("33%");
-    expect(widths).toContain("17%");
-    expect(widths).toContain("50%");
+    expect(widths).toContain("100%");
     // No 0% width bar should be rendered
     expect(widths).not.toContain("0%");
   });
