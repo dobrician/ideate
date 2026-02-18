@@ -254,4 +254,13 @@ describe("Digest env overrides", () => {
     const html = generateDigestHtml(digestData);
     expect(html).toContain("https://my.app/projects/proj-1");
   });
+
+  it("falls back to default SMTP_FROM and APP_URL when env is unset", async () => {
+    delete process.env.SMTP_FROM;
+    delete process.env.APP_URL;
+    vi.resetModules();
+    const { generateDigestHtml } = await import("@/lib/digest");
+    const html = generateDigestHtml(digestData);
+    expect(html).toContain("http://localhost:3000/projects/proj-1");
+  });
 });
