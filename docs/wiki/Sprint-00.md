@@ -1,25 +1,18 @@
-# Sprint 00 — UX Polish, Security Hardening & DevOps Automation
+# Sprint 00 — Cloudflare, Coverage, Accessibility & SSO
 
 **Date:** 2026-02-18
-**Focus:** PWA mobile overlap, AI model disclosure, dialog focus fix, trusted proxy validation, Docker CI push, DB backup automation, email change flow, API rate limiting
+**Focus:** Cloudflare deployment, close coverage gaps (digest/utils/mail), search keyboard a11y, change-password, OIDC SSO, webhook resilience
 
 ## Goals
 
-- [x] **Goal 1: Fix PWA banner mobile overlap** — Move the PWA install banner from `fixed top-16` to bottom position on mobile to prevent content overlap. Desktop already uses `sm:bottom-4`.
-
-- [x] **Goal 2: Add AI model disclosure in suggestion dialog** — Surface the `modelUsed` field from `completeWithFallback` in the suggestion dialog so users know which AI model generated the suggestions.
-
-- [x] **Goal 3: Fix AI dialog focus management** — When the suggestion detail panel opens/closes, restore focus to the trigger element. Addresses deep analysis finding A.14 (nested dialog focus leakage).
-
-- [x] **Goal 4: Add trusted proxy validation for rate limiting** — `request-utils.ts` trusts `x-forwarded-for` without validation. Add `TRUSTED_PROXIES` env var support and fall back to direct IP when not behind a trusted proxy.
-
-- [x] **Goal 5: Add Docker image push to CI pipeline** — Add a `docker-push` job to `.github/workflows/ci.yml` that builds and pushes the Docker image to GitHub Container Registry on main branch pushes.
-
-- [x] **Goal 6: Add database backup automation to CI** — Add a scheduled GitHub Actions workflow that runs the existing backup script weekly.
-
-- [x] **Goal 7: Add email change flow to profile page** — Add an email change form with verification. User enters new email, receives verification link, email updates after confirmation.
-
-- [x] **Goal 8: Add rate limiting to remaining API routes** — Protect export, attachment, webhook, and template API routes with `checkRateLimit` calls.
+- [ ] **Goal 1: Cloudflare deployment** — Pages + D1 migration, wrangler config, deploy pipeline
+- [ ] **Goal 2: Close coverage gap on `lib/digest.ts`** — add unit tests for digest aggregation, HTML generation, and cron endpoint (currently 50% stmts)
+- [ ] **Goal 3: Close coverage gap on `lib/utils.ts`** — add tests for `formatDate`, `formatDateTime`, `formatRelativeTime` (currently 37% stmts)
+- [ ] **Goal 4: Close coverage gap on `lib/mail.ts`** — test HTML email template rendering and edge cases on lines 212-243 (currently 86% stmts)
+- [ ] **Goal 5: Search keyboard navigation** — add ArrowUp/Down/Enter handlers to search combobox, fix `aria-selected` tracking, remove misleading static ARIA attributes
+- [ ] **Goal 6: Profile change-password flow** — add change-password form to profile page with current-password verification
+- [ ] **Goal 7: SSO foundation (OIDC)** — add OpenID Connect login with a configurable provider (Google as default), linking OIDC accounts to existing users by email
+- [ ] **Goal 8: Improve webhook resilience** — cover error retry paths in tests, add dead-letter logging for permanently failed deliveries
 
 ## Notes
 

@@ -4,6 +4,12 @@ Reverse chronological. Click each sprint for full details.
 
 ---
 
+### 🔄 [Sprint 00 — Cloudflare, Coverage, Accessibility & SSO](Sprint-00) *(2026-02-18)*
+**Focus:** Cloudflare deployment, close coverage gaps (digest/utils/mail), search keyboard a11y, change-password, OIDC SSO, webhook resilience
+**Stats:** 0/8 goals | 1115 tests
+
+---
+
 ### ✅ [Sprint 00 — UX Polish, Security Hardening & DevOps Automation](Sprint-00) *(2026-02-18)*
 **Focus:** PWA mobile overlap, AI model disclosure, dialog focus fix, trusted proxy validation, Docker CI push, DB backup automation, email change flow, API rate limiting
 **Stats:** 8/8 goals | 1115 tests | Email change flow, rate limiting on all API routes
