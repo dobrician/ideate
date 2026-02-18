@@ -5,6 +5,8 @@ import { getCurrentUser } from "@/lib/auth";
 import { hasPermission, canManageResource } from "@/lib/rbac";
 import type { Role } from "@/lib/rbac";
 import { logAudit } from "@/lib/audit";
+import { checkRateLimit } from "@/lib/rate-limit";
+import { getClientIp } from "@/lib/request-utils";
 import { eq } from "drizzle-orm";
 import { readFile, unlink } from "fs/promises";
 import { resolve } from "path";
@@ -19,11 +21,16 @@ interface RouteParams {
  * GET /api/attachments/[id]
  * Download an attachment file
  */
-export async function GET(_request: NextRequest, { params }: RouteParams) {
+export async function GET(request: NextRequest, { params }: RouteParams) {
   try {
     const user = await getCurrentUser();
     if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const rl = checkRateLimit(`attach-dl:${getClientIp(request)}`, 30, 60_000);
+    if (!rl.allowed) {
+      return NextResponse.json({ error: "Too many requests" }, { status: 429, headers: { "Retry-After": String(Math.ceil(rl.retryAfterMs / 1000)) } });
     }
 
     const { id } = await params;
@@ -73,11 +80,16 @@ export async function GET(_request: NextRequest, { params }: RouteParams) {
  * DELETE /api/attachments/[id]
  * Delete an attachment (owner or admin only)
  */
-export async function DELETE(_request: NextRequest, { params }: RouteParams) {
+export async function DELETE(request: NextRequest, { params }: RouteParams) {
   try {
     const user = await getCurrentUser();
     if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const rl = checkRateLimit(`attach-del:${getClientIp(request)}`, 20, 60_000);
+    if (!rl.allowed) {
+      return NextResponse.json({ error: "Too many requests" }, { status: 429, headers: { "Retry-After": String(Math.ceil(rl.retryAfterMs / 1000)) } });
     }
 
     const { id } = await params;

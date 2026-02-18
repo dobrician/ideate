@@ -1,8 +1,10 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
 import { projects, proposals, votes, comments, users } from "@/db/schema";
 import { getCurrentUser } from "@/lib/auth";
 import { hasPermission, type Role } from "@/lib/rbac";
+import { checkRateLimit } from "@/lib/rate-limit";
+import { getClientIp } from "@/lib/request-utils";
 import { logger } from "@/lib/logger";
 import archiver from "archiver";
 import { PassThrough } from "stream";
@@ -13,11 +15,16 @@ export const dynamic = "force-dynamic";
  * GET /api/admin/export — Full platform data export as ZIP (admin only)
  * Contains: projects.json, proposals.json, votes.json, comments.json, users.json
  */
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
     const user = await getCurrentUser();
     if (!user || !hasPermission(user.role as Role, "project:manage_all")) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const rl = checkRateLimit(`admin-export:${getClientIp(request)}`, 5, 60 * 60_000);
+    if (!rl.allowed) {
+      return NextResponse.json({ error: "Too many requests" }, { status: 429, headers: { "Retry-After": String(Math.ceil(rl.retryAfterMs / 1000)) } });
     }
 
     const [allProjects, allProposals, allVotes, allComments, allUsers] =

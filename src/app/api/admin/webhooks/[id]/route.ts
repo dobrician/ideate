@@ -5,6 +5,8 @@ import { eq } from "drizzle-orm";
 import { getCurrentUser } from "@/lib/auth";
 import { hasPermission, type Role } from "@/lib/rbac";
 import { requireOrigin } from "@/lib/csrf";
+import { checkRateLimit } from "@/lib/rate-limit";
+import { getClientIp } from "@/lib/request-utils";
 import { logger } from "@/lib/logger";
 
 type RouteContext = { params: Promise<{ id: string }> };
@@ -20,6 +22,11 @@ export async function PUT(request: NextRequest, context: RouteContext) {
     const user = await getCurrentUser();
     if (!user || !hasPermission(user.role as Role, "user:manage")) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const rl = checkRateLimit(`admin-wh:${getClientIp(request)}`, 20, 60_000);
+    if (!rl.allowed) {
+      return NextResponse.json({ error: "Too many requests" }, { status: 429, headers: { "Retry-After": String(Math.ceil(rl.retryAfterMs / 1000)) } });
     }
 
     const { id } = await context.params;
@@ -69,11 +76,16 @@ export async function PUT(request: NextRequest, context: RouteContext) {
 /**
  * DELETE /api/admin/webhooks/[id] — Delete a webhook (admin only)
  */
-export async function DELETE(_request: NextRequest, context: RouteContext) {
+export async function DELETE(request: NextRequest, context: RouteContext) {
   try {
     const user = await getCurrentUser();
     if (!user || !hasPermission(user.role as Role, "user:manage")) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const rl = checkRateLimit(`admin-wh:${getClientIp(request)}`, 20, 60_000);
+    if (!rl.allowed) {
+      return NextResponse.json({ error: "Too many requests" }, { status: 429, headers: { "Retry-After": String(Math.ceil(rl.retryAfterMs / 1000)) } });
     }
 
     const { id } = await context.params;

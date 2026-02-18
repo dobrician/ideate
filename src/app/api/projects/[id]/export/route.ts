@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
 import { projects, proposals, votes, comments, users } from "@/db/schema";
 import { getCurrentUser } from "@/lib/auth";
+import { checkRateLimit } from "@/lib/rate-limit";
+import { getClientIp } from "@/lib/request-utils";
 import { eq, sql, and, gte, lte } from "drizzle-orm";
 import { generateCsv, generatePdf } from "@/lib/export";
 import { logger } from "@/lib/logger";
@@ -19,6 +21,11 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
     const user = await getCurrentUser();
     if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const rl = checkRateLimit(`project-export:${getClientIp(request)}`, 10, 60 * 60_000);
+    if (!rl.allowed) {
+      return NextResponse.json({ error: "Too many requests" }, { status: 429, headers: { "Retry-After": String(Math.ceil(rl.retryAfterMs / 1000)) } });
     }
 
     const { id } = await params;

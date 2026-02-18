@@ -4,6 +4,8 @@ import { auditLogs, users } from "@/db/schema";
 import { getCurrentUser } from "@/lib/auth";
 import { hasPermission } from "@/lib/rbac";
 import type { Role } from "@/lib/rbac";
+import { checkRateLimit } from "@/lib/rate-limit";
+import { getClientIp } from "@/lib/request-utils";
 import { desc, sql, gte, lte } from "drizzle-orm";
 import { logger } from "@/lib/logger";
 
@@ -27,6 +29,11 @@ export async function GET(request: Request) {
 
     if (!hasPermission(user.role as Role, "user:manage")) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
+
+    const rl = checkRateLimit(`audit-export:${getClientIp(request)}`, 5, 60 * 60_000);
+    if (!rl.allowed) {
+      return NextResponse.json({ error: "Too many requests" }, { status: 429, headers: { "Retry-After": String(Math.ceil(rl.retryAfterMs / 1000)) } });
     }
 
     const { searchParams } = new URL(request.url);

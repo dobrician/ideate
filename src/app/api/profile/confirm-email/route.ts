@@ -4,6 +4,8 @@ import { db } from "@/db";
 import { users } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { logAudit } from "@/lib/audit";
+import { checkRateLimit } from "@/lib/rate-limit";
+import { getClientIp } from "@/lib/request-utils";
 import { logger } from "@/lib/logger";
 
 interface EmailChangePayload {
@@ -17,9 +19,15 @@ interface EmailChangePayload {
  * Confirms an email change request by validating the JWT and updating the user's email.
  */
 export async function GET(request: Request) {
+  const appUrl = process.env.APP_URL || "http://localhost:3000";
+
+  const rl = checkRateLimit(`confirm-email:${getClientIp(request)}`, 10, 60 * 60_000);
+  if (!rl.allowed) {
+    return NextResponse.redirect(`${appUrl}/profile?emailChange=invalid`);
+  }
+
   const { searchParams } = new URL(request.url);
   const token = searchParams.get("token");
-  const appUrl = process.env.APP_URL || "http://localhost:3000";
 
   if (!token) {
     return NextResponse.redirect(`${appUrl}/profile?emailChange=invalid`);

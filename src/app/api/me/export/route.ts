@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
 import {
   users,
@@ -9,6 +9,8 @@ import {
   notificationPreferences,
 } from "@/db/schema";
 import { getCurrentUser } from "@/lib/auth";
+import { checkRateLimit } from "@/lib/rate-limit";
+import { getClientIp } from "@/lib/request-utils";
 import { eq } from "drizzle-orm";
 import { logger } from "@/lib/logger";
 import archiver from "archiver";
@@ -20,11 +22,16 @@ export const dynamic = "force-dynamic";
  * GET /api/me/export — Per-user GDPR data export as ZIP
  * Contains: profile.json, projects.json, proposals.json, votes.json, comments.json, preferences.json
  */
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
     const user = await getCurrentUser();
     if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const rl = checkRateLimit(`me-export:${getClientIp(request)}`, 5, 60 * 60_000);
+    if (!rl.allowed) {
+      return NextResponse.json({ error: "Too many requests" }, { status: 429, headers: { "Retry-After": String(Math.ceil(rl.retryAfterMs / 1000)) } });
     }
 
     const [profile, myProjects, myProposals, myVotes, myComments, myPrefs] =

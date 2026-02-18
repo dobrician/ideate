@@ -7,17 +7,24 @@ import { projects } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { generateProjectSummary } from "@/lib/project-summary";
 import { isAiConfigured, isAiRateLimited } from "@/lib/llm";
+import { checkRateLimit } from "@/lib/rate-limit";
+import { getClientIp } from "@/lib/request-utils";
 
 /**
  * POST /api/projects/[id]/summary
  * Regenerate AI summary for a project (owner or admin only).
  */
 export async function POST(
-  _request: Request,
+  request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const user = await requireAuth();
+
+    const rl = checkRateLimit(`summary:${getClientIp(request)}`, 10, 15 * 60_000);
+    if (!rl.allowed) {
+      return NextResponse.json({ error: "Too many requests", code: "RATE_LIMITED" }, { status: 429, headers: { "Retry-After": String(Math.ceil(rl.retryAfterMs / 1000)) } });
+    }
     const { id } = await params;
 
     const project = await db

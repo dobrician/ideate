@@ -4,6 +4,8 @@ import { projectTemplates } from "@/db/schema";
 import { getCurrentUser } from "@/lib/auth";
 import { hasPermission, type Role } from "@/lib/rbac";
 import { requireOrigin } from "@/lib/csrf";
+import { checkRateLimit } from "@/lib/rate-limit";
+import { getClientIp } from "@/lib/request-utils";
 import { logger } from "@/lib/logger";
 
 export const dynamic = "force-dynamic";
@@ -11,11 +13,16 @@ export const dynamic = "force-dynamic";
 /**
  * GET /api/admin/templates — List all project templates
  */
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
     const user = await getCurrentUser();
     if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const rl = checkRateLimit(`admin-tpl:${getClientIp(request)}`, 20, 60_000);
+    if (!rl.allowed) {
+      return NextResponse.json({ error: "Too many requests" }, { status: 429, headers: { "Retry-After": String(Math.ceil(rl.retryAfterMs / 1000)) } });
     }
 
     const all = await db.select().from(projectTemplates);
@@ -42,6 +49,11 @@ export async function POST(request: NextRequest) {
     const user = await getCurrentUser();
     if (!user || !hasPermission(user.role as Role, "project:manage_all")) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const rl = checkRateLimit(`admin-tpl:${getClientIp(request)}`, 20, 60_000);
+    if (!rl.allowed) {
+      return NextResponse.json({ error: "Too many requests" }, { status: 429, headers: { "Retry-After": String(Math.ceil(rl.retryAfterMs / 1000)) } });
     }
 
     const body = await request.json();

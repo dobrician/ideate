@@ -4,6 +4,8 @@ import { getCurrentUser } from "@/lib/auth";
 import { hasPermission } from "@/lib/rbac";
 import type { Role } from "@/lib/rbac";
 import { requireOrigin } from "@/lib/csrf";
+import { checkRateLimit } from "@/lib/rate-limit";
+import { getClientIp } from "@/lib/request-utils";
 import { sendInvitationEmail } from "@/lib/mail";
 import { logAudit } from "@/lib/audit";
 import { logger } from "@/lib/logger";
@@ -35,6 +37,11 @@ export async function POST(request: NextRequest) {
 
     if (!hasPermission(user.role as Role, "user:manage")) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
+
+    const rl = checkRateLimit(`invite:${getClientIp(request)}`, 10, 60 * 60_000);
+    if (!rl.allowed) {
+      return NextResponse.json({ error: "Too many requests" }, { status: 429, headers: { "Retry-After": String(Math.ceil(rl.retryAfterMs / 1000)) } });
     }
 
     const body = await request.json();
@@ -116,7 +123,7 @@ export async function POST(request: NextRequest) {
  * GET /api/admin/invite
  * List pending invitations (admin only).
  */
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
     const user = await getCurrentUser();
     if (!user) {
@@ -125,6 +132,11 @@ export async function GET() {
 
     if (!hasPermission(user.role as Role, "user:manage")) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
+
+    const rl = checkRateLimit(`invite:${getClientIp(request)}`, 20, 60_000);
+    if (!rl.allowed) {
+      return NextResponse.json({ error: "Too many requests" }, { status: 429, headers: { "Retry-After": String(Math.ceil(rl.retryAfterMs / 1000)) } });
     }
 
     const pending = await db

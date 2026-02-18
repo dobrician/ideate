@@ -5,6 +5,8 @@ import { getCurrentUser } from "@/lib/auth";
 import { hasPermission } from "@/lib/rbac";
 import type { Role } from "@/lib/rbac";
 import { logAudit } from "@/lib/audit";
+import { checkRateLimit } from "@/lib/rate-limit";
+import { getClientIp } from "@/lib/request-utils";
 import { isProjectArchived } from "@/lib/project-utils";
 import { eq, count } from "drizzle-orm";
 import { writeFile, mkdir } from "fs/promises";
@@ -26,6 +28,11 @@ export async function POST(request: NextRequest) {
     const user = await getCurrentUser();
     if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const rl = checkRateLimit(`attach:${getClientIp(request)}`, 10, 60_000);
+    if (!rl.allowed) {
+      return NextResponse.json({ error: "Too many requests" }, { status: 429, headers: { "Retry-After": String(Math.ceil(rl.retryAfterMs / 1000)) } });
     }
 
     if (!hasPermission(user.role as Role, "proposal:create")) {
