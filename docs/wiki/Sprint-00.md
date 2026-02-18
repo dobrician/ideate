@@ -11,7 +11,7 @@
 - [x] **Goal 4: Admin rate-limit visibility dashboard** — expose rate-limit stats (active keys, hit counts) via admin API + UI panel (Enterprise, Section 10)
 - [x] **Goal 5: Data retention policy — auto-prune old audit logs** — add configurable TTL-based cleanup for audit log entries via cron endpoint (Enterprise, Section 10)
 - [x] **Goal 6: Tests for server action rate limiting** — unit tests verifying rate-limit enforcement on proposals/votes/comments/projects/profile actions
-- [ ] **Goal 7: Tests for data retention policy** — unit tests for audit log pruning logic, TTL config, and cron endpoint
+- [x] **Goal 7: Tests for data retention policy** — unit tests for audit log pruning logic, TTL config, and cron endpoint
 - [ ] **Goal 8: Tests for admin rate-limit dashboard** — unit tests for rate-limit stats API endpoint and admin UI component
 
 ## Notes

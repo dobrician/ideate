@@ -3,7 +3,6 @@ import { db } from "@/db";
 import { auditLogs } from "@/db/schema";
 import { lt } from "drizzle-orm";
 
-const CRON_SECRET = process.env.CRON_SECRET;
 const DEFAULT_TTL_DAYS = 90;
 
 /**
@@ -12,6 +11,7 @@ const DEFAULT_TTL_DAYS = 90;
  * Auth: Bearer token matching CRON_SECRET env var.
  */
 export async function GET(request: NextRequest) {
+  const CRON_SECRET = process.env.CRON_SECRET;
   if (!CRON_SECRET) {
     return NextResponse.json(
       { error: "CRON_SECRET not configured" },
