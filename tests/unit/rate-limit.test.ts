@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from "vitest";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { checkRateLimit, resetRateLimits, getRateLimitStats } from "@/lib/rate-limit";
 
 describe("RateLimit", () => {
@@ -94,5 +94,56 @@ describe("getRateLimitStats", () => {
     const stats = getRateLimitStats();
     expect(stats.totalKeys).toBe(60);
     expect(stats.keys.length).toBe(50);
+  });
+
+  it("excludes entries with all timestamps older than 15 minutes", () => {
+    vi.useFakeTimers();
+    const base = Date.now();
+    // Add an entry at current time
+    checkRateLimit("recent-key", 100, 60_000);
+    checkRateLimit("old-key", 100, 60_000);
+
+    // Advance time past 15 minutes so old entries are stale
+    vi.advanceTimersByTime(16 * 60_000);
+
+    // Add a fresh entry so totalKeys includes recent
+    checkRateLimit("fresh-key", 100, 60_000);
+
+    const stats = getRateLimitStats();
+    // "recent-key" and "old-key" timestamps are >15min old, excluded
+    // "fresh-key" is recent, included
+    expect(stats.keys.some((k) => k.key === "fresh-key")).toBe(true);
+    expect(stats.keys.some((k) => k.key === "old-key")).toBe(false);
+    vi.useRealTimers();
+  });
+});
+
+describe("RateLimit cleanup deletes empty entries", () => {
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  it("removes entries with all expired timestamps during cleanup", async () => {
+    vi.useFakeTimers();
+    vi.resetModules();
+
+    const mod = await import("@/lib/rate-limit");
+    mod.resetRateLimits();
+
+    const windowMs = 1000;
+
+    // Add entries
+    mod.checkRateLimit("will-expire", 100, windowMs);
+
+    // Advance past the cleanup interval (60s) and the window
+    vi.advanceTimersByTime(61_000);
+
+    // Trigger cleanup via a new checkRateLimit call
+    mod.checkRateLimit("new-key", 100, windowMs);
+
+    // After cleanup, "will-expire" should have been deleted since its
+    // timestamps are older than the window. Verify via stats.
+    const stats = mod.getRateLimitStats();
+    expect(stats.keys.some((k) => k.key === "will-expire")).toBe(false);
   });
 });
