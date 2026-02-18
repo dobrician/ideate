@@ -4,6 +4,12 @@ Reverse chronological. Click each sprint for full details.
 
 ---
 
+### 🔄 [Sprint 03 — 100% Coverage Ceiling & Test Fix](Sprint-03) *(2026-02-18)*
+**Focus:** Fix broken proposal-list bar chart test, close all remaining branch coverage gaps (proxy, email-deliverability, search route, profile actions, proposal actions, db/index)
+**Stats:** 0/8 goals | 1262 tests | Branch coverage 99.18% → target 100%
+
+---
+
 ### ✅ [Sprint 02 — Branch Coverage Ceiling & File Size Compliance](Sprint-02) *(2026-02-18)*
 **Focus:** Close all remaining branch gaps (webhooks, llm-cache, llm, mail, comment-utils, search, auth, oidc, password), resolve export.ts barrel false positive, split oversized openapi-spec.ts
 **Stats:** 8/8 goals | 1262 tests | Branch coverage 97.35% → 99.18%
