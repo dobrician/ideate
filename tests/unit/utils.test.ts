@@ -165,6 +165,33 @@ describe("formatRelativeTime", () => {
   });
 });
 
+describe("formatDate — generic BCP 47 locale support", () => {
+  const testDate = new Date("2026-06-15T12:00:00Z");
+
+  it("accepts a full BCP 47 tag like fr-FR", () => {
+    const result = formatDate(testDate, "fr-FR", "long");
+    expect(result.toLowerCase()).toContain("juin");
+    expect(result).toContain("2026");
+  });
+
+  it("accepts de locale", () => {
+    const result = formatDate(testDate, "de", "long");
+    expect(result.toLowerCase()).toContain("juni");
+  });
+
+  it("accepts ja-JP locale", () => {
+    const result = formatDate(testDate, "ja-JP", "long");
+    expect(result).toContain("2026");
+  });
+});
+
+describe("formatDateTime — generic locale support", () => {
+  it("accepts fr-FR locale", () => {
+    const result = formatDateTime(new Date("2026-06-15T14:30:00Z"), "fr-FR");
+    expect(result).toContain("2026");
+  });
+});
+
 describe("formatDateTime — edge cases", () => {
   it("accepts string date input", () => {
     const result = formatDateTime("2026-06-15T10:30:00Z", "en");

@@ -5,10 +5,17 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
 
+/** Resolve a short locale code to a BCP 47 tag (e.g. "ro" → "ro-RO"). */
+const LOCALE_MAP: Record<string, string> = { en: "en-US", ro: "ro-RO" };
+
+function resolveLocale(locale: string): string {
+  return LOCALE_MAP[locale] ?? locale;
+}
+
 /**
  * Format a date with locale-aware formatting.
  * @param date  - Date value (string, number, or Date)
- * @param locale - "en" or "ro"
+ * @param locale - BCP 47 tag or short code ("en", "ro", "fr-FR", etc.)
  * @param style  - "long" for "February 16, 2026", "short" for "Feb 16, 2026", "default" for locale default
  */
 export function formatDate(
@@ -17,7 +24,7 @@ export function formatDate(
   style: "long" | "short" | "default" = "long",
 ): string {
   if (!date) return "";
-  const dateFmt = locale === "ro" ? "ro-RO" : "en-US";
+  const dateFmt = resolveLocale(locale);
   const options: Intl.DateTimeFormatOptions | undefined =
     style === "long"
       ? { year: "numeric", month: "long", day: "numeric" }
@@ -35,7 +42,7 @@ export function formatDateTime(
   locale: string,
 ): string {
   if (!date) return "";
-  const dateFmt = locale === "ro" ? "ro-RO" : "en-US";
+  const dateFmt = resolveLocale(locale);
   return new Date(date).toLocaleString(dateFmt);
 }
 
