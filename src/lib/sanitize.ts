@@ -22,3 +22,27 @@ export function escapeHtml(input: string): string {
     (char) => HTML_ENTITY_MAP[char] as string,
   );
 }
+
+/**
+ * Sanitize an HTML snippet to only allow <mark> tags (from FTS5 highlights).
+ * All other HTML is escaped to prevent XSS.
+ */
+export function sanitizeSnippet(input: string): string {
+  // Temporarily replace valid <mark> and </mark> with placeholders
+  const MARK_OPEN = "\x00MARK_OPEN\x00";
+  const MARK_CLOSE = "\x00MARK_CLOSE\x00";
+
+  let safe = input
+    .replace(/<mark>/gi, MARK_OPEN)
+    .replace(/<\/mark>/gi, MARK_CLOSE);
+
+  // Escape all remaining HTML
+  safe = escapeHtml(safe);
+
+  // Restore <mark> tags
+  safe = safe
+    .replaceAll(MARK_OPEN, "<mark>")
+    .replaceAll(MARK_CLOSE, "</mark>");
+
+  return safe;
+}

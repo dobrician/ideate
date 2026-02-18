@@ -5,7 +5,7 @@
 
 ## Goals
 
-- [ ] **Goal 1: Fix Search XSS Vulnerability** — Sanitize `dangerouslySetInnerHTML` in `search-bar.tsx`. Only allow `<mark>` tags from FTS5 snippets. Add test to verify script injection is blocked. (Critical, Security)
+- [x] **Goal 1: Fix Search XSS Vulnerability** — Sanitize `dangerouslySetInnerHTML` in `search-bar.tsx`. Only allow `<mark>` tags from FTS5 snippets. Add test to verify script injection is blocked. (Critical, Security)
 - [ ] **Goal 2: Create Action/API Wrapper Functions** — Build `withActionAuth()` and `withApiAuth()` wrappers in `src/lib/action-wrapper.ts`. Centralize CSRF, auth, rate limiting, permissions, error handling. Migrate all server action files to use wrappers. (Medium, DX)
 - [ ] **Goal 3: Fix Analytics N+1 Queries** — Rewrite `admin/analytics/queries.ts` with JOINs instead of correlated subqueries. Memoize chart components with `React.memo()`. (Medium, Performance)
 - [ ] **Goal 4: Internationalize Error Messages** — Add error translation keys to EN/RO. Fix 4 missing RO plural forms. Translate 19 untranslated RO keys. Migrate server action error strings to use `t()` where possible. (Medium, UX)

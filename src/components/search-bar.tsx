@@ -4,6 +4,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { Search, FileText, Lightbulb, MessageSquare } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { useLocale } from "@/lib/use-locale";
+import { sanitizeSnippet } from "@/lib/sanitize";
 
 interface SearchResult {
   id: string;
@@ -194,7 +195,7 @@ export function SearchBar() {
                         <div className="min-w-0">
                           <div className="text-sm font-medium truncate">{result.title}</div>
                           {result.snippet && (
-                            <div className="text-xs text-muted-foreground line-clamp-2" dangerouslySetInnerHTML={{ __html: result.snippet }} />
+                            <div className="text-xs text-muted-foreground line-clamp-2" dangerouslySetInnerHTML={{ __html: sanitizeSnippet(result.snippet) }} />
                           )}
                         </div>
                       </a>
