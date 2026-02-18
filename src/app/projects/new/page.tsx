@@ -106,8 +106,8 @@ export default function NewProjectPage() {
       const result = await createProject(formData);
 
       if (result?.error) {
-        setError(result.error);
-        toast.error(result.error);
+        setError(t(result.error));
+        toast.error(t(result.error));
         setIsLoading(false);
       }
       // If successful, createProject redirects automatically

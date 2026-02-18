@@ -29,7 +29,7 @@ export function TagManager({ initialTags }: TagManagerProps) {
     setLoading(false);
 
     if (result.error) {
-      toast.error(result.error);
+      toast.error(t(result.error));
     } else {
       setAllTags((prev) => [...prev, { id: result.id!, name }]);
       setNewTagName("");
@@ -40,7 +40,7 @@ export function TagManager({ initialTags }: TagManagerProps) {
   async function handleDelete(tagId: string) {
     const result = await deleteTag(tagId, getCsrfTokenClient());
     if (result.error) {
-      toast.error(result.error);
+      toast.error(t(result.error));
     } else {
       setAllTags((prev) => prev.filter((tag) => tag.id !== tagId));
       toast.success(t("tags.deleted"));

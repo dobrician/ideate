@@ -63,7 +63,7 @@ describe("createTeam", () => {
   it("returns error when user is not admin", async () => {
     mockRequireAuth.mockResolvedValue({ ...adminUser, role: "member" });
     const result = await createTeam("MyTeam", "desc", "csrf");
-    expect(result.error).toBe("You don't have permission to perform this action");
+    expect(result.error).toBe("error.noPermission");
   });
 
   it("returns error for empty name", async () => {
@@ -91,7 +91,7 @@ describe("deleteTeam", () => {
   it("returns error when user is not admin", async () => {
     mockRequireAuth.mockResolvedValue({ ...adminUser, role: "viewer" });
     const result = await deleteTeam("team-1", "csrf");
-    expect(result.error).toBe("You don't have permission to perform this action");
+    expect(result.error).toBe("error.noPermission");
   });
 
   it("deletes team successfully", async () => {
@@ -107,7 +107,7 @@ describe("addTeamMember", () => {
   it("returns error when user is not admin", async () => {
     mockRequireAuth.mockResolvedValue({ ...adminUser, role: "member" });
     const result = await addTeamMember("team-1", "user@test.com", "member", "csrf");
-    expect(result.error).toBe("You don't have permission to perform this action");
+    expect(result.error).toBe("error.noPermission");
   });
 
   it("returns error for empty email", async () => {
@@ -159,7 +159,7 @@ describe("removeTeamMember", () => {
   it("returns error when user is not admin", async () => {
     mockRequireAuth.mockResolvedValue({ ...adminUser, role: "viewer" });
     const result = await removeTeamMember("team-1", "u2", "csrf");
-    expect(result.error).toBe("You don't have permission to perform this action");
+    expect(result.error).toBe("error.noPermission");
   });
 
   it("removes member successfully", async () => {

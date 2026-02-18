@@ -23,7 +23,7 @@ export function ArchiveBanner({ projectId, isAdmin }: ArchiveBannerProps) {
     setLoading(true);
     const result = await unarchiveProject(projectId, getCsrfTokenClient());
     if (result?.error) {
-      toast.error(result.error);
+      toast.error(t(result.error));
       setLoading(false);
     } else {
       toast.success(t("archive.unarchived"));

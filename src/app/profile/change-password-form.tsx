@@ -36,7 +36,7 @@ export function ChangePasswordForm() {
       } else if (errorKey === "noPasswordSet") {
         toast.error(t("profile.noPasswordSet"));
       } else {
-        toast.error(errorKey || t("profile.passwordChangeFailed"));
+        toast.error(t(errorKey || "profile.passwordChangeFailed"));
       }
     }
 

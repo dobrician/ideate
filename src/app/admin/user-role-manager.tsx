@@ -88,7 +88,7 @@ export function UserRoleManager({
     setLoadingId(null);
 
     if (result.error) {
-      toast.error(result.error);
+      toast.error(t(result.error));
     } else {
       toast.success(t("admin.roleUpdated"));
     }
@@ -102,7 +102,7 @@ export function UserRoleManager({
     setBulkLoading(false);
 
     if (result.error) {
-      toast.error(result.error);
+      toast.error(t(result.error));
     } else {
       toast.success(t("admin.bulkRoleUpdated", { count: result.count ?? ids.length }));
       setSelected(new Set());
@@ -118,7 +118,7 @@ export function UserRoleManager({
     setBulkLoading(false);
 
     if (result.error) {
-      toast.error(result.error);
+      toast.error(t(result.error));
     } else {
       toast.success(t("admin.bulkDeleted", { count: result.count ?? ids.length }));
       setSelected(new Set());

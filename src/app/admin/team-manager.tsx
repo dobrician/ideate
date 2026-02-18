@@ -37,7 +37,7 @@ export function TeamManager({ initialTeams }: { initialTeams: Team[] }) {
   async function handleCreate() {
     if (!newName.trim()) return;
     const result = await createTeam(newName, newDesc, getCsrfTokenClient());
-    if (result.error) { toast.error(result.error); return; }
+    if (result.error) { toast.error(t(result.error)); return; }
     toast.success(t("teams.created"));
     setNewName("");
     setNewDesc("");
@@ -47,7 +47,7 @@ export function TeamManager({ initialTeams }: { initialTeams: Team[] }) {
   async function handleDelete(teamId: string) {
     if (!confirm(t("teams.deleteConfirm"))) return;
     const result = await deleteTeam(teamId, getCsrfTokenClient());
-    if (result.error) { toast.error(result.error); return; }
+    if (result.error) { toast.error(t(result.error)); return; }
     toast.success(t("teams.deleted"));
     setTeams((prev) => prev.filter((tm) => tm.id !== teamId));
   }
@@ -55,7 +55,7 @@ export function TeamManager({ initialTeams }: { initialTeams: Team[] }) {
   async function handleAddMember(teamId: string) {
     if (!memberEmail.trim()) return;
     const result = await addTeamMember(teamId, memberEmail, memberRole, getCsrfTokenClient());
-    if (result.error) { toast.error(result.error); return; }
+    if (result.error) { toast.error(t(result.error)); return; }
     toast.success(t("teams.memberAdded"));
     setMemberEmail("");
     window.location.reload();
@@ -63,7 +63,7 @@ export function TeamManager({ initialTeams }: { initialTeams: Team[] }) {
 
   async function handleRemoveMember(teamId: string, memberId: string) {
     const result = await removeTeamMember(teamId, memberId, getCsrfTokenClient());
-    if (result.error) { toast.error(result.error); return; }
+    if (result.error) { toast.error(t(result.error)); return; }
     toast.success(t("teams.memberRemoved"));
     setTeams((prev) =>
       prev.map((tm) =>

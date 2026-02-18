@@ -91,7 +91,7 @@ export function ProposalItem({
     setIsDeleting(true);
     const result = await deleteProposal(proposal.id, projectId, getCsrfTokenClient());
     if (result?.error) {
-      toast.error(result.error);
+      toast.error(t(result.error));
       setIsDeleting(false);
       setDeleteOpen(false);
     } else {

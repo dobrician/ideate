@@ -66,7 +66,7 @@ export function VoteButtons({
           ? await removeVote(proposalId, projectId, token)
           : await castVote(proposalId, value, projectId, token);
       if (result?.error) {
-        toast.error(result.error);
+        toast.error(t(result.error));
       }
     });
   }

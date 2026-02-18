@@ -34,7 +34,7 @@ export function NotificationSettings({ prefs }: NotificationSettingsProps) {
     setLoading(false);
 
     if (result.error) {
-      toast.error(result.error);
+      toast.error(t(result.error));
     } else {
       toast.success(t("notifications.saved"));
     }

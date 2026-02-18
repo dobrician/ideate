@@ -83,7 +83,7 @@ beforeEach(() => {
   mockCheckRateLimit.mockReturnValue(allowed);
 });
 
-const RL_ERROR = { error: "Too many requests — please try again later" };
+const RL_ERROR = { error: "error.tooManyRequests" };
 
 // ─── Project actions ───────────────────────────────────────────────────
 

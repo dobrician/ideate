@@ -206,8 +206,11 @@ export const ro: Record<string, string> = {
   "dashboard.deadlineOverdue": "Expirat",
   "dashboard.deadlineDaysLeft": "{count}z rămase",
   "dashboard.projectProposals": "{count} propuneri",
+  "dashboard.projectProposals_one": "{count} propunere",
   "dashboard.projectVotes": "{count} voturi",
+  "dashboard.projectVotes_one": "{count} vot",
   "dashboard.projectComments": "{count} comentarii",
+  "dashboard.projectComments_one": "{count} comentariu",
   "dashboard.showMore": "Arată încă {count}",
   "dashboard.showLess": "Arată mai puțin",
   "dashboard.analytics": "Analiză",
@@ -321,7 +324,7 @@ export const ro: Record<string, string> = {
   "admin.projectCount": "{count} proiecte",
   "admin.projectCount_one": "{count} proiect",
   "admin.projectTitle": "Titlu",
-  "admin.projectStatus": "Status",
+  "admin.projectStatus": "Stare",
   "admin.projectCreated": "Creat",
 
   // Auth
@@ -448,7 +451,13 @@ export const ro: Record<string, string> = {
   "common.close": "Închide",
   "common.accessDenied": "Acces Interzis",
   "common.accessDeniedDesc": "Nu ai permisiunea de a accesa această pagină. Sunt necesare privilegii de administrator.",
-  "common.goToDashboard": "Mergi la Dashboard",
+  "common.goToDashboard": "Mergi la Panou",
+
+  // Server action errors
+  "error.tooManyRequests": "Prea multe cereri — încearcă din nou mai târziu",
+  "error.noPermission": "Nu ai permisiunea de a efectua această acțiune",
+  "error.mustBeLoggedIn": "Trebuie să fii autentificat",
+  "error.unexpected": "A apărut o eroare neașteptată",
 
   // Theme
   "theme.toggle": "Schimbă tema",
@@ -684,6 +693,7 @@ export const ro: Record<string, string> = {
   "digest.sent": "Emailuri de rezumat trimise",
   "digest.noSubscribers": "Niciun abonat la rezumat",
   "digest.votes": "{count} voturi",
+  "digest.votes_one": "{count} vot",
 
   // Project Templates
   "templates.title": "Șabloane de Proiecte",

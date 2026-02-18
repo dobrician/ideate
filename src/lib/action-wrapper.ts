@@ -45,18 +45,18 @@ export async function withActionAuth<T>(
         options.rateLimitWindow ?? 15 * 60_000,
       );
       if (!rl.allowed) {
-        return { error: "Too many requests — please try again later" };
+        return { error: "error.tooManyRequests" };
       }
     }
 
     if (options.permission && !hasPermission(user.role as Role, options.permission)) {
-      return { error: "You don't have permission to perform this action" };
+      return { error: "error.noPermission" };
     }
 
     return await handler(user);
   } catch (error) {
     if (error instanceof Error && error.message === "Unauthorized") {
-      return { error: "You must be logged in" };
+      return { error: "error.mustBeLoggedIn" };
     }
     if (error instanceof Error && error.message.startsWith("Forbidden:")) {
       return { error: error.message };
@@ -65,6 +65,6 @@ export async function withActionAuth<T>(
       throw error;
     }
     logger.error({ err: error }, "Action error");
-    return { error: "An unexpected error occurred" };
+    return { error: "error.unexpected" };
   }
 }

@@ -43,7 +43,7 @@ export function RoleManager({ initialRoles }: { initialRoles: CustomRole[] }) {
   async function handleCreate() {
     if (!newName.trim()) return;
     const result = await createCustomRole(newName, newDesc, [...newPerms], getCsrfTokenClient());
-    if (result.error) { toast.error(result.error); return; }
+    if (result.error) { toast.error(t(result.error)); return; }
     toast.success(t("roles.created"));
     setNewName(""); setNewDesc(""); setNewPerms(new Set());
     window.location.reload();
@@ -54,7 +54,7 @@ export function RoleManager({ initialRoles }: { initialRoles: CustomRole[] }) {
     const desc = editDesc.get(roleId) ?? "";
     if (!perms) return;
     const result = await updateCustomRole(roleId, [...perms], desc, getCsrfTokenClient());
-    if (result.error) { toast.error(result.error); return; }
+    if (result.error) { toast.error(t(result.error)); return; }
     toast.success(t("roles.updated"));
     setRoles((prev) => prev.map((r) =>
       r.id === roleId ? { ...r, permissions: [...perms], description: desc || null } : r
@@ -64,7 +64,7 @@ export function RoleManager({ initialRoles }: { initialRoles: CustomRole[] }) {
   async function handleDelete(roleId: string) {
     if (!confirm(t("roles.deleteConfirm"))) return;
     const result = await deleteCustomRole(roleId, getCsrfTokenClient());
-    if (result.error) { toast.error(result.error); return; }
+    if (result.error) { toast.error(t(result.error)); return; }
     toast.success(t("roles.deleted"));
     setRoles((prev) => prev.filter((r) => r.id !== roleId));
   }

@@ -122,7 +122,7 @@ describe("requestEmailChange", () => {
     mockRequireAuth.mockRejectedValue(new Error("Unauthorized"));
     const fd = makeFormData({ newEmail: "new@test.com" });
     const result = await requestEmailChange(fd);
-    expect(result).toEqual({ error: "You must be logged in" });
+    expect(result).toEqual({ error: "error.mustBeLoggedIn" });
     expect(mockSendEmailChangeEmail).not.toHaveBeenCalled();
   });
 
@@ -178,6 +178,6 @@ describe("requestEmailChange", () => {
     mockSendEmailChangeEmail.mockRejectedValue(new Error("SMTP down"));
     const fd = makeFormData({ newEmail: "new@test.com" });
     const result = await requestEmailChange(fd);
-    expect(result).toEqual({ error: "An unexpected error occurred" });
+    expect(result).toEqual({ error: "error.unexpected" });
   });
 });

@@ -121,7 +121,7 @@ describe("createTag", () => {
   it("rejects unauthenticated users", async () => {
     mockRequireAuth.mockRejectedValue(new Error("Unauthorized"));
     const r = await createTag("Tech", "csrf");
-    expect(r).toEqual({ error: "You must be logged in" });
+    expect(r).toEqual({ error: "error.mustBeLoggedIn" });
   });
 
   it("rejects non-admin users", async () => {
@@ -152,7 +152,7 @@ describe("deleteTag", () => {
   it("rejects unauthenticated users", async () => {
     mockRequireAuth.mockRejectedValue(new Error("Unauthorized"));
     const r = await deleteTag("tag-1", "csrf");
-    expect(r).toEqual({ error: "You must be logged in" });
+    expect(r).toEqual({ error: "error.mustBeLoggedIn" });
   });
 
   it("rejects non-admin users", async () => {
@@ -173,7 +173,7 @@ describe("addProjectTag", () => {
   it("rejects unauthenticated users", async () => {
     mockRequireAuth.mockRejectedValue(new Error("Unauthorized"));
     const r = await addProjectTag("proj-1", "tag-1", "csrf");
-    expect(r).toEqual({ error: "You must be logged in" });
+    expect(r).toEqual({ error: "error.mustBeLoggedIn" });
   });
 
   it("adds a project tag successfully", async () => {
@@ -187,7 +187,7 @@ describe("removeProjectTag", () => {
   it("rejects unauthenticated users", async () => {
     mockRequireAuth.mockRejectedValue(new Error("Unauthorized"));
     const r = await removeProjectTag("proj-1", "tag-1", "csrf");
-    expect(r).toEqual({ error: "You must be logged in" });
+    expect(r).toEqual({ error: "error.mustBeLoggedIn" });
   });
 
   it("removes a project tag successfully", async () => {

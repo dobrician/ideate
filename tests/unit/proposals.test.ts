@@ -63,11 +63,11 @@ describe("createProposal", () => {
 
   it("rejects unauthenticated", async () => {
     mockRequireAuth.mockRejectedValue(new Error("Unauthorized"));
-    expect(await createProposal(null, vfd())).toEqual({ error: "You must be logged in" });
+    expect(await createProposal(null, vfd())).toEqual({ error: "error.mustBeLoggedIn" });
   });
   it("rejects viewers", async () => {
     mockRequireAuth.mockResolvedValue(mkUser({ role: "viewer" }));
-    expect(await createProposal(null, vfd())).toEqual({ error: "You don't have permission to perform this action" });
+    expect(await createProposal(null, vfd())).toEqual({ error: "error.noPermission" });
   });
   it("rejects short titles", async () => {
     expect(await createProposal(null, mkFD({ projectId: "p", title: "Hi", description: "", initialVote: "1" }))).toEqual({ error: "Title must be at least 5 characters" });
@@ -100,7 +100,7 @@ describe("createProposal", () => {
   });
   it("returns generic error on failure", async () => {
     mockBuildSummary.mockRejectedValue(new Error("LLM timeout"));
-    expect(await createProposal(null, vfd())).toEqual({ error: "An unexpected error occurred" });
+    expect(await createProposal(null, vfd())).toEqual({ error: "error.unexpected" });
   });
   it("succeeds even when webhook rejects", async () => {
     mockFireWebhook.mockRejectedValue(new Error("webhook down"));
@@ -118,11 +118,11 @@ describe("deleteProposal", () => {
   beforeEach(() => { mockRequireAuth.mockResolvedValue(mkUser({ role: "manager" })); });
   it("rejects unauthenticated", async () => {
     mockRequireAuth.mockRejectedValue(new Error("Unauthorized"));
-    expect(await deleteProposal("prop-1", "proj-1", "t")).toEqual({ error: "You must be logged in" });
+    expect(await deleteProposal("prop-1", "proj-1", "t")).toEqual({ error: "error.mustBeLoggedIn" });
   });
   it("rejects viewers", async () => {
     mockRequireAuth.mockResolvedValue(mkUser({ role: "viewer" }));
-    expect(await deleteProposal("prop-1", "proj-1", "t")).toEqual({ error: "You don't have permission to perform this action" });
+    expect(await deleteProposal("prop-1", "proj-1", "t")).toEqual({ error: "error.noPermission" });
   });
   it("returns not found", async () => {
     mockSelLim.mockResolvedValueOnce([]);
@@ -140,18 +140,18 @@ describe("deleteProposal", () => {
   it("returns generic error on DB failure", async () => {
     mockSelLim.mockResolvedValueOnce([owned]);
     mockDelWhere.mockImplementation(() => { throw new Error("DB"); });
-    expect(await deleteProposal("prop-1", "proj-1", "t")).toEqual({ error: "An unexpected error occurred" });
+    expect(await deleteProposal("prop-1", "proj-1", "t")).toEqual({ error: "error.unexpected" });
   });
 });
 
 describe("castVote", () => {
   it("rejects unauthenticated", async () => {
     mockRequireAuth.mockRejectedValue(new Error("Unauthorized"));
-    expect(await castVote("p1", 1, "pj1", "t")).toEqual({ error: "You must be logged in" });
+    expect(await castVote("p1", 1, "pj1", "t")).toEqual({ error: "error.mustBeLoggedIn" });
   });
   it("rejects viewers", async () => {
     mockRequireAuth.mockResolvedValue(mkUser({ role: "viewer" }));
-    expect(await castVote("p1", 1, "pj1", "t")).toEqual({ error: "You don't have permission to perform this action" });
+    expect(await castVote("p1", 1, "pj1", "t")).toEqual({ error: "error.noPermission" });
   });
   it("rejects invalid value", async () => {
     expect(await castVote("p1", 5, "pj1", "t")).toEqual({ error: "Invalid vote value — must be 1 or -1" });
@@ -181,18 +181,18 @@ describe("castVote", () => {
   it("returns generic error on DB failure", async () => {
     setupLive();
     mockInsert.mockImplementation(() => { throw new Error("DB"); });
-    expect(await castVote("p1", 1, "pj1", "t")).toEqual({ error: "An unexpected error occurred" });
+    expect(await castVote("p1", 1, "pj1", "t")).toEqual({ error: "error.unexpected" });
   });
 });
 
 describe("removeVote", () => {
   it("rejects unauthenticated", async () => {
     mockRequireAuth.mockRejectedValue(new Error("Unauthorized"));
-    expect(await removeVote("p1", "pj1", "t")).toEqual({ error: "You must be logged in" });
+    expect(await removeVote("p1", "pj1", "t")).toEqual({ error: "error.mustBeLoggedIn" });
   });
   it("rejects viewers", async () => {
     mockRequireAuth.mockResolvedValue(mkUser({ role: "viewer" }));
-    expect(await removeVote("p1", "pj1", "t")).toEqual({ error: "You don't have permission to perform this action" });
+    expect(await removeVote("p1", "pj1", "t")).toEqual({ error: "error.noPermission" });
   });
   it("rejects missing proposal", async () => {
     mockSelLim.mockResolvedValueOnce([]);
@@ -210,6 +210,6 @@ describe("removeVote", () => {
   it("returns generic error on DB failure", async () => {
     setupLive();
     mockDelWhere.mockImplementation(() => { throw new Error("DB"); });
-    expect(await removeVote("p1", "pj1", "t")).toEqual({ error: "An unexpected error occurred" });
+    expect(await removeVote("p1", "pj1", "t")).toEqual({ error: "error.unexpected" });
   });
 });

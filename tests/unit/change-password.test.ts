@@ -127,7 +127,7 @@ describe("changePassword", () => {
 
     const result = await changePassword(fd);
 
-    expect(result).toEqual({ error: "You must be logged in" });
+    expect(result).toEqual({ error: "error.mustBeLoggedIn" });
     expect(mockUpdateSet).not.toHaveBeenCalled();
   });
 
@@ -241,7 +241,7 @@ describe("changePassword", () => {
 
     const result = await changePassword(fd);
 
-    expect(result).toEqual({ error: "An unexpected error occurred" });
+    expect(result).toEqual({ error: "error.unexpected" });
   });
 
   it("should return validation error when currentPassword is empty", async () => {

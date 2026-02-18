@@ -30,7 +30,7 @@ export function ProfileForm({ firstName, lastName }: ProfileFormProps) {
     if (result.success) {
       toast.success(t("profile.updated"));
     } else {
-      toast.error(result.error || t("profile.updateFailed"));
+      toast.error(t(result.error || "profile.updateFailed"));
     }
 
     setIsLoading(false);

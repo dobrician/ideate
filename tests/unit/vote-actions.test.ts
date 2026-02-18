@@ -122,13 +122,13 @@ describe("deleteProposal", () => {
   it("rejects unauthenticated users", async () => {
     mockRequireAuth.mockRejectedValue(new Error("Unauthorized"));
     const r = await deleteProposal("prop-1", "proj-1", "csrf");
-    expect(r).toEqual({ error: "You must be logged in" });
+    expect(r).toEqual({ error: "error.mustBeLoggedIn" });
     expect(mockDeleteWhere).not.toHaveBeenCalled();
   });
 
   it("rejects members (no delete permission)", async () => {
     const r = await deleteProposal("prop-1", "proj-1", "csrf");
-    expect(r).toEqual({ error: "You don't have permission to perform this action" });
+    expect(r).toEqual({ error: "error.noPermission" });
   });
 
   it("returns not found when proposal missing", async () => {
@@ -167,7 +167,7 @@ describe("deleteProposal", () => {
     rejection.catch(() => {}); // prevent unhandled rejection
     mockSelectResults.push(rejection);
     const r = await deleteProposal("prop-1", "proj-1", "csrf");
-    expect(r).toEqual({ error: "An unexpected error occurred" });
+    expect(r).toEqual({ error: "error.unexpected" });
   });
 });
 
@@ -175,13 +175,13 @@ describe("castVote", () => {
   it("rejects unauthenticated users", async () => {
     mockRequireAuth.mockRejectedValue(new Error("Unauthorized"));
     const r = await castVote("prop-1", 1, "proj-1", "csrf");
-    expect(r).toEqual({ error: "You must be logged in" });
+    expect(r).toEqual({ error: "error.mustBeLoggedIn" });
   });
 
   it("rejects viewers", async () => {
     mockRequireAuth.mockResolvedValue(makeUser({ role: "viewer" }));
     const r = await castVote("prop-1", 1, "proj-1", "csrf");
-    expect(r).toEqual({ error: "You don't have permission to perform this action" });
+    expect(r).toEqual({ error: "error.noPermission" });
   });
 
   it("upserts a positive vote", async () => {
@@ -244,7 +244,7 @@ describe("castVote", () => {
       throw new Error("DB error");
     });
     const r = await castVote("prop-1", 1, "proj-1", "csrf");
-    expect(r).toEqual({ error: "An unexpected error occurred" });
+    expect(r).toEqual({ error: "error.unexpected" });
   });
 });
 
@@ -252,13 +252,13 @@ describe("removeVote", () => {
   it("rejects unauthenticated users", async () => {
     mockRequireAuth.mockRejectedValue(new Error("Unauthorized"));
     const r = await removeVote("prop-1", "proj-1", "csrf");
-    expect(r).toEqual({ error: "You must be logged in" });
+    expect(r).toEqual({ error: "error.mustBeLoggedIn" });
   });
 
   it("rejects viewers", async () => {
     mockRequireAuth.mockResolvedValue(makeUser({ role: "viewer" }));
     const r = await removeVote("prop-1", "proj-1", "csrf");
-    expect(r).toEqual({ error: "You don't have permission to perform this action" });
+    expect(r).toEqual({ error: "error.noPermission" });
   });
 
   it("rejects vote removal when project deadline has passed", async () => {
@@ -293,6 +293,6 @@ describe("removeVote", () => {
       throw new Error("DB error");
     });
     const r = await removeVote("prop-1", "proj-1", "csrf");
-    expect(r).toEqual({ error: "An unexpected error occurred" });
+    expect(r).toEqual({ error: "error.unexpected" });
   });
 });

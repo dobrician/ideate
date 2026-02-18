@@ -109,7 +109,7 @@ describe("updateNotificationPreferences", () => {
       { emailNewProposal: true, emailVoteOnMine: true, emailCommentReply: true, emailWeeklyDigest: false },
       "csrf"
     );
-    expect(r).toEqual({ error: "You must be logged in" });
+    expect(r).toEqual({ error: "error.mustBeLoggedIn" });
   });
 
   it("saves preferences with upsert", async () => {

@@ -286,6 +286,7 @@ export const en: Record<string, string> = {
   "admin.exportCsvTooltip": "Download audit log as CSV",
   "admin.exportJsonTooltip": "Download audit log as JSON",
   "admin.selected": "{count} selected",
+  "admin.selected_one": "{count} selected",
   "admin.bulkChangeRole": "Change Role",
   "admin.bulkDelete": "Delete",
   "admin.bulkArchive": "Archive",
@@ -432,6 +433,12 @@ export const en: Record<string, string> = {
   "common.accessDenied": "Access Denied",
   "common.accessDeniedDesc": "You do not have permission to access this page. Admin privileges are required.",
   "common.goToDashboard": "Go to Dashboard",
+
+  // Server action errors
+  "error.tooManyRequests": "Too many requests — please try again later",
+  "error.noPermission": "You don't have permission to perform this action",
+  "error.mustBeLoggedIn": "You must be logged in",
+  "error.unexpected": "An unexpected error occurred",
 
   // Theme
   "theme.toggle": "Toggle theme",

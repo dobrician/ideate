@@ -28,7 +28,7 @@ export function ChangeEmailForm({ currentEmail }: { currentEmail: string }) {
         emailInUse: "profile.emailInUse",
       };
       const key = errorMap[result.error || ""];
-      toast.error(key ? t(key) : (result.error || t("profile.emailChangeFailed")));
+      toast.error(key ? t(key) : t(result.error || "profile.emailChangeFailed"));
     }
     setIsLoading(false);
   }

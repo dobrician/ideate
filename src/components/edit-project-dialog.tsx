@@ -75,8 +75,8 @@ export function EditProjectDialog({
       const result = await updateProject(projectId, formData);
 
       if (result?.error) {
-        setError(result.error);
-        toast.error(result.error);
+        setError(t(result.error));
+        toast.error(t(result.error));
         setIsSaving(false);
       } else if (result?.success) {
         toast.success(t("projectForm.projectUpdated"));

@@ -108,7 +108,7 @@ describe("changePassword", () => {
     const result = await changePassword(makeFormData({
       currentPassword: "old", newPassword: "newPass1!", confirmPassword: "newPass1!",
     }));
-    expect(result).toEqual({ error: "You must be logged in" });
+    expect(result).toEqual({ error: "error.mustBeLoggedIn" });
   });
 
   it("returns error on password mismatch", async () => {
@@ -155,7 +155,7 @@ describe("changePassword", () => {
     const result = await changePassword(makeFormData({
       currentPassword: "old", newPassword: "newPass1!", confirmPassword: "newPass1!",
     }));
-    expect(result).toEqual({ error: "An unexpected error occurred" });
+    expect(result).toEqual({ error: "error.unexpected" });
   });
 
   it("returns validation error for empty fields", async () => {
@@ -182,7 +182,7 @@ describe("updateNotificationPreferences", () => {
       { emailNewProposal: true, emailVoteOnMine: true, emailCommentReply: true, emailWeeklyDigest: true },
       "csrf-tok",
     );
-    expect(result).toEqual({ error: "You must be logged in" });
+    expect(result).toEqual({ error: "error.mustBeLoggedIn" });
   });
 
   it("returns generic error on unexpected failure", async () => {
@@ -191,7 +191,7 @@ describe("updateNotificationPreferences", () => {
       { emailNewProposal: true, emailVoteOnMine: true, emailCommentReply: true, emailWeeklyDigest: true },
       "csrf-tok",
     );
-    expect(result).toEqual({ error: "An unexpected error occurred" });
+    expect(result).toEqual({ error: "error.unexpected" });
   });
 });
 
@@ -221,13 +221,13 @@ describe("requestEmailChange", () => {
   it("returns error when not authenticated", async () => {
     mockRequireAuth.mockRejectedValue(new Error("Unauthorized"));
     const result = await requestEmailChange(makeFormData({ newEmail: "new@test.com" }));
-    expect(result).toEqual({ error: "You must be logged in" });
+    expect(result).toEqual({ error: "error.mustBeLoggedIn" });
   });
 
   it("returns generic error on unexpected failure", async () => {
     mockRequireAuth.mockRejectedValue(new Error("DB down"));
     const result = await requestEmailChange(makeFormData({ newEmail: "new@test.com" }));
-    expect(result).toEqual({ error: "An unexpected error occurred" });
+    expect(result).toEqual({ error: "error.unexpected" });
   });
 
   it("uses JWT_SECRET and APP_URL env vars when set", async () => {

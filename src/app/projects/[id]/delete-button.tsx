@@ -41,7 +41,7 @@ export function DeleteProjectButton({ projectId }: DeleteProjectButtonProps) {
       const result = await deleteProject(projectId, getCsrfTokenClient());
 
       if (result?.error) {
-        toast.error(result.error);
+        toast.error(t(result.error));
         setIsDeleting(false);
         setOpen(false);
       }

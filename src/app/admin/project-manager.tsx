@@ -74,7 +74,7 @@ export function ProjectManager({ projects }: ProjectManagerProps) {
     setConfirmDialog(null);
 
     if (result.error) {
-      toast.error(result.error);
+      toast.error(t(result.error));
     } else {
       const msg =
         confirmDialog.type === "archive"

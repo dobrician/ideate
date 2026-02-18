@@ -107,13 +107,13 @@ describe("bulkUpdateUserRole", () => {
   it("rejects unauthenticated users", async () => {
     mockRequireAuth.mockRejectedValue(new Error("Unauthorized"));
     const r = await bulkUpdateUserRole(["u1"], "member", "csrf");
-    expect(r).toEqual({ error: "You must be logged in" });
+    expect(r).toEqual({ error: "error.mustBeLoggedIn" });
   });
 
   it("rejects non-admin users", async () => {
     mockRequireAuth.mockResolvedValue(makeAdmin({ role: "member" }));
     const r = await bulkUpdateUserRole(["u1"], "member", "csrf");
-    expect(r).toEqual({ error: "You don't have permission to perform this action" });
+    expect(r).toEqual({ error: "error.noPermission" });
   });
 
   it("rejects invalid role", async () => {
@@ -148,13 +148,13 @@ describe("bulkDeleteUsers", () => {
   it("rejects unauthenticated users", async () => {
     mockRequireAuth.mockRejectedValue(new Error("Unauthorized"));
     const r = await bulkDeleteUsers(["u1"], "csrf");
-    expect(r).toEqual({ error: "You must be logged in" });
+    expect(r).toEqual({ error: "error.mustBeLoggedIn" });
   });
 
   it("rejects non-admin users", async () => {
     mockRequireAuth.mockResolvedValue(makeAdmin({ role: "member" }));
     const r = await bulkDeleteUsers(["u1"], "csrf");
-    expect(r).toEqual({ error: "You don't have permission to perform this action" });
+    expect(r).toEqual({ error: "error.noPermission" });
   });
 
   it("rejects empty user list", async () => {
@@ -179,13 +179,13 @@ describe("bulkArchiveProjects", () => {
   it("rejects unauthenticated users", async () => {
     mockRequireAuth.mockRejectedValue(new Error("Unauthorized"));
     const r = await bulkArchiveProjects(["p1"], "csrf");
-    expect(r).toEqual({ error: "You must be logged in" });
+    expect(r).toEqual({ error: "error.mustBeLoggedIn" });
   });
 
   it("rejects non-admin users", async () => {
     mockRequireAuth.mockResolvedValue(makeAdmin({ role: "manager" }));
     const r = await bulkArchiveProjects(["p1"], "csrf");
-    expect(r).toEqual({ error: "You don't have permission to perform this action" });
+    expect(r).toEqual({ error: "error.noPermission" });
   });
 
   it("rejects empty project list", async () => {
@@ -206,13 +206,13 @@ describe("bulkDeleteProjects", () => {
   it("rejects unauthenticated users", async () => {
     mockRequireAuth.mockRejectedValue(new Error("Unauthorized"));
     const r = await bulkDeleteProjects(["p1"], "csrf");
-    expect(r).toEqual({ error: "You must be logged in" });
+    expect(r).toEqual({ error: "error.mustBeLoggedIn" });
   });
 
   it("rejects non-admin users", async () => {
     mockRequireAuth.mockResolvedValue(makeAdmin({ role: "manager" }));
     const r = await bulkDeleteProjects(["p1"], "csrf");
-    expect(r).toEqual({ error: "You don't have permission to perform this action" });
+    expect(r).toEqual({ error: "error.noPermission" });
   });
 
   it("rejects empty project list", async () => {
