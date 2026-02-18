@@ -11,7 +11,7 @@
 
 - [x] **Goal 3: Fix AI dialog focus management** — When the suggestion detail panel opens/closes, restore focus to the trigger element. Addresses deep analysis finding A.14 (nested dialog focus leakage).
 
-- [ ] **Goal 4: Add trusted proxy validation for rate limiting** — `request-utils.ts` trusts `x-forwarded-for` without validation. Add `TRUSTED_PROXIES` env var support and fall back to direct IP when not behind a trusted proxy.
+- [x] **Goal 4: Add trusted proxy validation for rate limiting** — `request-utils.ts` trusts `x-forwarded-for` without validation. Add `TRUSTED_PROXIES` env var support and fall back to direct IP when not behind a trusted proxy.
 
 - [ ] **Goal 5: Add Docker image push to CI pipeline** — Add a `docker-push` job to `.github/workflows/ci.yml` that builds and pushes the Docker image to GitHub Container Registry on main branch pushes.
 
