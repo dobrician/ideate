@@ -4,9 +4,9 @@ Reverse chronological. Click each sprint for full details.
 
 ---
 
-### 🔄 [Sprint 38 — Cloudflare, Coverage, Accessibility & SSO](Sprint-38) *(2026-02-18)*
+### ✅ [Sprint 38 — Cloudflare, Coverage, Accessibility & SSO](Sprint-38) *(2026-02-18)*
 **Focus:** Cloudflare deployment, close coverage gaps (digest/utils/mail), search keyboard a11y, change-password, OIDC SSO, webhook resilience
-**Stats:** 0/8 goals | In progress
+**Stats:** 8/8 goals | 1138 tests | All Sprint 38 analysis goals verified complete
 
 ---
 
