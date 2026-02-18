@@ -43,7 +43,7 @@ export function VotesOverTimeChart({ data }: { data: VoteOverTimePoint[] }) {
   }
 
   return (
-    <Card>
+    <Card className="min-w-0 overflow-hidden">
       <CardHeader>
         <CardTitle className="text-lg">{t("charts.votesOverTime")}</CardTitle>
       </CardHeader>
@@ -99,7 +99,7 @@ export function TopProposalsChart({ data }: { data: TopProposal[] }) {
   }
 
   return (
-    <Card>
+    <Card className="min-w-0 overflow-hidden">
       <CardHeader>
         <CardTitle className="text-lg">{t("charts.topProposals")}</CardTitle>
       </CardHeader>
@@ -143,7 +143,7 @@ export function ActivityHeatmapChart({ data }: { data: ActivityPoint[] }) {
   }
 
   return (
-    <Card className="lg:col-span-2">
+    <Card className="min-w-0 overflow-hidden lg:col-span-2">
       <CardHeader>
         <CardTitle className="text-lg">{t("charts.activityHeatmap")}</CardTitle>
       </CardHeader>

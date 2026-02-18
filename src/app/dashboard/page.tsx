@@ -94,9 +94,9 @@ export default async function DashboardPage() {
         </Button>
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-2">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         {/* User's projects */}
-        <Card>
+        <Card className="min-w-0 overflow-hidden">
           <CardHeader className="flex flex-row items-start justify-between">
             <div>
               <CardTitle className="text-lg">{t("dashboard.yourProjects")}</CardTitle>
@@ -144,7 +144,7 @@ export default async function DashboardPage() {
         </Card>
 
         {/* User's proposals */}
-        <Card>
+        <Card className="min-w-0 overflow-hidden">
           <CardHeader>
             <CardTitle className="text-lg">{t("dashboard.yourProposals")}</CardTitle>
             <CardDescription>{t("proposals.count", { count: userProposals.length })}</CardDescription>
@@ -159,7 +159,7 @@ export default async function DashboardPage() {
                     <li key={p.id}>
                       <Link href={`/projects/${p.projectId}`}
                         className="group block rounded-md px-2 py-1.5 transition-colors hover:bg-muted/50">
-                        <span className="truncate text-sm font-medium group-hover:underline" title={p.title}>{p.title}</span>
+                        <span className="block truncate text-sm font-medium group-hover:underline" title={p.title}>{p.title}</span>
                         <span className="block truncate text-xs text-muted-foreground" title={p.projectTitle ?? ""}>
                           {t("dashboard.inProject", { project: p.projectTitle ?? t("projects.unknown") })}
                         </span>
@@ -173,7 +173,7 @@ export default async function DashboardPage() {
         </Card>
 
         {/* Recent votes */}
-        <Card>
+        <Card className="min-w-0 overflow-hidden">
           <CardHeader>
             <CardTitle className="text-lg">{t("dashboard.recentVotes")}</CardTitle>
             <CardDescription>{t("dashboard.totalVotes", { count: userVoteCount })}</CardDescription>
@@ -214,7 +214,7 @@ export default async function DashboardPage() {
         </Card>
 
         {/* Activity feed */}
-        <Card>
+        <Card className="min-w-0 overflow-hidden">
           <CardHeader>
             <CardTitle className="text-lg">{t("dashboard.activity")}</CardTitle>
             <CardDescription>{t("dashboard.activityDesc")}</CardDescription>
@@ -230,8 +230,8 @@ export default async function DashboardPage() {
                       <Link href={a.projectId ? `/projects/${a.projectId}` : "/projects"}
                         className="group flex gap-2 rounded-md px-2 py-1.5 transition-colors hover:bg-muted/50">
                         <MessageSquare className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" />
-                        <div className="min-w-0">
-                          <div>
+                        <div className="min-w-0 overflow-hidden">
+                          <p className="truncate">
                             <span className="font-medium group-hover:underline">
                               {a.userName || a.userEmail || t("common.someone")}
                             </span>
@@ -242,8 +242,8 @@ export default async function DashboardPage() {
                                 {formatRelativeTime(a.createdAt, t)}
                               </time>
                             )}
-                          </div>
-                          <p className="mt-0.5 line-clamp-2 text-muted-foreground sm:line-clamp-1">{a.content}</p>
+                          </p>
+                          <p className="mt-0.5 truncate text-muted-foreground sm:line-clamp-1">{a.content}</p>
                         </div>
                       </Link>
                     </li>
@@ -258,7 +258,7 @@ export default async function DashboardPage() {
       {/* Analytics Charts */}
       <div className="mt-6 sm:mt-8">
         <h2 className="mb-4 text-xl font-bold">{t("dashboard.analytics")}</h2>
-        <div className="grid gap-6 lg:grid-cols-2">
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
           <VotesOverTimeChart data={chartData.votesOverTime} />
           <TopProposalsChart data={chartData.topProposals} />
           <ActivityHeatmapChart data={chartData.activityHeatmap} />
