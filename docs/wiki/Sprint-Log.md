@@ -4,49 +4,25 @@ Reverse chronological. Click each sprint for full details.
 
 ---
 
-### ✅ [Sprint 00 — Cloudflare, Coverage, Accessibility & SSO](Sprint-00) *(2026-02-18)*
+### ✅ [Sprint 41 — Cloudflare, Coverage, Accessibility & SSO](Sprint-41) *(2026-02-18)*
 **Focus:** Cloudflare deployment, close coverage gaps (digest/utils/mail), search keyboard a11y, change-password, OIDC SSO, webhook resilience
-**Stats:** 8/8 goals | Cloudflare Pages + D1 config, full test coverage, OIDC SSO, keyboard a11y
+**Stats:** 8/8 goals | 1223 tests | Cloudflare Pages + D1, OIDC SSO, keyboard a11y
 
 ---
 
-### ✅ [Sprint 00 — PDF Locale Fix, PWA iOS, Server Action Rate Limiting, Admin Dashboard & Data Retention](Sprint-00) *(2026-02-18)*
-**Focus:** Fix hardcoded PDF locale, PWA safe-area iOS overlap, rate limiting on all server actions, admin rate-limit visibility, audit log data retention
-**Stats:** 8/8 goals | 1223 tests | Admin dashboard, data retention cron, full rate-limit test coverage
+### ✅ [Sprint 40 — Rate Limiting, Data Retention & Admin Dashboard](Sprint-40) *(2026-02-18)*
+**Focus:** PDF locale fix, PWA iOS safe-area, rate limiting on all server actions, admin rate-limit dashboard, audit log data retention, proxy tests, projects coverage
+**Stats:** 8/8 goals | 1195 tests | Rate limiting, data retention cron, admin dashboard
 
 ---
 
-### ✅ [Sprint 00 — Proxy Tests & Projects Coverage](Sprint-00) *(2026-02-18)*
-**Focus:** Add proxy.ts unit tests, close coverage gap on src/app/projects (funcs/branch)
-**Stats:** 2/2 goals | 1195 tests | 100% func coverage on projects + proposals
-
----
-
-### ✅ [Sprint 00 — Accessibility Polish, Locale Generics & Coverage Gaps](Sprint-00) *(2026-02-18)*
-**Focus:** Icon button a11y, redundant title cleanup, locale-generic date formatting, close coverage gaps (components/db/profile/projects), proxy.ts tests
-**Stats:** 8/8 goals | TBD tests | A11y polish, locale generics, coverage improvements
-
----
-
-### ✅ [Sprint 38 — Cloudflare, Coverage, Accessibility & SSO](Sprint-38) *(2026-02-18)*
-**Focus:** Cloudflare deployment, close coverage gaps (digest/utils/mail), search keyboard a11y, change-password, OIDC SSO, webhook resilience
-**Stats:** 8/8 goals | 1138 tests | All Sprint 38 analysis goals verified complete
-
----
-
-### ✅ [Sprint 00 — Cloudflare, Coverage, Accessibility & SSO](Sprint-00) *(2026-02-18)*
-**Focus:** Cloudflare deployment, close coverage gaps (digest/utils/mail), search keyboard a11y, change-password, OIDC SSO, webhook resilience
-**Stats:** 8/8 goals | 1138 tests | Webhook dead-letter logging + non-Error branch covered
-
----
-
-### ✅ [Sprint 00 — UX Polish, Security Hardening & DevOps Automation](Sprint-00) *(2026-02-18)*
+### ✅ [Sprint 39 — UX Polish, Security Hardening & DevOps](Sprint-39) *(2026-02-18)*
 **Focus:** PWA mobile overlap, AI model disclosure, dialog focus fix, trusted proxy validation, Docker CI push, DB backup automation, email change flow, API rate limiting
 **Stats:** 8/8 goals | 1115 tests | Email change flow, rate limiting on all API routes
 
 ---
 
-### ✅ [Sprint 41 — Code Quality, Dead Code Removal & Accessibility Polish](Sprint-41) *(2026-02-17)*
+### ✅ [Sprint 38 — Code Quality, Dead Code Removal & Accessibility Polish](Sprint-38) *(2026-02-17)*
 **Focus:** Inline lone query, locale fallback fix, role=alert on error containers, rename buildCommentTree, remove re-export shim, dead sanitize exports, locale export test, dead code audit
 **Stats:** 8/8 goals | 1099 tests | All dead code items from deep analysis resolved
 
@@ -61,12 +37,6 @@ Reverse chronological. Click each sprint for full details.
 ### ✅ [Sprint 39 — Code Quality, Coverage Gaps & Accessibility](Sprint-39) *(2026-02-17)*
 **Focus:** Fix lint warnings, close coverage gaps (search-d1/actions/db), split oversized files, remove dead code, localize export dates, proposal form a11y
 **Stats:** 8/8 goals | 1096 tests | 6 files split, dead code removed, locale-aware exports, a11y fix
-
----
-
-### ✅ [Sprint 00 — Cloudflare, Coverage, Accessibility & SSO](Sprint-00) *(2026-02-17)*
-**Focus:** Cloudflare deployment, close coverage gaps (digest/utils/mail), search keyboard a11y, change-password, OIDC SSO, webhook resilience
-**Stats:** 8/8 goals | 1099 tests | OIDC SSO + dead-letter webhook logging
 
 ---
 

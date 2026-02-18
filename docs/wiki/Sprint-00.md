@@ -1,18 +1,18 @@
-# Sprint 00 — Cloudflare, Coverage, Accessibility & SSO
+# Sprint 00 — Coverage Gaps: request-utils, search, rate-limit, digest, notifications, llm, sanitize, auth
 
 **Date:** 2026-02-18
-**Focus:** Cloudflare deployment, close coverage gaps (digest/utils/mail), search keyboard a11y, change-password, OIDC SSO, webhook resilience
+**Focus:** Close remaining branch/statement coverage gaps across 8 library modules identified in the deep analysis report
 
 ## Goals
 
-- [x] **Goal 1: Cloudflare deployment** — Pages + D1 migration, wrangler config, deploy pipeline (DevOps, Section 13)
-- [x] **Goal 2: Close coverage gap on `lib/digest.ts`** — unit tests for digest aggregation, HTML generation, and cron endpoint (Testing, Section 13)
-- [x] **Goal 3: Close coverage gap on `lib/utils.ts`** — tests for `formatDate`, `formatDateTime`, `formatRelativeTime` (Testing, Section 13)
-- [x] **Goal 4: Close coverage gap on `lib/mail.ts`** — test HTML email template rendering and edge cases on lines 212-243 (Testing, Section 13)
-- [x] **Goal 5: Search keyboard navigation** — ArrowUp/Down/Enter handlers, fix `aria-selected` tracking, remove misleading static ARIA (Accessibility, Section 13)
-- [x] **Goal 6: Profile change-password flow** — change-password form with current-password verification (Feature, Section 13)
-- [x] **Goal 7: SSO foundation (OIDC)** — OpenID Connect login with configurable provider, link accounts by email (Feature, Section 13)
-- [x] **Goal 8: Improve webhook resilience** — cover error retry paths in tests, dead-letter logging for failed deliveries (Testing + Reliability, Section 13)
+- [ ] **Goal 1: Close coverage gap on `lib/request-utils.ts`** — add tests for getClientIp and getActionClientIp with trusted/untrusted proxy scenarios (Testing, Section 1)
+- [ ] **Goal 2: Close coverage gap on `lib/search.ts`** — test uncovered branches on lines 4, 216-220 (Testing, Section 1)
+- [ ] **Goal 3: Close coverage gap on `lib/rate-limit.ts`** — test uncovered branches on lines 26, 101 (Testing, Section 1)
+- [ ] **Goal 4: Close coverage gap on `lib/digest.ts`** — test uncovered branches on lines 22-23 (Testing, Section 1)
+- [ ] **Goal 5: Close coverage gap on `lib/notifications.ts`** — test uncovered lines 80, 138 (Testing, Section 1)
+- [ ] **Goal 6: Close coverage gap on `lib/llm.ts`** — test uncovered branch/func on line 248, push branch coverage past 90% (Testing, Section 1)
+- [ ] **Goal 7: Close coverage gap on `lib/sanitize.ts`** — test uncovered branch on line 20, push branch coverage past 90% (Testing, Section 1)
+- [ ] **Goal 8: Close coverage gap on `lib/auth.ts`** — test uncovered branches on lines 29, 192, 245 (Testing, Section 1)
 
 ## Notes
 
