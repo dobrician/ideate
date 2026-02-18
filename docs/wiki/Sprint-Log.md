@@ -4,13 +4,13 @@ Reverse chronological. Click each sprint for full details.
 
 ---
 
-### 🔄 [Sprint 00 — Cloudflare, Export Coverage, Sentry, E2E CI, Proxy & Dead Code](Sprint-00) *(2026-02-18)*
-**Focus:** Cloudflare deployment, export.ts test coverage, close rate-limit/digest branch gaps, Sentry integration, E2E in CI, proxy migration, remove unused exports
+### 🔄 [Sprint 42 — Security, DX & Quality](Sprint-42) *(2026-02-18)*
+**Focus:** Fix search XSS, action/API wrappers, analytics N+1, i18n errors, test fix, onboarding, proposal tags UI, a11y polish
 **Stats:** 0/8 goals
 
 ---
 
-### ✅ [Sprint 00 — Enterprise Features: Teams, Custom Roles & Analytics](Sprint-00) *(2026-02-18)*
+### ✅ [Sprint 41b — Enterprise Features: Teams, Custom Roles & Analytics](Sprint-00) *(2026-02-18)*
 **Focus:** Multi-tenant teams/organizations, configurable roles (dynamic RBAC), advanced analytics dashboard
 **Stats:** 3/3 goals | 1373 tests
 
