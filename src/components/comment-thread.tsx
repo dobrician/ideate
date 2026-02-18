@@ -194,7 +194,6 @@ export function CommentThread({ comments, hiddenFields, currentUserId }: Comment
               size="icon"
               disabled={isPending}
               aria-label={t("comments.submit")}
-              title={t("comments.submit")}
               className="shrink-0"
             >
               <Send className="h-4 w-4" />

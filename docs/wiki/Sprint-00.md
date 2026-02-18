@@ -6,7 +6,7 @@
 ## Goals
 
 - [x] **Goal 1: Icon-only button a11y** — add `aria-label` to `dark-mode-toggle`, `locale-switcher`, `export-buttons`, `attachment-upload` delete button (WCAG 4.1.2)
-- [ ] **Goal 2: Remove redundant `title` from comment-thread send button** — already has `aria-label`, remove duplicate `title` attribute
+- [x] **Goal 2: Remove redundant `title` from comment-thread send button** — already has `aria-label`, remove duplicate `title` attribute
 - [ ] **Goal 3: Locale-generic date formatting** — replace hardcoded `en`/`ro` switch in `utils.ts` with BCP 47 locale tag support
 - [ ] **Goal 4: Close coverage gap on `src/components`** — raise from 93.75% stmts / 90% branch to 100%
 - [ ] **Goal 5: Close coverage gap on `src/db`** — raise from 88.88% branch to 100%
