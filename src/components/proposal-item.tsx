@@ -116,20 +116,20 @@ export function ProposalItem({
               <div className="pointer-events-none absolute inset-0" aria-hidden="true">
                 {greenWidth > 0 && (
                   <div
-                    className="absolute left-0 top-0 h-full bg-gradient-to-r from-green-500/25 to-green-500/5 transition-all duration-300"
+                    className="absolute left-0 top-0 h-full bg-gradient-to-r from-green-500/15 to-transparent transition-all duration-300"
                     style={{ width: `${greenWidth}%` }}
                   />
                 )}
                 {redWidth > 0 && (
                   <div
-                    className="absolute right-0 top-0 h-full bg-gradient-to-l from-red-500/25 to-red-500/5 transition-all duration-300"
+                    className="absolute right-0 top-0 h-full bg-gradient-to-l from-red-500/15 to-transparent transition-all duration-300"
                     style={{ width: `${redWidth}%` }}
                   />
                 )}
               </div>
               <div className="relative z-10 px-2 py-1">
-                <span className="truncate font-medium" title={proposal.title}>{proposal.title}</span>
-                <span className="ml-2 inline-flex max-w-[8rem] text-xs text-muted-foreground sm:max-w-none" title={`${t("proposals.by")} ${proposal.authorName}`}>
+                <span className="line-clamp-2 font-medium" title={proposal.title}>{proposal.title}</span>
+                <span className="block text-xs text-muted-foreground" title={`${t("proposals.by")} ${proposal.authorName}`}>
                   <span className="truncate">{t("proposals.by")} {proposal.authorName}</span>
                 </span>
               </div>

@@ -229,4 +229,18 @@ describe("requestEmailChange", () => {
     const result = await requestEmailChange(makeFormData({ newEmail: "new@test.com" }));
     expect(result).toEqual({ error: "Failed to request email change" });
   });
+
+  it("uses JWT_SECRET and APP_URL env vars when set", async () => {
+    const origSecret = process.env.JWT_SECRET;
+    const origUrl = process.env.APP_URL;
+    process.env.JWT_SECRET = "custom-secret-for-testing-32chars!!";
+    process.env.APP_URL = "https://ideate.example.com";
+
+    const result = await requestEmailChange(makeFormData({ newEmail: "new@test.com" }));
+    expect(result).toEqual({ success: true });
+    expect(mockSendEmailChangeEmail).toHaveBeenCalled();
+
+    process.env.JWT_SECRET = origSecret;
+    process.env.APP_URL = origUrl;
+  });
 });
