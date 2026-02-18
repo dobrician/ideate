@@ -12,7 +12,7 @@
 - [x] **Goal 5: Add error tracking (Sentry)** — integrate Sentry for production error monitoring, source maps, and alert routing (DevOps)
 - [x] **Goal 6: Add E2E tests to CI pipeline** — configure Playwright in GitHub Actions with a test server, run on PR and push to main (DevOps)
 - [x] **Goal 7: Migrate `middleware.ts` to `proxy.ts` convention** — address Next.js 16 deprecation warning for the middleware file convention (Tech Debt)
-- [ ] **Goal 8: Remove unused exports** — audit and remove dead exports: `buildProjectSummary`, `getAiUsageStats`, `getPermissions`, `requirePermission`, `canModifyResource`, `sanitizeObject`, `generateReportHtml` (Tech Debt)
+- [x] **Goal 8: Remove unused exports** — audit and remove dead exports: `buildProjectSummary`, `getAiUsageStats`, `getPermissions`, `requirePermission`, `canModifyResource`, `sanitizeObject`, `generateReportHtml` (Tech Debt)
 
 ## Notes
 

@@ -4,9 +4,9 @@ Reverse chronological. Click each sprint for full details.
 
 ---
 
-### ⬜ [Sprint 01 — Export Coverage, Sentry, E2E CI, Proxy Migration & Dead Code](Sprint-01) *(2026-02-18)*
+### ✅ [Sprint 01 — Export Coverage, Sentry, E2E CI, Proxy Migration & Dead Code](Sprint-01) *(2026-02-18)*
 **Focus:** Add export.ts tests, close rate-limit/digest branch gaps, integrate Sentry, add E2E to CI, complete proxy migration, remove unused exports
-**Stats:** 0/8 goals | TBD tests
+**Stats:** 8/8 goals | 1251 tests | Closed #13, export/rate-limit/digest at 100% branch
 
 ---
 
