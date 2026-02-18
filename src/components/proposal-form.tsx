@@ -6,9 +6,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import {
-  Dialog, DialogContent, DialogHeader, DialogTitle,
-  DialogTrigger, DialogClose,
-} from "@/components/ui/dialog";
+  Sheet, SheetContent, SheetHeader, SheetTitle,
+  SheetTrigger, SheetClose,
+} from "@/components/ui/sheet";
 import { ThumbsUp, ThumbsDown, AlertTriangle, Loader2, Eye, Pencil, X } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
@@ -211,7 +211,7 @@ function ProposalFormFields({
 }
 
 /**
- * Dialog wrapper for mobile/tablet — "New Proposal" button opens a dialog.
+ * Sheet drawer (side="left") for the proposal form — works on mobile and desktop.
  */
 export function ProposalForm(props: ProposalFormProps) {
   const form = useProposalForm(props);
@@ -229,46 +229,27 @@ export function ProposalForm(props: ProposalFormProps) {
   }, [state, t, resetForm]);
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
+    <Sheet open={open} onOpenChange={setOpen}>
+      <SheetTrigger asChild>
         <Button size="sm">
           <span className="sm:hidden">{form.t("proposalForm.newProposalShort")}</span>
           <span className="hidden sm:inline">{form.t("proposalForm.newProposal")}</span>
         </Button>
-      </DialogTrigger>
-      <DialogContent className="sm:max-w-lg">
-        <DialogHeader>
-          <DialogTitle>{form.t("proposalForm.title")}</DialogTitle>
-        </DialogHeader>
-        <ProposalFormFields form={form} showCancel onCancel={
-          <DialogClose asChild>
-            <Button type="button" variant="outline" size="sm" disabled={form.isPending}>
-              {form.t("common.cancel")}
-            </Button>
-          </DialogClose>
-        } />
-      </DialogContent>
-    </Dialog>
-  );
-}
-
-/**
- * Inline form for the sticky desktop sidebar — no dialog wrapper.
- */
-export function ProposalFormInline(props: ProposalFormProps) {
-  const form = useProposalForm(props);
-  const { state: inlineState, t: inlineT, resetForm: inlineResetForm } = form;
-
-  useEffect(() => {
-    if (!inlineState) return;
-    if (inlineState.success) { toast.success(inlineT("proposalForm.created")); inlineResetForm(); }
-    if (inlineState.error) toast.error(inlineState.error);
-  }, [inlineState, inlineT, inlineResetForm]);
-
-  return (
-    <div data-rsc-content className="min-w-0 overflow-hidden rounded-lg border bg-card p-4">
-      <h3 className="mb-3 truncate text-sm font-semibold">{form.t("proposalForm.title")}</h3>
-      <ProposalFormFields form={form} />
-    </div>
+      </SheetTrigger>
+      <SheetContent side="left" className="flex w-full flex-col overflow-y-auto sm:max-w-lg">
+        <SheetHeader className="shrink-0">
+          <SheetTitle>{form.t("proposalForm.title")}</SheetTitle>
+        </SheetHeader>
+        <div className="flex-1 px-4 pb-4">
+          <ProposalFormFields form={form} showCancel onCancel={
+            <SheetClose asChild>
+              <Button type="button" variant="outline" size="sm" disabled={form.isPending}>
+                {form.t("common.cancel")}
+              </Button>
+            </SheetClose>
+          } />
+        </div>
+      </SheetContent>
+    </Sheet>
   );
 }

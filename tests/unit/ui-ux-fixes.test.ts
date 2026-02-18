@@ -357,20 +357,23 @@ describe("Profile tabs scroll (#55)", () => {
 });
 
 // ============================================================
-// #56 — Sidebar form clipping (unit-level)
+// #56 — Sidebar form clipping → replaced with Sheet drawer
 // ============================================================
 
-describe("Sidebar form clipping (#56)", () => {
-  it("ProposalFormInline container has min-w-0 overflow-hidden", async () => {
+describe("Proposal form uses Sheet drawer (#56)", () => {
+  it("ProposalForm uses Sheet instead of Dialog", async () => {
     const fs = await import("fs");
     const src = fs.readFileSync("src/components/proposal-form.tsx", "utf-8");
-    expect(src).toContain("min-w-0 overflow-hidden");
+    expect(src).toContain("Sheet");
+    expect(src).toContain("SheetContent");
+    expect(src).toContain('side="left"');
   });
 
-  it("title has truncate class", async () => {
+  it("project page has no two-column sidebar layout", async () => {
     const fs = await import("fs");
-    const src = fs.readFileSync("src/components/proposal-form.tsx", "utf-8");
-    expect(src).toContain("truncate text-sm font-semibold");
+    const src = fs.readFileSync("src/app/projects/[id]/page.tsx", "utf-8");
+    expect(src).not.toContain("ProposalFormInline");
+    expect(src).not.toContain("lg:grid-cols-[1.6fr_1fr]");
   });
 });
 
