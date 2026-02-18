@@ -145,4 +145,35 @@ describe("formatRelativeTime", () => {
     const result = formatRelativeTime(ts, "en", t);
     expect(result).toBe("time.hoursAgo:3");
   });
+
+  it("returns 30 days ago at boundary", () => {
+    const thirtyDaysAgo = new Date(Date.now() - 30 * 86400_000);
+    expect(formatRelativeTime(thirtyDaysAgo, "en", t)).toBe("time.daysAgo:30");
+  });
+
+  it("falls back to short date at 31 days", () => {
+    const past = new Date(Date.now() - 31 * 86400_000);
+    const result = formatRelativeTime(past, "en", t);
+    expect(result).not.toContain("time.daysAgo");
+    expect(result).toContain("202");
+  });
+
+  it("handles ro locale for old dates", () => {
+    const past = new Date(Date.now() - 60 * 86400_000);
+    const result = formatRelativeTime(past, "ro", t);
+    expect(result).toContain("202");
+  });
+});
+
+describe("formatDateTime — edge cases", () => {
+  it("accepts string date input", () => {
+    const result = formatDateTime("2026-06-15T10:30:00Z", "en");
+    expect(result).toContain("2026");
+  });
+
+  it("accepts numeric timestamp input", () => {
+    const ts = new Date("2026-03-01T08:00:00Z").getTime();
+    const result = formatDateTime(ts, "en");
+    expect(result).toContain("2026");
+  });
 });
