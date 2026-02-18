@@ -81,8 +81,8 @@ export function ProposalItem({
   const upvotes = liveUpvotes ?? proposal.upvotes;
   const downvotes = liveDownvotes ?? proposal.downvotes;
   const totalVotes = upvotes + downvotes;
-  const greenWidth = totalVotes > 0 ? Math.round((upvotes / totalVotes) * 50) : 0;
-  const redWidth = totalVotes > 0 ? Math.round((downvotes / totalVotes) * 50) : 0;
+  const greenWidth = totalVotes > 0 ? Math.round((upvotes / totalVotes) * 100) : 0;
+  const redWidth = totalVotes > 0 ? Math.round((downvotes / totalVotes) * 100) : 0;
 
   async function handleDelete() {
     setIsDeleting(true);
@@ -106,28 +106,30 @@ export function ProposalItem({
       value={proposal.id}
       className="rounded-lg border bg-card transition-shadow duration-200 data-[state=open]:shadow-md"
     >
-      <AccordionTrigger className="relative overflow-hidden py-3 hover:no-underline">
-        <div className="pointer-events-none absolute inset-0" aria-hidden="true">
-          {redWidth > 0 && (
-            <div
-              className="absolute right-1/2 top-0 h-full bg-gradient-to-l from-red-500/20 to-red-500/5 transition-all duration-300"
-              style={{ width: `${redWidth}%` }}
-            />
-          )}
-          {greenWidth > 0 && (
-            <div
-              className="absolute left-1/2 top-0 h-full bg-gradient-to-r from-green-500/20 to-green-500/5 transition-all duration-300"
-              style={{ width: `${greenWidth}%` }}
-            />
-          )}
-        </div>
-        <div className="relative z-10 flex w-full flex-col gap-1 px-2 sm:px-4 sm:pr-2">
+      <AccordionTrigger className="py-3 hover:no-underline">
+        <div className="flex w-full flex-col gap-1 px-2 sm:px-4 sm:pr-2">
           <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-            <div className="min-w-0 flex-1 text-left">
-              <span className="truncate font-medium" title={proposal.title}>{proposal.title}</span>
-              <span className="ml-2 inline-flex max-w-[8rem] text-xs text-muted-foreground sm:max-w-none" title={`${t("proposals.by")} ${proposal.authorName}`}>
-                <span className="truncate">{t("proposals.by")} {proposal.authorName}</span>
-              </span>
+            <div className="relative min-w-0 flex-1 overflow-hidden rounded text-left">
+              <div className="pointer-events-none absolute inset-0" aria-hidden="true">
+                {greenWidth > 0 && (
+                  <div
+                    className="absolute left-0 top-0 h-full bg-gradient-to-r from-green-500/25 to-green-500/5 transition-all duration-300"
+                    style={{ width: `${greenWidth}%` }}
+                  />
+                )}
+                {redWidth > 0 && (
+                  <div
+                    className="absolute right-0 top-0 h-full bg-gradient-to-l from-red-500/25 to-red-500/5 transition-all duration-300"
+                    style={{ width: `${redWidth}%` }}
+                  />
+                )}
+              </div>
+              <div className="relative z-10 px-2 py-1">
+                <span className="truncate font-medium" title={proposal.title}>{proposal.title}</span>
+                <span className="ml-2 inline-flex max-w-[8rem] text-xs text-muted-foreground sm:max-w-none" title={`${t("proposals.by")} ${proposal.authorName}`}>
+                  <span className="truncate">{t("proposals.by")} {proposal.authorName}</span>
+                </span>
+              </div>
             </div>
           <div
             className="flex min-w-0 items-center gap-2"
