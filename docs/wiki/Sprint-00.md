@@ -5,7 +5,7 @@
 
 ## Goals
 
-- [ ] **Goal 1: Close coverage gap on `lib/request-utils.ts`** — add tests for getClientIp and getActionClientIp with trusted/untrusted proxy scenarios (Testing, Section 1)
+- [x] **Goal 1: Close coverage gap on `lib/request-utils.ts`** — add tests for getClientIp and getActionClientIp with trusted/untrusted proxy scenarios (Testing, Section 1)
 - [ ] **Goal 2: Close coverage gap on `lib/search.ts`** — test uncovered branches on lines 4, 216-220 (Testing, Section 1)
 - [ ] **Goal 3: Close coverage gap on `lib/rate-limit.ts`** — test uncovered branches on lines 26, 101 (Testing, Section 1)
 - [ ] **Goal 4: Close coverage gap on `lib/digest.ts`** — test uncovered branches on lines 22-23 (Testing, Section 1)
