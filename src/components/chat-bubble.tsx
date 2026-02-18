@@ -42,7 +42,7 @@ export function ChatBubble({
       ) : (
         <div className="w-6 shrink-0" />
       )}
-      <div className={`max-w-[85%] sm:max-w-[75%] ${isOwn ? "items-end" : "items-start"}`}>
+      <div className={`min-w-0 max-w-[85%] sm:max-w-[75%] ${isOwn ? "items-end" : "items-start"}`}>
         {showAvatar && (
           <div className={`flex items-center gap-1.5 mb-0.5 ${isOwn ? "justify-end" : ""}`}>
             <span className="text-xs font-medium text-foreground">
@@ -52,7 +52,7 @@ export function ChatBubble({
           </div>
         )}
         <div
-          className={`rounded-2xl px-3 py-2 text-sm ${
+          className={`overflow-hidden break-words rounded-2xl px-3 py-2 text-sm ${
             isOwn
               ? "bg-primary text-primary-foreground rounded-tr-sm"
               : "bg-muted text-foreground rounded-tl-sm"

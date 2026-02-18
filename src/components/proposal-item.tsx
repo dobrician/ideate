@@ -86,8 +86,9 @@ export function ProposalItem({
   const downvotes = liveDownvotes ?? proposal.downvotes;
   const totalVotes = upvotes + downvotes;
   const voteUnit = maxTotalVotes > 0 ? 100 / maxTotalVotes : 0;
-  const greenWidth = Math.round(upvotes * voteUnit);
-  const redWidth = Math.round(downvotes * voteUnit);
+  // No gradient when this proposal has zero total votes
+  const greenWidth = totalVotes > 0 ? Math.round(upvotes * voteUnit) : 0;
+  const redWidth = totalVotes > 0 ? Math.round(downvotes * voteUnit) : 0;
 
   async function handleDelete() {
     setIsDeleting(true);
@@ -115,20 +116,22 @@ export function ProposalItem({
         <div className="flex w-full flex-col gap-1 px-2 sm:px-4 sm:pr-2">
           <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
             <div className="relative min-w-0 flex-1 overflow-hidden rounded text-left">
-              <div className="pointer-events-none absolute inset-0" aria-hidden="true">
-                {greenWidth > 0 && (
-                  <div
-                    className="absolute left-0 top-0 h-full bg-gradient-to-r from-green-500/8 to-transparent transition-all duration-300"
-                    style={{ width: `${greenWidth}%` }}
-                  />
-                )}
-                {redWidth > 0 && (
-                  <div
-                    className="absolute right-0 top-0 h-full bg-gradient-to-l from-red-500/8 to-transparent transition-all duration-300"
-                    style={{ width: `${redWidth}%` }}
-                  />
-                )}
-              </div>
+              {totalVotes > 0 && (
+                <div className="pointer-events-none absolute inset-0" aria-hidden="true">
+                  {greenWidth > 0 && (
+                    <div
+                      className="absolute left-0 top-0 h-full bg-gradient-to-r from-green-500/8 to-transparent transition-all duration-300"
+                      style={{ width: `${greenWidth}%` }}
+                    />
+                  )}
+                  {redWidth > 0 && (
+                    <div
+                      className="absolute right-0 top-0 h-full bg-gradient-to-l from-red-500/8 to-transparent transition-all duration-300"
+                      style={{ width: `${redWidth}%` }}
+                    />
+                  )}
+                </div>
+              )}
               <div className="relative z-10 px-2 py-1">
                 <span className="line-clamp-2 break-words font-medium" title={proposal.title}>{proposal.title}</span>
                 <span className="block truncate text-xs text-muted-foreground" title={`${t("proposals.by")} ${proposal.authorName}`}>
@@ -137,7 +140,7 @@ export function ProposalItem({
               </div>
             </div>
           <div
-            className="flex min-w-0 items-center gap-2"
+            className="flex shrink-0 items-center gap-2"
             onClick={(e) => e.stopPropagation()}
           >
             <TooltipProvider>
