@@ -624,6 +624,10 @@ export const en: Record<string, string> = {
   "tags.noTags": "No tags yet. Create one above.",
   "tags.deleteTag": "Delete tag {name}",
   "tags.allTags": "All tags",
+  "tags.selectTag": "Select a tag",
+  "tags.addToProject": "Add tag...",
+  "tags.removeTag": "Remove tag {name}",
+  "tags.projectTags": "Tags",
   "a11y.filterByTag": "Filter by tag",
 
   "archive.banner": "This project is archived and read-only.",

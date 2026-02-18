@@ -84,6 +84,7 @@ function makeProposal(overrides: Partial<{
   comments: [];
   authorName: string;
   attachments: { id: string; filename: string; mimeType: string; size: number }[];
+  tags: { id: string; name: string }[];
 }> = {}) {
   return {
     id: overrides.id ?? "p1",
@@ -99,6 +100,7 @@ function makeProposal(overrides: Partial<{
     comments: overrides.comments ?? [],
     authorName: overrides.authorName ?? "Test Author",
     attachments: overrides.attachments ?? [],
+    tags: overrides.tags ?? [],
   };
 }
 

@@ -11,7 +11,7 @@
 - [x] **Goal 4: Internationalize Error Messages** — Add error translation keys to EN/RO. Fix 4 missing RO plural forms. Translate 19 untranslated RO keys. Migrate server action error strings to use `t()` where possible. (Medium, UX)
 - [x] **Goal 5: Fix Failing Test + Error Logging** — Fix `mail.test.ts` SMTP config test. Add `logger.warn` to webhook `.catch()` handlers. Add `logger.error` to AI suggestion route catch. Wrap `JSON.parse` in rbac.ts. Fix cron auth to use `timingSafeEqual`. (Small, Quality)
 - [x] **Goal 6: Add Onboarding Flow** — Create step-through guide for new users (create project → add proposals → vote). Track completion in user profile. Show on first login. (Medium, UX)
-- [ ] **Goal 7: Wire Proposal Tags UI** — Tags schema already exists (`0010_tags.sql`). Add tag selector to proposal form, filter-by-tag on project page, tag management in admin. (Medium, Feature)
+- [x] **Goal 7: Wire Proposal Tags UI** — Tags schema already exists (`0010_tags.sql`). Add tag selector to proposal form, filter-by-tag on project page, tag management in admin. (Medium, Feature)
 - [ ] **Goal 8: Accessibility Polish** — Keyboard-accessible permission badges in role manager. ARIA live regions for dynamic updates. Chart pattern fills for color-blind users. Dialog focus management. (Small, A11y)
 
 ## Notes

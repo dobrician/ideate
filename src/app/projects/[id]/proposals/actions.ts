@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { db } from "@/db";
-import { proposals, votes } from "@/db/schema";
+import { proposals, votes, proposalTags } from "@/db/schema";
 import { canManageResource } from "@/lib/rbac";
 import type { Role } from "@/lib/rbac";
 import { logger } from "@/lib/logger";
@@ -86,6 +86,13 @@ export async function createProposal(
       userId: user.id,
       value: parseInt(initialVote),
     });
+
+    const tagIds = (formData.get("tagIds") as string || "").split(",").filter(Boolean);
+    if (tagIds.length > 0) {
+      await db.insert(proposalTags).values(
+        tagIds.map((tagId) => ({ proposalId, tagId }))
+      );
+    }
 
     await logAudit({
       userId: user.id,

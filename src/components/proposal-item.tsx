@@ -25,6 +25,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { deleteProposal } from "@/app/projects/[id]/proposals/actions";
+import { Badge } from "@/components/ui/badge";
 import { Trash2, Paperclip } from "lucide-react";
 import { toast } from "sonner";
 import { useLocale } from "@/lib/use-locale";
@@ -55,6 +56,7 @@ export interface ProposalWithStats {
   comments: Comment[];
   authorName: string;
   attachments: AttachmentInfo[];
+  tags: { id: string; name: string }[];
 }
 
 export function ProposalItem({
@@ -174,6 +176,15 @@ export function ProposalItem({
               <Paperclip className="h-3 w-3" />
               {proposal.attachments.length}
             </span>
+          )}
+          {proposal.tags.length > 0 && (
+            <div className="flex flex-wrap gap-1 text-left">
+              {proposal.tags.map((tag) => (
+                <Badge key={tag.id} variant="secondary" className="px-1.5 py-0 text-[10px]">
+                  {tag.name}
+                </Badge>
+              ))}
+            </div>
           )}
           <span className="inline-flex items-center gap-1 text-left text-xs font-medium text-primary/80 hover:text-primary">
             {t("proposals.details")} ↓

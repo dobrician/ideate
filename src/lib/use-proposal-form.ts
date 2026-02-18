@@ -22,6 +22,7 @@ export interface ProposalFormProps {
   projectTitle?: string;
   projectDescription?: string;
   existingProposals?: ExistingProposal[];
+  availableTags?: { id: string; name: string }[];
 }
 
 export function useProposalForm({
@@ -29,12 +30,14 @@ export function useProposalForm({
   projectTitle,
   projectDescription,
   existingProposals,
+  availableTags,
 }: ProposalFormProps) {
   const { t } = useLocale();
   const [initialVote, setInitialVote] = useState<"1" | "-1">("1");
   const [state, formAction, isPending] = useActionState(createProposal, null);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
+  const [selectedTagIds, setSelectedTagIds] = useState<string[]>([]);
   const [similarMatches, setSimilarMatches] = useState<SimilarityMatch[]>([]);
   const [checkingSimilarity, setCheckingSimilarity] = useState(false);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -81,6 +84,7 @@ export function useProposalForm({
     setTitle("");
     setDescription("");
     setSimilarMatches([]);
+    setSelectedTagIds([]);
   }, []);
 
   // Clear debounce timer on unmount to prevent leaked setTimeout
@@ -108,5 +112,8 @@ export function useProposalForm({
     handleFieldChange,
     resetForm,
     projectId,
+    availableTags: availableTags || [],
+    selectedTagIds,
+    setSelectedTagIds,
   };
 }

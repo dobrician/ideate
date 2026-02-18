@@ -1,6 +1,6 @@
 import { db } from "@/db";
-import { projects, proposals, votes, comments, users, attachments } from "@/db/schema";
-import { eq, desc, asc, sql, count } from "drizzle-orm";
+import { projects, proposals, votes, comments, users, attachments, proposalTags, tags } from "@/db/schema";
+import { eq, desc, asc, sql, count, and, inArray } from "drizzle-orm";
 
 export const PROPOSALS_PAGE_SIZE = 20;
 
@@ -34,6 +34,7 @@ export interface ProposalWithStats {
   }[];
   authorName: string;
   attachments: AttachmentInfo[];
+  tags: { id: string; name: string }[];
 }
 
 /**
@@ -53,7 +54,8 @@ export async function getProjectProposals(
   currentUserId: string,
   limit = PROPOSALS_PAGE_SIZE,
   offset = 0,
-  sort: ProposalSort = "votes"
+  sort: ProposalSort = "votes",
+  filterTagId?: string,
 ): Promise<{ proposals: ProposalWithStats[]; total: number }> {
   // Build ORDER BY based on sort parameter
   const upExpr = sql`COALESCE(SUM(CASE WHEN ${votes.value} = 1 THEN 1 ELSE 0 END), 0)`;
@@ -98,12 +100,20 @@ export async function getProjectProposals(
       .from(proposals)
       .leftJoin(votes, eq(proposals.id, votes.proposalId))
       .leftJoin(users, eq(proposals.userId, users.id))
-      .where(eq(proposals.projectId, projectId))
+      .where(filterTagId
+        ? and(eq(proposals.projectId, projectId), inArray(proposals.id,
+            db.select({ pid: proposalTags.proposalId }).from(proposalTags).where(eq(proposalTags.tagId, filterTagId))
+          ))
+        : eq(proposals.projectId, projectId))
       .groupBy(proposals.id)
       .orderBy(...orderClauses)
       .limit(limit)
       .offset(offset),
-    db.select({ total: count() }).from(proposals).where(eq(proposals.projectId, projectId)),
+    db.select({ total: count() }).from(proposals).where(filterTagId
+      ? and(eq(proposals.projectId, projectId), inArray(proposals.id,
+          db.select({ pid: proposalTags.proposalId }).from(proposalTags).where(eq(proposalTags.tagId, filterTagId))
+        ))
+      : eq(proposals.projectId, projectId)),
   ]);
 
   const total = totalResult[0]?.total ?? 0;
@@ -194,6 +204,30 @@ export async function getProjectProposals(
     attachmentsByProposal.set(a.proposalId, list);
   }
 
+  // Fetch tags for all proposals on this page
+  const tagsByProposal = new Map<string, { id: string; name: string }[]>();
+  if (proposalIds.length > 0) {
+    const allPropTags = await db
+      .select({
+        proposalId: proposalTags.proposalId,
+        tagId: tags.id,
+        tagName: tags.name,
+      })
+      .from(proposalTags)
+      .innerJoin(tags, eq(proposalTags.tagId, tags.id))
+      .where(
+        sql`${proposalTags.proposalId} IN (${sql.join(
+          proposalIds.map((pid) => sql`${pid}`),
+          sql`, `
+        )})`
+      );
+    for (const pt of allPropTags) {
+      const list = tagsByProposal.get(pt.proposalId) || [];
+      list.push({ id: pt.tagId, name: pt.tagName });
+      tagsByProposal.set(pt.proposalId, list);
+    }
+  }
+
   const mapped = proposalRows.map((p) => {
     const pComments = commentsByProposal.get(p.id) || [];
     const authorName =
@@ -224,6 +258,7 @@ export async function getProjectProposals(
       })),
       authorName,
       attachments: attachmentsByProposal.get(p.id) || [],
+      tags: tagsByProposal.get(p.id) || [],
     };
   });
 

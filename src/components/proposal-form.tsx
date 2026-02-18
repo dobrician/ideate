@@ -9,7 +9,8 @@ import {
   Dialog, DialogContent, DialogHeader, DialogTitle,
   DialogTrigger, DialogClose,
 } from "@/components/ui/dialog";
-import { ThumbsUp, ThumbsDown, AlertTriangle, Loader2, Eye, Pencil } from "lucide-react";
+import { ThumbsUp, ThumbsDown, AlertTriangle, Loader2, Eye, Pencil, X } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { getCsrfTokenClient } from "@/lib/csrf-client";
 import { useProposalForm } from "@/lib/use-proposal-form";
@@ -29,6 +30,7 @@ function ProposalFormFields({
     t, formAction, isPending, initialVote, setInitialVote,
     title, setTitle, description, setDescription,
     checkingSimilarity, warnings, handleFieldChange, state, projectId,
+    availableTags, selectedTagIds, setSelectedTagIds,
   } = form;
   const [titleTouched, setTitleTouched] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
@@ -55,6 +57,7 @@ function ProposalFormFields({
       <input type="hidden" name="projectId" value={projectId} />
       <input type="hidden" name="initialVote" value={initialVote} />
       <input type="hidden" name="csrfToken" value={getCsrfTokenClient()} />
+      <input type="hidden" name="tagIds" value={selectedTagIds.join(",")} />
 
       <div className="space-y-1.5">
         <Label htmlFor="proposal-title">{t("proposalForm.titleLabel")}</Label>
@@ -158,6 +161,38 @@ function ProposalFormFields({
           </Button>
         </div>
       </div>
+
+      {availableTags.length > 0 && (
+        <div className="space-y-1.5">
+          <Label>{t("tags.projectTags")}</Label>
+          <div className="flex flex-wrap gap-1.5">
+            {availableTags.map((tag) => {
+              const selected = selectedTagIds.includes(tag.id);
+              return (
+                <button
+                  key={tag.id}
+                  type="button"
+                  onClick={() =>
+                    setSelectedTagIds(selected
+                      ? selectedTagIds.filter((id) => id !== tag.id)
+                      : [...selectedTagIds, tag.id])
+                  }
+                  className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 text-xs font-medium transition-colors ${
+                    selected
+                      ? "border-primary bg-primary/10 text-primary"
+                      : "border-muted-foreground/30 text-muted-foreground hover:border-primary/50"
+                  }`}
+                  aria-pressed={selected}
+                  disabled={isPending}
+                >
+                  {tag.name}
+                  {selected && <X className="h-3 w-3" />}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
 
       {state?.error && (
         <div id="proposal-form-error" className="rounded-md bg-red-50 p-3 dark:bg-red-950" role="alert">

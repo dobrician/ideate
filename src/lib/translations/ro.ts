@@ -642,6 +642,10 @@ export const ro: Record<string, string> = {
   "tags.noTags": "Nicio etichetă încă. Creează una mai sus.",
   "tags.deleteTag": "Șterge eticheta {name}",
   "tags.allTags": "Toate etichetele",
+  "tags.selectTag": "Selectează o etichetă",
+  "tags.addToProject": "Adaugă etichetă...",
+  "tags.removeTag": "Elimină eticheta {name}",
+  "tags.projectTags": "Etichete",
   "a11y.filterByTag": "Filtrare după etichetă",
 
   // Archive

@@ -19,6 +19,7 @@ import { toast } from "sonner";
 import { useLocale } from "@/lib/use-locale";
 import { getCsrfTokenClient } from "@/lib/csrf-client";
 import { Pencil } from "lucide-react";
+import { TagSelector } from "@/components/tag-selector";
 
 interface EditProjectDialogProps {
   projectId: string;
@@ -26,6 +27,8 @@ interface EditProjectDialogProps {
   description: string | null;
   deadline: string | number | Date | null;
   status: string;
+  availableTags?: { id: string; name: string }[];
+  currentTagIds?: string[];
 }
 
 export function EditProjectDialog({
@@ -34,6 +37,8 @@ export function EditProjectDialog({
   description,
   deadline,
   status,
+  availableTags = [],
+  currentTagIds = [],
 }: EditProjectDialogProps) {
   const router = useRouter();
   const { t } = useLocale();
@@ -42,6 +47,7 @@ export function EditProjectDialog({
   const [error, setError] = useState("");
   const [fieldErrors, setFieldErrors] = useState<{ title?: string; deadline?: string }>({});
   const [touched, setTouched] = useState<Record<string, boolean>>({});
+  const [selectedTagIds, setSelectedTagIds] = useState<string[]>(currentTagIds);
 
   function handleBlur(field: string, value: string) {
     setTouched((prev) => ({ ...prev, [field]: true }));
@@ -170,6 +176,21 @@ export function EditProjectDialog({
               <option value="archived">{t("projects.status.archived")}</option>
             </select>
           </div>
+
+          {availableTags.length > 0 && (
+            <div className="space-y-1.5">
+              <Label>{t("tags.projectTags")}</Label>
+              {selectedTagIds.map((id) => (
+                <input key={id} type="hidden" name="tagIds" value={id} />
+              ))}
+              <TagSelector
+                availableTags={availableTags}
+                selectedTagIds={selectedTagIds}
+                onChange={setSelectedTagIds}
+                disabled={isSaving}
+              />
+            </div>
+          )}
 
           {error && (
             <div className="rounded-md bg-red-50 p-3 dark:bg-red-950" role="alert">

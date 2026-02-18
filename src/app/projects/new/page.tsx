@@ -11,6 +11,7 @@ import { createProject } from "../actions";
 import { toast } from "sonner";
 import { useLocale } from "@/lib/use-locale";
 import { getCsrfTokenClient } from "@/lib/csrf-client";
+import { TagSelector } from "@/components/tag-selector";
 
 interface Template {
   id: string;
@@ -33,12 +34,20 @@ export default function NewProjectPage() {
   const [fieldErrors, setFieldErrors] = useState<{ title?: string; deadline?: string }>({});
   const [touched, setTouched] = useState<Record<string, boolean>>({});
   const [templates, setTemplates] = useState<Template[]>([]);
+  const [availableTags, setAvailableTags] = useState<{ id: string; name: string }[]>([]);
+  const [selectedTagIds, setSelectedTagIds] = useState<string[]>([]);
 
   useEffect(() => {
     fetch("/api/admin/templates")
       .then((res) => res.ok ? res.json() : null)
       .then((data) => {
         if (data?.templates) setTemplates(data.templates);
+      })
+      .catch(() => {});
+    fetch("/api/tags")
+      .then((res) => res.ok ? res.json() : null)
+      .then((data) => {
+        if (data?.tags) setAvailableTags(data.tags);
       })
       .catch(() => {});
   }, []);
@@ -225,6 +234,21 @@ export default function NewProjectPage() {
                 {t("projectForm.statusHint")}
               </p>
             </div>
+
+            {availableTags.length > 0 && (
+              <div className="space-y-2">
+                <Label>{t("tags.projectTags")}</Label>
+                {selectedTagIds.map((id) => (
+                  <input key={id} type="hidden" name="tagIds" value={id} />
+                ))}
+                <TagSelector
+                  availableTags={availableTags}
+                  selectedTagIds={selectedTagIds}
+                  onChange={setSelectedTagIds}
+                  disabled={isLoading}
+                />
+              </div>
+            )}
 
             {error && (
               <div className="rounded-md bg-red-50 p-3 dark:bg-red-950" role="alert">

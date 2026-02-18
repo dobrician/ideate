@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { db } from "@/db";
-import { projects } from "@/db/schema";
+import { projects, projectTags } from "@/db/schema";
 import { canManageResource } from "@/lib/rbac";
 import type { Role } from "@/lib/rbac";
 import { logger } from "@/lib/logger";
@@ -63,6 +63,14 @@ export async function createProject(formData: FormData) {
       status,
       userId: user.id,
     });
+
+    // Save project tags
+    const tagIds = formData.getAll("tagIds") as string[];
+    if (tagIds.length > 0) {
+      await db.insert(projectTags).values(
+        tagIds.map((tagId) => ({ projectId, tagId }))
+      );
+    }
 
     await logAudit({
       userId: user.id,
@@ -127,6 +135,15 @@ export async function updateProject(projectId: string, formData: FormData) {
         updatedAt: new Date(),
       })
       .where(eq(projects.id, projectId));
+
+    // Sync project tags: delete all then re-insert
+    const tagIds = formData.getAll("tagIds") as string[];
+    await db.delete(projectTags).where(eq(projectTags.projectId, projectId));
+    if (tagIds.length > 0) {
+      await db.insert(projectTags).values(
+        tagIds.map((tagId) => ({ projectId, tagId }))
+      );
+    }
 
     await logAudit({
       userId: user.id,

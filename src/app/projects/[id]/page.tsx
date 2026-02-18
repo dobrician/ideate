@@ -1,11 +1,11 @@
 import { notFound, redirect } from "next/navigation";
 import type { Metadata } from "next";
 import { db } from "@/db";
-import { comments, projects, users } from "@/db/schema";
+import { comments, projects, users, tags, projectTags } from "@/db/schema";
 import { getCurrentUser } from "@/lib/auth";
 import { hasPermission, canManageResource } from "@/lib/rbac";
 import type { Role } from "@/lib/rbac";
-import { eq } from "drizzle-orm";
+import { eq, asc } from "drizzle-orm";
 import { Badge } from "@/components/ui/badge";
 import {
   Card,
@@ -33,10 +33,11 @@ import { RegenerateSummaryButton } from "@/components/regenerate-summary-button"
 import { SuggestProposalsButton } from "@/components/suggest-proposals";
 import { MarkdownRenderer } from "@/components/markdown-renderer";
 import { ArchiveBanner } from "@/components/archive-banner";
+import { TagFilter } from "@/components/tag-filter";
 
 interface ProjectPageProps {
   params: Promise<{ id: string }>;
-  searchParams: Promise<{ page?: string; sort?: string }>;
+  searchParams: Promise<{ page?: string; sort?: string; tag?: string }>;
 }
 
 /**
@@ -105,10 +106,11 @@ export default async function ProjectPage({ params, searchParams }: ProjectPageP
   const sp = await searchParams;
   const proposalPage = Math.max(1, parseInt(sp.page || "1", 10) || 1);
   const proposalSort: ProposalSort = isValidSort(sp.sort || "") ? sp.sort as ProposalSort : "votes";
+  const filterTag = sp.tag || undefined;
   const proposalOffset = (proposalPage - 1) * PROPOSALS_PAGE_SIZE;
-  const [{ proposals: proposalsWithStats, total: proposalTotal }, commentRows] =
+  const [{ proposals: proposalsWithStats, total: proposalTotal }, commentRows, allTags, projectTagRows] =
     await Promise.all([
-      getProjectProposals(id, user.id, PROPOSALS_PAGE_SIZE, proposalOffset, proposalSort),
+      getProjectProposals(id, user.id, PROPOSALS_PAGE_SIZE, proposalOffset, proposalSort, filterTag),
       db
         .select({
           id: comments.id,
@@ -124,6 +126,8 @@ export default async function ProjectPage({ params, searchParams }: ProjectPageP
         .leftJoin(users, eq(comments.userId, users.id))
         .where(eq(comments.projectId, id))
         .orderBy(comments.createdAt),
+      db.select({ id: tags.id, name: tags.name }).from(tags).orderBy(asc(tags.name)),
+      db.select({ tagId: projectTags.tagId }).from(projectTags).where(eq(projectTags.projectId, id)),
     ]);
   const projectComments = commentRows.map((r) => ({
     id: r.id,
@@ -135,6 +139,8 @@ export default async function ProjectPage({ params, searchParams }: ProjectPageP
     avatarUrl: r.avatarUrl ?? undefined,
     createdAt: r.createdAt,
   }));
+  const currentTagIds = projectTagRows.map((r) => r.tagId);
+  const currentTagNames = allTags.filter((t) => currentTagIds.includes(t.id));
   const proposalTotalPages = Math.ceil(proposalTotal / PROPOSALS_PAGE_SIZE);
 
   return (
@@ -162,6 +168,9 @@ export default async function ProjectPage({ params, searchParams }: ProjectPageP
                 {projectData.deadline && (
                   <DeadlineCountdown deadline={projectData.deadline} />
                 )}
+                {currentTagNames.map((tag) => (
+                  <Badge key={tag.id} variant="secondary">{tag.name}</Badge>
+                ))}
               </CardDescription>
             </div>
             <div className="flex flex-wrap items-center gap-1.5">
@@ -174,6 +183,8 @@ export default async function ProjectPage({ params, searchParams }: ProjectPageP
                     description={projectData.description}
                     deadline={projectData.deadline}
                     status={projectData.status}
+                    availableTags={allTags}
+                    currentTagIds={currentTagIds}
                   />
                   <DeleteProjectButton projectId={id} />
                 </>
@@ -229,6 +240,7 @@ export default async function ProjectPage({ params, searchParams }: ProjectPageP
                 {t("proposals.count", { count: proposalTotal })}
               </h2>
               <ProposalSortSelector currentSort={proposalSort} />
+              {allTags.length > 0 && <TagFilter tags={allTags} activeTagId={filterTag} />}
               <div className="flex-1" />
               {canCreateProposal && (
                 <div className="flex gap-2">
@@ -254,6 +266,7 @@ export default async function ProjectPage({ params, searchParams }: ProjectPageP
                         description: p.description ?? undefined,
                         summary: p.summary ?? undefined,
                       }))}
+                      availableTags={allTags}
                     />
                   </div>
                 </div>
@@ -289,6 +302,7 @@ export default async function ProjectPage({ params, searchParams }: ProjectPageP
               description: p.description ?? undefined,
               summary: p.summary ?? undefined,
             }))}
+            availableTags={allTags}
           />
         </aside>
       )}
