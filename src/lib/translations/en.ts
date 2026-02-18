@@ -459,6 +459,8 @@ export const en: Record<string, string> = {
   "search.typeProposal": "Proposal",
   "search.typeComment": "Comment",
   "search.ariaResults": "Search results",
+  "search.errorUnauthorized": "Please sign in to search",
+  "search.errorGeneric": "Search failed. Please try again.",
 
   // Export
   "export.pdf": "PDF",

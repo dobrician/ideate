@@ -20,6 +20,7 @@ export function SearchBar() {
   const [results, setResults] = useState<SearchResult[]>([]);
   const [isOpen, setIsOpen] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [activeIndex, setActiveIndex] = useState(-1);
   const containerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -28,10 +29,12 @@ export function SearchBar() {
   const doSearch = useCallback(async (q: string) => {
     if (q.length < 2) {
       setResults([]);
+      setError(null);
       setIsOpen(false);
       return;
     }
     setLoading(true);
+    setError(null);
     try {
       const res = await fetch(`/api/search?q=${encodeURIComponent(q)}`);
       if (res.ok) {
@@ -39,13 +42,23 @@ export function SearchBar() {
         setResults(data.results || []);
         setIsOpen(true);
         setActiveIndex(-1);
+      } else if (res.status === 401) {
+        setResults([]);
+        setError(t("search.errorUnauthorized"));
+        setIsOpen(true);
+      } else {
+        setResults([]);
+        setError(t("search.errorGeneric"));
+        setIsOpen(true);
       }
     } catch {
       setResults([]);
+      setError(t("search.errorGeneric"));
+      setIsOpen(true);
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [t]);
 
   const handleChange = (value: string) => {
     setQuery(value);
@@ -145,7 +158,7 @@ export function SearchBar() {
           aria-activedescendant={activeId}
           value={query}
           onChange={(e) => handleChange(e.target.value)}
-          onFocus={() => results.length > 0 && setIsOpen(true)}
+          onFocus={() => (results.length > 0 || error) && setIsOpen(true)}
           onKeyDown={handleKeyDown}
           className="pl-8 h-9"
         />
@@ -161,12 +174,17 @@ export function SearchBar() {
               {t("search.searching")}
             </div>
           )}
-          {!loading && !hasResults && query.length >= 2 && (
+          {!loading && error && (
+            <div className="p-3 text-sm text-destructive" role="alert">
+              {error}
+            </div>
+          )}
+          {!loading && !error && !hasResults && query.length >= 2 && (
             <div className="p-3 text-sm text-muted-foreground" role="status">
               {t("search.noResults")}
             </div>
           )}
-          {!loading && hasResults && (() => {
+          {!loading && !error && hasResults && (() => {
             let flatIndex = -1;
             return (["project", "proposal", "comment"] as const).map((type) => {
               const items = grouped[type];

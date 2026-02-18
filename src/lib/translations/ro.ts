@@ -478,6 +478,8 @@ export const ro: Record<string, string> = {
   "search.typeProposal": "Propunere",
   "search.typeComment": "Comentariu",
   "search.ariaResults": "Rezultate căutare",
+  "search.errorUnauthorized": "Autentificați-vă pentru a căuta",
+  "search.errorGeneric": "Căutarea a eșuat. Încercați din nou.",
 
   // Export
   "export.pdf": "PDF",

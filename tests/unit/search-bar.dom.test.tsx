@@ -16,6 +16,8 @@ vi.mock("@/lib/use-locale", () => ({
         "search.typeProject": "Projects",
         "search.typeProposal": "Proposals",
         "search.typeComment": "Comments",
+        "search.errorUnauthorized": "Please sign in to search",
+        "search.errorGeneric": "Search failed. Please try again.",
       };
       return map[key] ?? key;
     },
@@ -132,6 +134,73 @@ describe("SearchBar keyboard navigation", () => {
 
     await waitFor(() => {
       expect(screen.getByText("No results found")).toBeInTheDocument();
+    });
+  });
+
+  it("shows unauthorized error on 401 response", async () => {
+    fetchHandler = async () => new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401 });
+    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
+    await renderSearchBar();
+
+    const input = screen.getByLabelText("Search...");
+    await user.type(input, "test");
+    await vi.advanceTimersByTimeAsync(350);
+
+    await waitFor(() => {
+      expect(screen.getByText("Please sign in to search")).toBeInTheDocument();
+    });
+  });
+
+  it("shows generic error on 500 response", async () => {
+    fetchHandler = async () => new Response(JSON.stringify({ error: "Internal" }), { status: 500 });
+    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
+    await renderSearchBar();
+
+    const input = screen.getByLabelText("Search...");
+    await user.type(input, "test");
+    await vi.advanceTimersByTimeAsync(350);
+
+    await waitFor(() => {
+      expect(screen.getByText("Search failed. Please try again.")).toBeInTheDocument();
+    });
+  });
+
+  it("shows generic error on network failure", async () => {
+    fetchHandler = async () => { throw new Error("Network error"); };
+    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
+    await renderSearchBar();
+
+    const input = screen.getByLabelText("Search...");
+    await user.type(input, "test");
+    await vi.advanceTimersByTimeAsync(350);
+
+    await waitFor(() => {
+      expect(screen.getByText("Search failed. Please try again.")).toBeInTheDocument();
+    });
+  });
+
+  it("clears error when new search succeeds", async () => {
+    fetchHandler = async () => new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401 });
+    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
+    await renderSearchBar();
+
+    const input = screen.getByLabelText("Search...");
+    await user.type(input, "test");
+    await vi.advanceTimersByTimeAsync(350);
+
+    await waitFor(() => {
+      expect(screen.getByText("Please sign in to search")).toBeInTheDocument();
+    });
+
+    // Now make search succeed
+    fetchHandler = async () => new Response(JSON.stringify({ results: mockResults }), { status: 200 });
+    await user.clear(input);
+    await user.type(input, "alpha");
+    await vi.advanceTimersByTimeAsync(350);
+
+    await waitFor(() => {
+      expect(screen.queryByText("Please sign in to search")).not.toBeInTheDocument();
+      expect(screen.getByText("Project Alpha")).toBeInTheDocument();
     });
   });
 
