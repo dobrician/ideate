@@ -27,7 +27,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         {t("a11y.skipToMain")}
       </a>
       <Header />
-      <main id="main-content" className="flex-1 overflow-auto p-4 lg:p-6">{children}</main>
+      <main id="main-content" className="flex-1 p-4 lg:p-6">{children}</main>
     </div>
   );
 }

@@ -115,9 +115,4 @@
     border-color: oklch(1 0 0 / 12%);
     box-shadow: 0 0 0 1px oklch(1 0 0 / 6%);
   }
-  /* Hide orphaned RSC streaming chunks that leak as direct body children */
-  body > [data-rsc-content],
-  body > aside {
-    display: none !important;
-  }
 }
