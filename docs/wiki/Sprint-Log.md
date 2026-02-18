@@ -4,37 +4,37 @@ Reverse chronological. Click each sprint for full details.
 
 ---
 
-### 🔄 [Sprint 42 — Security, DX & Quality](Sprint-42) *(2026-02-18)*
+### 🔄 [Sprint 47 — Security, DX & Quality](Sprint-47) *(2026-02-18)*
 **Focus:** Fix search XSS, action/API wrappers, analytics N+1, i18n errors, test fix, onboarding, proposal tags UI, a11y polish
-**Stats:** 0/8 goals
+**Stats:** 8/8 goals | 1391 tests
 
 ---
 
-### ✅ [Sprint 41b — Enterprise Features: Teams, Custom Roles & Analytics](Sprint-00) *(2026-02-18)*
+### ✅ [Sprint 46 — Enterprise Features: Teams, Custom Roles & Analytics](Sprint-46) *(2026-02-18)*
 **Focus:** Multi-tenant teams/organizations, configurable roles (dynamic RBAC), advanced analytics dashboard
 **Stats:** 3/3 goals | 1373 tests
 
 ---
 
-### ✅ [Sprint 03 — 100% Coverage Ceiling & Test Fix](Sprint-03) *(2026-02-18)*
+### ✅ [Sprint 45 — 100% Coverage Ceiling & Test Fix](Sprint-45) *(2026-02-18)*
 **Focus:** Fix broken proposal-list bar chart test, close all remaining branch coverage gaps (proxy, email-deliverability, search route, profile actions, proposal actions, db/index)
 **Stats:** 8/8 goals | 1269 tests | Branch coverage 99.18% → 100% across all metrics
 
 ---
 
-### ✅ [Sprint 02 — Branch Coverage Ceiling & File Size Compliance](Sprint-02) *(2026-02-18)*
+### ✅ [Sprint 44 — Branch Coverage Ceiling & File Size Compliance](Sprint-44) *(2026-02-18)*
 **Focus:** Close all remaining branch gaps (webhooks, llm-cache, llm, mail, comment-utils, search, auth, oidc, password), resolve export.ts barrel false positive, split oversized openapi-spec.ts
 **Stats:** 8/8 goals | 1262 tests | Branch coverage 97.35% → 99.18%
 
 ---
 
-### ✅ [Sprint 01 — Export Coverage, Sentry, E2E CI, Proxy Migration & Dead Code](Sprint-01) *(2026-02-18)*
+### ✅ [Sprint 43 — Export Coverage, Sentry, E2E CI, Proxy Migration & Dead Code](Sprint-43) *(2026-02-18)*
 **Focus:** Add export.ts tests, close rate-limit/digest branch gaps, integrate Sentry, add E2E to CI, complete proxy migration, remove unused exports
 **Stats:** 8/8 goals | 1251 tests | Closed #13, export/rate-limit/digest at 100% branch
 
 ---
 
-### ✅ [Sprint 00 — Coverage Gaps: request-utils, search, rate-limit, digest, notifications, llm, sanitize, auth](Sprint-00) *(2026-02-18)*
+### ✅ [Sprint 42 — Coverage Gaps: request-utils, search, rate-limit, digest, notifications, llm, sanitize, auth](Sprint-42) *(2026-02-18)*
 **Focus:** Close remaining branch/statement coverage gaps across 8 library modules
 **Stats:** 8/8 goals | 1244 tests | Branch coverage 91.87% → 96.66%
 
@@ -61,24 +61,6 @@ Reverse chronological. Click each sprint for full details.
 ### ✅ [Sprint 38 — Code Quality, Dead Code Removal & Accessibility Polish](Sprint-38) *(2026-02-17)*
 **Focus:** Inline lone query, locale fallback fix, role=alert on error containers, rename buildCommentTree, remove re-export shim, dead sanitize exports, locale export test, dead code audit
 **Stats:** 8/8 goals | 1099 tests | All dead code items from deep analysis resolved
-
----
-
-### ✅ [Sprint 40 — Security Hardening, Accessibility & Tech Debt](Sprint-40) *(2026-02-17)*
-**Focus:** Account takeover fix, JWT revocation, auth logging, error text contrast, vote icon a11y, dialog focus, rate limiting, schema+hook cleanup
-**Stats:** 8/8 goals | 1100 tests | Security hardened, a11y fixes, rate limiting on all API routes
-
----
-
-### ✅ [Sprint 39 — Code Quality, Coverage Gaps & Accessibility](Sprint-39) *(2026-02-17)*
-**Focus:** Fix lint warnings, close coverage gaps (search-d1/actions/db), split oversized files, remove dead code, localize export dates, proposal form a11y
-**Stats:** 8/8 goals | 1096 tests | 6 files split, dead code removed, locale-aware exports, a11y fix
-
----
-
-### ✅ [Sprint 30 — Docs Hygiene, Coverage Gaps & Production Hardening](Sprint-30) *(2026-02-17)*
-**Focus:** Update stale docs (Known-Issues, Nice-to-Have), close coverage gaps (vote-update.ts, export.ts, llm.ts), Cloudflare deployment spike, push branch coverage past 93%
-**Stats:** 8/8 goals | 808 tests | 93.85% branch coverage | 1 open issue (#13 Cloudflare — spike complete)
 
 ---
 
@@ -161,7 +143,6 @@ Reverse chronological. Click each sprint for full details.
 ---
 
 ### ✅ [Sprint 24 — Project Detail Page](Sprint-24) *(2026-02-16)*
-
 **Focus:** Markdown rendering (descriptions, proposals, comments), edit project dialog, two-column layout with sticky sidebar, deadline enforcement, mobile comment height, project CRUD unit tests, E2E tests
 **Stats:** 12 commits | 702 tests | Issue #45
 
@@ -192,7 +173,7 @@ Reverse chronological. Click each sprint for full details.
 ---
 
 ### ✅ [Sprint 19 — AI Features from Ideator](Sprint-19) *(2026-02-16)*
-**Focus:** Port all AI features from ideator: project summaries, AI proposal suggestions (✨), similarity check, markdown renderer
+**Focus:** Port all AI features from ideator: project summaries, AI proposal suggestions, similarity check, markdown renderer
 **Stats:** 10 commits | 32/32 smoke | 30 new tests
 
 ---
@@ -287,18 +268,18 @@ Reverse chronological. Click each sprint for full details.
 
 ---
 
-### ✅ [Sprint 3 — Proposals & Voting](Sprint-03) *(2026-02-15)*
+### ✅ Sprint 3 — Proposals & Voting *(2026-02-15)*
 **Focus:** Proposals CRUD, voting system (+1/-1), vote bar charts, threaded comments, AI summarization (Gemini/OpenAI), auth middleware, profile page
 **Stats:** 6 commits | Issues #1, #4
 
 ---
 
-### ✅ [Sprint 2 — Auth & Core Features](Sprint-02) *(2026-02-15)*
+### ✅ Sprint 2 — Auth & Core Features *(2026-02-15)*
 **Focus:** Email magic link auth, JWT sessions with CSRF + rotation, projects CRUD, smoke test suite
 **Stats:** 7 commits | 20 tests | 8 smoke tests | Issue #5
 
 ---
 
-### ✅ [Sprint 1 — Foundation](Sprint-01) *(2026-02-15)*
+### ✅ Sprint 1 — Foundation *(2026-02-15)*
 **Focus:** Next.js 16, TypeScript strict, Drizzle ORM + SQLite, Docker, shadcn/ui, basic layout
 **Stats:** 9 commits | 1 test | 2 smoke tests

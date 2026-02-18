@@ -1,7 +1,7 @@
-# Sprint 00 — Cloudflare, Export Coverage, Rate-Limit/Digest Gaps, Sentry, E2E CI, Proxy Migration & Dead Code
+# Sprint 43 — Export Coverage, Sentry, E2E CI, Proxy Migration & Dead Code
 
 **Date:** 2026-02-18
-**Focus:** Cloudflare deployment, export.ts test coverage, close rate-limit/digest branch gaps, Sentry integration, E2E in CI, proxy migration, remove unused exports
+**Focus:** Add export.ts tests, close rate-limit/digest branch gaps, integrate Sentry, add E2E to CI, complete proxy migration, remove unused exports
 
 ## Goals
 

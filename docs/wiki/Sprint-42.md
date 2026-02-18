@@ -1,22 +1,20 @@
-# Sprint 42 — Security, DX & Quality
+# Sprint 42 — Coverage Gaps: request-utils, search, rate-limit, digest, notifications, llm, sanitize, auth
 
 **Date:** 2026-02-18
-**Focus:** Fix critical XSS vulnerability, reduce boilerplate with action wrappers, fix analytics performance, i18n errors, test fix, onboarding, proposal tags UI, accessibility polish
+**Focus:** Cloudflare deployment, export.ts test coverage, close rate-limit/digest branch gaps, Sentry integration, E2E in CI, proxy migration, remove unused exports
 
 ## Goals
 
-- [x] **Goal 1: Fix Search XSS Vulnerability** — Sanitize `dangerouslySetInnerHTML` in `search-bar.tsx`. Only allow `<mark>` tags from FTS5 snippets. Add test to verify script injection is blocked. (Critical, Security)
-- [x] **Goal 2: Create Action/API Wrapper Functions** — Build `withActionAuth()` and `withApiAuth()` wrappers in `src/lib/action-wrapper.ts`. Centralize CSRF, auth, rate limiting, permissions, error handling. Migrate all server action files to use wrappers. (Medium, DX)
-- [x] **Goal 3: Fix Analytics N+1 Queries** — Rewrite `admin/analytics/queries.ts` with JOINs instead of correlated subqueries. Memoize chart components with `React.memo()`. (Medium, Performance)
-- [x] **Goal 4: Internationalize Error Messages** — Add error translation keys to EN/RO. Fix 4 missing RO plural forms. Translate 19 untranslated RO keys. Migrate server action error strings to use `t()` where possible. (Medium, UX)
-- [x] **Goal 5: Fix Failing Test + Error Logging** — Fix `mail.test.ts` SMTP config test. Add `logger.warn` to webhook `.catch()` handlers. Add `logger.error` to AI suggestion route catch. Wrap `JSON.parse` in rbac.ts. Fix cron auth to use `timingSafeEqual`. (Small, Quality)
-- [x] **Goal 6: Add Onboarding Flow** — Create step-through guide for new users (create project → add proposals → vote). Track completion in user profile. Show on first login. (Medium, UX)
-- [x] **Goal 7: Wire Proposal Tags UI** — Tags schema already exists (`0010_tags.sql`). Add tag selector to proposal form, filter-by-tag on project page, tag management in admin. (Medium, Feature)
-- [x] **Goal 8: Accessibility Polish** — Keyboard-accessible permission badges in role manager. ARIA live regions for dynamic updates. Chart pattern fills for color-blind users. Dialog focus management. (Small, A11y)
+- [x] **Goal 1: Cloudflare deployment completion** — resolve remaining D1 migration issues, test production deploy, close issue #13 (DevOps)
+- [x] **Goal 2: Add `lib/export.ts` to test coverage** — currently at 0% stmts/branch (excluded from coverage config). Add unit tests for PDF, CSV, and HTML export generation (Testing)
+- [x] **Goal 3: Close remaining branch gaps in `lib/rate-limit.ts`** — cover lines 26 and 101 (currently 80% branch) (Testing)
+- [x] **Goal 4: Close remaining branch gaps in `lib/digest.ts`** — cover lines 22-23 (currently 83.3% branch) (Testing)
+- [x] **Goal 5: Add error tracking (Sentry)** — integrate Sentry for production error monitoring, source maps, and alert routing (DevOps)
+- [x] **Goal 6: Add E2E tests to CI pipeline** — configure Playwright in GitHub Actions with a test server, run on PR and push to main (DevOps)
+- [x] **Goal 7: Migrate `middleware.ts` to `proxy.ts` convention** — address Next.js 16 deprecation warning for the middleware file convention (Tech Debt)
+- [x] **Goal 8: Remove unused exports** — audit and remove dead exports: `buildProjectSummary`, `getAiUsageStats`, `getPermissions`, `requirePermission`, `canModifyResource`, `sanitizeObject`, `generateReportHtml` (Tech Debt)
 
 ## Notes
 
 - After each goal, edit this file: change `- [ ]` to `- [x]` for that goal. Do NOT add new lines.
 - Commit + push after EACH goal.
-- Run `npm run lint && npx tsc --noEmit && npm test` after each goal to verify nothing breaks.
-- Reference: `docs/deep-analysis-sprint42.md` for full details on each issue.

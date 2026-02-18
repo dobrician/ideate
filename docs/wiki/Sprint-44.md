@@ -1,4 +1,4 @@
-# Sprint 02 — Branch Coverage Ceiling & File Size Compliance
+# Sprint 44 — Branch Coverage Ceiling & File Size Compliance
 
 **Date:** 2026-02-18
 **Focus:** Close all remaining branch coverage gaps (webhooks, llm-cache, llm, mail, comment-utils, search, auth, oidc, password), resolve export.ts barrel false positive, split oversized openapi-spec.ts
