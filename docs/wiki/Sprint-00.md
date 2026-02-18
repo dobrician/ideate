@@ -1,13 +1,18 @@
-# Sprint 00 — Enterprise Features: Teams, Custom Roles & Analytics
+# Sprint 00 — Cloudflare, Export Coverage, Rate-Limit/Digest Gaps, Sentry, E2E CI, Proxy Migration & Dead Code
 
 **Date:** 2026-02-18
-**Focus:** Implement the 3 remaining enterprise features from deep analysis Section 10: multi-tenant teams/organizations, configurable roles (dynamic RBAC), and advanced analytics dashboard
+**Focus:** Cloudflare deployment, export.ts test coverage, close rate-limit/digest branch gaps, Sentry integration, E2E in CI, proxy migration, remove unused exports
 
 ## Goals
 
-- [x] **Goal 1: Add Teams/Organizations** — multi-tenancy with team schema, team CRUD, team membership, project scoping by team, team switcher UI (Feature, Section 10)
-- [x] **Goal 2: Add Configurable Roles** — dynamic RBAC with custom role definitions stored in DB, admin UI for role/permission management, migration from hard-coded roles (Feature, Section 10)
-- [x] **Goal 3: Add Advanced Analytics dashboard** — admin analytics page with charts (recharts) for proposal trends, vote activity, user engagement, and project health over time (Feature, Section 10)
+- [ ] **Goal 1: Cloudflare deployment completion** — resolve remaining D1 migration issues, test production deploy, close issue #13 (DevOps)
+- [ ] **Goal 2: Add `lib/export.ts` to test coverage** — currently at 0% stmts/branch (excluded from coverage config). Add unit tests for PDF, CSV, and HTML export generation (Testing)
+- [ ] **Goal 3: Close remaining branch gaps in `lib/rate-limit.ts`** — cover lines 26 and 101 (currently 80% branch) (Testing)
+- [ ] **Goal 4: Close remaining branch gaps in `lib/digest.ts`** — cover lines 22-23 (currently 83.3% branch) (Testing)
+- [ ] **Goal 5: Add error tracking (Sentry)** — integrate Sentry for production error monitoring, source maps, and alert routing (DevOps)
+- [ ] **Goal 6: Add E2E tests to CI pipeline** — configure Playwright in GitHub Actions with a test server, run on PR and push to main (DevOps)
+- [ ] **Goal 7: Migrate `middleware.ts` to `proxy.ts` convention** — address Next.js 16 deprecation warning for the middleware file convention (Tech Debt)
+- [ ] **Goal 8: Remove unused exports** — audit and remove dead exports: `buildProjectSummary`, `getAiUsageStats`, `getPermissions`, `requirePermission`, `canModifyResource`, `sanitizeObject`, `generateReportHtml` (Tech Debt)
 
 ## Notes
 
