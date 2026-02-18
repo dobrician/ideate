@@ -17,5 +17,8 @@ const HTML_ENTITY_RE = /[&<>"'/]/g;
  * Escape HTML entities in a string to prevent XSS
  */
 export function escapeHtml(input: string): string {
-  return input.replace(HTML_ENTITY_RE, (char) => HTML_ENTITY_MAP[char] || char);
+  return input.replace(
+    HTML_ENTITY_RE,
+    (char) => HTML_ENTITY_MAP[char] as string,
+  );
 }
