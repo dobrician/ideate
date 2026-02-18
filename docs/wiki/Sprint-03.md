@@ -12,7 +12,7 @@
 - [x] **Goal 5: Close branch gap on `app/profile/actions.ts` lines 235-236** — test fallback values for JWT_SECRET/APP_URL env vars; currently 96.29% branch (Testing)
 - [x] **Goal 6: Close branch gap on `app/projects/[id]/proposals/actions.ts` line 63** — test uncovered conditional branch; currently 98.52% branch (Testing)
 - [x] **Goal 7: Close branch gap on `db/index.ts` line 8** — test DATABASE_URL fallback path; currently 94.44% branch (Testing)
-- [ ] **Goal 8: Verify 100% coverage across all metrics** — confirm stmts, branch, func, line all at 100% (Testing)
+- [x] **Goal 8: Verify 100% coverage across all metrics** — confirm stmts, branch, func, line all at 100% (Testing)
 
 ## Notes
 
