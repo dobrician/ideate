@@ -10,7 +10,7 @@
 - [x] **Goal 3: Close branch gaps on `lib/llm.ts`** — test OpenAI-only path (no GEMINI_KEY), undefined `tokensUsed`, cost-lookup null fallbacks; currently 91.66% branch (Testing)
 - [x] **Goal 4: Close branch gaps on `lib/mail.ts`, `lib/comment-utils.ts`, `lib/search.ts`** — test SMTP_PORT/SMTP_FROM defaults, null `createdAt` sort, missing DATABASE_URL fallback (Testing)
 - [x] **Goal 5: Close branch gaps on `lib/auth.ts`, `lib/oidc.ts`, `lib/password.ts`** — test tokens without exp/jti, missing APP_URL+OIDC_REDIRECT_URI, null emailVerified (Testing)
-- [ ] **Goal 6: Resolve `lib/export.ts` coverage false positive** — exclude barrel re-export file from coverage config or add smoke import test (Testing)
+- [x] **Goal 6: Resolve `lib/export.ts` coverage false positive** — exclude barrel re-export file from coverage config or add smoke import test (Testing)
 - [ ] **Goal 7: Split `lib/openapi-spec.ts` (835 lines) into modules** — each under 300 lines, maintain all existing exports (Code Quality)
 - [ ] **Goal 8: Verify branch coverage above 99%** — confirm all gaps closed, overall branch coverage ≥ 99% (Testing)
 
