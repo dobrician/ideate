@@ -1,8 +1,14 @@
 // @vitest-environment jsdom
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
 import "@testing-library/jest-dom/vitest";
 import { StatCard } from "@/components/stat-card";
+
+vi.mock("next/link", () => ({
+  default: ({ href, children }: { href: string; children: React.ReactNode }) => (
+    <a href={href}>{children}</a>
+  ),
+}));
 
 describe("StatCard component", () => {
   it("renders title and value", () => {
@@ -64,5 +70,23 @@ describe("StatCard component", () => {
 
     expect(screen.getByLabelText("Empty: 0")).toBeInTheDocument();
     expect(screen.getByLabelText("Empty: 0").textContent).toBe("0");
+  });
+
+  it("wraps in a Link when href is provided", () => {
+    render(
+      <StatCard title="Linked" value={5} icon={<span>L</span>} href="/dashboard" />,
+    );
+
+    const link = screen.getByRole("link");
+    expect(link).toHaveAttribute("href", "/dashboard");
+    expect(screen.getByText("Linked")).toBeInTheDocument();
+  });
+
+  it("does not render a link without href", () => {
+    render(
+      <StatCard title="NoLink" value={3} icon={<span>N</span>} />,
+    );
+
+    expect(screen.queryByRole("link")).not.toBeInTheDocument();
   });
 });
