@@ -109,6 +109,26 @@ describe("Auth Session Functions", () => {
       expect(session?.email).toBe("test@example.com");
     });
 
+    it("should skip rotation when token has no exp field", async () => {
+      const jwt = await import("jsonwebtoken");
+      const secret = process.env.JWT_SECRET!;
+      // Sign a token with no expiresIn so there is no `exp` claim
+      const token = jwt.default.sign(
+        { userId: "user-no-exp", email: "noexp@example.com", type: "session", jti: "no-exp-jti" },
+        secret,
+        { issuer: process.env.APP_URL, audience: process.env.APP_URL }
+      );
+      mockCookies.get.mockReturnValue({ value: token });
+      mockDbLimit.mockResolvedValue([]); // not revoked
+
+      const { getSession } = await import("@/lib/auth");
+      const session = await getSession();
+      expect(session).not.toBeNull();
+      expect(session?.userId).toBe("user-no-exp");
+      // No rotation should occur — session cookie should NOT be re-set
+      expect(mockCookies.set).not.toHaveBeenCalled();
+    });
+
     it("should rotate token when expiry is within 3 days", async () => {
       const jwt = await import("jsonwebtoken");
       const secret = process.env.JWT_SECRET!;
@@ -167,6 +187,27 @@ describe("Auth Session Functions", () => {
       const { clearSession } = await import("@/lib/auth");
       await clearSession();
 
+      expect(mockCookies.delete).toHaveBeenCalledWith("session");
+      expect(mockCookies.delete).toHaveBeenCalledWith("csrf_token");
+    });
+
+    it("should skip revocation when payload has no jti", async () => {
+      const jwt = await import("jsonwebtoken");
+      const secret = process.env.JWT_SECRET!;
+      // Sign a token without the jti claim so the revocation guard is false
+      const token = jwt.default.sign(
+        { userId: "user-nojti", email: "nojti@example.com", type: "session" },
+        secret,
+        { expiresIn: "7d", issuer: process.env.APP_URL, audience: process.env.APP_URL }
+      );
+      mockCookies.get.mockReturnValue({ value: token });
+
+      const { clearSession } = await import("@/lib/auth");
+      await clearSession();
+
+      // revokeToken should NOT have been called (no insert into revokedTokens)
+      expect(mockDbValues).not.toHaveBeenCalled();
+      // Cookies should still be deleted
       expect(mockCookies.delete).toHaveBeenCalledWith("session");
       expect(mockCookies.delete).toHaveBeenCalledWith("csrf_token");
     });

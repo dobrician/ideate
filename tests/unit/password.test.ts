@@ -249,6 +249,27 @@ describe("Password Module", () => {
       expect(result?.emailVerified).toBe(true);
     });
 
+    it("should return emailVerified as false when db value is null", async () => {
+      const { hashPassword, authenticateWithPassword } = await import(
+        "@/lib/password"
+      );
+      const hash = await hashPassword("Password123");
+      mockDbSelectResult.push({
+        id: "user-null-ev",
+        email: "nullev@example.com",
+        passwordHash: hash,
+        emailVerified: null,
+      });
+
+      const result = await authenticateWithPassword(
+        "nullev@example.com",
+        "Password123"
+      );
+      expect(result).not.toBeNull();
+      expect(result?.userId).toBe("user-null-ev");
+      expect(result?.emailVerified).toBe(false);
+    });
+
     it("should reject incorrect password", async () => {
       const { hashPassword, authenticateWithPassword } = await import(
         "@/lib/password"

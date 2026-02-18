@@ -79,6 +79,20 @@ describe("OIDC Library", () => {
       expect(config!.redirectUri).toContain("/api/auth/oidc/callback");
     });
 
+    it("falls back to http://localhost:3000 when both OIDC_REDIRECT_URI and APP_URL are unset", () => {
+      process.env.OIDC_ISSUER = "https://accounts.google.com";
+      process.env.OIDC_CLIENT_ID = "test-id";
+      process.env.OIDC_CLIENT_SECRET = "test-secret";
+      delete process.env.OIDC_REDIRECT_URI;
+      delete process.env.APP_URL;
+
+      const config = getOidcConfig();
+      expect(config).not.toBeNull();
+      expect(config!.redirectUri).toBe(
+        "http://localhost:3000/api/auth/oidc/callback"
+      );
+    });
+
     it("uses custom redirect URI when set", () => {
       process.env.OIDC_ISSUER = "https://accounts.google.com";
       process.env.OIDC_CLIENT_ID = "test-id";
