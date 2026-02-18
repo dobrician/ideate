@@ -4,6 +4,12 @@ Reverse chronological. Click each sprint for full details.
 
 ---
 
+### 🔄 [Sprint 00 — Proxy Tests & Projects Coverage](Sprint-00) *(2026-02-18)*
+**Focus:** Add proxy.ts unit tests, close coverage gap on src/app/projects (funcs/branch)
+**Stats:** 0/2 goals | In progress
+
+---
+
 ### ✅ [Sprint 00 — Accessibility Polish, Locale Generics & Coverage Gaps](Sprint-00) *(2026-02-18)*
 **Focus:** Icon button a11y, redundant title cleanup, locale-generic date formatting, close coverage gaps (components/db/profile/projects), proxy.ts tests
 **Stats:** 8/8 goals | TBD tests | A11y polish, locale generics, coverage improvements
