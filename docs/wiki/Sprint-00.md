@@ -11,7 +11,7 @@
 - [x] **Goal 4: Close coverage gap on `src/components`** — raise from 93.75% stmts / 90% branch to 100%
 - [x] **Goal 5: Close coverage gap on `src/db`** — raise from 88.88% branch to 100%
 - [x] **Goal 6: Close coverage gap on `src/app/profile`** — raise from 98.63% stmts / 93.47% branch
-- [ ] **Goal 7: Add `proxy.ts` unit tests** — auth proxy currently has zero test coverage
+- [x] **Goal 7: Add `proxy.ts` unit tests** — auth proxy currently has zero test coverage
 - [ ] **Goal 8: Close coverage gap on `src/app/projects`** — raise from 71.42% funcs / 96.77% branch
 
 ## Notes

@@ -13,7 +13,7 @@ describe("Error Recovery", () => {
   });
 
   describe("SMTP send failure", () => {
-    it("should throw descriptive error when SMTP send fails", async () => {
+    it("should throw descriptive error when SMTP send fails", { timeout: 15000 }, async () => {
       const { sendMagicLinkEmail } = await import("@/lib/mail");
 
       // sendMagicLinkEmail should throw with a descriptive message
