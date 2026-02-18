@@ -1,21 +1,20 @@
-# Sprint 2 — Auth & Core Features (2026-02-15)
-**Status:** ✅ COMPLETE
+# Sprint 02 — Branch Coverage Ceiling & File Size Compliance
+
+**Date:** 2026-02-18
+**Focus:** Close all remaining branch coverage gaps (webhooks, llm-cache, llm, mail, comment-utils, search, auth, oidc, password), resolve export.ts barrel false positive, split oversized openapi-spec.ts
 
 ## Goals
-- [x] Email magic link auth (send link, verify, create session)
-- [x] JWT session management (HTTP-only cookies) — with CSRF protection + token rotation (#5)
-- [x] Login/register pages
-- [x] Projects CRUD (create, list, view, edit, delete)
-- [x] Basic routing structure
-- [x] README.md with setup instructions
-- [x] Smoke test suite (`npm run test:smoke`)
 
-## Outcomes
-- 7 conventional commits, 20 tests total
-- Email magic link: JWT 15m expiry, 7d sessions, auto-rotation, CSRF, enumeration prevention
-- Projects CRUD: list/create/detail/edit/delete with zod validation, ownership checks
-- Smoke suite: 8 tests covering homepage, health, login, static assets, auth, errors
-- Issue #5 (JWT security) closed
+- [ ] **Goal 1: Close function/branch gap on `lib/webhooks.ts`** — test `deliverWebhook` (success, retry, permanent failure paths); currently 83.33% function coverage (Testing)
+- [ ] **Goal 2: Close branch gap on `lib/llm-cache.ts`** — test null `createdAt` fallback on line 52; currently 85.71% branch (Testing)
+- [ ] **Goal 3: Close branch gaps on `lib/llm.ts`** — test OpenAI-only path (no GEMINI_KEY), undefined `tokensUsed`, cost-lookup null fallbacks; currently 91.66% branch (Testing)
+- [ ] **Goal 4: Close branch gaps on `lib/mail.ts`, `lib/comment-utils.ts`, `lib/search.ts`** — test SMTP_PORT/SMTP_FROM defaults, null `createdAt` sort, missing DATABASE_URL fallback (Testing)
+- [ ] **Goal 5: Close branch gaps on `lib/auth.ts`, `lib/oidc.ts`, `lib/password.ts`** — test tokens without exp/jti, missing APP_URL+OIDC_REDIRECT_URI, null emailVerified (Testing)
+- [ ] **Goal 6: Resolve `lib/export.ts` coverage false positive** — exclude barrel re-export file from coverage config or add smoke import test (Testing)
+- [ ] **Goal 7: Split `lib/openapi-spec.ts` (835 lines) into modules** — each under 300 lines, maintain all existing exports (Code Quality)
+- [ ] **Goal 8: Verify branch coverage above 99%** — confirm all gaps closed, overall branch coverage ≥ 99% (Testing)
 
 ## Notes
-- All tests passing, zero regressions
+
+- After each goal, edit this file: change `- [ ]` to `- [x]` for that goal. Do NOT add new lines.
+- Commit + push after EACH goal.

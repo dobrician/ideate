@@ -4,6 +4,12 @@ Reverse chronological. Click each sprint for full details.
 
 ---
 
+### 🔄 [Sprint 02 — Branch Coverage Ceiling & File Size Compliance](Sprint-02) *(2026-02-18)*
+**Focus:** Close all remaining branch gaps (webhooks, llm-cache, llm, mail, comment-utils, search, auth, oidc, password), resolve export.ts barrel false positive, split oversized openapi-spec.ts
+**Stats:** 0/8 goals | 1251 tests | Branch coverage 97.35% → target ≥ 99%
+
+---
+
 ### ✅ [Sprint 01 — Export Coverage, Sentry, E2E CI, Proxy Migration & Dead Code](Sprint-01) *(2026-02-18)*
 **Focus:** Add export.ts tests, close rate-limit/digest branch gaps, integrate Sentry, add E2E to CI, complete proxy migration, remove unused exports
 **Stats:** 8/8 goals | 1251 tests | Closed #13, export/rate-limit/digest at 100% branch
