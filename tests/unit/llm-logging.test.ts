@@ -171,6 +171,24 @@ describe("LLM response parsing edge cases", () => {
     expect(result.modelUsed).toBe("openai");
   });
 
+  it("should handle Gemini response parts without text field", async () => {
+    const fetchMock = vi.fn<(input: string | URL | Request, init?: RequestInit) => Promise<Response>>();
+    fetchMock.mockResolvedValue(mockResponse({
+      candidates: [{ content: { parts: [{ text: "ok" }, {}] } }],
+      usageMetadata: { totalTokenCount: 5 },
+    }));
+    globalThis.fetch = fetchMock;
+
+    const { completeWithFallback } = await loadLLM({
+      GEMINI_API_KEY: "test-key",
+      OPENAI_API_KEY: undefined,
+    });
+
+    const result = await completeWithFallback("test");
+    expect(result.text).toBe("ok");
+    expect(result.modelUsed).toBe("gemini");
+  });
+
   it("should handle Gemini response with no candidates gracefully", async () => {
     const fetchMock = vi.fn<(input: string | URL | Request, init?: RequestInit) => Promise<Response>>();
     fetchMock.mockResolvedValue(mockResponse({ candidates: [] }));
@@ -215,6 +233,27 @@ describe("LLM response parsing edge cases", () => {
     const result = await completeWithFallback("test");
     expect(result.text).toBe("fresh");
     expect(result.modelUsed).toBe("gemini");
+  });
+});
+
+describe("setCachedResponse error handling", () => {
+  it("should not throw when setCachedResponse rejects", async () => {
+    const { setCachedResponse } = await import("@/lib/llm-cache");
+    vi.mocked(setCachedResponse).mockRejectedValueOnce(new Error("cache write fail"));
+
+    const fetchMock = vi.fn<(input: string | URL | Request, init?: RequestInit) => Promise<Response>>();
+    fetchMock.mockResolvedValue(geminiResponse("ok", 10));
+    globalThis.fetch = fetchMock;
+
+    const { completeWithFallback } = await loadLLM({
+      GEMINI_API_KEY: "test-key",
+      OPENAI_API_KEY: undefined,
+    });
+
+    const result = await completeWithFallback("test");
+    expect(result.text).toBe("ok");
+    // Wait for fire-and-forget .catch to settle
+    await new Promise((r) => setTimeout(r, 50));
   });
 });
 

@@ -41,7 +41,7 @@ interface LLMResult {
   text: string | null;
   status?: number;
   error?: unknown;
-  tokensUsed?: number;
+  tokensUsed: number;
 }
 
 /** Cost per 1K tokens (approximate, in USD) */
@@ -96,14 +96,11 @@ export function isAiRateLimited(): boolean {
   return isRateLimited();
 }
 
-function trackUsage(provider: string, tokensUsed: number): void {
+function trackUsage(provider: "gemini" | "openai", tokensUsed: number): void {
   resetWindowIfStale();
   usage.requests += 1;
   usage.tokens += tokensUsed;
-  const rates = COST_PER_1K[provider];
-  if (rates) {
-    usage.costUsd += (tokensUsed / 1000) * rates.output;
-  }
+  usage.costUsd += (tokensUsed / 1000) * COST_PER_1K[provider].output;
 }
 
 function isThrottled(modelKey: string): boolean {
@@ -122,10 +119,9 @@ async function callGemini(
   prompt: string,
   opts: LLMOptions
 ): Promise<LLMResult> {
-  if (!GEMINI_KEY) return { text: null };
   if (isThrottled("gemini")) {
     llmLog.warn({ provider: "gemini", reason: "throttled" }, "LLM skipped (throttled)");
-    return { text: null, status: 429 };
+    return { text: null, status: 429, tokensUsed: 0 };
   }
 
   const start = Date.now();
@@ -134,7 +130,7 @@ async function callGemini(
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "x-goog-api-key": GEMINI_KEY,
+        "x-goog-api-key": GEMINI_KEY!,
       },
       body: JSON.stringify({
         contents: [{ parts: [{ text: prompt }] }],
@@ -151,7 +147,7 @@ async function callGemini(
     if (!response.ok) {
       if (response.status === 429) throttle("gemini");
       llmLog.error({ provider: "gemini", model: GEMINI_MODEL, status: response.status, latencyMs }, "LLM request failed");
-      return { text: null, status: response.status };
+      return { text: null, status: response.status, tokensUsed: 0 };
     }
 
     const data = await response.json();
@@ -167,13 +163,13 @@ async function callGemini(
     llmLog.info({
       provider: "gemini", model: GEMINI_MODEL, latencyMs,
       promptLen: prompt.length, responseLen: text?.length ?? 0,
-      tokensUsed, costUsd: (tokensUsed / 1000) * (COST_PER_1K.gemini?.output ?? 0),
+      tokensUsed, costUsd: (tokensUsed / 1000) * COST_PER_1K.gemini.output,
     }, "LLM request completed");
     return { text, tokensUsed };
   } catch (error) {
     const latencyMs = Date.now() - start;
     llmLog.error({ provider: "gemini", model: GEMINI_MODEL, latencyMs, err: error }, "LLM request error");
-    return { text: null, error };
+    return { text: null, error, tokensUsed: 0 };
   }
 }
 
@@ -184,10 +180,9 @@ async function callOpenAI(
   prompt: string,
   opts: LLMOptions
 ): Promise<LLMResult> {
-  if (!OPENAI_KEY) return { text: null };
   if (isThrottled("openai")) {
     llmLog.warn({ provider: "openai", reason: "throttled" }, "LLM skipped (throttled)");
-    return { text: null, status: 429 };
+    return { text: null, status: 429, tokensUsed: 0 };
   }
 
   const start = Date.now();
@@ -212,7 +207,7 @@ async function callOpenAI(
     if (!response.ok) {
       if (response.status === 429) throttle("openai");
       llmLog.error({ provider: "openai", model: OPENAI_MODEL, status: response.status, latencyMs }, "LLM request failed");
-      return { text: null, status: response.status };
+      return { text: null, status: response.status, tokensUsed: 0 };
     }
 
     const data = await response.json();
@@ -223,13 +218,13 @@ async function callOpenAI(
     llmLog.info({
       provider: "openai", model: OPENAI_MODEL, latencyMs,
       promptLen: prompt.length, responseLen: text?.length ?? 0,
-      tokensUsed, costUsd: (tokensUsed / 1000) * (COST_PER_1K.openai?.output ?? 0),
+      tokensUsed, costUsd: (tokensUsed / 1000) * COST_PER_1K.openai.output,
     }, "LLM request completed");
     return { text, tokensUsed };
   } catch (error) {
     const latencyMs = Date.now() - start;
     llmLog.error({ provider: "openai", model: OPENAI_MODEL, latencyMs, err: error }, "LLM request error");
-    return { text: null, error };
+    return { text: null, error, tokensUsed: 0 };
   }
 }
 
@@ -256,19 +251,16 @@ export async function completeWithFallback(
     return { text: null, modelUsed: null };
   }
 
-  const candidates: {
-    key: string;
-    fn: (p: string, o: LLMOptions) => Promise<LLMResult>;
-  }[] = [
-    { key: "gemini", fn: callGemini },
-    { key: "openai", fn: callOpenAI },
-  ].filter((c) => (c.key === "gemini" ? !!GEMINI_KEY : !!OPENAI_KEY));
+  const candidates = ([
+    { key: "gemini" as const, fn: callGemini },
+    { key: "openai" as const, fn: callOpenAI },
+  ] as const).filter((c) => (c.key === "gemini" ? !!GEMINI_KEY : !!OPENAI_KEY));
 
   for (const candidate of candidates) {
     const result = await candidate.fn(prompt, opts);
     if (result.status === 429) continue;
     if (result.text) {
-      trackUsage(candidate.key, result.tokensUsed ?? 0);
+      trackUsage(candidate.key, result.tokensUsed);
       // Cache the successful response (fire-and-forget)
       setCachedResponse(prompt, result.text, candidate.key).catch(() => {});
       return { text: result.text, modelUsed: candidate.key };

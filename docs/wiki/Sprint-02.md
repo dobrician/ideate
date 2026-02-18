@@ -7,7 +7,7 @@
 
 - [x] **Goal 1: Close function/branch gap on `lib/webhooks.ts`** — test `deliverWebhook` (success, retry, permanent failure paths); currently 83.33% function coverage (Testing)
 - [x] **Goal 2: Close branch gap on `lib/llm-cache.ts`** — test null `createdAt` fallback on line 52; currently 85.71% branch (Testing)
-- [ ] **Goal 3: Close branch gaps on `lib/llm.ts`** — test OpenAI-only path (no GEMINI_KEY), undefined `tokensUsed`, cost-lookup null fallbacks; currently 91.66% branch (Testing)
+- [x] **Goal 3: Close branch gaps on `lib/llm.ts`** — test OpenAI-only path (no GEMINI_KEY), undefined `tokensUsed`, cost-lookup null fallbacks; currently 91.66% branch (Testing)
 - [ ] **Goal 4: Close branch gaps on `lib/mail.ts`, `lib/comment-utils.ts`, `lib/search.ts`** — test SMTP_PORT/SMTP_FROM defaults, null `createdAt` sort, missing DATABASE_URL fallback (Testing)
 - [ ] **Goal 5: Close branch gaps on `lib/auth.ts`, `lib/oidc.ts`, `lib/password.ts`** — test tokens without exp/jti, missing APP_URL+OIDC_REDIRECT_URI, null emailVerified (Testing)
 - [ ] **Goal 6: Resolve `lib/export.ts` coverage false positive** — exclude barrel re-export file from coverage config or add smoke import test (Testing)
