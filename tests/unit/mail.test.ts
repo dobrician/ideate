@@ -203,6 +203,26 @@ describe("Mail", () => {
     });
   });
 
+  describe("SMTP env defaults", () => {
+    it("uses default SMTP_PORT and SMTP_FROM when env vars are unset", async () => {
+      const origPort = process.env.SMTP_PORT;
+      const origFrom = process.env.SMTP_FROM;
+      delete process.env.SMTP_PORT;
+      delete process.env.SMTP_FROM;
+      reMockNodemailer();
+      try {
+        mockSendMail.mockResolvedValue({ messageId: "defaults-test" });
+        const { sendMagicLinkEmail } = await import("@/lib/mail");
+        await sendMagicLinkEmail("u@e.com", "https://l.t");
+        const opts = mockSendMail.mock.calls[0][0];
+        expect(opts.from).toContain("idea@surcod.ro");
+      } finally {
+        process.env.SMTP_PORT = origPort;
+        process.env.SMTP_FROM = origFrom;
+      }
+    });
+  });
+
   describe("getSmtpTransporter", () => {
     it("returns null when SMTP is not configured", async () => {
       const e = process.env;

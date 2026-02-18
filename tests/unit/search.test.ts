@@ -375,6 +375,30 @@ describe("Search Library", () => {
     });
   });
 
+  describe("DATABASE_URL default", () => {
+    it("falls back to data/ideate.db when DATABASE_URL is unset", async () => {
+      const orig = process.env.DATABASE_URL;
+      delete process.env.DATABASE_URL;
+      vi.resetModules();
+      vi.doMock("better-sqlite3", () => ({
+        default: class {
+          prepare = mockPrepare;
+          exec = mockExec;
+          pragma = mockPragma;
+          close = mockClose;
+        },
+      }));
+      try {
+        mockAll.mockReturnValue([]);
+        const mod = await import("@/lib/search");
+        const results = mod.search("test");
+        expect(results).toEqual([]);
+      } finally {
+        process.env.DATABASE_URL = orig;
+      }
+    });
+  });
+
   describe("rebuildSearchIndex", () => {
     it("should rebuild both FTS indexes", () => {
       rebuildSearchIndex();

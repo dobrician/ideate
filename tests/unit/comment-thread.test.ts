@@ -55,6 +55,15 @@ describe("buildThreadedCommentTree", () => {
     expect(tree[0].id).toBe("c1");
   });
 
+  it("handles both comments having null createdAt", () => {
+    const comments: Comment[] = [
+      makeComment({ id: "c1", createdAt: null }),
+      makeComment({ id: "c2", createdAt: null }),
+    ];
+    const tree = buildThreadedCommentTree(comments);
+    expect(tree).toHaveLength(2);
+  });
+
   it("does not mutate the original array", () => {
     const comments: Comment[] = [
       makeComment({ id: "c2", createdAt: new Date("2026-01-16T00:00:00Z") }),
