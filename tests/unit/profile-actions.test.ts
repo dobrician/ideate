@@ -243,4 +243,21 @@ describe("requestEmailChange", () => {
     process.env.JWT_SECRET = origSecret;
     process.env.APP_URL = origUrl;
   });
+
+  it("falls back to empty JWT_SECRET and localhost APP_URL when env vars are unset", async () => {
+    const origSecret = process.env.JWT_SECRET;
+    const origUrl = process.env.APP_URL;
+    delete process.env.JWT_SECRET;
+    delete process.env.APP_URL;
+
+    const result = await requestEmailChange(makeFormData({ newEmail: "new@test.com" }));
+    expect(result).toEqual({ success: true });
+    expect(mockSendEmailChangeEmail).toHaveBeenCalledWith(
+      "new@test.com",
+      expect.stringContaining("http://localhost:3000"),
+    );
+
+    process.env.JWT_SECRET = origSecret;
+    process.env.APP_URL = origUrl;
+  });
 });
