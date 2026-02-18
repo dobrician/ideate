@@ -246,4 +246,20 @@ describe("Auth Library", () => {
       expect(decoded.aud).toBe(process.env.APP_URL);
     });
   });
+
+  describe("APP_URL fallback", () => {
+    it("should use localhost:3000 when APP_URL is unset", async () => {
+      const originalAppUrl = process.env.APP_URL;
+      delete process.env.APP_URL;
+
+      try {
+        const link = generateMagicLink("test@example.com");
+        expect(link).toContain("http://localhost:3000/auth/verify?token=");
+      } finally {
+        if (originalAppUrl !== undefined) {
+          process.env.APP_URL = originalAppUrl;
+        }
+      }
+    });
+  });
 });
