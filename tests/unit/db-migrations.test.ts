@@ -28,170 +28,104 @@ const mockExit = vi.spyOn(process, "exit").mockImplementation(() => {
   throw new Error("process.exit called");
 });
 
+const journal = (entries: { idx: number; tag: string }[]) =>
+  JSON.stringify({ entries });
+const prep = (applied: boolean) => ({
+  get: vi.fn().mockReturnValue(applied ? { 1: 1 } : null),
+  run: vi.fn(),
+});
+
 describe("db/index migration logic", () => {
   beforeEach(() => {
     vi.resetModules();
-    mockExec.mockReset();
-    mockPrepare.mockReset();
-    mockPragma.mockReset();
-    mockExistsSync.mockReset();
-    mockReadFileSync.mockReset();
-    mockLogInfo.mockReset();
-    mockLogFatal.mockReset();
+    [mockExec, mockPrepare, mockPragma, mockExistsSync, mockReadFileSync,
+      mockLogInfo, mockLogFatal].forEach(m => m.mockReset());
     mockExit.mockClear();
   });
 
   it("should skip migrations when journal file does not exist", async () => {
     mockExistsSync.mockReturnValue(false);
-    mockPrepare.mockReturnValue({ get: vi.fn(), run: vi.fn() });
-
+    mockPrepare.mockReturnValue(prep(false));
     await import("@/db/index");
-
-    // Only CREATE TABLE — returns early before BEGIN IMMEDIATE when no journal
     expect(mockExec).toHaveBeenCalledTimes(1);
     expect(mockExec.mock.calls[0][0]).toContain("_migrations");
   });
 
   it("should skip already-applied migrations", async () => {
-    // Journal exists
     mockExistsSync.mockReturnValue(true);
-    // Journal content
-    mockReadFileSync.mockReturnValue(
-      JSON.stringify({ entries: [{ idx: 0, tag: "0000_init" }] })
-    );
-    // Migration already applied
-    mockPrepare.mockReturnValue({
-      get: vi.fn().mockReturnValue({ 1: 1 }),
-      run: vi.fn(),
-    });
-
+    mockReadFileSync.mockReturnValue(journal([{ idx: 0, tag: "0000_init" }]));
+    mockPrepare.mockReturnValue(prep(true));
     await import("@/db/index");
-
-    // CREATE TABLE + BEGIN IMMEDIATE + COMMIT (migration skipped)
     expect(mockExec).toHaveBeenCalledTimes(3);
   });
 
   it("should skip migration file that does not exist on disk", async () => {
-    // Journal path exists, but the .sql file does not
-    mockExistsSync.mockImplementation((path: string) => {
-      if (path.includes("_journal.json")) return true;
-      return false; // .sql file does not exist
-    });
-    mockReadFileSync.mockReturnValue(
-      JSON.stringify({ entries: [{ idx: 0, tag: "0000_missing" }] })
-    );
-    mockPrepare.mockReturnValue({
-      get: vi.fn().mockReturnValue(null), // not applied
-      run: vi.fn(),
-    });
-
+    mockExistsSync.mockImplementation((path: string) =>
+      path.includes("_journal.json"));
+    mockReadFileSync.mockReturnValue(journal([{ idx: 0, tag: "0000_missing" }]));
+    mockPrepare.mockReturnValue(prep(false));
     await import("@/db/index");
-
-    // CREATE TABLE + BEGIN IMMEDIATE + COMMIT (no .sql file to apply)
     expect(mockExec).toHaveBeenCalledTimes(3);
   });
 
   it("should apply pending migration with statement breakpoints", async () => {
     mockExistsSync.mockReturnValue(true);
-    mockReadFileSync.mockImplementation((path: string) => {
-      if (path.includes("_journal.json")) {
-        return JSON.stringify({ entries: [{ idx: 0, tag: "0001_create" }] });
-      }
-      return "CREATE TABLE foo (id TEXT);--> statement-breakpoint\nCREATE INDEX idx ON foo(id);";
-    });
-    const mockRun = vi.fn();
-    mockPrepare.mockReturnValue({
-      get: vi.fn().mockReturnValue(null), // not applied
-      run: mockRun,
-    });
-
+    mockReadFileSync.mockImplementation((path: string) =>
+      path.includes("_journal.json")
+        ? journal([{ idx: 0, tag: "0001_create" }])
+        : "CREATE TABLE foo (id TEXT);--> statement-breakpoint\nCREATE INDEX idx ON foo(id);");
+    const p = prep(false);
+    mockPrepare.mockReturnValue(p);
     await import("@/db/index");
-
-    // CREATE TABLE + BEGIN IMMEDIATE + 2 migration statements + COMMIT
     expect(mockExec).toHaveBeenCalledTimes(5);
     expect(mockExec.mock.calls[1][0]).toBe("BEGIN IMMEDIATE");
     expect(mockExec.mock.calls[4][0]).toBe("COMMIT");
-    expect(mockRun).toHaveBeenCalledWith("0001_create.sql");
+    expect(p.run).toHaveBeenCalledWith("0001_create.sql");
   });
 
   it("should skip duplicate column errors (idempotent)", async () => {
     mockExistsSync.mockReturnValue(true);
-    mockReadFileSync.mockImplementation((path: string) => {
-      if (path.includes("_journal.json")) {
-        return JSON.stringify({ entries: [{ idx: 0, tag: "0002_alter" }] });
-      }
-      return "ALTER TABLE users ADD COLUMN foo TEXT;";
-    });
-    const mockRun = vi.fn();
-    mockPrepare.mockReturnValue({
-      get: vi.fn().mockReturnValue(null),
-      run: mockRun,
-    });
-    // First exec calls succeed, ALTER TABLE throws duplicate column
-    let execCallCount = 0;
+    mockReadFileSync.mockImplementation((path: string) =>
+      path.includes("_journal.json")
+        ? journal([{ idx: 0, tag: "0002_alter" }])
+        : "ALTER TABLE users ADD COLUMN foo TEXT;");
+    const p = prep(false);
+    mockPrepare.mockReturnValue(p);
     mockExec.mockImplementation((sql: string) => {
-      execCallCount++;
-      if (sql.includes("ALTER TABLE")) {
-        throw new Error("duplicate column name: foo");
-      }
+      if (sql.includes("ALTER TABLE")) throw new Error("duplicate column name: foo");
     });
-
     await import("@/db/index");
-
-    // Migration was recorded despite the skipped statement
-    expect(mockRun).toHaveBeenCalledWith("0002_alter.sql");
+    expect(p.run).toHaveBeenCalledWith("0002_alter.sql");
     expect(mockLogInfo).toHaveBeenCalledWith(
       expect.objectContaining({ migration: "0002_alter.sql" }),
-      "Skipped idempotent statement"
-    );
+      "Skipped idempotent statement");
   });
 
   it("should retry on SQLITE_BUSY errors", async () => {
     mockExistsSync.mockReturnValue(true);
-    mockReadFileSync.mockReturnValue(
-      JSON.stringify({ entries: [{ idx: 0, tag: "0000_init" }] })
-    );
-    mockPrepare.mockReturnValue({
-      get: vi.fn().mockReturnValue({ 1: 1 }),
-      run: vi.fn(),
-    });
-
+    mockReadFileSync.mockReturnValue(journal([{ idx: 0, tag: "0000_init" }]));
+    mockPrepare.mockReturnValue(prep(true));
     let callCount = 0;
     mockExec.mockImplementation(() => {
       callCount++;
-      // Fail on first attempt's BEGIN IMMEDIATE, succeed on second
-      if (callCount === 2) {
-        throw new Error("SQLITE_BUSY: database is locked");
-      }
+      if (callCount === 2) throw new Error("SQLITE_BUSY: database is locked");
     });
-
     await import("@/db/index");
-
     expect(mockLogInfo).toHaveBeenCalledWith(
-      expect.objectContaining({ attempt: 1 }),
-      "Migration locked, retrying..."
-    );
+      expect.objectContaining({ attempt: 1 }), "Migration locked, retrying...");
   });
 
   it("should rollback on non-idempotent migration error", async () => {
     mockExistsSync.mockReturnValue(true);
-    mockReadFileSync.mockImplementation((path: string) => {
-      if (path.includes("_journal.json")) {
-        return JSON.stringify({ entries: [{ idx: 0, tag: "0003_bad" }] });
-      }
-      return "DROP TABLE nonexistent;";
-    });
-    mockPrepare.mockReturnValue({
-      get: vi.fn().mockReturnValue(null),
-      run: vi.fn(),
-    });
+    mockReadFileSync.mockImplementation((path: string) =>
+      path.includes("_journal.json")
+        ? journal([{ idx: 0, tag: "0003_bad" }])
+        : "DROP TABLE nonexistent;");
+    mockPrepare.mockReturnValue(prep(false));
     mockExec.mockImplementation((sql: string) => {
-      if (sql.includes("DROP TABLE")) {
-        throw new Error("no such table: nonexistent");
-      }
+      if (sql.includes("DROP TABLE")) throw new Error("no such table: nonexistent");
       if (sql === "ROLLBACK") return;
     });
-
     await expect(import("@/db/index")).rejects.toThrow("process.exit called");
     expect(mockExec).toHaveBeenCalledWith("ROLLBACK");
     expect(mockLogFatal).toHaveBeenCalled();
@@ -199,101 +133,71 @@ describe("db/index migration logic", () => {
 
   it("should sort journal entries by idx", async () => {
     mockExistsSync.mockReturnValue(true);
-    mockReadFileSync.mockImplementation((path: string) => {
-      if (path.includes("_journal.json")) {
-        return JSON.stringify({
-          entries: [
-            { idx: 2, tag: "0002_second" },
-            { idx: 0, tag: "0000_first" },
-            { idx: 1, tag: "0001_middle" },
-          ],
-        });
-      }
-      return "SELECT 1;";
-    });
-    const mockRun = vi.fn();
-    mockPrepare.mockReturnValue({
-      get: vi.fn().mockReturnValue(null),
-      run: mockRun,
-    });
-
+    mockReadFileSync.mockImplementation((path: string) =>
+      path.includes("_journal.json")
+        ? journal([{ idx: 2, tag: "0002_second" }, { idx: 0, tag: "0000_first" }, { idx: 1, tag: "0001_middle" }])
+        : "SELECT 1;");
+    const p = prep(false);
+    mockPrepare.mockReturnValue(p);
     await import("@/db/index");
-
-    // Verify migrations applied in order
-    const runCalls = mockRun.mock.calls.map((c: unknown[]) => c[0]);
-    expect(runCalls).toEqual([
-      "0000_first.sql",
-      "0001_middle.sql",
-      "0002_second.sql",
-    ]);
+    const runCalls = p.run.mock.calls.map((c: unknown[]) => c[0]);
+    expect(runCalls).toEqual(["0000_first.sql", "0001_middle.sql", "0002_second.sql"]);
   });
 
   it("should skip 'already exists' errors as idempotent", async () => {
     mockExistsSync.mockReturnValue(true);
-    mockReadFileSync.mockImplementation((path: string) => {
-      if (path.includes("_journal.json")) {
-        return JSON.stringify({ entries: [{ idx: 0, tag: "0004_create" }] });
-      }
-      return "CREATE TABLE foo (id TEXT);";
-    });
-    const mockRun = vi.fn();
-    mockPrepare.mockReturnValue({
-      get: vi.fn().mockReturnValue(null),
-      run: mockRun,
-    });
+    mockReadFileSync.mockImplementation((path: string) =>
+      path.includes("_journal.json")
+        ? journal([{ idx: 0, tag: "0004_create" }])
+        : "CREATE TABLE foo (id TEXT);");
+    const p = prep(false);
+    mockPrepare.mockReturnValue(p);
     mockExec.mockImplementation((sql: string) => {
-      if (sql.includes("CREATE TABLE foo")) {
-        throw new Error("table foo already exists");
-      }
+      if (sql.includes("CREATE TABLE foo")) throw new Error("table foo already exists");
     });
-
     await import("@/db/index");
+    expect(p.run).toHaveBeenCalledWith("0004_create.sql");
+  });
 
-    expect(mockRun).toHaveBeenCalledWith("0004_create.sql");
+  it("should use resolve('data/ideate.db') when DATABASE_URL is unset", async () => {
+    const orig = process.env.DATABASE_URL;
+    delete process.env.DATABASE_URL;
+    mockExistsSync.mockReturnValue(false);
+    mockPrepare.mockReturnValue(prep(false));
+    const Database = (await import("better-sqlite3")).default;
+    const callsBefore = vi.mocked(Database).mock.calls.length;
+    await import("@/db/index");
+    const lastCallArg = vi.mocked(Database).mock.calls[callsBefore][0];
+    expect(String(lastCallArg)).toContain("data/ideate.db");
+    process.env.DATABASE_URL = orig;
   });
 
   it("should handle non-Error thrown value in isIdempotentError", async () => {
     mockExistsSync.mockReturnValue(true);
-    mockReadFileSync.mockImplementation((path: string) => {
-      if (path.includes("_journal.json")) {
-        return JSON.stringify({ entries: [{ idx: 0, tag: "0005_str" }] });
-      }
-      return "CREATE TABLE bar (id TEXT);";
-    });
-    const mockRun = vi.fn();
-    mockPrepare.mockReturnValue({
-      get: vi.fn().mockReturnValue(null),
-      run: mockRun,
-    });
+    mockReadFileSync.mockImplementation((path: string) =>
+      path.includes("_journal.json")
+        ? journal([{ idx: 0, tag: "0005_str" }])
+        : "CREATE TABLE bar (id TEXT);");
+    const p = prep(false);
+    mockPrepare.mockReturnValue(p);
     mockExec.mockImplementation((sql: string) => {
       if (sql.includes("CREATE TABLE bar")) {
         // eslint-disable-next-line no-throw-literal
         throw "table bar already exists";
       }
     });
-
     await import("@/db/index");
-
-    expect(mockRun).toHaveBeenCalledWith("0005_str.sql");
+    expect(p.run).toHaveBeenCalledWith("0005_str.sql");
   });
 
   it("should abort after max retries on persistent SQLITE_BUSY", async () => {
     mockExistsSync.mockReturnValue(true);
-    mockReadFileSync.mockReturnValue(
-      JSON.stringify({ entries: [{ idx: 0, tag: "0000_init" }] })
-    );
-    mockPrepare.mockReturnValue({
-      get: vi.fn().mockReturnValue(null),
-      run: vi.fn(),
-    });
-    // Always throw SQLITE_BUSY on BEGIN IMMEDIATE
+    mockReadFileSync.mockReturnValue(journal([{ idx: 0, tag: "0000_init" }]));
+    mockPrepare.mockReturnValue(prep(false));
     mockExec.mockImplementation((sql: string) => {
-      if (sql === "BEGIN IMMEDIATE") {
-        throw new Error("SQLITE_BUSY: database is locked");
-      }
+      if (sql === "BEGIN IMMEDIATE") throw new Error("SQLITE_BUSY: database is locked");
       if (sql === "ROLLBACK") return;
     });
-
     await expect(import("@/db/index")).rejects.toThrow("process.exit called");
     expect(mockLogFatal).toHaveBeenCalled();
   });
