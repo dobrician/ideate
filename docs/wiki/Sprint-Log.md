@@ -4,9 +4,9 @@ Reverse chronological. Click each sprint for full details.
 
 ---
 
-### 🔄 [Sprint 00 — UX Polish, Security Hardening & DevOps Automation](Sprint-00) *(2026-02-18)*
+### ✅ [Sprint 00 — UX Polish, Security Hardening & DevOps Automation](Sprint-00) *(2026-02-18)*
 **Focus:** PWA mobile overlap, AI model disclosure, dialog focus fix, trusted proxy validation, Docker CI push, DB backup automation, email change flow, API rate limiting
-**Stats:** 0/8 goals | In progress
+**Stats:** 8/8 goals | 1115 tests | Email change flow, rate limiting on all API routes
 
 ---
 

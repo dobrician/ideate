@@ -19,7 +19,7 @@
 
 - [x] **Goal 7: Add email change flow to profile page** — Add an email change form with verification. User enters new email, receives verification link, email updates after confirmation.
 
-- [ ] **Goal 8: Add rate limiting to remaining API routes** — Protect export, attachment, webhook, and template API routes with `checkRateLimit` calls.
+- [x] **Goal 8: Add rate limiting to remaining API routes** — Protect export, attachment, webhook, and template API routes with `checkRateLimit` calls.
 
 ## Notes
 
