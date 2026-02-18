@@ -5,7 +5,7 @@
 
 ## Goals
 
-- [ ] **Goal 1: Fix PWA banner mobile overlap** — Move the PWA install banner from `fixed top-16` to bottom position on mobile to prevent content overlap. Desktop already uses `sm:bottom-4`.
+- [x] **Goal 1: Fix PWA banner mobile overlap** — Move the PWA install banner from `fixed top-16` to bottom position on mobile to prevent content overlap. Desktop already uses `sm:bottom-4`.
 
 - [ ] **Goal 2: Add AI model disclosure in suggestion dialog** — Surface the `modelUsed` field from `completeWithFallback` in the suggestion dialog so users know which AI model generated the suggestions.
 

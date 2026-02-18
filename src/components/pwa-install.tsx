@@ -52,7 +52,7 @@ export function PwaInstall() {
   if (!deferredPrompt || dismissed) return null;
 
   return (
-    <div className="fixed top-16 left-4 right-4 z-50 mx-auto flex max-w-md items-center gap-3 rounded-lg border bg-background p-3 shadow-lg sm:top-auto sm:bottom-4 sm:left-auto sm:right-4">
+    <div className="fixed bottom-4 left-4 right-4 z-50 mx-auto flex max-w-md items-center gap-3 rounded-lg border bg-background p-3 shadow-lg sm:left-auto sm:right-4">
       <div className="flex-1">
         <p className="text-sm font-medium">{t("pwa.install")}</p>
         <p className="text-xs text-muted-foreground">
