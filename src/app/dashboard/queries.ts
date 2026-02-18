@@ -158,8 +158,8 @@ async function getRecentActivity(userId: string) {
  * Fetch chart data for the dashboard analytics section.
  */
 export async function getChartData() {
-  const thirtyDaysAgo = new Date();
-  thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+  const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+  const thirtyDaysAgoUnix = Math.floor(thirtyDaysAgo.getTime() / 1000);
 
   const [votesOverTime, topProposals, activityHeatmap] = await Promise.all([
     // Votes per day (last 30 days)
@@ -195,9 +195,9 @@ export async function getChartData() {
       })
       .from(
         sql`(
-          SELECT ${votes.createdAt} as created_at FROM ${votes} WHERE ${votes.createdAt} >= ${thirtyDaysAgo}
+          SELECT ${votes.createdAt} as created_at FROM ${votes} WHERE ${votes.createdAt} >= ${thirtyDaysAgoUnix}
           UNION ALL
-          SELECT ${comments.createdAt} as created_at FROM ${comments} WHERE ${comments.createdAt} >= ${thirtyDaysAgo}
+          SELECT ${comments.createdAt} as created_at FROM ${comments} WHERE ${comments.createdAt} >= ${thirtyDaysAgoUnix}
         )`
       )
       .groupBy(sql`date(created_at, 'unixepoch')`)

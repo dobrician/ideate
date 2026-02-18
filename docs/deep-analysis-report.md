@@ -439,6 +439,54 @@ What an enterprise customer would expect that Ideate currently lacks:
 
 ---
 
+## 14. Sprint 01 Analysis & Goals
+
+**Date:** 2026-02-18
+**Basis:** Open issues, test coverage, TypeScript check, Sprint 00 outcomes
+
+### Current State
+
+| Check | Result |
+|-------|--------|
+| `tsc --noEmit` | **Clean** — zero errors |
+| `vitest run` | **1,244 tests, 88 files, all passing** |
+| Statement coverage | **99.80%** |
+| Branch coverage | **96.66%** |
+| Function coverage | **99.07%** |
+| Line coverage | **99.93%** |
+| Open issues | **1** — #13 Cloudflare deployment (nice-to-have) |
+
+### Sprint 00 Outcomes
+
+Sprint 00 closed 8/8 goals: coverage gaps on request-utils, search, rate-limit, digest, notifications, llm, escapeHtml dead-branch removal, and auth. Coverage jumped from 91.87% to 96.66% branch. The codebase is now at near-ceiling coverage levels.
+
+### Remaining Coverage Gaps
+
+| File | Stmts | Branch | Uncovered Lines |
+|------|-------|--------|-----------------|
+| `app/api/search/route.ts` | 94.1% | 91.7% | 23 |
+| `lib/digest.ts` | 100% | 83.3% | 22-23 |
+| `lib/rate-limit.ts` | 100% | 80% | 26, 101 |
+| `lib/llm.ts` | 98% | 91.7% | 170-187, 226, 271 |
+| `lib/mail.ts` | 100% | 93.3% | 8, 11 |
+| `lib/export.ts` | 0% | 0% | Entire file (excluded from test runs) |
+| `src/proxy.ts` | 100% | 97% | 25 |
+
+### Sprint 01 Goals
+
+| # | Goal | Category | Rationale |
+|---|------|----------|-----------|
+| 1 | **Cloudflare deployment completion** — resolve remaining D1 migration issues, test production deploy, close issue #13 | DevOps | Only open issue. Config was added in Sprint 00 (Goal 1) but issue remains open — deployment not yet verified end-to-end. |
+| 2 | **Add `lib/export.ts` to test coverage** — currently at 0% stmts/branch (excluded from coverage config). Add unit tests for PDF, CSV, and HTML export generation | Testing | The single largest untested file. Export is user-facing and contains duplicated `escapeHtml` (flagged in deep analysis Section 3). |
+| 3 | **Close remaining branch gaps in `lib/rate-limit.ts`** — cover lines 26 and 101 (currently 80% branch) | Testing | Lowest branch coverage among lib files. Rate limiting is security-critical infrastructure. |
+| 4 | **Close remaining branch gaps in `lib/digest.ts`** — cover lines 22-23 (currently 83.3% branch) | Testing | Digest was a major Sprint 00 focus but two branches remain uncovered. |
+| 5 | **Add error tracking (Sentry)** — integrate Sentry for production error monitoring, source maps, and alert routing | DevOps | Flagged in deep analysis Section 11 as a medium-severity DevOps gap. No production error visibility currently exists. |
+| 6 | **Add E2E tests to CI pipeline** — configure Playwright in GitHub Actions with a test server, run on PR and push to main | DevOps | Flagged in deep analysis Section 11. E2E tests exist (16 files) but only run manually. CI runs unit tests only. |
+| 7 | **Migrate `middleware.ts` to `proxy.ts` convention** — address Next.js 16 deprecation warning for the middleware file convention | Tech Debt | Build deprecation warning persists. The proxy file exists (`src/proxy.ts`) but the middleware convention is still active. Clean up the migration. |
+| 8 | **Remove unused exports** — audit and remove dead exports: `buildProjectSummary`, `getAiUsageStats`, `getPermissions`, `requirePermission`, `canModifyResource`, `sanitizeObject`, `generateReportHtml` | Tech Debt | 7 unused exports identified in deep analysis Section 8. Dead code adds maintenance burden and confuses coverage reports. |
+
+---
+
 ## Appendix: Key Files Reference
 
 | File | Lines | Purpose |
