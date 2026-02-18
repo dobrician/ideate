@@ -5,7 +5,7 @@
 
 ## Goals
 
-- [ ] **Goal 1: Fix hardcoded `en-US` locale in PDF export** — replace fallback with env-aware locale resolution in `export-pdf.ts` (Code Quality, Section 3)
+- [x] **Goal 1: Fix hardcoded `en-US` locale in PDF export** — replace fallback with env-aware locale resolution in `export-pdf.ts` (Code Quality, Section 3)
 - [ ] **Goal 2: PWA safe-area-inset for iOS home bar** — add `safe-area-inset-bottom` padding to PWA install banner to prevent overlap on notched devices (UX, Section 7)
 - [ ] **Goal 3: Rate limiting on server actions** — add `checkRateLimit` to proposal/vote/comment/project/profile server actions (Security, Section 4)
 - [ ] **Goal 4: Admin rate-limit visibility dashboard** — expose rate-limit stats (active keys, hit counts) via admin API + UI panel (Enterprise, Section 10)
