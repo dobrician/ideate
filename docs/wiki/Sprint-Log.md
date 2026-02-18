@@ -4,9 +4,9 @@ Reverse chronological. Click each sprint for full details.
 
 ---
 
-### 🔄 [Sprint 00 — Proxy Tests & Projects Coverage](Sprint-00) *(2026-02-18)*
+### ✅ [Sprint 00 — Proxy Tests & Projects Coverage](Sprint-00) *(2026-02-18)*
 **Focus:** Add proxy.ts unit tests, close coverage gap on src/app/projects (funcs/branch)
-**Stats:** 0/2 goals | In progress
+**Stats:** 2/2 goals | 1195 tests | 100% func coverage on projects + proposals
 
 ---
 

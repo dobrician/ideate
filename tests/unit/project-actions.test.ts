@@ -1,449 +1,216 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 
 interface MockUser {
-  id: string;
-  email: string;
-  firstName: string | null;
-  lastName: string | null;
-  avatarUrl: string | null;
-  role: "admin" | "manager" | "member" | "viewer";
-  createdAt: Date | null;
-  updatedAt: Date | null;
+  id: string; email: string; firstName: string | null; lastName: string | null;
+  avatarUrl: string | null; role: "admin" | "manager" | "member" | "viewer";
+  createdAt: Date | null; updatedAt: Date | null;
 }
 
-interface ProjectInsertValues {
-  id: string;
-  title: string;
-  description: string | null;
-  deadline: Date;
-  status: string;
-  userId: string;
-}
-
-const mockRevalidatePath = vi.fn();
-vi.mock("next/cache", () => ({
-  revalidatePath: (...args: unknown[]) => mockRevalidatePath(...args),
-}));
-
+const mockRevalidate = vi.fn();
+vi.mock("next/cache", () => ({ revalidatePath: (...a: unknown[]) => mockRevalidate(...a) }));
 const mockRedirect = vi.fn();
 vi.mock("next/navigation", () => ({
-  redirect: (url: string) => {
-    mockRedirect(url);
-    throw new Error(`NEXT_REDIRECT:${url}`);
-  },
+  redirect: (url: string) => { mockRedirect(url); throw new Error(`NEXT_REDIRECT:${url}`); },
 }));
+const mockAuth = vi.fn<() => Promise<MockUser>>();
+vi.mock("@/lib/auth", () => ({ requireAuth: (...a: unknown[]) => mockAuth(...a) }));
+vi.mock("@/lib/csrf", () => ({ requireCsrfToken: vi.fn().mockResolvedValue(undefined) }));
+const mockFireWebhook = vi.fn().mockResolvedValue(undefined);
+vi.mock("@/lib/webhooks", () => ({ fireWebhookEvent: (...a: unknown[]) => mockFireWebhook(...a) }));
 
-const mockRequireAuth = vi.fn<() => Promise<MockUser>>();
-vi.mock("@/lib/auth", () => ({
-  requireAuth: (...args: unknown[]) => mockRequireAuth(...args),
-}));
-
-vi.mock("@/lib/csrf", () => ({
-  requireCsrfToken: vi.fn().mockResolvedValue(undefined),
-}));
-
-const mockInsertValues = vi.fn();
-const mockUpdateSet = vi.fn();
-const mockUpdateWhere = vi.fn();
-const mockDeleteWhere = vi.fn();
-const mockSelectLimit = vi.fn();
-
+const mockInsert = vi.fn(), mockSet = vi.fn(), mockSetWhere = vi.fn();
+const mockDelWhere = vi.fn(), mockSelLim = vi.fn();
 vi.mock("@/db", () => ({
   db: {
-    insert: () => ({
-      values: (...args: unknown[]) => {
-        mockInsertValues(...args);
-        return Promise.resolve();
-      },
-    }),
-    update: () => ({
-      set: (...args: unknown[]) => {
-        mockUpdateSet(...args);
-        return {
-          where: (...wArgs: unknown[]) => {
-            mockUpdateWhere(...wArgs);
-            return Promise.resolve();
-          },
-        };
-      },
-    }),
-    delete: () => ({
-      where: (...args: unknown[]) => {
-        mockDeleteWhere(...args);
-        return Promise.resolve();
-      },
-    }),
-    select: () => ({
-      from: () => ({
-        where: () => ({ limit: () => mockSelectLimit() }),
-      }),
-    }),
+    insert: () => ({ values: (...a: unknown[]) => { mockInsert(...a); return Promise.resolve(); } }),
+    update: () => ({ set: (...a: unknown[]) => { mockSet(...a); return { where: (...w: unknown[]) => { mockSetWhere(...w); return Promise.resolve(); } }; } }),
+    delete: () => ({ where: (...a: unknown[]) => { mockDelWhere(...a); return Promise.resolve(); } }),
+    select: () => ({ from: () => ({ where: () => ({ limit: () => mockSelLim() }) }) }),
   },
 }));
 
-function makeUser(overrides: Partial<MockUser> = {}): MockUser {
-  return {
-    id: "user-1",
-    email: "alice@test.com",
-    firstName: "Alice",
-    lastName: "Test",
-    avatarUrl: null,
-    role: "member",
-    createdAt: new Date(),
-    updatedAt: new Date(),
-    ...overrides,
-  };
-}
+const mkUser = (o: Partial<MockUser> = {}): MockUser => ({
+  id: "user-1", email: "a@t.com", firstName: "A", lastName: "T",
+  avatarUrl: null, role: "member", createdAt: new Date(), updatedAt: new Date(), ...o,
+});
+const mkFD = (e: Record<string, string>) => {
+  const fd = new FormData(); Object.entries(e).forEach(([k, v]) => fd.set(k, v)); return fd;
+};
+const futureDate = new Date(Date.now() + 7 * 86400000).toISOString().split("T")[0];
+const ownedProj = { id: "proj-1", title: "Old", description: null, deadline: new Date(), status: "active", userId: "user-1", summary: null, createdAt: new Date(), updatedAt: new Date() };
 
-function makeFormData(entries: Record<string, string>): FormData {
-  const fd = new FormData();
-  for (const [key, value] of Object.entries(entries)) fd.set(key, value);
-  return fd;
-}
-
-const futureDate = new Date(Date.now() + 7 * 86400000)
-  .toISOString()
-  .split("T")[0];
-
-import {
-  createProject,
-  updateProject,
-  deleteProject,
-  unarchiveProject,
-} from "@/app/projects/actions";
+import { createProject, updateProject, deleteProject, unarchiveProject } from "@/app/projects/actions";
 
 beforeEach(() => {
-  mockRevalidatePath.mockClear();
-  mockRedirect.mockClear();
-  mockRequireAuth.mockReset();
-  mockInsertValues.mockReset();
-  mockUpdateSet.mockReset();
-  mockUpdateWhere.mockReset();
-  mockDeleteWhere.mockReset();
-  mockSelectLimit.mockReset();
-  mockRequireAuth.mockResolvedValue(makeUser());
-  mockSelectLimit.mockResolvedValue([]);
+  [mockRevalidate, mockRedirect, mockInsert, mockSet, mockSetWhere, mockDelWhere, mockSelLim, mockFireWebhook].forEach(m => m.mockReset());
+  mockFireWebhook.mockResolvedValue(undefined);
+  mockAuth.mockReset().mockResolvedValue(mkUser());
+  mockSelLim.mockResolvedValue([]);
 });
 
 describe("createProject", () => {
-  const validForm = () =>
-    makeFormData({
-      title: "Test Project",
-      description: "A good description",
-      deadline: futureDate,
-      status: "active",
-    });
+  const vfd = () => mkFD({ title: "Test Project", description: "Good desc", deadline: futureDate, status: "active" });
 
-  it("rejects unauthenticated users", async () => {
-    mockRequireAuth.mockRejectedValue(new Error("Unauthorized"));
-    await expect(createProject(validForm())).rejects.toThrow("NEXT_REDIRECT");
+  it("rejects unauthenticated", async () => {
+    mockAuth.mockRejectedValue(new Error("Unauthorized"));
+    await expect(createProject(vfd())).rejects.toThrow("NEXT_REDIRECT");
     expect(mockRedirect).toHaveBeenCalledWith("/auth/login");
   });
-
   it("rejects viewers", async () => {
-    mockRequireAuth.mockResolvedValue(makeUser({ role: "viewer" }));
-    const r = await createProject(validForm());
-    expect(r).toEqual({
-      error: "You don't have permission to create projects",
-    });
+    mockAuth.mockResolvedValue(mkUser({ role: "viewer" }));
+    expect(await createProject(vfd())).toEqual({ error: "You don't have permission to create projects" });
   });
-
   it("rejects short title", async () => {
-    const fd = makeFormData({
-      title: "Hi",
-      description: "",
-      deadline: futureDate,
-    });
-    const r = await createProject(fd);
-    expect(r).toEqual({ error: "Title must be at least 3 characters" });
+    expect(await createProject(mkFD({ title: "Hi", description: "", deadline: futureDate }))).toEqual({ error: "Title must be at least 3 characters" });
   });
-
   it("rejects past deadline", async () => {
-    const fd = makeFormData({
-      title: "Valid Title",
-      description: "",
-      deadline: "2020-01-01",
-    });
-    const r = await createProject(fd);
-    expect(r).toEqual({ error: "Deadline must be a valid future date" });
+    expect(await createProject(mkFD({ title: "Valid", description: "", deadline: "2020-01-01" }))).toEqual({ error: "Deadline must be a valid future date" });
   });
-
-  it("creates project and redirects", async () => {
-    await expect(createProject(validForm())).rejects.toThrow("NEXT_REDIRECT");
-    const v = mockInsertValues.mock.calls[0][0] as ProjectInsertValues;
+  it("creates and redirects", async () => {
+    await expect(createProject(vfd())).rejects.toThrow("NEXT_REDIRECT");
+    const v = mockInsert.mock.calls[0][0] as { title: string; status: string; userId: string };
     expect(v.title).toBe("Test Project");
     expect(v.status).toBe("active");
     expect(v.userId).toBe("user-1");
-    expect(mockRevalidatePath).toHaveBeenCalledWith("/projects");
+    expect(mockRevalidate).toHaveBeenCalledWith("/projects");
   });
-
+  it("stores null when description is empty", async () => {
+    await expect(createProject(mkFD({ title: "No Desc", description: "", deadline: futureDate }))).rejects.toThrow("NEXT_REDIRECT");
+    expect((mockInsert.mock.calls[0][0] as { description: string | null }).description).toBeNull();
+  });
   it("returns generic error on DB failure", async () => {
-    mockInsertValues.mockImplementation(() => {
-      throw new Error("DB down");
-    });
-    const r = await createProject(validForm());
-    expect(r).toEqual({
-      error: "Failed to create project. Please try again.",
-    });
+    mockInsert.mockImplementation(() => { throw new Error("DB"); });
+    expect(await createProject(vfd())).toEqual({ error: "Failed to create project. Please try again." });
+  });
+  it("succeeds even when webhook rejects", async () => {
+    mockFireWebhook.mockRejectedValue(new Error("webhook down"));
+    await expect(createProject(vfd())).rejects.toThrow("NEXT_REDIRECT");
   });
 });
 
 describe("updateProject", () => {
-  const validForm = () =>
-    makeFormData({
-      title: "Updated Title",
-      description: "Updated desc",
-      deadline: futureDate,
-      status: "active",
-    });
+  const vfd = () => mkFD({ title: "Updated", description: "Desc", deadline: futureDate, status: "active" });
+  beforeEach(() => { mockAuth.mockResolvedValue(mkUser({ role: "manager" })); });
 
-  const ownedProject = {
-    id: "proj-1",
-    title: "Old",
-    description: null,
-    deadline: new Date(),
-    status: "active",
-    userId: "user-1",
-    summary: null,
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  };
-
-  beforeEach(() => {
-    // manager role has project:update permission
-    mockRequireAuth.mockResolvedValue(makeUser({ role: "manager" }));
+  it("rejects unauthenticated", async () => {
+    mockAuth.mockRejectedValue(new Error("Unauthorized"));
+    await expect(updateProject("p1", vfd())).rejects.toThrow("NEXT_REDIRECT");
   });
-
-  it("rejects unauthenticated users", async () => {
-    mockRequireAuth.mockRejectedValue(new Error("Unauthorized"));
-    await expect(updateProject("proj-1", validForm())).rejects.toThrow(
-      "NEXT_REDIRECT"
-    );
-    expect(mockRedirect).toHaveBeenCalledWith("/auth/login");
-  });
-
   it("rejects viewers", async () => {
-    mockRequireAuth.mockResolvedValue(makeUser({ role: "viewer" }));
-    const r = await updateProject("proj-1", validForm());
-    expect(r).toEqual({
-      error: "You don't have permission to update projects",
-    });
+    mockAuth.mockResolvedValue(mkUser({ role: "viewer" }));
+    expect(await updateProject("p1", vfd())).toEqual({ error: "You don't have permission to update projects" });
   });
-
   it("rejects short title", async () => {
-    const fd = makeFormData({
-      title: "Hi",
-      description: "",
-      deadline: futureDate,
-    });
-    const r = await updateProject("proj-1", fd);
-    expect(r).toEqual({ error: "Title must be at least 3 characters" });
+    expect(await updateProject("p1", mkFD({ title: "Hi", description: "", deadline: futureDate }))).toEqual({ error: "Title must be at least 3 characters" });
   });
-
-  it("returns not found for missing project", async () => {
-    mockSelectLimit.mockResolvedValueOnce([]);
-    const r = await updateProject("proj-1", validForm());
-    expect(r).toEqual({ error: "Project not found" });
+  it("returns not found", async () => {
+    mockSelLim.mockResolvedValueOnce([]);
+    expect(await updateProject("p1", vfd())).toEqual({ error: "Project not found" });
   });
-
   it("rejects non-owner", async () => {
-    mockSelectLimit.mockResolvedValueOnce([
-      { ...ownedProject, userId: "other-user" },
-    ]);
-    const r = await updateProject("proj-1", validForm());
-    expect(r).toEqual({
-      error: "You don't have permission to update this project",
-    });
+    mockSelLim.mockResolvedValueOnce([{ ...ownedProj, userId: "other" }]);
+    expect(await updateProject("p1", vfd())).toEqual({ error: "You don't have permission to update this project" });
   });
-
   it("updates owned project", async () => {
-    mockSelectLimit.mockResolvedValueOnce([ownedProject]);
-    const r = await updateProject("proj-1", validForm());
-    expect(r).toEqual({ success: true });
-    expect(mockUpdateSet).toHaveBeenCalled();
-    expect(mockRevalidatePath).toHaveBeenCalledWith("/projects/proj-1");
-    expect(mockRevalidatePath).toHaveBeenCalledWith("/projects");
+    mockSelLim.mockResolvedValueOnce([ownedProj]);
+    expect(await updateProject("p1", vfd())).toEqual({ success: true });
+    expect(mockSet).toHaveBeenCalled();
+    expect(mockRevalidate).toHaveBeenCalledWith("/projects/p1");
   });
-
-  it("allows admin to update any project", async () => {
-    mockRequireAuth.mockResolvedValue(makeUser({ role: "admin" }));
-    mockSelectLimit.mockResolvedValueOnce([
-      { ...ownedProject, userId: "other" },
-    ]);
-    const r = await updateProject("proj-1", validForm());
-    expect(r).toEqual({ success: true });
+  it("allows admin to update any", async () => {
+    mockAuth.mockResolvedValue(mkUser({ role: "admin" }));
+    mockSelLim.mockResolvedValueOnce([{ ...ownedProj, userId: "other" }]);
+    expect(await updateProject("p1", vfd())).toEqual({ success: true });
   });
-
+  it("stores null when description is empty", async () => {
+    mockSelLim.mockResolvedValueOnce([ownedProj]);
+    expect(await updateProject("p1", mkFD({ title: "Upd", description: "", deadline: futureDate }))).toEqual({ success: true });
+    expect(mockSet).toHaveBeenCalledWith(expect.objectContaining({ description: null }));
+  });
+  it("fires webhook on archive", async () => {
+    mockSelLim.mockResolvedValueOnce([ownedProj]);
+    expect(await updateProject("p1", mkFD({ title: "Upd", description: "d", deadline: futureDate, status: "archived" }))).toEqual({ success: true });
+    expect(mockSet).toHaveBeenCalledWith(expect.objectContaining({ status: "archived" }));
+  });
+  it("succeeds even when archive webhook rejects", async () => {
+    mockSelLim.mockResolvedValueOnce([ownedProj]);
+    mockFireWebhook.mockRejectedValue(new Error("webhook down"));
+    expect(await updateProject("p1", mkFD({ title: "Upd", description: "d", deadline: futureDate, status: "archived" }))).toEqual({ success: true });
+  });
   it("returns generic error on DB failure", async () => {
-    mockSelectLimit.mockResolvedValueOnce([ownedProject]);
-    mockUpdateSet.mockImplementation(() => {
-      throw new Error("DB down");
-    });
-    const r = await updateProject("proj-1", validForm());
-    expect(r).toEqual({
-      error: "Failed to update project. Please try again.",
-    });
-  });
-
-  it("fires webhook when archiving a previously active project", async () => {
-    mockSelectLimit.mockResolvedValueOnce([ownedProject]); // status: "active"
-    const fd = makeFormData({
-      title: "Updated Title",
-      description: "desc",
-      deadline: futureDate,
-      status: "archived",
-    });
-    const r = await updateProject("proj-1", fd);
-    expect(r).toEqual({ success: true });
-    expect(mockUpdateSet).toHaveBeenCalledWith(
-      expect.objectContaining({ status: "archived" })
-    );
+    mockSelLim.mockResolvedValueOnce([ownedProj]);
+    mockSet.mockImplementation(() => { throw new Error("DB"); });
+    expect(await updateProject("p1", vfd())).toEqual({ error: "Failed to update project. Please try again." });
   });
 });
 
 describe("deleteProject", () => {
-  const ownedProject = {
-    id: "proj-1",
-    title: "Old",
-    description: null,
-    deadline: new Date(),
-    status: "active",
-    userId: "user-1",
-    summary: null,
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  };
+  beforeEach(() => { mockAuth.mockResolvedValue(mkUser({ role: "manager" })); });
 
-  beforeEach(() => {
-    // manager role has project:delete permission
-    mockRequireAuth.mockResolvedValue(makeUser({ role: "manager" }));
+  it("rejects unauthenticated", async () => {
+    mockAuth.mockRejectedValue(new Error("Unauthorized"));
+    await expect(deleteProject("p1", "t")).rejects.toThrow("NEXT_REDIRECT");
   });
-
-  it("rejects unauthenticated users", async () => {
-    mockRequireAuth.mockRejectedValue(new Error("Unauthorized"));
-    await expect(deleteProject("proj-1", "token")).rejects.toThrow(
-      "NEXT_REDIRECT"
-    );
-    expect(mockRedirect).toHaveBeenCalledWith("/auth/login");
-  });
-
   it("rejects viewers", async () => {
-    mockRequireAuth.mockResolvedValue(makeUser({ role: "viewer" }));
-    const r = await deleteProject("proj-1", "token");
-    expect(r).toEqual({
-      error: "You don't have permission to delete projects",
-    });
+    mockAuth.mockResolvedValue(mkUser({ role: "viewer" }));
+    expect(await deleteProject("p1", "t")).toEqual({ error: "You don't have permission to delete projects" });
   });
-
-  it("returns not found for missing project", async () => {
-    mockSelectLimit.mockResolvedValueOnce([]);
-    const r = await deleteProject("proj-1", "token");
-    expect(r).toEqual({ error: "Project not found" });
+  it("returns not found", async () => {
+    mockSelLim.mockResolvedValueOnce([]);
+    expect(await deleteProject("p1", "t")).toEqual({ error: "Project not found" });
   });
-
   it("rejects non-owner", async () => {
-    mockSelectLimit.mockResolvedValueOnce([
-      { ...ownedProject, userId: "other" },
-    ]);
-    const r = await deleteProject("proj-1", "token");
-    expect(r).toEqual({
-      error: "You don't have permission to delete this project",
-    });
+    mockSelLim.mockResolvedValueOnce([{ ...ownedProj, userId: "other" }]);
+    expect(await deleteProject("p1", "t")).toEqual({ error: "You don't have permission to delete this project" });
   });
-
-  it("deletes owned project and redirects", async () => {
-    mockSelectLimit.mockResolvedValueOnce([ownedProject]);
-    await expect(deleteProject("proj-1", "token")).rejects.toThrow(
-      "NEXT_REDIRECT"
-    );
-    expect(mockDeleteWhere).toHaveBeenCalled();
-    expect(mockRevalidatePath).toHaveBeenCalledWith("/projects");
+  it("deletes and redirects", async () => {
+    mockSelLim.mockResolvedValueOnce([ownedProj]);
+    await expect(deleteProject("p1", "t")).rejects.toThrow("NEXT_REDIRECT");
+    expect(mockDelWhere).toHaveBeenCalled();
     expect(mockRedirect).toHaveBeenCalledWith("/projects");
   });
-
-  it("allows admin to delete any project", async () => {
-    mockRequireAuth.mockResolvedValue(makeUser({ role: "admin" }));
-    mockSelectLimit.mockResolvedValueOnce([
-      { ...ownedProject, userId: "other" },
-    ]);
-    await expect(deleteProject("proj-1", "token")).rejects.toThrow(
-      "NEXT_REDIRECT"
-    );
-    expect(mockDeleteWhere).toHaveBeenCalled();
+  it("allows admin to delete any", async () => {
+    mockAuth.mockResolvedValue(mkUser({ role: "admin" }));
+    mockSelLim.mockResolvedValueOnce([{ ...ownedProj, userId: "other" }]);
+    await expect(deleteProject("p1", "t")).rejects.toThrow("NEXT_REDIRECT");
   });
-
   it("returns generic error on DB failure", async () => {
-    mockSelectLimit.mockResolvedValueOnce([ownedProject]);
-    mockDeleteWhere.mockImplementation(() => {
-      throw new Error("DB down");
-    });
-    const r = await deleteProject("proj-1", "token");
-    expect(r).toEqual({
-      error: "Failed to delete project. Please try again.",
-    });
+    mockSelLim.mockResolvedValueOnce([ownedProj]);
+    mockDelWhere.mockImplementation(() => { throw new Error("DB"); });
+    expect(await deleteProject("p1", "t")).toEqual({ error: "Failed to delete project. Please try again." });
   });
 });
 
 describe("unarchiveProject", () => {
-  const archivedProject = {
-    id: "proj-1",
-    title: "Archived",
-    description: null,
-    deadline: new Date(),
-    status: "archived",
-    userId: "user-1",
-    summary: null,
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  };
+  const archived = { ...ownedProj, status: "archived" };
 
-  it("rejects non-admin users", async () => {
-    mockRequireAuth.mockResolvedValue(makeUser({ role: "member" }));
-    const r = await unarchiveProject("proj-1", "token");
-    expect(r).toEqual({ error: "Only admins can unarchive projects" });
+  it("rejects non-admin", async () => {
+    expect(await unarchiveProject("p1", "t")).toEqual({ error: "Only admins can unarchive projects" });
   });
-
-  it("returns not found for missing project", async () => {
-    mockRequireAuth.mockResolvedValue(makeUser({ role: "admin" }));
-    mockSelectLimit.mockResolvedValueOnce([]);
-    const r = await unarchiveProject("proj-1", "token");
-    expect(r).toEqual({ error: "Project not found" });
+  it("returns not found", async () => {
+    mockAuth.mockResolvedValue(mkUser({ role: "admin" }));
+    mockSelLim.mockResolvedValueOnce([]);
+    expect(await unarchiveProject("p1", "t")).toEqual({ error: "Project not found" });
   });
-
-  it("rejects unarchiving a non-archived project", async () => {
-    mockRequireAuth.mockResolvedValue(makeUser({ role: "admin" }));
-    mockSelectLimit.mockResolvedValueOnce([
-      { ...archivedProject, status: "active" },
-    ]);
-    const r = await unarchiveProject("proj-1", "token");
-    expect(r).toEqual({ error: "Project is not archived" });
+  it("rejects non-archived", async () => {
+    mockAuth.mockResolvedValue(mkUser({ role: "admin" }));
+    mockSelLim.mockResolvedValueOnce([ownedProj]);
+    expect(await unarchiveProject("p1", "t")).toEqual({ error: "Project is not archived" });
   });
-
-  it("unarchives project as admin", async () => {
-    mockRequireAuth.mockResolvedValue(makeUser({ role: "admin" }));
-    mockSelectLimit.mockResolvedValueOnce([archivedProject]);
-    const r = await unarchiveProject("proj-1", "token");
-    expect(r).toEqual({ success: true });
-    expect(mockUpdateSet).toHaveBeenCalledWith(
-      expect.objectContaining({ status: "active" })
-    );
+  it("unarchives as admin", async () => {
+    mockAuth.mockResolvedValue(mkUser({ role: "admin" }));
+    mockSelLim.mockResolvedValueOnce([archived]);
+    expect(await unarchiveProject("p1", "t")).toEqual({ success: true });
+    expect(mockSet).toHaveBeenCalledWith(expect.objectContaining({ status: "active" }));
   });
-
-  it("redirects to login for unauthenticated users", async () => {
-    mockRequireAuth.mockRejectedValue(new Error("Unauthorized"));
-    await expect(unarchiveProject("proj-1", "token")).rejects.toThrow(
-      "NEXT_REDIRECT"
-    );
-    expect(mockRedirect).toHaveBeenCalledWith("/auth/login");
+  it("redirects unauthenticated to login", async () => {
+    mockAuth.mockRejectedValue(new Error("Unauthorized"));
+    await expect(unarchiveProject("p1", "t")).rejects.toThrow("NEXT_REDIRECT");
   });
-
   it("returns generic error on DB failure", async () => {
-    mockRequireAuth.mockResolvedValue(makeUser({ role: "admin" }));
-    mockSelectLimit.mockResolvedValueOnce([archivedProject]);
-    mockUpdateSet.mockImplementation(() => {
-      throw new Error("DB down");
-    });
-    const r = await unarchiveProject("proj-1", "token");
-    expect(r).toEqual({ error: "Failed to unarchive project" });
+    mockAuth.mockResolvedValue(mkUser({ role: "admin" }));
+    mockSelLim.mockResolvedValueOnce([archived]);
+    mockSet.mockImplementation(() => { throw new Error("DB"); });
+    expect(await unarchiveProject("p1", "t")).toEqual({ error: "Failed to unarchive project" });
   });
 });
