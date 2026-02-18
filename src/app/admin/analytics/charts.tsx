@@ -1,5 +1,6 @@
 "use client";
 
+import { memo } from "react";
 import {
   ResponsiveContainer, LineChart, Line, BarChart, Bar,
   XAxis, YAxis, Tooltip, Legend, CartesianGrid,
@@ -23,7 +24,7 @@ function EmptyCard({ title }: { title: string }) {
   );
 }
 
-export function ProposalTrendChart({ data }: { data: TrendPoint[] }) {
+export const ProposalTrendChart = memo(function ProposalTrendChart({ data }: { data: TrendPoint[] }) {
   const { t } = useLocale();
   const title = t("analytics.proposalTrend");
   if (data.length === 0) return <EmptyCard title={title} />;
@@ -45,9 +46,9 @@ export function ProposalTrendChart({ data }: { data: TrendPoint[] }) {
       </CardContent>
     </Card>
   );
-}
+});
 
-export function VoteTrendChart({ data }: { data: VotePoint[] }) {
+export const VoteTrendChart = memo(function VoteTrendChart({ data }: { data: VotePoint[] }) {
   const { t } = useLocale();
   const title = t("analytics.voteTrend");
   if (data.length === 0) return <EmptyCard title={title} />;
@@ -71,9 +72,9 @@ export function VoteTrendChart({ data }: { data: VotePoint[] }) {
       </CardContent>
     </Card>
   );
-}
+});
 
-export function UserGrowthChart({ data }: { data: TrendPoint[] }) {
+export const UserGrowthChart = memo(function UserGrowthChart({ data }: { data: TrendPoint[] }) {
   const { t } = useLocale();
   const title = t("analytics.userGrowth");
   if (data.length === 0) return <EmptyCard title={title} />;
@@ -95,9 +96,9 @@ export function UserGrowthChart({ data }: { data: TrendPoint[] }) {
       </CardContent>
     </Card>
   );
-}
+});
 
-export function ProjectHealthChart({ data }: { data: ProjectPoint[] }) {
+export const ProjectHealthChart = memo(function ProjectHealthChart({ data }: { data: ProjectPoint[] }) {
   const { t } = useLocale();
   const title = t("analytics.projectHealth");
   if (data.length === 0) return <EmptyCard title={title} />;
@@ -122,9 +123,9 @@ export function ProjectHealthChart({ data }: { data: ProjectPoint[] }) {
       </CardContent>
     </Card>
   );
-}
+});
 
-export function EngagementByDayChart({ data }: { data: DayPoint[] }) {
+export const EngagementByDayChart = memo(function EngagementByDayChart({ data }: { data: DayPoint[] }) {
   const { t } = useLocale();
   const title = t("analytics.engagementByDay");
   if (data.every((d) => d.count === 0)) return <EmptyCard title={title} />;
@@ -146,9 +147,9 @@ export function EngagementByDayChart({ data }: { data: DayPoint[] }) {
       </CardContent>
     </Card>
   );
-}
+});
 
-export function ActivityTrendChart({ data }: { data: ActivityPoint[] }) {
+export const ActivityTrendChart = memo(function ActivityTrendChart({ data }: { data: ActivityPoint[] }) {
   const { t } = useLocale();
   const title = t("analytics.activityTrend");
   if (data.length === 0) return <EmptyCard title={title} />;
@@ -170,4 +171,4 @@ export function ActivityTrendChart({ data }: { data: ActivityPoint[] }) {
       </CardContent>
     </Card>
   );
-}
+});

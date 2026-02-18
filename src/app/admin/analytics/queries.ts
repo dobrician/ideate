@@ -1,9 +1,12 @@
 import { db } from "@/db";
 import { users, projects, proposals, votes, comments } from "@/db/schema";
-import { sql, asc, desc, gte, count } from "drizzle-orm";
+import { sql, asc, desc, gte, count, eq } from "drizzle-orm";
 
-const thirtyDaysAgo = () => new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
-const ninetyDaysAgo = () => new Date(Date.now() - 90 * 24 * 60 * 60 * 1000);
+const DAYS_30 = 30 * 24 * 60 * 60 * 1000;
+const DAYS_90 = 90 * 24 * 60 * 60 * 1000;
+
+const thirtyDaysAgo = () => new Date(Date.now() - DAYS_30);
+const ninetyDaysAgo = () => new Date(Date.now() - DAYS_90);
 
 export async function getAnalyticsData() {
   const d30 = thirtyDaysAgo();
@@ -13,7 +16,7 @@ export async function getAnalyticsData() {
 
   const [
     totals, proposalTrend, voteTrend, userGrowth,
-    projectHealth, topContributors, engagementByDay,
+    projectHealth, activityByDay, engagementByDay,
   ] = await Promise.all([
     db.select({
       users: sql<number>`(SELECT COUNT(*) FROM users)`,
@@ -54,17 +57,23 @@ export async function getAnalyticsData() {
       .groupBy(sql`strftime('%Y-W%W', created_at, 'unixepoch')`)
       .orderBy(asc(sql`strftime('%Y-W%W', created_at, 'unixepoch')`)),
 
-    // Project health: active projects with proposals + votes counts
+    // Project health: use LEFT JOINs instead of correlated subqueries
     db.select({
       id: projects.id,
       title: projects.title,
       status: projects.status,
-      proposalCount: sql<number>`(SELECT COUNT(*) FROM proposals WHERE proposals.project_id = projects.id)`,
-      voteCount: sql<number>`(SELECT COUNT(*) FROM votes WHERE votes.proposal_id IN (SELECT id FROM proposals WHERE proposals.project_id = projects.id))`,
-      commentCount: sql<number>`(SELECT COUNT(*) FROM comments WHERE comments.project_id = projects.id)`,
-    }).from(projects).orderBy(desc(sql`proposalCount + voteCount + commentCount`)).limit(10),
+      proposalCount: sql<number>`COUNT(DISTINCT proposals.id)`,
+      voteCount: sql<number>`COUNT(DISTINCT votes.proposal_id || '-' || votes.user_id)`,
+      commentCount: sql<number>`COUNT(DISTINCT comments.id)`,
+    }).from(projects)
+      .leftJoin(proposals, eq(proposals.projectId, projects.id))
+      .leftJoin(votes, eq(votes.proposalId, proposals.id))
+      .leftJoin(comments, eq(comments.projectId, projects.id))
+      .groupBy(projects.id)
+      .orderBy(desc(sql`COUNT(DISTINCT proposals.id) + COUNT(DISTINCT votes.proposal_id || '-' || votes.user_id) + COUNT(DISTINCT comments.id)`))
+      .limit(10),
 
-    // Top contributors (last 30 days)
+    // Activity per day (last 30 days) — single UNION ALL query
     db.select({
       date: sql<string>`date(created_at, 'unixepoch')`.as("date"),
       count: sql<number>`COUNT(*)`.as("count"),
@@ -103,7 +112,7 @@ export async function getAnalyticsData() {
       title: r.title.length > 20 ? r.title.slice(0, 20) + "..." : r.title,
       proposals: Number(r.proposalCount), votes: Number(r.voteCount), comments: Number(r.commentCount),
     })),
-    activityTrend: topContributors.map((r) => ({ date: r.date, count: Number(r.count) })),
+    activityTrend: activityByDay.map((r) => ({ date: r.date, count: Number(r.count) })),
     engagementByDay: dayNames.map((name, i) => ({
       day: name,
       count: Number(engagementByDay.find((r) => Number(r.dayOfWeek) === i)?.count ?? 0),
