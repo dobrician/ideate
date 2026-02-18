@@ -12,7 +12,7 @@
 - [x] **Goal 5: Search keyboard navigation** — ArrowUp/Down/Enter handlers, fix `aria-selected` tracking, remove misleading static ARIA (Accessibility, Section 13)
 - [x] **Goal 6: Profile change-password flow** — change-password form with current-password verification (Feature, Section 13)
 - [x] **Goal 7: SSO foundation (OIDC)** — OpenID Connect login with configurable provider, link accounts by email (Feature, Section 13)
-- [ ] **Goal 8: Improve webhook resilience** — cover error retry paths in tests, dead-letter logging for failed deliveries (Testing + Reliability, Section 13)
+- [x] **Goal 8: Improve webhook resilience** — cover error retry paths in tests, dead-letter logging for failed deliveries (Testing + Reliability, Section 13)
 
 ## Notes
 
