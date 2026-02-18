@@ -146,7 +146,7 @@ export function AttachmentUpload({
                   size="sm"
                   className="h-6 w-6 p-0 text-muted-foreground hover:text-red-700 dark:hover:text-red-400"
                   onClick={() => deleteAttachment(att.id)}
-                  title={t("attachments.delete")}
+                  aria-label={t("attachments.delete")}
                 >
                   <X className="h-3 w-3" />
                 </Button>

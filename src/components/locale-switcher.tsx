@@ -47,7 +47,7 @@ export function LocaleSwitcher() {
       size="sm"
       onClick={toggle}
       className="min-h-[44px] min-w-[44px] gap-1 text-xs font-medium"
-      title={locale === "en" ? t("locale.switchToRo") : t("locale.switchToEn")}
+      aria-label={locale === "en" ? t("locale.switchToRo") : t("locale.switchToEn")}
     >
       <Globe className="h-3.5 w-3.5" />
       {locale.toUpperCase()}

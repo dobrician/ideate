@@ -30,7 +30,7 @@ export function ExportButtons({ projectId }: ExportButtonsProps) {
         variant="ghost"
         size="sm"
         onClick={() => handleExport("pdf")}
-        title={t("export.pdfTooltip")}
+        aria-label={t("export.pdfTooltip")}
       >
         <Download className="mr-1 h-3 w-3" />
         {t("export.pdf")}
@@ -39,7 +39,7 @@ export function ExportButtons({ projectId }: ExportButtonsProps) {
         variant="ghost"
         size="sm"
         onClick={() => handleExport("csv")}
-        title={t("export.csvTooltip")}
+        aria-label={t("export.csvTooltip")}
       >
         <Download className="mr-1 h-3 w-3" />
         {t("export.csv")}
