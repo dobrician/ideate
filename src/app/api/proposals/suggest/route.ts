@@ -4,6 +4,7 @@ import { completeWithFallback, isAiConfigured, isAiRateLimited } from "@/lib/llm
 import { checkRateLimit } from "@/lib/rate-limit";
 import { getClientIp } from "@/lib/request-utils";
 import { z } from "zod";
+import { logger } from "@/lib/logger";
 
 const LOCALE = process.env.LOCALE || "en";
 
@@ -179,7 +180,8 @@ export async function POST(request: Request) {
     }
 
     return NextResponse.json({ proposals, modelUsed });
-  } catch {
+  } catch (error) {
+    logger.error({ err: error }, "AI suggestion generation failed");
     return NextResponse.json(
       { proposals: [], error: "Failed to generate suggestions" },
       { status: 500 }

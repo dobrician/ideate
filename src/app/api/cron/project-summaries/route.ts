@@ -1,11 +1,19 @@
 import { NextRequest, NextResponse } from "next/server";
+import { timingSafeEqual } from "crypto";
 import { db } from "@/db";
 import { projects } from "@/db/schema";
 import { isNull } from "drizzle-orm";
 import { generateProjectSummary } from "@/lib/project-summary";
 
-const CRON_SECRET = process.env.CRON_SECRET;
 const BATCH_SIZE = 5;
+
+function verifyCronAuth(authHeader: string | null, secret: string): boolean {
+  const expected = `Bearer ${secret}`;
+  const a = Buffer.from(authHeader ?? "", "utf-8");
+  const b = Buffer.from(expected, "utf-8");
+  if (a.length !== b.length) return false;
+  return timingSafeEqual(a, b);
+}
 
 /**
  * GET /api/cron/project-summaries
@@ -13,7 +21,8 @@ const BATCH_SIZE = 5;
  * Auth: Bearer token matching CRON_SECRET env var.
  */
 export async function GET(request: NextRequest) {
-  if (!CRON_SECRET) {
+  const cronSecret = process.env.CRON_SECRET;
+  if (!cronSecret) {
     return NextResponse.json(
       { error: "CRON_SECRET not configured" },
       { status: 500 }
@@ -21,7 +30,7 @@ export async function GET(request: NextRequest) {
   }
 
   const auth = request.headers.get("authorization");
-  if (auth !== `Bearer ${CRON_SECRET}`) {
+  if (!verifyCronAuth(auth, cronSecret)) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 

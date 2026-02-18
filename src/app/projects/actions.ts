@@ -7,6 +7,7 @@ import { db } from "@/db";
 import { projects } from "@/db/schema";
 import { canManageResource } from "@/lib/rbac";
 import type { Role } from "@/lib/rbac";
+import { logger } from "@/lib/logger";
 import { eq } from "drizzle-orm";
 import { randomUUID } from "crypto";
 import { logAudit } from "@/lib/audit";
@@ -71,7 +72,7 @@ export async function createProject(formData: FormData) {
       details: JSON.stringify({ title }),
     });
 
-    fireWebhookEvent("project.created", { projectId, title, userId: user.id }).catch(() => {});
+    fireWebhookEvent("project.created", { projectId, title, userId: user.id }).catch((err) => logger.warn({ err }, "Webhook delivery failed"));
 
     revalidatePath("/projects");
     redirect(`/projects/${projectId}`);
@@ -136,7 +137,7 @@ export async function updateProject(projectId: string, formData: FormData) {
     });
 
     if (status === "archived" && existingProject[0].status !== "archived") {
-      fireWebhookEvent("project.archived", { projectId, title, userId: user.id }).catch(() => {});
+      fireWebhookEvent("project.archived", { projectId, title, userId: user.id }).catch((err) => logger.warn({ err }, "Webhook delivery failed"));
     }
 
     revalidatePath(`/projects/${projectId}`);

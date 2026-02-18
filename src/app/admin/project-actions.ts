@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { db } from "@/db";
 import { projects, tags, projectTags } from "@/db/schema";
 import type { Role } from "@/lib/rbac";
+import { logger } from "@/lib/logger";
 import { eq, inArray, and } from "drizzle-orm";
 import { logAudit } from "@/lib/audit";
 import { fireWebhookEvent } from "@/lib/webhooks";
@@ -34,7 +35,7 @@ export async function bulkArchiveProjects(
     });
 
     for (const pid of projectIds) {
-      fireWebhookEvent("project.archived", { projectId: pid, userId: user.id }).catch(() => {});
+      fireWebhookEvent("project.archived", { projectId: pid, userId: user.id }).catch((err) => logger.warn({ err }, "Webhook delivery failed"));
     }
 
     revalidatePath("/admin");

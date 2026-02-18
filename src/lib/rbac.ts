@@ -64,7 +64,14 @@ export async function loadCustomRoles(): Promise<void> {
   const rows = await db.select().from(customRoles);
   const map = new Map<string, ReadonlySet<Permission>>();
   for (const row of rows) {
-    const perms = JSON.parse(row.permissions) as string[];
+    let perms: string[];
+    try {
+      perms = JSON.parse(row.permissions) as string[];
+    } catch {
+      const { logger } = await import("@/lib/logger");
+      logger.error({ role: row.name }, "Malformed permissions JSON in custom role");
+      continue;
+    }
     const valid = perms.filter((p): p is Permission =>
       ALL_PERMISSIONS.includes(p as Permission)
     );

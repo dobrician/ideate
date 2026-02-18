@@ -6,6 +6,7 @@ import { db } from "@/db";
 import { proposals, votes } from "@/db/schema";
 import { canManageResource } from "@/lib/rbac";
 import type { Role } from "@/lib/rbac";
+import { logger } from "@/lib/logger";
 import { buildProposalSummary } from "@/lib/ai";
 import { emitVoteUpdate } from "@/lib/vote-update";
 import { eq, and } from "drizzle-orm";
@@ -94,7 +95,7 @@ export async function createProposal(
       details: JSON.stringify({ title, projectId }),
     });
 
-    fireWebhookEvent("proposal.created", { proposalId, title, projectId, userId: user.id }).catch(() => {});
+    fireWebhookEvent("proposal.created", { proposalId, title, projectId, userId: user.id }).catch((err) => logger.warn({ err }, "Webhook delivery failed"));
 
     revalidatePath(`/projects/${projectId}`);
     return { success: true };
@@ -186,7 +187,7 @@ export async function castVote(
 
     await emitVoteUpdate(proposalId, projectId);
     notifyVote(proposalId, projectId, user.id, value);
-    fireWebhookEvent("vote.cast", { proposalId, projectId, userId: user.id, value }).catch(() => {});
+    fireWebhookEvent("vote.cast", { proposalId, projectId, userId: user.id, value }).catch((err) => logger.warn({ err }, "Webhook delivery failed"));
     revalidatePath(`/projects/${projectId}`);
     return { success: true };
   });

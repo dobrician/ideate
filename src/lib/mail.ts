@@ -5,12 +5,11 @@ import { dirname } from "path";
 import { logger } from "@/lib/logger";
 import { sendViaResend } from "@/lib/mail-resend";
 
-const SMTP_HOST = process.env.SMTP_HOST || "";
-const SMTP_PORT = parseInt(process.env.SMTP_PORT || "587", 10);
-const SMTP_USER = process.env.SMTP_USER || "";
-const SMTP_PASS = process.env.SMTP_PASS || "";
-const SMTP_FROM = process.env.SMTP_FROM || "idea@surcod.ro";
-const MAIL_LOG_FILE = process.env.MAIL_LOG_FILE || "";
+function getSmtpHost(): string { return process.env.SMTP_HOST || ""; }
+function getSmtpPort(): number { return parseInt(process.env.SMTP_PORT || "587", 10); }
+function getSmtpUser(): string { return process.env.SMTP_USER || ""; }
+function getSmtpPass(): string { return process.env.SMTP_PASS || ""; }
+function getSmtpFrom(): string { return process.env.SMTP_FROM || "idea@surcod.ro"; }
 
 function isCloudflare(): boolean {
   return process.env.DEPLOY_TARGET === "cloudflare";
@@ -18,7 +17,7 @@ function isCloudflare(): boolean {
 
 function logMail(to: string, type: string, url: string): void {
   if (isCloudflare()) return;
-  const logFile = MAIL_LOG_FILE || (process.env.NODE_ENV !== "production" ? "/tmp/ideate-mail.log" : "");
+  const logFile = process.env.MAIL_LOG_FILE || (process.env.NODE_ENV !== "production" ? "/tmp/ideate-mail.log" : "");
   if (!logFile) return;
   try {
     mkdirSync(dirname(logFile), { recursive: true });
@@ -30,7 +29,7 @@ function logMail(to: string, type: string, url: string): void {
 }
 
 function validateSmtpConfig(): void {
-  if (!SMTP_HOST || !SMTP_USER || !SMTP_PASS) {
+  if (!getSmtpHost() || !getSmtpUser() || !getSmtpPass()) {
     throw new Error(
       "SMTP configuration required: SMTP_HOST, SMTP_USER, SMTP_PASS"
     );
@@ -44,13 +43,17 @@ let transporter: Transporter | null = null;
  * Use for optional sends like notifications where missing SMTP is acceptable.
  */
 export function getSmtpTransporter(): Transporter | null {
-  if (!SMTP_HOST || !SMTP_USER || !SMTP_PASS) return null;
+  const host = getSmtpHost();
+  const user = getSmtpUser();
+  const pass = getSmtpPass();
+  if (!host || !user || !pass) return null;
   if (!transporter) {
+    const port = getSmtpPort();
     transporter = nodemailer.createTransport({
-      host: SMTP_HOST,
-      port: SMTP_PORT,
-      secure: SMTP_PORT === 465,
-      auth: { user: SMTP_USER, pass: SMTP_PASS },
+      host,
+      port,
+      secure: port === 465,
+      auth: { user, pass },
     });
   }
   return transporter;
@@ -71,7 +74,7 @@ interface EmailPayload {
 async function sendEmail(payload: EmailPayload, logType: string, logUrl: string, errorMsg: string): Promise<void> {
   if (isCloudflare()) {
     try {
-      await sendViaResend({ from: SMTP_FROM, ...payload });
+      await sendViaResend({ from: getSmtpFrom(), ...payload });
     } catch (error) {
       logger.error({ err: error }, errorMsg);
       throw error;
@@ -79,7 +82,7 @@ async function sendEmail(payload: EmailPayload, logType: string, logUrl: string,
   } else {
     const transport = getTransporter();
     try {
-      await transport.sendMail({ from: SMTP_FROM, ...payload });
+      await transport.sendMail({ from: getSmtpFrom(), ...payload });
     } catch (error) {
       logger.error({ err: error }, errorMsg);
       throw new Error(errorMsg);
