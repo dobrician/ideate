@@ -4,6 +4,12 @@ Reverse chronological. Click each sprint for full details.
 
 ---
 
+### ✅ [Sprint 00 — Accessibility Polish, Locale Generics & Coverage Gaps](Sprint-00) *(2026-02-18)*
+**Focus:** Icon button a11y, redundant title cleanup, locale-generic date formatting, close coverage gaps (components/db/profile/projects), proxy.ts tests
+**Stats:** 8/8 goals | TBD tests | A11y polish, locale generics, coverage improvements
+
+---
+
 ### ✅ [Sprint 38 — Cloudflare, Coverage, Accessibility & SSO](Sprint-38) *(2026-02-18)*
 **Focus:** Cloudflare deployment, close coverage gaps (digest/utils/mail), search keyboard a11y, change-password, OIDC SSO, webhook resilience
 **Stats:** 8/8 goals | 1138 tests | All Sprint 38 analysis goals verified complete
