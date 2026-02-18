@@ -25,7 +25,9 @@ type AuditAction =
   | "bulk_delete"
   | "bulk_archive"
   | "oidc_login"
-  | "oidc_register";
+  | "oidc_register"
+  | "request_email_change"
+  | "change_email";
 
 type AuditEntity =
   | "project"

@@ -251,6 +251,17 @@ export const ro: Record<string, string> = {
   "profile.tabProposals": "Propunerile Mele",
   "profile.showMore": "Afișează mai multe",
   "profile.showLess": "Afișează mai puține",
+  "profile.changeEmail": "Schimbă Email-ul",
+  "profile.currentEmailLabel": "Email curent",
+  "profile.newEmail": "Adresa de Email Nouă",
+  "profile.newEmailPlaceholder": "Introduceți noul email",
+  "profile.emailChangeHint": "Un link de verificare va fi trimis la noua adresă.",
+  "profile.sendVerification": "Trimite Verificare",
+  "profile.sendingVerification": "Se trimite...",
+  "profile.emailChangeSent": "Email de verificare trimis! Verificați noua căsuță.",
+  "profile.sameEmail": "Noul email este identic cu cel curent",
+  "profile.emailInUse": "Acest email este deja utilizat",
+  "profile.emailChangeFailed": "Trimiterea emailului de verificare a eșuat",
 
   // Admin
   "admin.title": "Panou de Administrare",

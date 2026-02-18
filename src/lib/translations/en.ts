@@ -241,6 +241,17 @@ export const en: Record<string, string> = {
   "profile.tabProposals": "My Proposals",
   "profile.showMore": "Show more",
   "profile.showLess": "Show less",
+  "profile.changeEmail": "Change Email",
+  "profile.currentEmailLabel": "Current email",
+  "profile.newEmail": "New Email Address",
+  "profile.newEmailPlaceholder": "Enter your new email",
+  "profile.emailChangeHint": "A verification link will be sent to the new address.",
+  "profile.sendVerification": "Send Verification",
+  "profile.sendingVerification": "Sending...",
+  "profile.emailChangeSent": "Verification email sent! Check your new inbox.",
+  "profile.sameEmail": "New email is the same as current email",
+  "profile.emailInUse": "This email is already in use",
+  "profile.emailChangeFailed": "Failed to send verification email",
 
   // Admin
   "admin.title": "Admin Panel",

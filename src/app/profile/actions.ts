@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
+import jwt from "jsonwebtoken";
 import { db } from "@/db";
 import { users, notificationPreferences } from "@/db/schema";
 import { requireAuth } from "@/lib/auth";
@@ -9,6 +10,7 @@ import { eq } from "drizzle-orm";
 import { logAudit } from "@/lib/audit";
 import { requireCsrfToken } from "@/lib/csrf";
 import { validatePassword, verifyPassword, hashPassword } from "@/lib/password";
+import { sendEmailChangeEmail } from "@/lib/mail";
 
 const profileSchema = z.object({
   firstName: z.string().max(100, "First name too long").optional(),
@@ -174,5 +176,69 @@ export async function updateNotificationPreferences(
       return { error: "You must be logged in" };
     }
     return { error: "Failed to update notification preferences" };
+  }
+}
+
+const emailChangeSchema = z.object({
+  newEmail: z.string().email("Invalid email address").max(255),
+});
+
+/**
+ * Request email change — sends verification link to the new email address
+ */
+export async function requestEmailChange(formData: FormData) {
+  try {
+    await requireCsrfToken(formData.get("csrfToken") as string);
+    const user = await requireAuth();
+
+    const parsed = emailChangeSchema.safeParse({
+      newEmail: (formData.get("newEmail") as string)?.toLowerCase().trim(),
+    });
+    if (!parsed.success) {
+      return { error: parsed.error.issues[0].message };
+    }
+
+    const { newEmail } = parsed.data;
+
+    if (newEmail === user.email) {
+      return { error: "sameEmail" };
+    }
+
+    // Check if email is already in use
+    const existing = await db.select({ id: users.id })
+      .from(users)
+      .where(eq(users.email, newEmail))
+      .limit(1);
+
+    if (existing.length > 0) {
+      return { error: "emailInUse" };
+    }
+
+    const secret = process.env.JWT_SECRET || "";
+    const appUrl = process.env.APP_URL || "http://localhost:3000";
+
+    const token = jwt.sign(
+      { userId: user.id, newEmail, type: "email-change" },
+      secret,
+      { expiresIn: "1h", issuer: "ideate", audience: "ideate" }
+    );
+
+    const verifyLink = `${appUrl}/api/profile/confirm-email?token=${token}`;
+    await sendEmailChangeEmail(newEmail, verifyLink);
+
+    await logAudit({
+      userId: user.id,
+      action: "request_email_change",
+      entity: "user",
+      entityId: user.id,
+      details: `Requested change to ${newEmail}`,
+    });
+
+    return { success: true };
+  } catch (error) {
+    if (error instanceof Error && error.message === "Unauthorized") {
+      return { error: "You must be logged in" };
+    }
+    return { error: "Failed to request email change" };
   }
 }

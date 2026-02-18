@@ -245,6 +245,35 @@ export async function sendInvitationEmail(
 }
 
 /**
+ * Send email change verification email to the NEW email address
+ */
+export async function sendEmailChangeEmail(
+  newEmail: string,
+  verifyLink: string
+): Promise<void> {
+  const transport = getTransporter();
+  const subject = "Confirm your new email - Ideate";
+  const text = `You requested to change your Ideate email to this address.\n\nClick the link below to confirm:\n\n${verifyLink}\n\nThis link expires in 1 hour. If you didn't request this, ignore this email.`;
+  const html = `
+    <!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"></head>
+    <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
+      <h1 style="color: #0070f3; margin-bottom: 24px;">Confirm Email Change</h1>
+      <p>You requested to change your Ideate email to this address. Click below to confirm:</p>
+      <p style="margin: 32px 0;"><a href="${verifyLink}" style="background-color: #0070f3; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; display: inline-block; font-weight: 600;">Confirm Email</a></p>
+      <p style="color: #666; font-size: 14px;">${verifyLink}</p>
+      <hr style="border: none; border-top: 1px solid #eee; margin: 32px 0;">
+      <p style="color: #999; font-size: 12px;">This link expires in 1 hour. If you didn't request this, ignore this email.</p>
+    </body></html>`;
+  try {
+    await transport.sendMail({ from: SMTP_FROM, to: newEmail, subject, text, html });
+    logMail(newEmail, "email-change", verifyLink);
+  } catch (error) {
+    logger.error({ err: error }, "Failed to send email change verification");
+    throw new Error("Failed to send email change verification");
+  }
+}
+
+/**
  * Verify SMTP connection
  * @returns True if connection successful
  */

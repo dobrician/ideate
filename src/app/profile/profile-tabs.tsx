@@ -9,6 +9,7 @@ import Link from "next/link";
 import { FolderOpen, Lightbulb } from "lucide-react";
 import { ProfileForm } from "./profile-form";
 import { ChangePasswordForm } from "./change-password-form";
+import { ChangeEmailForm } from "./change-email-form";
 import { NotificationSettings } from "./notification-settings";
 import { useLocale } from "@/lib/use-locale";
 import { statusBadgeClass, statusLabel } from "@/lib/status-utils";
@@ -148,6 +149,7 @@ export function ProfileTabs({ user, projects, proposals, notificationPrefs }: Pr
         </Card>
 
         <ProfileForm firstName={user.firstName} lastName={user.lastName} />
+        <ChangeEmailForm currentEmail={user.email} />
       </TabsContent>
 
       <TabsContent value="security">
