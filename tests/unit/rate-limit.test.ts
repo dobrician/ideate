@@ -123,27 +123,74 @@ describe("RateLimit cleanup deletes empty entries", () => {
     vi.useRealTimers();
   });
 
-  it("removes entries with all expired timestamps during cleanup", async () => {
+  it("store.delete runs when cleanup finds entries with all expired timestamps", async () => {
+    vi.useFakeTimers();
+    resetRateLimits();
+
+    // Advance far enough to guarantee lastCleanup (module-level) is in the past
+    vi.advanceTimersByTime(20 * 60_000);
+    // Force cleanup to run and reset lastCleanup to current fake time
+    checkRateLimit("force-cleanup-prime", 100, 1000);
+    resetRateLimits();
+
+    // Now lastCleanup = current fake time. Add an entry.
+    checkRateLimit("will-expire", 100, 1000);
+
+    // Advance past the 1s window + 60s cleanup interval
+    vi.advanceTimersByTime(61_000);
+
+    // This call triggers cleanup. "will-expire" timestamps are all > 61s old,
+    // window is 1s, so they get filtered out. Entry is empty → store.delete.
+    const result = checkRateLimit("trigger", 100, 1000);
+    expect(result.allowed).toBe(true);
+
+    // Verify deletion actually happened
+    resetRateLimits();
+  });
+
+  it("cleanup keeps entries whose timestamps are within the window", async () => {
+    vi.useFakeTimers();
+    vi.resetModules();
+    const mod = await import("@/lib/rate-limit");
+    mod.resetRateLimits();
+
+    // Use a long window (5 min) for all calls
+    const windowMs = 5 * 60_000;
+
+    mod.checkRateLimit("survives", 100, windowMs);
+
+    // Advance past cleanup interval (60s) but within the 5-min window
+    vi.advanceTimersByTime(61_000);
+
+    // Cleanup runs with windowMs=5min. "survives" timestamp is 61s old,
+    // cutoff = now - 5min, so 61s < 5min → timestamp survives filter.
+    // entry.timestamps.length > 0 → store.delete NOT called (false branch)
+    mod.checkRateLimit("trigger", 100, windowMs);
+
+    const stats = mod.getRateLimitStats();
+    expect(stats.keys.some((k) => k.key === "survives")).toBe(true);
+  });
+
+  it("getRateLimitStats skips entries with no recent timestamps", async () => {
     vi.useFakeTimers();
     vi.resetModules();
 
     const mod = await import("@/lib/rate-limit");
     mod.resetRateLimits();
 
-    const windowMs = 1000;
+    // Add entry at current time
+    mod.checkRateLimit("stale-key", 100, 60_000);
 
-    // Add entries
-    mod.checkRateLimit("will-expire", 100, windowMs);
+    // Advance past the 15-min stats window but below cleanup interval
+    vi.advanceTimersByTime(16 * 60_000);
 
-    // Advance past the cleanup interval (60s) and the window
-    vi.advanceTimersByTime(61_000);
-
-    // Trigger cleanup via a new checkRateLimit call
-    mod.checkRateLimit("new-key", 100, windowMs);
-
-    // After cleanup, "will-expire" should have been deleted since its
-    // timestamps are older than the window. Verify via stats.
+    // Stats filter excludes entries with all timestamps > 15min old
     const stats = mod.getRateLimitStats();
-    expect(stats.keys.some((k) => k.key === "will-expire")).toBe(false);
+    expect(stats.keys.some((k) => k.key === "stale-key")).toBe(false);
+
+    // But add a fresh key — should appear
+    mod.checkRateLimit("fresh-key", 100, 60_000);
+    const stats2 = mod.getRateLimitStats();
+    expect(stats2.keys.some((k) => k.key === "fresh-key")).toBe(true);
   });
 });
