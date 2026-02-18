@@ -6,7 +6,7 @@
 ## Goals
 
 - [x] **Goal 1: Fix broken `proposal-list.dom.test.tsx` bar chart assertions** — test expected old 50%-scaled widths but component uses full percentage (60/40/67/33/100); align test with actual rendering (Testing)
-- [ ] **Goal 2: Close branch gap on `app/api/search/route.ts` line 23** — test rate-limit rejection path returning 429 with Retry-After header; currently 91.66% branch (Testing)
+- [x] **Goal 2: Close branch gap on `app/api/search/route.ts` line 23** — test rate-limit rejection path returning 429 with Retry-After header; currently 91.66% branch (Testing)
 - [ ] **Goal 3: Close branch gap on `proxy.ts` line 25** — test token-expiry branch where `payload.exp + 30 < now`; currently 97.05% branch (Testing)
 - [ ] **Goal 4: Close branch gap on `app/api/email-deliverability/route.ts` line 9** — test uncovered conditional; currently 87.5% branch (Testing)
 - [ ] **Goal 5: Close branch gap on `app/profile/actions.ts` lines 235-236** — test fallback values for JWT_SECRET/APP_URL env vars; currently 96.29% branch (Testing)
