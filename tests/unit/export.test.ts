@@ -87,6 +87,40 @@ describe("Export", () => {
       expect(csv).toContain("Eve");
       expect(csv).toContain("Great project!");
     });
+
+    it("should handle null project description", () => {
+      const project = { ...mockProject, description: null, proposals: [] };
+      const csv = generateCsv(project);
+      expect(csv).toContain("Project,Test Project,,");
+    });
+
+    it("should escape double quotes in fields", () => {
+      const project = {
+        ...mockProject,
+        title: 'Say "Hello"',
+        proposals: [],
+      };
+      const csv = generateCsv(project);
+      expect(csv).toContain('"Say ""Hello"""');
+    });
+
+    it("should use summary when description is null", () => {
+      const project = {
+        ...mockProject,
+        proposals: [{
+          title: "P",
+          description: null,
+          summary: "A summary",
+          authorName: "X",
+          createdAt: new Date("2026-02-10"),
+          upvotes: 0,
+          downvotes: 0,
+          comments: [],
+        }],
+      };
+      const csv = generateCsv(project);
+      expect(csv).toContain("A summary");
+    });
   });
 
   describe("generatePdf", () => {
@@ -153,6 +187,27 @@ describe("Export", () => {
           upvotes: 0,
           downvotes: 0,
           comments: [],
+        }],
+      };
+      const buffer = await generatePdf(project);
+      expect(buffer.byteLength).toBeGreaterThan(0);
+    });
+
+    it("should pluralize comments label when proposal has multiple comments", async () => {
+      const project = {
+        ...mockProject,
+        proposals: [{
+          title: "Multi Comment",
+          description: null,
+          summary: null,
+          authorName: "Alice",
+          createdAt: new Date("2026-02-10"),
+          upvotes: 1,
+          downvotes: 0,
+          comments: [
+            { content: "First", authorName: "Bob", createdAt: new Date("2026-02-11") },
+            { content: "Second", authorName: "Eve", createdAt: new Date("2026-02-12") },
+          ],
         }],
       };
       const buffer = await generatePdf(project);
