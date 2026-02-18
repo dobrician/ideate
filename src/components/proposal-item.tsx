@@ -110,10 +110,10 @@ export function ProposalItem({
   return (
     <AccordionItem
       value={proposal.id}
-      className="rounded-lg border bg-card transition-shadow duration-200 data-[state=open]:shadow-md"
+      className="overflow-hidden rounded-lg border bg-card transition-shadow duration-200 data-[state=open]:shadow-md"
     >
       <AccordionTrigger className="py-3 hover:no-underline">
-        <div className="flex w-full flex-col gap-1 px-2 sm:px-4 sm:pr-2">
+        <div className="flex min-w-0 flex-1 flex-col gap-1 px-2 sm:px-4 sm:pr-2">
           <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
             <div className="relative min-w-0 flex-1 overflow-hidden rounded text-left">
               {totalVotes > 0 && (
@@ -170,7 +170,7 @@ export function ProposalItem({
           </div>
           </div>
           {(proposal.description || proposal.summary) && (
-            <p className="truncate text-left text-xs text-muted-foreground/70">
+            <p className="min-w-0 truncate text-left text-xs text-muted-foreground/70">
               {proposal.summary || proposal.description}
             </p>
           )}
