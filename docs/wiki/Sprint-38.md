@@ -11,7 +11,7 @@
 - [x] **Goal 4: Close coverage gap on `lib/mail.ts`** — test HTML email template rendering and edge cases on lines 212-243 (currently 86% stmts)
 - [x] **Goal 5: Search keyboard navigation** — add ArrowUp/Down/Enter handlers to search combobox, fix `aria-selected` tracking, remove misleading static ARIA attributes
 - [x] **Goal 6: Profile change-password flow** — add change-password form to profile page with current-password verification
-- [ ] **Goal 7: SSO foundation (OIDC)** — add OpenID Connect login with a configurable provider (Google as default), linking OIDC accounts to existing users by email
+- [x] **Goal 7: SSO foundation (OIDC)** — add OpenID Connect login with a configurable provider (Google as default), linking OIDC accounts to existing users by email
 - [ ] **Goal 8: Improve webhook resilience** — cover error retry paths in tests, add dead-letter logging for permanently failed deliveries
 
 ## Notes
