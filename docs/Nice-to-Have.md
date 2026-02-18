@@ -22,7 +22,7 @@ Future improvements and feature ideas. Prioritize during sprint planning.
 ## Technical
 - [x] **GitHub Actions CI** — Automated testing on PR *(Sprint 5)*
 - [x] **Structured logging** — Pino JSON logs for observability *(Sprint 15)*
-- [ ] **Error tracking** — Sentry or similar
+- [x] **Error tracking** — Sentry integrated with source maps *(Sprint 00)*
 - [ ] **Performance monitoring** — Core Web Vitals
 - [x] **Database backups** — Automated SQLite snapshots with WAL checkpoint + 7-day rotation *(Sprint 16)*
 - [ ] **MCP integrations** — Research useful Model Context Protocols
