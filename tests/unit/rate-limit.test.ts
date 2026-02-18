@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from "vitest";
-import { checkRateLimit, resetRateLimits } from "@/lib/rate-limit";
+import { checkRateLimit, resetRateLimits, getRateLimitStats } from "@/lib/rate-limit";
 
 describe("RateLimit", () => {
   beforeEach(() => {
@@ -51,5 +51,48 @@ describe("RateLimit", () => {
 
     await new Promise((resolve) => setTimeout(resolve, 150));
     expect(checkRateLimit("expire-test", 1, windowMs).allowed).toBe(true);
+  });
+});
+
+describe("getRateLimitStats", () => {
+  beforeEach(() => {
+    resetRateLimits();
+  });
+
+  it("returns empty stats when store is empty", () => {
+    const stats = getRateLimitStats();
+    expect(stats.totalKeys).toBe(0);
+    expect(stats.keys).toEqual([]);
+  });
+
+  it("returns active keys with hit counts", () => {
+    checkRateLimit("ip:1.2.3.4", 100, 15 * 60_000);
+    checkRateLimit("ip:1.2.3.4", 100, 15 * 60_000);
+    checkRateLimit("ip:5.6.7.8", 100, 15 * 60_000);
+    const stats = getRateLimitStats();
+    expect(stats.totalKeys).toBe(2);
+    const ip1 = stats.keys.find((k) => k.key === "ip:1.2.3.4");
+    expect(ip1?.hitCount).toBe(2);
+    const ip2 = stats.keys.find((k) => k.key === "ip:5.6.7.8");
+    expect(ip2?.hitCount).toBe(1);
+  });
+
+  it("sorts keys by hitCount descending", () => {
+    checkRateLimit("low", 100, 60_000);
+    checkRateLimit("high", 100, 60_000);
+    checkRateLimit("high", 100, 60_000);
+    checkRateLimit("high", 100, 60_000);
+    const stats = getRateLimitStats();
+    expect(stats.keys[0].key).toBe("high");
+    expect(stats.keys[1].key).toBe("low");
+  });
+
+  it("limits to 50 keys maximum", () => {
+    for (let i = 0; i < 60; i++) {
+      checkRateLimit(`key-${i}`, 100, 60_000);
+    }
+    const stats = getRateLimitStats();
+    expect(stats.totalKeys).toBe(60);
+    expect(stats.keys.length).toBe(50);
   });
 });
