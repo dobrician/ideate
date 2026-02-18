@@ -124,6 +124,27 @@ describe("completeWithFallback rate limiting", () => {
 // Basic behavior
 // ---------------------------------------------------------------------------
 
+describe("completeWithFallback cache hit", () => {
+  it("should return cached response without calling fetch", async () => {
+    const { getCachedResponse } = await import("@/lib/llm-cache");
+    vi.mocked(getCachedResponse).mockResolvedValueOnce({
+      response: "cached text",
+      modelUsed: "gemini",
+    });
+
+    const fetchMock = vi.fn<(input: string | URL | Request, init?: RequestInit) => Promise<Response>>();
+    globalThis.fetch = fetchMock;
+
+    const { completeWithFallback } = await loadLLM({
+      GEMINI_API_KEY: "test-key",
+    });
+
+    const result = await completeWithFallback("prompt");
+    expect(result).toEqual({ text: "cached text", modelUsed: "gemini" });
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+});
+
 describe("completeWithFallback basic behavior", () => {
   it("should return null when no API keys are configured", async () => {
     const fetchMock = vi.fn<(input: string | URL | Request, init?: RequestInit) => Promise<Response>>();

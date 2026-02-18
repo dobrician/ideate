@@ -134,6 +134,90 @@ describe("LLM structured logging", () => {
   });
 });
 
+describe("LLM response parsing edge cases", () => {
+  it("should estimate tokens from text length when Gemini metadata missing", async () => {
+    const fetchMock = vi.fn<(input: string | URL | Request, init?: RequestInit) => Promise<Response>>();
+    fetchMock.mockResolvedValue(mockResponse({
+      candidates: [{ content: { parts: [{ text: "hello world" }] } }],
+      usageMetadata: {},
+    }));
+    globalThis.fetch = fetchMock;
+
+    const { completeWithFallback } = await loadLLM({
+      GEMINI_API_KEY: "test-key",
+      OPENAI_API_KEY: undefined,
+    });
+
+    const result = await completeWithFallback("test");
+    expect(result.text).toBe("hello world");
+    expect(result.modelUsed).toBe("gemini");
+  });
+
+  it("should estimate tokens from text length when OpenAI usage missing", async () => {
+    const fetchMock = vi.fn<(input: string | URL | Request, init?: RequestInit) => Promise<Response>>();
+    fetchMock.mockResolvedValue(mockResponse({
+      choices: [{ message: { content: "openai text" } }],
+      usage: {},
+    }));
+    globalThis.fetch = fetchMock;
+
+    const { completeWithFallback } = await loadLLM({
+      GEMINI_API_KEY: undefined,
+      OPENAI_API_KEY: "test-oai",
+    });
+
+    const result = await completeWithFallback("test");
+    expect(result.text).toBe("openai text");
+    expect(result.modelUsed).toBe("openai");
+  });
+
+  it("should handle Gemini response with no candidates gracefully", async () => {
+    const fetchMock = vi.fn<(input: string | URL | Request, init?: RequestInit) => Promise<Response>>();
+    fetchMock.mockResolvedValue(mockResponse({ candidates: [] }));
+    globalThis.fetch = fetchMock;
+
+    const { completeWithFallback } = await loadLLM({
+      GEMINI_API_KEY: "test-key",
+      OPENAI_API_KEY: undefined,
+    });
+
+    const result = await completeWithFallback("test");
+    expect(result.text).toBeNull();
+  });
+
+  it("should handle OpenAI response with no choices gracefully", async () => {
+    const fetchMock = vi.fn<(input: string | URL | Request, init?: RequestInit) => Promise<Response>>();
+    fetchMock.mockResolvedValue(mockResponse({ choices: [] }));
+    globalThis.fetch = fetchMock;
+
+    const { completeWithFallback } = await loadLLM({
+      GEMINI_API_KEY: undefined,
+      OPENAI_API_KEY: "test-oai",
+    });
+
+    const result = await completeWithFallback("test");
+    expect(result.text).toBeNull();
+  });
+
+  it("should proceed without cache when getCachedResponse throws", async () => {
+    const { getCachedResponse } = await import("@/lib/llm-cache");
+    vi.mocked(getCachedResponse).mockRejectedValueOnce(new Error("db error"));
+
+    const fetchMock = vi.fn<(input: string | URL | Request, init?: RequestInit) => Promise<Response>>();
+    fetchMock.mockResolvedValue(geminiResponse("fresh", 10));
+    globalThis.fetch = fetchMock;
+
+    const { completeWithFallback } = await loadLLM({
+      GEMINI_API_KEY: "test-key",
+      OPENAI_API_KEY: undefined,
+    });
+
+    const result = await completeWithFallback("test");
+    expect(result.text).toBe("fresh");
+    expect(result.modelUsed).toBe("gemini");
+  });
+});
+
 describe("isAiConfigured", () => {
   it("returns true when GEMINI_API_KEY is set", async () => {
     const { isAiConfigured } = await loadLLM({ GEMINI_API_KEY: "key", OPENAI_API_KEY: undefined });
