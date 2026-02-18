@@ -180,6 +180,19 @@ describe("Webhook Library", () => {
       expect(lastSet.attempts).toBe(3);
     });
 
+    it("stores 'Unknown error' when thrown value is not an Error", { timeout: 15000 }, async () => {
+      const setArgs: unknown[] = [];
+      mockSet.mockImplementation((arg: unknown) => {
+        setArgs.push(arg);
+        return { where: vi.fn().mockResolvedValue(undefined) };
+      });
+      globalThis.fetch = async () => { throw "string error"; };
+      await deliverWebhook("d-nonerror", URL, "secret", PAYLOAD);
+      const lastSet = setArgs[setArgs.length - 1] as Record<string, unknown>;
+      expect(lastSet.responseBody).toBe("Unknown error");
+      expect(lastSet.status).toBe("failed");
+    });
+
     it("warns but does not error on intermediate failures", async () => {
       let count = 0;
       globalThis.fetch = async () => {
