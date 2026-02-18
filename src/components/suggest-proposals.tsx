@@ -41,6 +41,7 @@ export function SuggestProposalsButton({
   const [suggestions, setSuggestions] = useState<SuggestionWithVote[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [detailIdx, setDetailIdx] = useState<number | null>(null);
+  const [modelUsed, setModelUsed] = useState<string | null>(null);
 
   async function generate() {
     setOpen(true);
@@ -74,6 +75,7 @@ export function SuggestProposalsButton({
       setSuggestions(
         data.proposals.map((s: Suggestion) => ({ ...s, vote: null }))
       );
+      setModelUsed(data.modelUsed ?? null);
     } catch {
       setError(t("suggestions.error"));
     } finally {
@@ -131,6 +133,7 @@ export function SuggestProposalsButton({
     setSuggestions([]);
     setError(null);
     setDetailIdx(null);
+    setModelUsed(null);
   }
 
   return (
@@ -202,6 +205,12 @@ export function SuggestProposalsButton({
               </p>
               <MarkdownRenderer content={suggestions[detailIdx].details} />
             </div>
+          )}
+
+          {!loading && modelUsed && suggestions.length > 0 && (
+            <p className="text-xs text-muted-foreground text-center">
+              {t("suggestions.modelDisclosure", { model: modelUsed })}
+            </p>
           )}
 
           {!loading && (

@@ -520,6 +520,7 @@ export const ro: Record<string, string> = {
   "suggestions.noKeys": "AI nu este configurat pe acest server",
   "suggestions.unavailable": "AI temporar indisponibil — încearcă din nou mai târziu",
   "suggestions.added": "{count} propunere(i) adăugată(e)",
+  "suggestions.modelDisclosure": "Generat de {model}",
 
   // Project Summary
   "projectSummary.regenerate": "Regenerează rezumatul",

@@ -152,7 +152,7 @@ export async function POST(request: Request) {
     }
 
     const prompt = buildPrompt(body);
-    const { text } = await completeWithFallback(prompt, {
+    const { text, modelUsed } = await completeWithFallback(prompt, {
       maxTokens: 2048,
       temperature: 0.65,
     });
@@ -178,7 +178,7 @@ export async function POST(request: Request) {
       }
     }
 
-    return NextResponse.json({ proposals });
+    return NextResponse.json({ proposals, modelUsed });
   } catch {
     return NextResponse.json(
       { proposals: [], error: "Failed to generate suggestions" },
