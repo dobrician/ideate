@@ -9,7 +9,7 @@
 
 - [x] **Goal 2: Add AI model disclosure in suggestion dialog** — Surface the `modelUsed` field from `completeWithFallback` in the suggestion dialog so users know which AI model generated the suggestions.
 
-- [ ] **Goal 3: Fix AI dialog focus management** — When the suggestion detail panel opens/closes, restore focus to the trigger element. Addresses deep analysis finding A.14 (nested dialog focus leakage).
+- [x] **Goal 3: Fix AI dialog focus management** — When the suggestion detail panel opens/closes, restore focus to the trigger element. Addresses deep analysis finding A.14 (nested dialog focus leakage).
 
 - [ ] **Goal 4: Add trusted proxy validation for rate limiting** — `request-utils.ts` trusts `x-forwarded-for` without validation. Add `TRUSTED_PROXIES` env var support and fall back to direct IP when not behind a trusted proxy.
 

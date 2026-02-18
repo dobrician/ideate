@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import {
@@ -42,6 +42,14 @@ export function SuggestProposalsButton({
   const [error, setError] = useState<string | null>(null);
   const [detailIdx, setDetailIdx] = useState<number | null>(null);
   const [modelUsed, setModelUsed] = useState<string | null>(null);
+  const backButtonRef = useRef<HTMLButtonElement>(null);
+
+  useEffect(() => {
+    if (detailIdx !== null) {
+      // Focus the back button when entering detail view
+      requestAnimationFrame(() => backButtonRef.current?.focus());
+    }
+  }, [detailIdx]);
 
   async function generate() {
     setOpen(true);
@@ -195,7 +203,7 @@ export function SuggestProposalsButton({
 
           {detailIdx !== null && suggestions[detailIdx] && (
             <div className="space-y-3">
-              <Button variant="ghost" size="sm" onClick={() => setDetailIdx(null)}>
+              <Button ref={backButtonRef} variant="ghost" size="sm" onClick={() => setDetailIdx(null)}>
                 <ArrowLeft className="mr-1 h-4 w-4" />
                 {t("projectForm.goBack")}
               </Button>
