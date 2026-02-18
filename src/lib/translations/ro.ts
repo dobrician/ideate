@@ -734,6 +734,20 @@ export const ro: Record<string, string> = {
   "teams.email": "Email membru",
   "teams.deleteConfirm": "Ștergi această echipă? Toate asocierile de membri vor fi eliminate.",
 
+  // Custom Roles
+  "roles.title": "Roluri Personalizate",
+  "roles.description": "Definește roluri personalizate cu permisiuni specifice",
+  "roles.create": "Creează Rol",
+  "roles.name": "Nume Rol",
+  "roles.descriptionLabel": "Descriere",
+  "roles.created": "Rol creat",
+  "roles.updated": "Rol actualizat",
+  "roles.deleted": "Rol șters",
+  "roles.deleteConfirm": "Ștergi acest rol personalizat?",
+  "roles.noRoles": "Niciun rol personalizat încă",
+  "roles.permCount": "permisiuni",
+  "roles.save": "Salvează Modificările",
+
   // Data Export
   "dataExport.title": "Export Date",
   "dataExport.platformExport": "Export Date Platformă",

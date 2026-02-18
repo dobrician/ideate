@@ -11,6 +11,11 @@ import { describe, it, expect } from "vitest";
 import {
   hasPermission,
   canManageResource,
+  getPermissionsForRole,
+  getCustomRoleNames,
+  invalidateRoleCache,
+  ALL_PERMISSIONS,
+  BUILT_IN_ROLES,
   type Role,
   type Permission,
 } from "@/lib/rbac";
@@ -376,5 +381,57 @@ describe("Permission boundary verifications", () => {
   it("manager should be able to delete proposals but not manage all projects", () => {
     expect(hasPermission("manager", "proposal:delete")).toBe(true);
     expect(hasPermission("manager", "project:manage_all")).toBe(false);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// New exports: ALL_PERMISSIONS, BUILT_IN_ROLES, getPermissionsForRole, etc.
+// ---------------------------------------------------------------------------
+
+describe("ALL_PERMISSIONS", () => {
+  it("should contain 13 permissions", () => {
+    expect(ALL_PERMISSIONS).toHaveLength(13);
+  });
+
+  it("should include all expected permissions", () => {
+    expect(ALL_PERMISSIONS).toContain("project:create");
+    expect(ALL_PERMISSIONS).toContain("user:manage");
+    expect(ALL_PERMISSIONS).toContain("vote:cast");
+  });
+});
+
+describe("BUILT_IN_ROLES", () => {
+  it("should contain the 4 built-in roles", () => {
+    expect(BUILT_IN_ROLES).toEqual(["admin", "manager", "member", "viewer"]);
+  });
+});
+
+describe("getPermissionsForRole", () => {
+  it("should return all permissions for admin", () => {
+    const perms = getPermissionsForRole("admin");
+    expect(perms.size).toBe(13);
+  });
+
+  it("should return 3 permissions for viewer", () => {
+    const perms = getPermissionsForRole("viewer");
+    expect(perms.size).toBe(3);
+  });
+
+  it("should return empty set for unknown role", () => {
+    const perms = getPermissionsForRole("unknown-custom");
+    expect(perms.size).toBe(0);
+  });
+});
+
+describe("getCustomRoleNames", () => {
+  it("should return empty array when no custom roles loaded", () => {
+    invalidateRoleCache();
+    expect(getCustomRoleNames()).toEqual([]);
+  });
+});
+
+describe("invalidateRoleCache", () => {
+  it("should not throw", () => {
+    expect(() => invalidateRoleCache()).not.toThrow();
   });
 });

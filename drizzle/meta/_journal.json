@@ -127,6 +127,20 @@
       "when": 1771276000000,
       "tag": "0017_sprint40_revoked_tokens",
       "breakpoints": true
+    },
+    {
+      "idx": 18,
+      "version": "6",
+      "when": 1771276400000,
+      "tag": "0018_teams",
+      "breakpoints": true
+    },
+    {
+      "idx": 19,
+      "version": "6",
+      "when": 1771276800000,
+      "tag": "0019_custom_roles",
+      "breakpoints": true
     }
   ]
 }

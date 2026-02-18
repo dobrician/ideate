@@ -216,3 +216,14 @@ export const teamMembers = sqliteTable("team_members", {
   role: text("role", { enum: ["owner", "admin", "member", "viewer"] }).notNull().default("member"),
   joinedAt: integer("joined_at", { mode: "timestamp" }).default(sql`(unixepoch())`),
 }, (table) => [primaryKey({ columns: [table.teamId, table.userId] })]);
+
+// ─── Custom Roles ───────────────────────────────────────────────────────
+
+export const customRoles = sqliteTable("custom_roles", {
+  id: pk(),
+  name: text("name").notNull().unique(),
+  description: text("description"),
+  permissions: text("permissions").notNull().default("[]"),
+  isSystem: integer("is_system", { mode: "boolean" }).notNull().default(false),
+  createdAt: ts(), updatedAt: tsUp(),
+});

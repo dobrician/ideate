@@ -1,9 +1,9 @@
 import { db } from "@/db";
-import { users, projects, auditLogs, invitations, tags, webhooks, projectTemplates, teams, teamMembers } from "@/db/schema";
+import { users, projects, auditLogs, invitations, tags, webhooks, projectTemplates, teams, teamMembers, customRoles } from "@/db/schema";
 import { desc, asc, eq, sql } from "drizzle-orm";
 
 export async function getAdminData() {
-  const [allUsers, stats, recentAudit, pendingInvitations, allProjects, allTags, allWebhooks, allTemplates, allTeamsRaw] = await Promise.all([
+  const [allUsers, stats, recentAudit, pendingInvitations, allProjects, allTags, allWebhooks, allTemplates, allTeamsRaw, allCustomRolesRaw] = await Promise.all([
     db.select({
       id: users.id, email: users.email, firstName: users.firstName,
       lastName: users.lastName, role: users.role, createdAt: users.createdAt,
@@ -52,6 +52,12 @@ export async function getAdminData() {
       .leftJoin(teamMembers, eq(teams.id, teamMembers.teamId))
       .leftJoin(users, eq(teamMembers.userId, users.id))
       .orderBy(desc(teams.createdAt)),
+
+    db.select({
+      id: customRoles.id, name: customRoles.name,
+      description: customRoles.description, permissions: customRoles.permissions,
+      isSystem: customRoles.isSystem,
+    }).from(customRoles).orderBy(asc(customRoles.name)),
   ]);
 
   // Group teams with their members
@@ -66,9 +72,14 @@ export async function getAdminData() {
     }
   }
 
+  const allRoles = allCustomRolesRaw.map((r) => ({
+    ...r, permissions: JSON.parse(r.permissions) as string[],
+    isSystem: Boolean(r.isSystem),
+  }));
+
   return {
     allUsers, stats: stats[0], recentAudit, pendingInvitations,
     allProjects, allTags, allWebhooks, allTemplates,
-    allTeams: Array.from(teamsMap.values()),
+    allTeams: Array.from(teamsMap.values()), allRoles,
   };
 }

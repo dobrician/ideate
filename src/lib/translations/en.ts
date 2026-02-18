@@ -718,6 +718,20 @@ export const en: Record<string, string> = {
   "teams.email": "Member email",
   "teams.deleteConfirm": "Delete this team? All member associations will be removed.",
 
+  // Custom Roles
+  "roles.title": "Custom Roles",
+  "roles.description": "Define custom roles with specific permissions",
+  "roles.create": "Create Role",
+  "roles.name": "Role Name",
+  "roles.descriptionLabel": "Description",
+  "roles.created": "Role created",
+  "roles.updated": "Role updated",
+  "roles.deleted": "Role deleted",
+  "roles.deleteConfirm": "Delete this custom role?",
+  "roles.noRoles": "No custom roles yet",
+  "roles.permCount": "permissions",
+  "roles.save": "Save Changes",
+
   // Data Export
   "dataExport.title": "Data Export",
   "dataExport.platformExport": "Platform Data Export",

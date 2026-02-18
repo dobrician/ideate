@@ -15,6 +15,7 @@ import { WebhookManager } from "./webhook-manager";
 import { TemplateManager } from "./template-manager";
 import { RateLimitPanel } from "./rate-limit-panel";
 import { TeamManager } from "./team-manager";
+import { RoleManager } from "./role-manager";
 import { StatCard } from "@/components/stat-card";
 import { getTranslations } from "@/lib/i18n-server";
 import { getAdminData } from "./queries";
@@ -37,7 +38,7 @@ export default async function AdminPage() {
     );
   }
 
-  const { allUsers, stats: s, recentAudit, pendingInvitations, allProjects, allTags, allWebhooks, allTemplates, allTeams } = await getAdminData();
+  const { allUsers, stats: s, recentAudit, pendingInvitations, allProjects, allTags, allWebhooks, allTemplates, allTeams, allRoles } = await getAdminData();
 
   return (
     <div className="mx-auto max-w-6xl py-4 sm:py-8">
@@ -113,6 +114,14 @@ export default async function AdminPage() {
               ...inv, expiresAt: inv.expiresAt?.toISOString() ?? null, createdAt: inv.createdAt?.toISOString() ?? null,
             }))} />
           </CardContent>
+        </Card>
+
+        <Card className="lg:col-span-2">
+          <CardHeader>
+            <CardTitle>{t("roles.title")}</CardTitle>
+            <CardDescription>{t("roles.description")}</CardDescription>
+          </CardHeader>
+          <CardContent><RoleManager initialRoles={allRoles} /></CardContent>
         </Card>
 
         <Card className="lg:col-span-2">

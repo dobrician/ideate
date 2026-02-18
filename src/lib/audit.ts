@@ -41,7 +41,8 @@ type AuditEntity =
   | "session"
   | "attachment"
   | "tag"
-  | "team";
+  | "team"
+  | "custom_role";
 
 interface AuditEntry {
   userId: string | null;
