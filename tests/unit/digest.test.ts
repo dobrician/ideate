@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 
 const mockSelect = vi.fn();
 const mockFrom = vi.fn();
@@ -232,5 +232,26 @@ describe("Digest", () => {
       expect(mLog.info).toHaveBeenCalledWith(
         expect.objectContaining({ sent: 1, total: 1 }), expect.any(String));
     });
+  });
+});
+
+describe("Digest env overrides", () => {
+  const origFrom = process.env.SMTP_FROM;
+  const origUrl = process.env.APP_URL;
+
+  afterEach(() => {
+    if (origFrom === undefined) delete process.env.SMTP_FROM;
+    else process.env.SMTP_FROM = origFrom;
+    if (origUrl === undefined) delete process.env.APP_URL;
+    else process.env.APP_URL = origUrl;
+  });
+
+  it("uses custom SMTP_FROM and APP_URL from env", async () => {
+    process.env.SMTP_FROM = "custom@example.com";
+    process.env.APP_URL = "https://my.app";
+    vi.resetModules();
+    const { generateDigestHtml } = await import("@/lib/digest");
+    const html = generateDigestHtml(digestData);
+    expect(html).toContain("https://my.app/projects/proj-1");
   });
 });
