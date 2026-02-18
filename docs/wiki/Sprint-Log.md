@@ -4,9 +4,9 @@ Reverse chronological. Click each sprint for full details.
 
 ---
 
-### 🔄 [Sprint 41 — Code Quality, Dead Code Removal & Accessibility Polish](Sprint-41) *(2026-02-17)*
+### ✅ [Sprint 41 — Code Quality, Dead Code Removal & Accessibility Polish](Sprint-41) *(2026-02-17)*
 **Focus:** Inline lone query, locale fallback fix, role=alert on error containers, rename buildCommentTree, remove re-export shim, dead sanitize exports, locale export test, dead code audit
-**Stats:** 0/8 goals | In progress
+**Stats:** 8/8 goals | 1099 tests | All dead code items from deep analysis resolved
 
 ---
 

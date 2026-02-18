@@ -19,7 +19,7 @@
 
 - [x] **Goal 7: Add test verifying export formatDate respects non-English locale** — Add a unit test that calls `formatDate` with a Romanian locale and asserts month names are in Romanian, confirming the locale parameter works end-to-end.
 
-- [ ] **Goal 8: Verify generateReportHtml is removed and close dead code audit** — The deep analysis flagged `generateReportHtml` in `export.ts` as potentially dead. Confirm it no longer exists after the export refactor and document closure in this sprint.
+- [x] **Goal 8: Verify generateReportHtml is removed and close dead code audit** — The deep analysis flagged `generateReportHtml` in `export.ts` as potentially dead. Confirm it no longer exists after the export refactor and document closure in this sprint.
 
 ## Notes
 
