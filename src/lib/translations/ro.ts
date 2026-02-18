@@ -748,6 +748,25 @@ export const ro: Record<string, string> = {
   "roles.permCount": "permisiuni",
   "roles.save": "Salvează Modificările",
 
+  // Analytics
+  "analytics.title": "Analiză",
+  "analytics.subtitle": "Tendințe, implicare și starea proiectelor",
+  "analytics.backToAdmin": "Admin",
+  "analytics.proposalTrend": "Tendința Propunerilor (90 zile)",
+  "analytics.voteTrend": "Tendința Voturilor (30 zile)",
+  "analytics.userGrowth": "Creșterea Utilizatorilor (90 zile)",
+  "analytics.projectHealth": "Sănătatea Proiectelor",
+  "analytics.engagementByDay": "Implicare pe Zi a Săptămânii",
+  "analytics.activityTrend": "Tendința Activității (30 zile)",
+  "analytics.proposals": "Propuneri",
+  "analytics.votes": "Voturi",
+  "analytics.comments": "Comentarii",
+  "analytics.newUsers": "Utilizatori Noi",
+  "analytics.actions": "Acțiuni",
+  "analytics.activeProjects": "Proiecte Active",
+  "analytics.new30d": "{count} noi în ultimele 30 zile",
+  "analytics.ofTotal": "din {total} total",
+
   // Data Export
   "dataExport.title": "Export Date",
   "dataExport.platformExport": "Export Date Platformă",

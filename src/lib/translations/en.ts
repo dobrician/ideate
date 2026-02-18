@@ -732,6 +732,25 @@ export const en: Record<string, string> = {
   "roles.permCount": "permissions",
   "roles.save": "Save Changes",
 
+  // Analytics
+  "analytics.title": "Analytics",
+  "analytics.subtitle": "Platform trends, engagement, and project health",
+  "analytics.backToAdmin": "Admin",
+  "analytics.proposalTrend": "Proposal Trend (90 days)",
+  "analytics.voteTrend": "Vote Trend (30 days)",
+  "analytics.userGrowth": "User Growth (90 days)",
+  "analytics.projectHealth": "Project Health",
+  "analytics.engagementByDay": "Engagement by Day of Week",
+  "analytics.activityTrend": "Activity Trend (30 days)",
+  "analytics.proposals": "Proposals",
+  "analytics.votes": "Votes",
+  "analytics.comments": "Comments",
+  "analytics.newUsers": "New Users",
+  "analytics.actions": "Actions",
+  "analytics.activeProjects": "Active Projects",
+  "analytics.new30d": "{count} new in last 30 days",
+  "analytics.ofTotal": "of {total} total",
+
   // Data Export
   "dataExport.title": "Data Export",
   "dataExport.platformExport": "Platform Data Export",

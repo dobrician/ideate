@@ -5,7 +5,7 @@ import { hasPermission } from "@/lib/rbac";
 import type { Role } from "@/lib/rbac";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Users, FolderOpen, Lightbulb, ThumbsUp, ShieldX } from "lucide-react";
+import { Users, FolderOpen, Lightbulb, ThumbsUp, ShieldX, BarChart3 } from "lucide-react";
 import { UserRoleManager } from "./user-role-manager";
 import { AuditLog } from "./audit-log";
 import { InvitationPanel } from "./invitation-panel";
@@ -42,9 +42,14 @@ export default async function AdminPage() {
 
   return (
     <div className="mx-auto max-w-6xl py-4 sm:py-8">
-      <div className="mb-5 sm:mb-8">
-        <h1 className="text-2xl font-bold sm:text-3xl">{t("admin.title")}</h1>
-        <p className="text-muted-foreground">{t("admin.subtitle")}</p>
+      <div className="mb-5 flex items-center justify-between sm:mb-8">
+        <div>
+          <h1 className="text-2xl font-bold sm:text-3xl">{t("admin.title")}</h1>
+          <p className="text-muted-foreground">{t("admin.subtitle")}</p>
+        </div>
+        <Button variant="outline" asChild>
+          <Link href="/admin/analytics"><BarChart3 className="mr-1.5 h-4 w-4" />{t("analytics.title")}</Link>
+        </Button>
       </div>
 
       <div className="mb-6 grid grid-cols-2 gap-3 sm:mb-8 sm:gap-4 lg:grid-cols-4">
