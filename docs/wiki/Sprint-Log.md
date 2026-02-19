@@ -256,6 +256,12 @@ Reverse chronological. Click each sprint for full details.
 
 ---
 
+### 🔄 [Sprint 48 — Realistic Data Factories & High-Volume Simulation](Sprint-48) *(2026-02-19)*
+**Focus:** Factory system for generating realistic demo data — 20 users, multiple projects, proposals with real-feeling content, diverse voting patterns, threaded comments
+**Stats:** In progress
+
+---
+
 ### ✅ [Sprint 5 — CI/CD & Infrastructure](Sprint-05) *(2026-02-16)*
 **Focus:** GitHub Actions CI, FTS5 search, audit logging, Docker backup, email deliverability, i18n EN/RO, OpenAPI docs, performance
 **Stats:** 260+ tests | Issues #2, #3, #9, #10, #11
