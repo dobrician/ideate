@@ -14,6 +14,34 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import type { VoteEvent } from "@/lib/vote-events";
 
+// Mock pubsub to use a simple in-memory implementation
+vi.mock("@/lib/pubsub", () => {
+  const listeners = new Map<string, Set<(ch: string, msg: string) => void>>();
+  const memoryPubSub = {
+    async publish(channel: string, message: string) {
+      const set = listeners.get(channel);
+      if (!set) return;
+      for (const listener of set) {
+        try { listener(channel, message); } catch { /* ignore */ }
+      }
+    },
+    subscribe(channel: string, listener: (ch: string, msg: string) => void) {
+      let set = listeners.get(channel);
+      if (!set) { set = new Set(); listeners.set(channel, set); }
+      set.add(listener);
+      return () => {
+        set!.delete(listener);
+        if (set!.size === 0) listeners.delete(channel);
+      };
+    },
+  };
+  return {
+    getPubSub: () => memoryPubSub,
+    memoryPubSub,
+    redisPubSub: memoryPubSub,
+  };
+});
+
 /**
  * We use dynamic import + vi.resetModules so each test group gets a fresh
  * module instance with a clean listeners map. This prevents state leaking
