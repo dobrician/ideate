@@ -1,5 +1,6 @@
 "use client";
 
+import { memo } from "react";
 import {
   ResponsiveContainer,
   LineChart, Line,
@@ -26,29 +27,53 @@ interface ActivityPoint {
   count: number;
 }
 
-export function VotesOverTimeChart({ data }: { data: VoteOverTimePoint[] }) {
-  const { t } = useLocale();
+/** SVG pattern definitions for color-blind accessible chart fills. */
+function ChartPatternDefs() {
+  return (
+    <defs>
+      <pattern id="dash-pro" patternUnits="userSpaceOnUse" width="6" height="6">
+        <rect width="6" height="6" fill="#22c55e" />
+        <circle cx="3" cy="3" r="1.5" fill="#fff" opacity="0.3" />
+      </pattern>
+      <pattern id="dash-contra" patternUnits="userSpaceOnUse" width="6" height="6">
+        <rect width="6" height="6" fill="#ef4444" />
+        <path d="M0 0L6 6M6 0L0 6" stroke="#fff" strokeWidth="1" opacity="0.3" />
+      </pattern>
+      <pattern id="dash-activity" patternUnits="userSpaceOnUse" width="6" height="6">
+        <rect width="6" height="6" fill="#6366f1" />
+        <path d="M0 3H6" stroke="#fff" strokeWidth="1.5" opacity="0.3" />
+        <path d="M3 0V6" stroke="#fff" strokeWidth="1.5" opacity="0.3" />
+      </pattern>
+    </defs>
+  );
+}
 
-  if (data.length === 0) {
-    return (
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-lg">{t("charts.votesOverTime")}</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <p className="text-sm text-muted-foreground">{t("charts.noData")}</p>
-        </CardContent>
-      </Card>
-    );
-  }
+function EmptyChart({ title }: { title: string }) {
+  const { t } = useLocale();
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="text-lg">{title}</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <p className="text-sm text-muted-foreground">{t("charts.noData")}</p>
+      </CardContent>
+    </Card>
+  );
+}
+
+export const VotesOverTimeChart = memo(function VotesOverTimeChart({ data }: { data: VoteOverTimePoint[] }) {
+  const { t } = useLocale();
+  const title = t("charts.votesOverTime");
+  if (data.length === 0) return <EmptyChart title={title} />;
 
   return (
     <Card className="min-w-0 overflow-hidden">
       <CardHeader>
-        <CardTitle className="text-lg">{t("charts.votesOverTime")}</CardTitle>
+        <CardTitle className="text-lg">{title}</CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="h-64 w-full" role="img" aria-label={t("charts.votesOverTime")}>
+        <div className="h-64 w-full" role="img" aria-label={title}>
           <ResponsiveContainer width="100%" height="100%">
             <LineChart data={data} margin={{ top: 5, right: 10, left: -10, bottom: 5 }}>
               <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
@@ -72,7 +97,7 @@ export function VotesOverTimeChart({ data }: { data: VoteOverTimePoint[] }) {
               <Line
                 type="monotone" dataKey="contra"
                 name={t("vote.contra")} stroke="#ef4444"
-                strokeWidth={2} dot={false}
+                strokeWidth={2} strokeDasharray="6 3" dot={false}
               />
             </LineChart>
           </ResponsiveContainer>
@@ -80,33 +105,23 @@ export function VotesOverTimeChart({ data }: { data: VoteOverTimePoint[] }) {
       </CardContent>
     </Card>
   );
-}
+});
 
-export function TopProposalsChart({ data }: { data: TopProposal[] }) {
+export const TopProposalsChart = memo(function TopProposalsChart({ data }: { data: TopProposal[] }) {
   const { t } = useLocale();
-
-  if (data.length === 0) {
-    return (
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-lg">{t("charts.topProposals")}</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <p className="text-sm text-muted-foreground">{t("charts.noData")}</p>
-        </CardContent>
-      </Card>
-    );
-  }
+  const title = t("charts.topProposals");
+  if (data.length === 0) return <EmptyChart title={title} />;
 
   return (
     <Card className="min-w-0 overflow-hidden">
       <CardHeader>
-        <CardTitle className="text-lg">{t("charts.topProposals")}</CardTitle>
+        <CardTitle className="text-lg">{title}</CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="h-64 w-full" role="img" aria-label={t("charts.topProposals")}>
+        <div className="h-64 w-full" role="img" aria-label={title}>
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={data} layout="vertical" margin={{ top: 5, right: 10, left: -10, bottom: 5 }}>
+              <ChartPatternDefs />
               <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
               <XAxis type="number" tick={{ fontSize: 11 }} allowDecimals={false} />
               <YAxis
@@ -116,41 +131,31 @@ export function TopProposalsChart({ data }: { data: TopProposal[] }) {
               />
               <Tooltip contentStyle={{ borderRadius: 8, fontSize: 12 }} />
               <Legend wrapperStyle={{ fontSize: 12 }} />
-              <Bar dataKey="pro" name={t("vote.pro")} fill="#22c55e" stackId="votes" />
-              <Bar dataKey="contra" name={t("vote.contra")} fill="#ef4444" stackId="votes" />
+              <Bar dataKey="pro" name={t("vote.pro")} fill="url(#dash-pro)" stackId="votes" />
+              <Bar dataKey="contra" name={t("vote.contra")} fill="url(#dash-contra)" stackId="votes" />
             </BarChart>
           </ResponsiveContainer>
         </div>
       </CardContent>
     </Card>
   );
-}
+});
 
-export function ActivityHeatmapChart({ data }: { data: ActivityPoint[] }) {
+export const ActivityHeatmapChart = memo(function ActivityHeatmapChart({ data }: { data: ActivityPoint[] }) {
   const { t } = useLocale();
-
-  if (data.length === 0) {
-    return (
-      <Card className="lg:col-span-2">
-        <CardHeader>
-          <CardTitle className="text-lg">{t("charts.activityHeatmap")}</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <p className="text-sm text-muted-foreground">{t("charts.noData")}</p>
-        </CardContent>
-      </Card>
-    );
-  }
+  const title = t("charts.activityHeatmap");
+  if (data.length === 0) return <EmptyChart title={title} />;
 
   return (
     <Card className="min-w-0 overflow-hidden lg:col-span-2">
       <CardHeader>
-        <CardTitle className="text-lg">{t("charts.activityHeatmap")}</CardTitle>
+        <CardTitle className="text-lg">{title}</CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="h-64 w-full" role="img" aria-label={t("charts.activityHeatmap")}>
+        <div className="h-64 w-full" role="img" aria-label={title}>
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={data} margin={{ top: 5, right: 10, left: -10, bottom: 5 }}>
+              <ChartPatternDefs />
               <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
               <XAxis
                 dataKey="date"
@@ -163,11 +168,11 @@ export function ActivityHeatmapChart({ data }: { data: ActivityPoint[] }) {
                 contentStyle={{ borderRadius: 8, fontSize: 12 }}
                 labelFormatter={(label) => String(label)}
               />
-              <Bar dataKey="count" name={t("charts.actions")} fill="#6366f1" radius={[2, 2, 0, 0]} />
+              <Bar dataKey="count" name={t("charts.actions")} fill="url(#dash-activity)" radius={[2, 2, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
         </div>
       </CardContent>
     </Card>
   );
-}
+});
