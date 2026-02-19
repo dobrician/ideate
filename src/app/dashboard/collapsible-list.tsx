@@ -36,6 +36,7 @@ export function CollapsibleList({
           size="sm"
           className="mt-2 w-full text-xs"
           onClick={() => setExpanded(!expanded)}
+          aria-expanded={expanded}
         >
           {expanded ? t("dashboard.showLess") : t("dashboard.showMore", { count: total - MOBILE_LIMIT })}
         </Button>

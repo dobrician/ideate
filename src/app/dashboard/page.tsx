@@ -59,7 +59,7 @@ export default async function DashboardPage() {
           <div key={s.label} className="flex items-center gap-2 rounded-lg border bg-card px-3 py-2">
             <span className="text-muted-foreground">{s.icon}</span>
             <span className="text-sm font-bold">{s.value}</span>
-            <span className="truncate text-xs text-muted-foreground">{s.label}</span>
+            <span className="truncate text-xs text-muted-foreground" title={s.label}>{s.label}</span>
           </div>
         ))}
       </div>
@@ -200,8 +200,8 @@ export default async function DashboardPage() {
                       )}
                       <Link href={`/projects/${v.projectId}`}
                         className="min-w-0 transition-colors hover:underline">
-                        <span className="block truncate text-sm">{v.proposalTitle}</span>
-                        <span className="block truncate text-xs text-muted-foreground">
+                        <span className="block truncate text-sm" title={v.proposalTitle}>{v.proposalTitle}</span>
+                        <span className="block truncate text-xs text-muted-foreground" title={v.projectTitle ?? ""}>
                           {t("dashboard.inProject", { project: v.projectTitle ?? t("projects.unknown") })}
                         </span>
                       </Link>
@@ -231,7 +231,7 @@ export default async function DashboardPage() {
                         className="group flex gap-2 rounded-md px-2 py-1.5 transition-colors hover:bg-muted/50">
                         <MessageSquare className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" />
                         <div className="min-w-0 overflow-hidden">
-                          <p className="truncate">
+                          <p className="truncate" title={`${a.userName || a.userEmail || t("common.someone")} ${t("dashboard.commentedOn")} ${a.proposalTitle}`}>
                             <span className="font-medium group-hover:underline">
                               {a.userName || a.userEmail || t("common.someone")}
                             </span>
@@ -243,7 +243,7 @@ export default async function DashboardPage() {
                               </time>
                             )}
                           </p>
-                          <p className="mt-0.5 truncate text-muted-foreground sm:line-clamp-1">{a.content}</p>
+                          <p className="mt-0.5 truncate text-muted-foreground sm:line-clamp-1" title={a.content}>{a.content}</p>
                         </div>
                       </Link>
                     </li>
