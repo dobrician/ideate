@@ -11,6 +11,9 @@ interface CacheStats {
   misses: number;
   hitRate: number;
   memEntries: number;
+  redisHits: number;
+  redisMisses: number;
+  redisEnabled: boolean;
 }
 
 interface QueueStats {
@@ -137,6 +140,37 @@ export function MonitoringPanel({
             <div className="rounded-lg border p-3">
               <p className="text-2xl font-bold">{cacheStats.hitRate}%</p>
               <p className="text-xs text-muted-foreground">{t("monitoring.hitRate")}</p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Redis Cache */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Zap className="h-5 w-5" />
+            {t("monitoring.redisCache")}
+          </CardTitle>
+          <CardDescription>
+            {cacheStats.redisEnabled ? t("monitoring.redisConnected") : t("monitoring.redisDisabled")}
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-3 gap-4 text-center">
+            <div className="rounded-lg border p-3">
+              <p className="text-2xl font-bold text-green-600">{cacheStats.redisHits}</p>
+              <p className="text-xs text-muted-foreground">{t("monitoring.redisHits")}</p>
+            </div>
+            <div className="rounded-lg border p-3">
+              <p className="text-2xl font-bold text-red-600">{cacheStats.redisMisses}</p>
+              <p className="text-xs text-muted-foreground">{t("monitoring.redisMisses")}</p>
+            </div>
+            <div className="rounded-lg border p-3">
+              <p className={`text-2xl font-bold ${cacheStats.redisEnabled ? "text-green-600" : "text-muted-foreground"}`}>
+                {cacheStats.redisEnabled ? t("monitoring.redisStatusOn") : t("monitoring.redisStatusOff")}
+              </p>
+              <p className="text-xs text-muted-foreground">{t("monitoring.status")}</p>
             </div>
           </div>
         </CardContent>

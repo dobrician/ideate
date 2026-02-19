@@ -40,6 +40,13 @@ vi.mock("@/lib/use-locale", () => ({
         "monitoring.maxConnections": "Max",
         "monitoring.activeConnections": "Active",
         "monitoring.idleConnections": "Idle",
+        "monitoring.redisCache": "Redis Cache",
+        "monitoring.redisConnected": "Redis L2 cache is active",
+        "monitoring.redisDisabled": "Redis not connected",
+        "monitoring.redisHits": "Redis Hits",
+        "monitoring.redisMisses": "Redis Misses",
+        "monitoring.redisStatusOn": "ON",
+        "monitoring.redisStatusOff": "OFF",
       };
       return translations[key] ?? key;
     },
@@ -59,7 +66,15 @@ const perfStats = {
   ],
 };
 
-const cacheStats = { hits: 80, misses: 20, hitRate: 80, memEntries: 45 };
+const cacheStats = {
+  hits: 80,
+  misses: 20,
+  hitRate: 80,
+  memEntries: 45,
+  redisHits: 30,
+  redisMisses: 10,
+  redisEnabled: true,
+};
 const queueStats = { pending: 3, processing: 1, completed: 50, failed: 2, dead: 0 };
 const resourceStats = {
   memory: { heapUsedMB: 64.5, heapTotalMB: 128, rssMB: 180.2, externalMB: 2.1, heapUsagePercent: 50 },
@@ -90,6 +105,25 @@ describe("MonitoringPanel", () => {
 
     expect(screen.getByText("Cache Statistics")).toBeInTheDocument();
     expect(screen.getByText("45 in-memory entries")).toBeInTheDocument();
+  });
+
+  it("renders Redis cache section", () => {
+    render(<MonitoringPanel perfStats={perfStats} cacheStats={cacheStats} queueStats={queueStats} resourceStats={resourceStats} />);
+
+    expect(screen.getByText("Redis Cache")).toBeInTheDocument();
+    expect(screen.getByText("Redis Hits")).toBeInTheDocument();
+    expect(screen.getByText("Redis Misses")).toBeInTheDocument();
+    expect(screen.getByText("30")).toBeInTheDocument();
+    expect(screen.getByText("10")).toBeInTheDocument();
+    expect(screen.getByText("ON")).toBeInTheDocument();
+  });
+
+  it("shows Redis as disabled when not enabled", () => {
+    const disabledCache = { ...cacheStats, redisEnabled: false };
+    render(<MonitoringPanel perfStats={perfStats} cacheStats={disabledCache} queueStats={queueStats} resourceStats={resourceStats} />);
+
+    expect(screen.getByText("OFF")).toBeInTheDocument();
+    expect(screen.getByText("Redis not connected")).toBeInTheDocument();
   });
 
   it("renders slowest paths table", () => {

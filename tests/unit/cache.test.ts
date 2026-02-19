@@ -25,16 +25,39 @@ vi.mock("@/lib/logger", () => ({
   logger: { info: vi.fn(), warn: vi.fn(), error: vi.fn() },
 }));
 
-import { cacheGet, cacheSet, cacheDelete, cacheClear, getCacheStats, resetCacheStats } from "@/lib/cache";
+// Redis mocks — default: Redis not available
+const mockRedisGet = vi.fn();
+const mockRedisSet = vi.fn();
+const mockRedisDel = vi.fn();
+let mockRedisReady = false;
+
+vi.mock("@/lib/redis", () => ({
+  getRedis: () =>
+    mockRedisReady
+      ? { get: mockRedisGet, set: mockRedisSet, del: mockRedisDel }
+      : null,
+  isRedisReady: () => mockRedisReady,
+}));
+
+import {
+  cacheGet,
+  cacheGetAsync,
+  cacheSet,
+  cacheDelete,
+  cacheClear,
+  getCacheStats,
+  resetCacheStats,
+} from "@/lib/cache";
 
 beforeEach(() => {
   vi.clearAllMocks();
+  mockRedisReady = false;
   cacheClear();
   resetCacheStats();
 });
 
 describe("Multi-layer Cache", () => {
-  describe("cacheGet", () => {
+  describe("cacheGet (sync)", () => {
     it("returns null on cache miss", () => {
       mockSelectAll.mockReturnValue([]);
       const result = cacheGet("nonexistent");
@@ -48,18 +71,16 @@ describe("Multi-layer Cache", () => {
 
       const result = cacheGet("test-key");
       expect(result).toBe("test-value");
-      // Should not hit DB since memory has it
       expect(mockSelectAll).not.toHaveBeenCalled();
     });
 
-    it("returns value from DB layer (L2) and promotes to memory", () => {
+    it("returns value from DB layer (L3) and promotes to memory", () => {
       const now = Math.floor(Date.now() / 1000);
       mockSelectAll.mockReturnValue([{ value: "db-value", ttl: 300, createdAt: now }]);
 
       const result = cacheGet("db-key");
       expect(result).toBe("db-value");
 
-      // Second call should use memory
       mockSelectAll.mockClear();
       const result2 = cacheGet("db-key");
       expect(result2).toBe("db-value");
@@ -89,22 +110,86 @@ describe("Multi-layer Cache", () => {
     });
   });
 
+  describe("cacheGetAsync", () => {
+    it("returns value from memory (L1) without checking Redis", async () => {
+      cacheSet("mem-key", "mem-value", 60);
+      mockRedisReady = true;
+
+      const result = await cacheGetAsync("mem-key");
+      expect(result).toBe("mem-value");
+      expect(mockRedisGet).not.toHaveBeenCalled();
+    });
+
+    it("returns value from Redis (L2) when available", async () => {
+      mockRedisReady = true;
+      mockRedisGet.mockResolvedValue("redis-value");
+      mockSelectAll.mockReturnValue([]);
+
+      const result = await cacheGetAsync("redis-key");
+      expect(result).toBe("redis-value");
+      expect(mockRedisGet).toHaveBeenCalledWith("cache:redis-key");
+
+      const stats = getCacheStats();
+      expect(stats.redisHits).toBe(1);
+    });
+
+    it("falls through to DB (L3) on Redis miss", async () => {
+      mockRedisReady = true;
+      mockRedisGet.mockResolvedValue(null);
+      const now = Math.floor(Date.now() / 1000);
+      mockSelectAll.mockReturnValue([{ value: "db-val", ttl: 300, createdAt: now }]);
+
+      const result = await cacheGetAsync("db-only");
+      expect(result).toBe("db-val");
+
+      const stats = getCacheStats();
+      expect(stats.redisMisses).toBe(1);
+      expect(stats.hits).toBe(1);
+    });
+
+    it("returns null when all layers miss", async () => {
+      mockRedisReady = true;
+      mockRedisGet.mockResolvedValue(null);
+      mockSelectAll.mockReturnValue([]);
+
+      const result = await cacheGetAsync("nowhere");
+      expect(result).toBeNull();
+
+      const stats = getCacheStats();
+      expect(stats.misses).toBe(1);
+      expect(stats.redisMisses).toBe(1);
+    });
+
+    it("skips Redis when not ready", async () => {
+      mockRedisReady = false;
+      mockSelectAll.mockReturnValue([]);
+
+      const result = await cacheGetAsync("no-redis");
+      expect(result).toBeNull();
+      expect(mockRedisGet).not.toHaveBeenCalled();
+    });
+  });
+
   describe("cacheSet", () => {
     it("stores value in memory and DB", () => {
       cacheSet("new-key", "new-value", 120);
       expect(mockInsertValues).toHaveBeenCalled();
 
-      // Should be retrievable from memory
       const result = cacheGet("new-key");
       expect(result).toBe("new-value");
     });
 
+    it("writes to Redis when available", () => {
+      mockRedisReady = true;
+      cacheSet("redis-write", "val", 60);
+      // Redis set is fire-and-forget (void promise)
+      expect(mockRedisSet).toHaveBeenCalledWith("cache:redis-write", "val", "EX", 60);
+    });
+
     it("evicts oldest entry when memory is full", () => {
-      // Fill memory to capacity
       for (let i = 0; i < 501; i++) {
         cacheSet(`key-${i}`, `value-${i}`, 3600);
       }
-      // First key should be evicted
       mockSelectAll.mockReturnValue([]);
       const result = cacheGet("key-0");
       expect(result).toBeNull();
@@ -112,13 +197,19 @@ describe("Multi-layer Cache", () => {
   });
 
   describe("cacheDelete", () => {
-    it("removes value from both layers", () => {
+    it("removes value from all layers", () => {
       cacheSet("del-key", "del-value", 60);
       cacheDelete("del-key");
 
       mockSelectAll.mockReturnValue([]);
       const result = cacheGet("del-key");
       expect(result).toBeNull();
+    });
+
+    it("deletes from Redis when available", () => {
+      mockRedisReady = true;
+      cacheDelete("redis-del");
+      expect(mockRedisDel).toHaveBeenCalledWith("cache:redis-del");
     });
   });
 
@@ -136,16 +227,31 @@ describe("Multi-layer Cache", () => {
       const stats = getCacheStats();
       expect(stats.memEntries).toBe(2);
     });
+
+    it("includes Redis stats", () => {
+      const stats = getCacheStats();
+      expect(stats.redisHits).toBe(0);
+      expect(stats.redisMisses).toBe(0);
+      expect(stats.redisEnabled).toBe(false);
+    });
+
+    it("reports redisEnabled when Redis is ready", () => {
+      mockRedisReady = true;
+      const stats = getCacheStats();
+      expect(stats.redisEnabled).toBe(true);
+    });
   });
 
   describe("resetCacheStats", () => {
-    it("resets all counters", () => {
+    it("resets all counters including Redis", () => {
       mockSelectAll.mockReturnValue([]);
       cacheGet("miss");
       resetCacheStats();
       const stats = getCacheStats();
       expect(stats.hits).toBe(0);
       expect(stats.misses).toBe(0);
+      expect(stats.redisHits).toBe(0);
+      expect(stats.redisMisses).toBe(0);
     });
   });
 });

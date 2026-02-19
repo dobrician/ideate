@@ -862,4 +862,11 @@ export const ro: Record<string, string> = {
   "monitoring.maxConnections": "Max",
   "monitoring.activeConnections": "Active",
   "monitoring.idleConnections": "Inactive",
+  "monitoring.redisCache": "Cache Redis",
+  "monitoring.redisConnected": "Cache Redis L2 activ",
+  "monitoring.redisDisabled": "Redis neconectat — se folosesc doar memorie + SQLite",
+  "monitoring.redisHits": "Potriviri Redis",
+  "monitoring.redisMisses": "Ratări Redis",
+  "monitoring.redisStatusOn": "ACTIV",
+  "monitoring.redisStatusOff": "INACTIV",
 };
