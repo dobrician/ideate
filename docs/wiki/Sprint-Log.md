@@ -64,9 +64,9 @@ Reverse chronological. Click each sprint for full details.
 
 ---
 
-### 🔄 [Sprint 51 — Real-time Collaboration Foundation: Live Presence & WebSocket](Sprint-51) *(2026-02-19)*
+### ✅ [Sprint 51 — Real-time Collaboration Foundation: Live Presence & WebSocket](Sprint-51) *(2026-02-19)*
 **Focus:** WebSocket server, user presence, typing indicators, project-level live updates, connection management
-**Stats:** 0/5 goals in progress
+**Stats:** 5/5 goals complete
 
 ---
 
