@@ -47,6 +47,11 @@ vi.mock("@/lib/use-locale", () => ({
         "monitoring.redisMisses": "Redis Misses",
         "monitoring.redisStatusOn": "ON",
         "monitoring.redisStatusOff": "OFF",
+        "monitoring.wsConnections": "WebSocket Connections",
+        "monitoring.wsConnectionsDesc": "Active WebSocket connection stats",
+        "monitoring.wsTotal": "Total",
+        "monitoring.wsAuthenticated": "Authenticated",
+        "monitoring.wsChannels": "Channels",
       };
       return translations[key] ?? key;
     },
@@ -81,10 +86,11 @@ const resourceStats = {
   connectionPool: { maxConnections: 5, activeConnections: 2, idleConnections: 3 },
   uptimeSeconds: 3661,
 };
+const wsStats = { total: 12, authenticated: 10, channels: { "project:p1": 5, "project:p2": 3 } };
 
 describe("MonitoringPanel", () => {
   it("renders overview stat cards", () => {
-    render(<MonitoringPanel perfStats={perfStats} cacheStats={cacheStats} queueStats={queueStats} resourceStats={resourceStats} />);
+    render(<MonitoringPanel perfStats={perfStats} cacheStats={cacheStats} queueStats={queueStats} resourceStats={resourceStats} wsStats={wsStats} />);
 
     expect(screen.getByText("Total Requests")).toBeInTheDocument();
     expect(screen.getByText("150")).toBeInTheDocument();
@@ -94,40 +100,40 @@ describe("MonitoringPanel", () => {
   });
 
   it("renders job queue status grid", () => {
-    render(<MonitoringPanel perfStats={perfStats} cacheStats={cacheStats} queueStats={queueStats} resourceStats={resourceStats} />);
+    render(<MonitoringPanel perfStats={perfStats} cacheStats={cacheStats} queueStats={queueStats} resourceStats={resourceStats} wsStats={wsStats} />);
 
     expect(screen.getByText("Job Queue Status")).toBeInTheDocument();
     expect(screen.getByText("50")).toBeTruthy();
   });
 
   it("renders cache statistics", () => {
-    render(<MonitoringPanel perfStats={perfStats} cacheStats={cacheStats} queueStats={queueStats} resourceStats={resourceStats} />);
+    render(<MonitoringPanel perfStats={perfStats} cacheStats={cacheStats} queueStats={queueStats} resourceStats={resourceStats} wsStats={wsStats} />);
 
     expect(screen.getByText("Cache Statistics")).toBeInTheDocument();
     expect(screen.getByText("45 in-memory entries")).toBeInTheDocument();
   });
 
   it("renders Redis cache section", () => {
-    render(<MonitoringPanel perfStats={perfStats} cacheStats={cacheStats} queueStats={queueStats} resourceStats={resourceStats} />);
+    render(<MonitoringPanel perfStats={perfStats} cacheStats={cacheStats} queueStats={queueStats} resourceStats={resourceStats} wsStats={wsStats} />);
 
     expect(screen.getByText("Redis Cache")).toBeInTheDocument();
     expect(screen.getByText("Redis Hits")).toBeInTheDocument();
     expect(screen.getByText("Redis Misses")).toBeInTheDocument();
     expect(screen.getByText("30")).toBeInTheDocument();
-    expect(screen.getByText("10")).toBeInTheDocument();
+    expect(screen.getAllByText("10").length).toBeGreaterThanOrEqual(1);
     expect(screen.getByText("ON")).toBeInTheDocument();
   });
 
   it("shows Redis as disabled when not enabled", () => {
     const disabledCache = { ...cacheStats, redisEnabled: false };
-    render(<MonitoringPanel perfStats={perfStats} cacheStats={disabledCache} queueStats={queueStats} resourceStats={resourceStats} />);
+    render(<MonitoringPanel perfStats={perfStats} cacheStats={disabledCache} queueStats={queueStats} resourceStats={resourceStats} wsStats={wsStats} />);
 
     expect(screen.getByText("OFF")).toBeInTheDocument();
     expect(screen.getByText("Redis not connected")).toBeInTheDocument();
   });
 
   it("renders slowest paths table", () => {
-    render(<MonitoringPanel perfStats={perfStats} cacheStats={cacheStats} queueStats={queueStats} resourceStats={resourceStats} />);
+    render(<MonitoringPanel perfStats={perfStats} cacheStats={cacheStats} queueStats={queueStats} resourceStats={resourceStats} wsStats={wsStats} />);
 
     expect(screen.getByText("Slowest Paths")).toBeInTheDocument();
     expect(screen.getByText("/api/slow")).toBeInTheDocument();
@@ -135,14 +141,14 @@ describe("MonitoringPanel", () => {
   });
 
   it("renders recent requests", () => {
-    render(<MonitoringPanel perfStats={perfStats} cacheStats={cacheStats} queueStats={queueStats} resourceStats={resourceStats} />);
+    render(<MonitoringPanel perfStats={perfStats} cacheStats={cacheStats} queueStats={queueStats} resourceStats={resourceStats} wsStats={wsStats} />);
 
     expect(screen.getByText("Recent Requests")).toBeInTheDocument();
     expect(screen.getByText("/api/test")).toBeInTheDocument();
   });
 
   it("renders memory usage section", () => {
-    render(<MonitoringPanel perfStats={perfStats} cacheStats={cacheStats} queueStats={queueStats} resourceStats={resourceStats} />);
+    render(<MonitoringPanel perfStats={perfStats} cacheStats={cacheStats} queueStats={queueStats} resourceStats={resourceStats} wsStats={wsStats} />);
 
     expect(screen.getByText("Memory Usage")).toBeInTheDocument();
     expect(screen.getByText("64.5MB")).toBeInTheDocument();
@@ -152,21 +158,38 @@ describe("MonitoringPanel", () => {
   });
 
   it("renders connection pool section", () => {
-    render(<MonitoringPanel perfStats={perfStats} cacheStats={cacheStats} queueStats={queueStats} resourceStats={resourceStats} />);
+    render(<MonitoringPanel perfStats={perfStats} cacheStats={cacheStats} queueStats={queueStats} resourceStats={resourceStats} wsStats={wsStats} />);
 
     expect(screen.getByText("Connection Pool")).toBeInTheDocument();
     expect(screen.getByText("Idle")).toBeInTheDocument();
   });
 
   it("renders uptime", () => {
-    render(<MonitoringPanel perfStats={perfStats} cacheStats={cacheStats} queueStats={queueStats} resourceStats={resourceStats} />);
+    render(<MonitoringPanel perfStats={perfStats} cacheStats={cacheStats} queueStats={queueStats} resourceStats={resourceStats} wsStats={wsStats} />);
 
     expect(screen.getByText("Uptime: 1h 1m 1s")).toBeInTheDocument();
   });
 
+  it("renders WebSocket connections section", () => {
+    render(<MonitoringPanel perfStats={perfStats} cacheStats={cacheStats} queueStats={queueStats} resourceStats={resourceStats} wsStats={wsStats} />);
+
+    expect(screen.getByText("WebSocket Connections")).toBeInTheDocument();
+    expect(screen.getByText("12")).toBeInTheDocument();
+    expect(screen.getByText("project:p1")).toBeInTheDocument();
+    expect(screen.getByText("project:p2")).toBeInTheDocument();
+  });
+
+  it("renders WebSocket with no channels", () => {
+    const emptyWs = { total: 0, authenticated: 0, channels: {} };
+    render(<MonitoringPanel perfStats={perfStats} cacheStats={cacheStats} queueStats={queueStats} resourceStats={resourceStats} wsStats={emptyWs} />);
+
+    expect(screen.getByText("WebSocket Connections")).toBeInTheDocument();
+    expect(screen.queryByText("project:p1")).not.toBeInTheDocument();
+  });
+
   it("hides slowest paths when empty", () => {
     const emptyPerf = { ...perfStats, slowestPaths: [], recentTimings: [] };
-    render(<MonitoringPanel perfStats={emptyPerf} cacheStats={cacheStats} queueStats={queueStats} resourceStats={resourceStats} />);
+    render(<MonitoringPanel perfStats={emptyPerf} cacheStats={cacheStats} queueStats={queueStats} resourceStats={resourceStats} wsStats={wsStats} />);
 
     expect(screen.queryByText("Slowest Paths")).not.toBeInTheDocument();
     expect(screen.queryByText("Recent Requests")).not.toBeInTheDocument();

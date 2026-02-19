@@ -10,6 +10,7 @@ import { getPerfStats } from "@/lib/perf-monitor";
 import { getCacheStats } from "@/lib/cache";
 import { getQueueStats } from "@/lib/queue";
 import { getResourceStats } from "@/lib/resource-monitor";
+import { getConnectionStats } from "@/lib/websocket/server";
 import { MonitoringPanel } from "./monitoring-panel";
 
 export default async function MonitoringPage() {
@@ -37,6 +38,13 @@ export default async function MonitoringPage() {
     getResourceStats(),
   ]);
 
+  let wsStats: { total: number; authenticated: number; channels: Record<string, number> };
+  try {
+    wsStats = getConnectionStats();
+  } catch {
+    wsStats = { total: 0, authenticated: 0, channels: {} };
+  }
+
   return (
     <div className="mx-auto max-w-6xl py-4 sm:py-8">
       <div className="mb-5 flex items-center gap-3 sm:mb-8">
@@ -49,7 +57,7 @@ export default async function MonitoringPage() {
         </div>
       </div>
 
-      <MonitoringPanel perfStats={perfStats} cacheStats={cacheStats} queueStats={queueStats} resourceStats={resourceStats} />
+      <MonitoringPanel perfStats={perfStats} cacheStats={cacheStats} queueStats={queueStats} resourceStats={resourceStats} wsStats={wsStats} />
     </div>
   );
 }

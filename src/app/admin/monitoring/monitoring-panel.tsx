@@ -1,7 +1,7 @@
 "use client";
 
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Activity, Database, Layers, Clock, Zap, HardDrive, Server } from "lucide-react";
+import { Activity, Database, Layers, Clock, Zap, HardDrive, Server, Radio } from "lucide-react";
 import { useLocale } from "@/lib/use-locale";
 import type { PerfStats } from "@/lib/perf-monitor";
 import type { ResourceStats } from "@/lib/resource-monitor";
@@ -33,16 +33,24 @@ function formatUptime(seconds: number): string {
   return `${s}s`;
 }
 
+interface WsStats {
+  total: number;
+  authenticated: number;
+  channels: Record<string, number>;
+}
+
 export function MonitoringPanel({
   perfStats,
   cacheStats,
   queueStats,
   resourceStats,
+  wsStats,
 }: {
   perfStats: PerfStats;
   cacheStats: CacheStats;
   queueStats: QueueStats;
   resourceStats: ResourceStats;
+  wsStats: WsStats;
 }) {
   const { t } = useLocale();
 
@@ -233,6 +241,53 @@ export function MonitoringPanel({
               <p className="text-xs text-muted-foreground">{t("monitoring.idleConnections")}</p>
             </div>
           </div>
+        </CardContent>
+      </Card>
+
+      {/* WebSocket Connections */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Radio className="h-5 w-5" />
+            {t("monitoring.wsConnections")}
+          </CardTitle>
+          <CardDescription>{t("monitoring.wsConnectionsDesc")}</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-3 gap-4 text-center">
+            <div className="rounded-lg border p-3">
+              <p className="text-2xl font-bold">{wsStats.total}</p>
+              <p className="text-xs text-muted-foreground">{t("monitoring.wsTotal")}</p>
+            </div>
+            <div className="rounded-lg border p-3">
+              <p className="text-2xl font-bold text-green-600">{wsStats.authenticated}</p>
+              <p className="text-xs text-muted-foreground">{t("monitoring.wsAuthenticated")}</p>
+            </div>
+            <div className="rounded-lg border p-3">
+              <p className="text-2xl font-bold">{Object.keys(wsStats.channels).length}</p>
+              <p className="text-xs text-muted-foreground">{t("monitoring.wsChannels")}</p>
+            </div>
+          </div>
+          {Object.keys(wsStats.channels).length > 0 && (
+            <div className="mt-4">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b text-left">
+                    <th className="pb-2 pr-4 font-medium">Channel</th>
+                    <th className="pb-2 font-medium">Subscribers</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {Object.entries(wsStats.channels).map(([ch, count]) => (
+                    <tr key={ch} className="border-b last:border-0">
+                      <td className="py-1.5 pr-4 font-mono text-xs">{ch}</td>
+                      <td className="py-1.5">{count}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
         </CardContent>
       </Card>
 
