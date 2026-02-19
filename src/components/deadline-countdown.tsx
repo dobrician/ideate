@@ -31,22 +31,33 @@ function calcTimeLeft(deadline: Date): TimeLeft {
 }
 
 /**
- * Countdown timer showing time remaining until project deadline
+ * Countdown timer showing time remaining until project deadline.
+ * Defers time computation to after mount to avoid hydration mismatch
+ * (Date.now() differs between server and client rendering).
  */
 export function DeadlineCountdown({ deadline }: DeadlineCountdownProps) {
   const { t } = useLocale();
   const deadlineMs = new Date(deadline).getTime();
-  const [timeLeft, setTimeLeft] = useState<TimeLeft>(
-    calcTimeLeft(new Date(deadlineMs))
-  );
+  // Start as null so server and client render the same placeholder
+  const [timeLeft, setTimeLeft] = useState<TimeLeft | null>(null);
 
   useEffect(() => {
     const target = new Date(deadlineMs);
+    setTimeLeft(calcTimeLeft(target));
     const interval = setInterval(() => {
       setTimeLeft(calcTimeLeft(target));
     }, 1000);
     return () => clearInterval(interval);
   }, [deadlineMs]);
+
+  if (timeLeft === null) {
+    return (
+      <div className="flex items-center gap-2 rounded-md bg-blue-100 px-3 py-2 text-sm font-medium text-blue-800 dark:bg-blue-900 dark:text-blue-200">
+        <Clock className="h-4 w-4" />
+        <span>&hellip;</span>
+      </div>
+    );
+  }
 
   if (timeLeft.expired) {
     return (
