@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ChevronDown, ChevronRight, Reply } from "lucide-react";
 import { useLocale } from "@/lib/use-locale";
@@ -26,14 +26,14 @@ export function ChatBubble({
 }) {
   const { t } = useLocale();
   const displayName = comment.userName || comment.userEmail || t("common.anonymous");
-  // Defer time-ago computation to avoid hydration mismatch (Date.now() differs
-  // between server and client). Render empty string during SSR+hydration.
-  const [timeAgo, setTimeAgo] = useState("");
-  useEffect(() => {
-    if (comment.createdAt) {
-      setTimeAgo(formatTimeAgo(comment.createdAt, t));
-    }
-  }, [comment.createdAt, t]);
+  // Defer time-ago to client to avoid hydration mismatch (Date.now() differs server/client)
+  const [mounted, setMounted] = useState(false);
+  // eslint-disable-next-line react-hooks/set-state-in-effect -- mount flag for hydration
+  useEffect(() => { setMounted(true); }, []);
+  const timeAgo = useMemo(
+    () => mounted && comment.createdAt ? formatTimeAgo(comment.createdAt, t) : "",
+    [mounted, comment.createdAt, t]
+  );
   const initials = getInitials(displayName);
   const colorClass = avatarColor(comment.userId);
 

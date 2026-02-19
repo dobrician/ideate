@@ -41,6 +41,7 @@ export function DeadlineCountdown({ deadline }: DeadlineCountdownProps) {
   // Start as null so server and client render the same placeholder
   const [timeLeft, setTimeLeft] = useState<TimeLeft | null>(null);
 
+  /* eslint-disable react-hooks/set-state-in-effect -- initial calc + interval for countdown */
   useEffect(() => {
     const target = new Date(deadlineMs);
     setTimeLeft(calcTimeLeft(target));
@@ -49,6 +50,7 @@ export function DeadlineCountdown({ deadline }: DeadlineCountdownProps) {
     }, 1000);
     return () => clearInterval(interval);
   }, [deadlineMs]);
+  /* eslint-enable react-hooks/set-state-in-effect */
 
   if (timeLeft === null) {
     return (

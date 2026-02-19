@@ -185,7 +185,7 @@ describe("I18n Library", () => {
 
     it("should translate dashboard keys", () => {
       expect(t("en", "dashboard.title")).toBe("Dashboard");
-      expect(t("ro", "dashboard.title")).toBe("Dashboard");
+      expect(t("ro", "dashboard.title")).toBe("Panou de Control");
     });
 
     it("should translate auth keys", () => {
