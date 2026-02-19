@@ -48,6 +48,15 @@ function ChartPatternDefs() {
   );
 }
 
+/** Shared tooltip style that respects light/dark theme via CSS variables. */
+const tooltipStyle: React.CSSProperties = {
+  borderRadius: 8,
+  fontSize: 12,
+  backgroundColor: "var(--color-card)",
+  borderColor: "var(--color-border)",
+  color: "var(--color-card-foreground)",
+};
+
 function EmptyChart({ title }: { title: string }) {
   const { t } = useLocale();
   return (
@@ -79,13 +88,13 @@ export const VotesOverTimeChart = memo(function VotesOverTimeChart({ data }: { d
               <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
               <XAxis
                 dataKey="date"
-                tick={{ fontSize: 11 }}
+                tick={{ fontSize: 11, fill: "var(--color-muted-foreground)" }}
                 tickFormatter={(v: string) => v.slice(5)}
                 interval="preserveStartEnd"
               />
-              <YAxis tick={{ fontSize: 11 }} allowDecimals={false} width={35} />
+              <YAxis tick={{ fontSize: 11, fill: "var(--color-muted-foreground)" }} allowDecimals={false} width={35} />
               <Tooltip
-                contentStyle={{ borderRadius: 8, fontSize: 12 }}
+                contentStyle={tooltipStyle}
                 labelFormatter={(label) => String(label)}
               />
               <Legend wrapperStyle={{ fontSize: 12 }} />
@@ -123,13 +132,13 @@ export const TopProposalsChart = memo(function TopProposalsChart({ data }: { dat
             <BarChart data={data} layout="vertical" margin={{ top: 5, right: 10, left: -10, bottom: 5 }}>
               <ChartPatternDefs />
               <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
-              <XAxis type="number" tick={{ fontSize: 11 }} allowDecimals={false} />
+              <XAxis type="number" tick={{ fontSize: 11, fill: "var(--color-muted-foreground)" }} allowDecimals={false} />
               <YAxis
                 dataKey="title" type="category"
-                tick={{ fontSize: 10 }} width={80}
+                tick={{ fontSize: 10, fill: "var(--color-muted-foreground)" }} width={80}
                 tickFormatter={(v: string) => v.length > 15 ? `${v.slice(0, 15)}...` : v}
               />
-              <Tooltip contentStyle={{ borderRadius: 8, fontSize: 12 }} />
+              <Tooltip contentStyle={tooltipStyle} />
               <Legend wrapperStyle={{ fontSize: 12 }} />
               <Bar dataKey="pro" name={t("vote.pro")} fill="url(#dash-pro)" stackId="votes" />
               <Bar dataKey="contra" name={t("vote.contra")} fill="url(#dash-contra)" stackId="votes" />
@@ -159,13 +168,13 @@ export const ActivityHeatmapChart = memo(function ActivityHeatmapChart({ data }:
               <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
               <XAxis
                 dataKey="date"
-                tick={{ fontSize: 11 }}
+                tick={{ fontSize: 11, fill: "var(--color-muted-foreground)" }}
                 tickFormatter={(v: string) => v.slice(5)}
                 interval="preserveStartEnd"
               />
-              <YAxis tick={{ fontSize: 11 }} allowDecimals={false} width={35} />
+              <YAxis tick={{ fontSize: 11, fill: "var(--color-muted-foreground)" }} allowDecimals={false} width={35} />
               <Tooltip
-                contentStyle={{ borderRadius: 8, fontSize: 12 }}
+                contentStyle={tooltipStyle}
                 labelFormatter={(label) => String(label)}
               />
               <Bar dataKey="count" name={t("charts.actions")} fill="url(#dash-activity)" radius={[2, 2, 0, 0]} />
