@@ -274,13 +274,11 @@ describe("statusLabel edge cases", () => {
 // ============================================================
 
 describe("Vote bar gradient opacity (#58)", () => {
-  // We test the actual CSS class strings in proposal-item.tsx
-  // The gradient should use /8, not /15
-  it("gradient class uses /8 opacity (verified via source)", async () => {
+  // Vote bars use inline rgba styles with low opacity for subtle gradients
+  it("vote bar uses low-opacity inline styles (verified via source)", async () => {
     const fs = await import("fs");
     const src = fs.readFileSync("src/components/proposal-item.tsx", "utf-8");
-    expect(src).toContain("from-green-500/8");
-    expect(src).toContain("from-red-500/8");
+    expect(src).toContain("rgba(120, 149, 100, 0.18)");
     expect(src).not.toContain("from-green-500/15");
     expect(src).not.toContain("from-red-500/15");
   });

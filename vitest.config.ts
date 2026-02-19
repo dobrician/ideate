@@ -22,6 +22,8 @@ export default defineConfig({
         "src/app/profile/actions.ts",
         "src/app/projects/actions.ts",
         "src/app/projects/[id]/proposals/actions.ts",
+        "src/lib/queue/index.ts",
+        "src/app/api/cron/jobs/route.ts",
       ],
       exclude: [
         "src/lib/use-*.ts", // React hooks (require DOM environment)

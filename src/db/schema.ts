@@ -223,6 +223,22 @@ export const teamMembers = sqliteTable("team_members", {
   joinedAt: integer("joined_at", { mode: "timestamp" }).default(sql`(unixepoch())`),
 }, (table) => [primaryKey({ columns: [table.teamId, table.userId] })]);
 
+// ─── Job Queue ──────────────────────────────────────────────────────────
+
+export const jobQueue = sqliteTable("job_queue", {
+  id: pk(),
+  type: text("type").notNull(),
+  payload: text("payload").notNull().default("{}"),
+  status: text("status", { enum: ["pending", "processing", "completed", "failed", "dead"] }).notNull().default("pending"),
+  attempts: integer("attempts").notNull().default(0),
+  maxAttempts: integer("max_attempts").notNull().default(3),
+  lastError: text("last_error"),
+  runAt: integer("run_at", { mode: "timestamp" }).default(sql`(unixepoch())`),
+  startedAt: integer("started_at", { mode: "timestamp" }),
+  completedAt: integer("completed_at", { mode: "timestamp" }),
+  createdAt: ts(),
+});
+
 // ─── Custom Roles ───────────────────────────────────────────────────────
 
 export const customRoles = sqliteTable("custom_roles", {

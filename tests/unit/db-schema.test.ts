@@ -11,5 +11,6 @@ describe("database schema", () => {
     expect(schema.attachments).toBeDefined();
     expect(schema.teams).toBeDefined();
     expect(schema.teamMembers).toBeDefined();
+    expect(schema.jobQueue).toBeDefined();
   });
 });
