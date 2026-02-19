@@ -12,6 +12,7 @@ import { eq } from "drizzle-orm";
 import { randomUUID } from "crypto";
 import { logAudit } from "@/lib/audit";
 import { fireWebhookEvent } from "@/lib/webhooks";
+import { emitProjectEvent } from "@/lib/project-events";
 import { withActionAuth } from "@/lib/action-wrapper";
 
 /**
@@ -157,6 +158,17 @@ export async function updateProject(projectId: string, formData: FormData) {
       fireWebhookEvent("project.archived", { projectId, title, userId: user.id }).catch((err) => logger.warn({ err }, "Webhook delivery failed"));
     }
 
+    if (status !== existingProject[0].status) {
+      emitProjectEvent({
+        projectId,
+        action: "status_changed",
+        entityId: projectId,
+        summary: `Status changed to ${status}`,
+        userId: user.id,
+        userName: user.email,
+      });
+    }
+
     revalidatePath(`/projects/${projectId}`);
     revalidatePath("/projects");
 
@@ -198,6 +210,15 @@ export async function unarchiveProject(projectId: string, csrfToken: string) {
       entity: "project",
       entityId: projectId,
       details: JSON.stringify({ action: "unarchive" }),
+    });
+
+    emitProjectEvent({
+      projectId,
+      action: "status_changed",
+      entityId: projectId,
+      summary: "Status changed to active",
+      userId: user.id,
+      userName: user.email,
     });
 
     revalidatePath(`/projects/${projectId}`);

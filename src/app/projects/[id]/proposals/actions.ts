@@ -15,6 +15,7 @@ import { logAudit } from "@/lib/audit";
 import { notifyVote } from "@/lib/notifications";
 import { isDeadlinePassed, isProjectArchived } from "@/lib/project-utils";
 import { fireWebhookEvent } from "@/lib/webhooks";
+import { emitProjectEvent } from "@/lib/project-events";
 import { withActionAuth } from "@/lib/action-wrapper";
 
 async function resolveProposalProject(
@@ -104,6 +105,15 @@ export async function createProposal(
 
     fireWebhookEvent("proposal.created", { proposalId, title, projectId, userId: user.id }).catch((err) => logger.warn({ err }, "Webhook delivery failed"));
 
+    emitProjectEvent({
+      projectId,
+      action: "proposal_added",
+      entityId: proposalId,
+      summary: title,
+      userId: user.id,
+      userName: user.email,
+    });
+
     revalidatePath(`/projects/${projectId}`);
     return { success: true };
   });
@@ -141,6 +151,15 @@ export async function deleteProposal(
       entity: "proposal",
       entityId: proposalId,
       details: JSON.stringify({ projectId }),
+    });
+
+    emitProjectEvent({
+      projectId,
+      action: "proposal_deleted",
+      entityId: proposalId,
+      summary: existing[0].title,
+      userId: user.id,
+      userName: user.email,
     });
 
     revalidatePath(`/projects/${projectId}`);
@@ -195,6 +214,16 @@ export async function castVote(
     await emitVoteUpdate(proposalId, projectId);
     notifyVote(proposalId, projectId, user.id, value);
     fireWebhookEvent("vote.cast", { proposalId, projectId, userId: user.id, value }).catch((err) => logger.warn({ err }, "Webhook delivery failed"));
+
+    emitProjectEvent({
+      projectId,
+      action: "vote_cast",
+      entityId: proposalId,
+      summary: `Vote ${value > 0 ? "up" : "down"}`,
+      userId: user.id,
+      userName: user.email,
+    });
+
     revalidatePath(`/projects/${projectId}`);
     return { success: true };
   });

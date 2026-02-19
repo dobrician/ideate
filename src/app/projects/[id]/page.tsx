@@ -1,3 +1,4 @@
+import { cookies } from "next/headers";
 import { notFound, redirect } from "next/navigation";
 import type { Metadata } from "next";
 import { db } from "@/db";
@@ -35,6 +36,7 @@ import { MarkdownRenderer } from "@/components/markdown-renderer";
 import { ArchiveBanner } from "@/components/archive-banner";
 import { TagFilter } from "@/components/tag-filter";
 import { ClientOnly } from "@/components/client-only";
+import { ProjectLivePanel } from "@/components/project-live-panel";
 
 interface ProjectPageProps {
   params: Promise<{ id: string }>;
@@ -87,6 +89,8 @@ export default async function ProjectPage({ params, searchParams }: ProjectPageP
   const { id } = await params;
   const { t, locale } = await getTranslations();
   const role = user.role as Role;
+  const cookieStore = await cookies();
+  const sessionToken = cookieStore.get("session")?.value ?? "";
 
   const project = await db
     .select()
@@ -210,6 +214,10 @@ export default async function ProjectPage({ params, searchParams }: ProjectPageP
               <MarkdownRenderer content={projectData.description} className="text-muted-foreground" />
             </div>
           )}
+
+          <ClientOnly>
+            <ProjectLivePanel projectId={id} sessionToken={sessionToken} />
+          </ClientOnly>
 
           <div className="grid gap-4 sm:grid-cols-2">
             <div>
