@@ -9,7 +9,7 @@
 - [x] **Goal 2: Redis-backed Pub/Sub** — Create `src/lib/pubsub/` module with `RedisPubSub` and `MemoryPubSub` implementations. Update vote stream `/api/votes/stream/route.ts` to use Redis pub/sub when available, fallback to memory.
 - [x] **Goal 3: PostgreSQL Database Adapter** — Add PostgreSQL support to `src/db/pg.ts` with connection pooling. Update `drizzle.config.ts` to support both SQLite and PostgreSQL via env var `DATABASE_DRIVER`. Keep SQLite as default.
 - [x] **Goal 4: Database Migration Compatibility** — Ensure all migrations work on both SQLite and PostgreSQL. Add PostgreSQL-specific migration path in `/drizzle-pg/`. Update schema types to handle database-specific differences.
-- [ ] **Goal 5: Redis Cache Integration** — Update cache layer from Sprint 49 to use Redis as L2 cache when available. Add Redis cache statistics to admin monitoring dashboard. Implement cache invalidation on data changes.
+- [x] **Goal 5: Redis Cache Integration** — Update cache layer from Sprint 49 to use Redis as L2 cache when available. Add Redis cache statistics to admin monitoring dashboard. Implement cache invalidation on data changes.
 
 ## Notes
 - Database driver selection via `DATABASE_DRIVER=sqlite|postgresql` env var
