@@ -1,4 +1,19 @@
 services:
+  redis:
+    image: redis:7-alpine
+    container_name: ideate-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - ideate-redis-data:/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
+
   staging:
     build:
       context: .
@@ -15,6 +30,10 @@ services:
       - NODE_ENV=production
       - DATABASE_URL=/app/data/ideate.db
       - MAIL_LOG_FILE=/tmp/ideate-logs/mail.log
+      - REDIS_URL=redis://redis:6379
+    depends_on:
+      redis:
+        condition: service_healthy
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "wget", "-qO-", "http://127.0.0.1:3000/api/health"]
@@ -35,6 +54,10 @@ services:
     environment:
       - NODE_ENV=production
       - DATABASE_URL=/app/data/ideate.db
+      - REDIS_URL=redis://redis:6379
+    depends_on:
+      redis:
+        condition: service_healthy
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "wget", "-qO-", "http://127.0.0.1:3000/api/health"]
@@ -44,5 +67,6 @@ services:
       start_period: 10s
 
 volumes:
+  ideate-redis-data:
   ideate-data-staging:
   ideate-data-dev:

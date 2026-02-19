@@ -15,6 +15,7 @@ const nextConfig: NextConfig = {
   experimental: {
     optimizePackageImports: ["lucide-react"],
   },
+  serverExternalPackages: ["ioredis"],
 };
 
 const config = withBundleAnalyzer(nextConfig);
