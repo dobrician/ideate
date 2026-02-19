@@ -6,6 +6,7 @@ import { Toaster } from "@/components/ui/sonner";
 import { PwaInstall } from "@/components/pwa-install";
 import { ServiceWorkerRegistration } from "@/components/sw-register";
 import { getRequestLocale } from "@/lib/i18n-server";
+import { LocaleProvider } from "@/lib/use-locale";
 import { OnboardingCheck } from "@/components/onboarding-check";
 import "./globals.css";
 
@@ -64,6 +65,7 @@ export default async function RootLayout({
     <html lang={locale} suppressHydrationWarning>
       <head />
       <body className={`${inter.className} antialiased`}>
+        <LocaleProvider locale={locale}>
         <ThemeProvider>
           <AppShell>
             {children}
@@ -73,6 +75,7 @@ export default async function RootLayout({
           <PwaInstall />
           <ServiceWorkerRegistration />
         </ThemeProvider>
+        </LocaleProvider>
       </body>
     </html>
   );
