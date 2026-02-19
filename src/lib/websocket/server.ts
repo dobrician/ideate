@@ -13,6 +13,7 @@ import type { Duplex } from "stream";
 import { verifySessionToken } from "@/lib/auth";
 import { logger } from "@/lib/logger";
 import { getPubSub } from "@/lib/pubsub";
+import { setPresence, removePresence, removeAllPresence } from "@/lib/presence";
 import type {
   WsClientMessage,
   WsServerMessage,
@@ -201,6 +202,9 @@ function handleSubscribe(ws: WebSocket, state: ClientState, channel: string): vo
   });
   state.unsubscribers.set(channel, unsub);
 
+  // Set presence for this user in the channel
+  setPresence(channel, state.userId, state.userName).catch(() => {});
+
   send(ws, { type: "subscribed", channel });
 }
 
@@ -209,6 +213,9 @@ function handleUnsubscribe(ws: WebSocket, state: ClientState, channel: string): 
     send(ws, { type: "error", message: "Not authenticated" });
     return;
   }
+
+  // Remove presence for this user from the channel
+  removePresence(channel, state.userId, state.userName).catch(() => {});
 
   state.channels.delete(channel);
   const unsub = state.unsubscribers.get(channel);
@@ -268,11 +275,20 @@ function cleanupClient(ws: WebSocket): void {
     unsub();
   }
 
+  // Remove presence from all channels
+  if (state.userId) {
+    for (const channel of state.channels) {
+      removePresence(channel, state.userId, state.userName).catch(() => {});
+    }
+  }
+
   // Decrement user connection count
   if (state.userId) {
     const count = userConnectionCounts.get(state.userId) ?? 1;
     if (count <= 1) {
       userConnectionCounts.delete(state.userId);
+      // Remove all presence when last connection closes
+      removeAllPresence(state.userId, state.userName).catch(() => {});
     } else {
       userConnectionCounts.set(state.userId, count - 1);
     }
