@@ -4,6 +4,12 @@ Reverse chronological. Click each sprint for full details.
 
 ---
 
+### 🔄 [Sprint 49 — Performance & Scale Hardening: Background Jobs & Query Optimization](Sprint-49) *(2026-02-19)*
+**Focus:** Background job queue, query optimization with indexes, caching infrastructure, performance monitoring, resource limits
+**Stats:** 1/5 goals in progress
+
+---
+
 ### ✅ [Sprint 48 — Realistic Data Factories & High-Volume Simulation](Sprint-48) *(2026-02-19)*
 **Focus:** Factory system for 20+ realistic users, projects, proposals, votes, threaded comments. CLI seeder + admin API endpoint.
 **Stats:** 13/13 goals | 1423 tests

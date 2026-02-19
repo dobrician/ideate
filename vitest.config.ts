@@ -23,6 +23,7 @@ export default defineConfig({
         "src/app/projects/actions.ts",
         "src/app/projects/[id]/proposals/actions.ts",
         "src/lib/queue/index.ts",
+        "src/lib/query-explain.ts",
         "src/app/api/cron/jobs/route.ts",
       ],
       exclude: [

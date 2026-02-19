@@ -794,4 +794,17 @@ export const en: Record<string, string> = {
   "onboarding.finish": "Get Started",
   "onboarding.finishing": "Saving...",
   "onboarding.completed": "You're all set!",
+
+  // Performance
+  "performance.title": "Query Performance",
+  "performance.subtitle": "Database query explain plans and index audit",
+  "performance.explainPlans": "Query Explain Plans",
+  "performance.explainDesc": "{indexed} of {total} queries use indexes",
+  "performance.indexed": "Uses index",
+  "performance.fullScan": "Full table scan",
+  "performance.indexes": "Database Indexes",
+  "performance.indexCount": "{count} indexes defined",
+  "performance.indexName": "Index",
+  "performance.tableName": "Table",
+  "performance.definition": "Definition",
 };

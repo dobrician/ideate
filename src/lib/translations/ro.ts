@@ -813,4 +813,17 @@ export const ro: Record<string, string> = {
   "onboarding.finish": "Începe",
   "onboarding.finishing": "Se salvează...",
   "onboarding.completed": "Ești pregătit!",
+
+  // Performance
+  "performance.title": "Performanță Interogări",
+  "performance.subtitle": "Planuri de execuție și audit indexuri baza de date",
+  "performance.explainPlans": "Planuri de Execuție",
+  "performance.explainDesc": "{indexed} din {total} interogări folosesc indexuri",
+  "performance.indexed": "Folosește index",
+  "performance.fullScan": "Scanare completă",
+  "performance.indexes": "Indexuri Bază de Date",
+  "performance.indexCount": "{count} indexuri definite",
+  "performance.indexName": "Index",
+  "performance.tableName": "Tabel",
+  "performance.definition": "Definiție",
 };
