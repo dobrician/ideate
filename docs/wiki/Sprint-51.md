@@ -5,7 +5,7 @@
 
 ## Goals
 
-- [ ] **Goal 1: WebSocket Server Upgrade** — Replace SSE with WebSocket server at `/api/ws/route.ts`. Add WebSocket client library in `src/lib/websocket/client.ts` with reconnection, heartbeat, message queuing.
+- [x] **Goal 1: WebSocket Server Upgrade** — Replace SSE with WebSocket server at `/api/ws/route.ts`. Add WebSocket client library in `src/lib/websocket/client.ts` with reconnection, heartbeat, message queuing.
 - [ ] **Goal 2: User Presence System** — Create `src/lib/presence/` module with `UserPresence` service. Track online users per project/proposal. Add presence table or Redis-backed presence with TTL.
 - [ ] **Goal 3: Typing Indicators Infrastructure** — Add typing events to WebSocket messages. Create `useTypingIndicator` hook in `src/lib/use-typing.ts`. Add typing state management with debounced cleanup.
 - [ ] **Goal 4: Project-level Live Updates** — Extend WebSocket to broadcast project changes (new proposals, status changes). Update project detail page to show live participant count and recent activity feed.
