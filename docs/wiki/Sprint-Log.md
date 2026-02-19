@@ -4,9 +4,9 @@ Reverse chronological. Click each sprint for full details.
 
 ---
 
-### 🔄 [Sprint 49 — Performance & Scale Hardening: Background Jobs & Query Optimization](Sprint-49) *(2026-02-19)*
+### ✅ [Sprint 49 — Performance & Scale Hardening: Background Jobs & Query Optimization](Sprint-49) *(2026-02-19)*
 **Focus:** Background job queue, query optimization with indexes, caching infrastructure, performance monitoring, resource limits
-**Stats:** 1/5 goals in progress
+**Stats:** 5/5 goals
 
 ---
 
