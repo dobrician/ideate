@@ -140,8 +140,8 @@ export const TopProposalsChart = memo(function TopProposalsChart({ data }: { dat
               />
               <Tooltip contentStyle={tooltipStyle} />
               <Legend wrapperStyle={{ fontSize: 12 }} />
-              <Bar dataKey="pro" name={t("vote.pro")} fill="url(#dash-pro)" stackId="votes" />
-              <Bar dataKey="contra" name={t("vote.contra")} fill="url(#dash-contra)" stackId="votes" />
+              <Bar dataKey="pro" name={t("vote.pro")} fill="#a3b88c" stackId="votes" />
+              <Bar dataKey="contra" name={t("vote.contra")} fill="#c8907a" stackId="votes" />
             </BarChart>
           </ResponsiveContainer>
         </div>
@@ -177,7 +177,7 @@ export const ActivityHeatmapChart = memo(function ActivityHeatmapChart({ data }:
                 contentStyle={tooltipStyle}
                 labelFormatter={(label) => String(label)}
               />
-              <Bar dataKey="count" name={t("charts.actions")} fill="url(#dash-activity)" radius={[2, 2, 0, 0]} />
+              <Bar dataKey="count" name={t("charts.actions")} fill="#a3b88c" radius={[2, 2, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
         </div>

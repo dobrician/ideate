@@ -65,7 +65,7 @@ export const ProposalTrendChart = memo(function ProposalTrendChart({ data }: { d
               <XAxis dataKey="week" tick={{ fontSize: 10 }} tickFormatter={(v: string) => v.slice(5)} />
               <YAxis tick={{ fontSize: 11 }} allowDecimals={false} width={35} />
               <Tooltip contentStyle={{ borderRadius: 8, fontSize: 12 }} />
-              <Bar dataKey="count" name={t("analytics.proposals")} fill="url(#pat-indigo)" radius={[2, 2, 0, 0]} />
+              <Bar dataKey="count" name={t("analytics.proposals")} fill="#8b9dc3" radius={[2, 2, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
         </div>
@@ -116,7 +116,7 @@ export const UserGrowthChart = memo(function UserGrowthChart({ data }: { data: T
               <XAxis dataKey="week" tick={{ fontSize: 10 }} tickFormatter={(v: string) => v.slice(5)} />
               <YAxis tick={{ fontSize: 11 }} allowDecimals={false} width={35} />
               <Tooltip contentStyle={{ borderRadius: 8, fontSize: 12 }} />
-              <Bar dataKey="count" name={t("analytics.newUsers")} fill="url(#pat-green)" radius={[2, 2, 0, 0]} />
+              <Bar dataKey="count" name={t("analytics.newUsers")} fill="#a3b88c" radius={[2, 2, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
         </div>
@@ -142,9 +142,9 @@ export const ProjectHealthChart = memo(function ProjectHealthChart({ data }: { d
               <YAxis dataKey="title" type="category" tick={{ fontSize: 10 }} width={100} />
               <Tooltip contentStyle={{ borderRadius: 8, fontSize: 12 }} />
               <Legend wrapperStyle={{ fontSize: 12 }} />
-              <Bar dataKey="proposals" name={t("analytics.proposals")} fill="url(#pat-indigo)" stackId="a" />
-              <Bar dataKey="votes" name={t("analytics.votes")} fill="url(#pat-green)" stackId="a" />
-              <Bar dataKey="comments" name={t("analytics.comments")} fill="url(#pat-amber)" stackId="a" />
+              <Bar dataKey="proposals" name={t("analytics.proposals")} fill="#8b9dc3" stackId="a" />
+              <Bar dataKey="votes" name={t("analytics.votes")} fill="#a3b88c" stackId="a" />
+              <Bar dataKey="comments" name={t("analytics.comments")} fill="#c8907a" stackId="a" />
             </BarChart>
           </ResponsiveContainer>
         </div>
@@ -169,7 +169,7 @@ export const EngagementByDayChart = memo(function EngagementByDayChart({ data }:
               <XAxis dataKey="day" tick={{ fontSize: 11 }} />
               <YAxis tick={{ fontSize: 11 }} allowDecimals={false} width={35} />
               <Tooltip contentStyle={{ borderRadius: 8, fontSize: 12 }} />
-              <Bar dataKey="count" name={t("analytics.actions")} fill="url(#pat-violet)" radius={[2, 2, 0, 0]} />
+              <Bar dataKey="count" name={t("analytics.actions")} fill="#9b8ec4" radius={[2, 2, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
         </div>
