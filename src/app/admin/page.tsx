@@ -5,7 +5,7 @@ import { hasPermission } from "@/lib/rbac";
 import type { Role } from "@/lib/rbac";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Users, FolderOpen, Lightbulb, ThumbsUp, ShieldX, BarChart3, Gauge } from "lucide-react";
+import { Users, FolderOpen, Lightbulb, ThumbsUp, ShieldX, BarChart3, Gauge, Activity } from "lucide-react";
 import { UserRoleManager } from "./user-role-manager";
 import { AuditLog } from "./audit-log";
 import { InvitationPanel } from "./invitation-panel";
@@ -48,6 +48,9 @@ export default async function AdminPage() {
           <p className="text-muted-foreground">{t("admin.subtitle")}</p>
         </div>
         <div className="flex gap-2">
+          <Button variant="outline" asChild>
+            <Link href="/admin/monitoring"><Activity className="mr-1.5 h-4 w-4" />{t("monitoring.title")}</Link>
+          </Button>
           <Button variant="outline" asChild>
             <Link href="/admin/performance"><Gauge className="mr-1.5 h-4 w-4" />{t("performance.title")}</Link>
           </Button>
