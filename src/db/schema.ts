@@ -239,6 +239,15 @@ export const jobQueue = sqliteTable("job_queue", {
   createdAt: ts(),
 });
 
+// ─── Cache Entries ──────────────────────────────────────────────────
+
+export const cacheEntries = sqliteTable("cache_entries", {
+  key: text("key").primaryKey(),
+  value: text("value").notNull(),
+  ttl: integer("ttl").notNull().default(300),
+  createdAt: integer("created_at").default(sql`(unixepoch())`),
+});
+
 // ─── Custom Roles ───────────────────────────────────────────────────────
 
 export const customRoles = sqliteTable("custom_roles", {
