@@ -15,6 +15,8 @@ export default defineConfig({
         "src/lib/**/*.ts",
         "src/proxy.ts",
         "src/db/index.ts",
+        "src/db/migrate-pg.ts",
+        "src/db/adapter.ts",
         "src/components/stat-card.tsx",
         "src/app/dashboard/queries.ts",
         "src/app/api/search/route.ts",

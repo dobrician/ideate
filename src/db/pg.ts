@@ -11,6 +11,7 @@ import { drizzle } from "drizzle-orm/node-postgres";
 import * as schema from "./schema-pg";
 import { logger } from "@/lib/logger";
 import { updatePoolStats } from "@/lib/resource-monitor";
+import { applyPgMigrations } from "./migrate-pg";
 
 const POSTGRESQL_URL = process.env.POSTGRESQL_URL ?? process.env.DATABASE_URL;
 
@@ -47,6 +48,11 @@ function syncPoolStats(): void {
 
 // Initial pool stats sync
 syncPoolStats();
+
+// Apply migrations (fire-and-forget; logs on failure)
+applyPgMigrations(pool).catch((err) => {
+  logger.fatal({ err }, "PG migration failed — continuing without migrations");
+});
 
 export const db = drizzle(pool, { schema });
 export type DB = typeof db;
