@@ -34,6 +34,7 @@ import { SuggestProposalsButton } from "@/components/suggest-proposals";
 import { MarkdownRenderer } from "@/components/markdown-renderer";
 import { ArchiveBanner } from "@/components/archive-banner";
 import { TagFilter } from "@/components/tag-filter";
+import { ClientOnly } from "@/components/client-only";
 
 interface ProjectPageProps {
   params: Promise<{ id: string }>;
@@ -268,12 +269,20 @@ export default async function ProjectPage({ params, searchParams }: ProjectPageP
                 </div>
               )}
             </div>
-            <ProposalList
-              proposals={proposalsWithStats}
-              projectId={id}
-              currentUserId={user.id}
-              isAdmin={isAdmin}
-            />
+            <ClientOnly fallback={
+              <div className="space-y-2">
+                {proposalsWithStats.map((p) => (
+                  <div key={p.id} className="h-20 animate-pulse rounded-lg border bg-muted/30" />
+                ))}
+              </div>
+            }>
+              <ProposalList
+                proposals={proposalsWithStats}
+                projectId={id}
+                currentUserId={user.id}
+                isAdmin={isAdmin}
+              />
+            </ClientOnly>
             {proposalTotalPages > 1 && (
               <div className="mt-6">
                 <Pagination currentPage={proposalPage} totalPages={proposalTotalPages} />
@@ -281,7 +290,9 @@ export default async function ProjectPage({ params, searchParams }: ProjectPageP
             )}
           </div>
 
-          <ProjectComments projectId={id} comments={projectComments} currentUserId={user.id} />
+          <ClientOnly>
+            <ProjectComments projectId={id} comments={projectComments} currentUserId={user.id} />
+          </ClientOnly>
         </CardContent>
       </Card>
     </div>
