@@ -149,7 +149,7 @@ export default async function ProjectsPage({ searchParams }: ProjectsPageProps) 
         <>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {allProjects.map((project) => (
-              <Link key={project.id} href={`/projects/${project.id}`}>
+              <Link key={project.id} href={`/projects/${project.id}`} className="no-underline hover:no-underline">
                 <Card className="h-full min-h-[180px] transition-all duration-200 hover:shadow-lg hover:border-primary/20">
                   <CardHeader>
                     <div className="flex items-start justify-between gap-2">
