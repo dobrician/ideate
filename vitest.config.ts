@@ -32,6 +32,8 @@ export default defineConfig({
       exclude: [
         "src/lib/use-*.ts", // React hooks (require DOM environment)
         "src/lib/export.ts", // Pure barrel re-export (no logic to test)
+        "src/lib/websocket/client.ts", // Client-side WebSocket (requires browser WebSocket)
+        "src/lib/websocket/index.ts", // Pure barrel re-export (no logic to test)
       ],
     },
   },

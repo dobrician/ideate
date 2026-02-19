@@ -850,4 +850,40 @@ export const en: Record<string, string> = {
   "monitoring.redisMisses": "Redis Misses",
   "monitoring.redisStatusOn": "ON",
   "monitoring.redisStatusOff": "OFF",
+
+  // WebSocket / Real-time
+  "ws.connected": "Connected",
+  "ws.disconnected": "Disconnected",
+  "ws.connecting": "Connecting...",
+  "ws.reconnecting": "Reconnecting...",
+  "ws.connectionLost": "Connection lost. Reconnecting...",
+  "ws.connectionRestored": "Connection restored",
+  "ws.fallbackPolling": "Using polling mode",
+
+  // Presence
+  "presence.online": "Online",
+  "presence.offline": "Offline",
+  "presence.usersOnline": "{count} users online",
+  "presence.usersOnline_one": "{count} user online",
+  "presence.viewing": "viewing",
+
+  // Typing
+  "typing.indicator": "{name} is typing...",
+  "typing.indicatorMultiple": "{count} people are typing...",
+
+  // Live Updates
+  "live.participantCount": "{count} participants",
+  "live.participantCount_one": "{count} participant",
+  "live.newProposal": "New proposal added",
+  "live.statusChanged": "Project status changed",
+  "live.newVote": "New vote cast",
+  "live.activityFeed": "Live Activity",
+  "live.noActivity": "No recent activity",
+
+  // Connection Management
+  "monitoring.wsConnections": "WebSocket Connections",
+  "monitoring.wsConnectionsDesc": "Active WebSocket connection stats",
+  "monitoring.wsTotal": "Total",
+  "monitoring.wsAuthenticated": "Authenticated",
+  "monitoring.wsChannels": "Channels",
 };

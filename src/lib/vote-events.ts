@@ -10,6 +10,7 @@
  */
 
 import { getPubSub } from "@/lib/pubsub";
+import { publishToChannel } from "@/lib/websocket/server";
 
 type VoteListener = (data: VoteEvent) => void;
 
@@ -87,9 +88,25 @@ export function subscribeVotes(
  * (including the local subscriber handler which calls deliverLocally).
  */
 export function emitVoteChange(event: VoteEvent): void {
+  // Publish to SSE listeners via pub/sub
   const pubsub = getPubSub();
   pubsub.publish(
     `${CHANNEL_PREFIX}${event.projectId}`,
     JSON.stringify(event),
   );
+
+  // Also publish to WebSocket clients on the project channel
+  try {
+    publishToChannel(`project:${event.projectId}`, {
+      type: "vote_update",
+      channel: `project:${event.projectId}`,
+      data: {
+        proposalId: event.proposalId,
+        upvotes: event.upvotes,
+        downvotes: event.downvotes,
+      },
+    });
+  } catch {
+    // WebSocket server may not be initialized (e.g. during tests)
+  }
 }

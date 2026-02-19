@@ -869,4 +869,40 @@ export const ro: Record<string, string> = {
   "monitoring.redisMisses": "Ratări Redis",
   "monitoring.redisStatusOn": "ACTIV",
   "monitoring.redisStatusOff": "INACTIV",
+
+  // WebSocket / Real-time
+  "ws.connected": "Conectat",
+  "ws.disconnected": "Deconectat",
+  "ws.connecting": "Se conectează...",
+  "ws.reconnecting": "Reconectare...",
+  "ws.connectionLost": "Conexiune pierdută. Reconectare...",
+  "ws.connectionRestored": "Conexiune restabilită",
+  "ws.fallbackPolling": "Mod polling",
+
+  // Presence
+  "presence.online": "Online",
+  "presence.offline": "Offline",
+  "presence.usersOnline": "{count} utilizatori online",
+  "presence.usersOnline_one": "{count} utilizator online",
+  "presence.viewing": "vizualizează",
+
+  // Typing
+  "typing.indicator": "{name} scrie...",
+  "typing.indicatorMultiple": "{count} persoane scriu...",
+
+  // Live Updates
+  "live.participantCount": "{count} participanți",
+  "live.participantCount_one": "{count} participant",
+  "live.newProposal": "Propunere nouă adăugată",
+  "live.statusChanged": "Status proiect modificat",
+  "live.newVote": "Vot nou înregistrat",
+  "live.activityFeed": "Activitate Live",
+  "live.noActivity": "Nicio activitate recentă",
+
+  // Connection Management
+  "monitoring.wsConnections": "Conexiuni WebSocket",
+  "monitoring.wsConnectionsDesc": "Statistici conexiuni WebSocket active",
+  "monitoring.wsTotal": "Total",
+  "monitoring.wsAuthenticated": "Autentificate",
+  "monitoring.wsChannels": "Canale",
 };
