@@ -94,7 +94,7 @@ export default async function DashboardPage() {
         </Button>
       </div>
 
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2 lg:[&>*]:flex lg:[&>*]:flex-col">
         {/* User's projects */}
         <Card className="min-w-0 overflow-hidden">
           <CardHeader className="flex flex-row items-start justify-between">
@@ -106,7 +106,7 @@ export default async function DashboardPage() {
               {t("dashboard.viewAll")}
             </Link>
           </CardHeader>
-          <CardContent>
+          <CardContent className="flex-1">
             {userProjects.length === 0 ? (
               <EmptyState
                 icon={<FolderOpen className="h-5 w-5 text-muted-foreground" />}
@@ -116,7 +116,7 @@ export default async function DashboardPage() {
                   </Link></>}
               />
             ) : (
-              <ul className="space-y-2" role="list">
+              <ul className="max-h-80 space-y-2 overflow-y-auto" role="list">
                 <CollapsibleList total={userProjects.length}>
                   {userProjects.map((p) => (
                     <li key={p.id}>
@@ -149,11 +149,11 @@ export default async function DashboardPage() {
             <CardTitle className="text-lg">{t("dashboard.yourProposals")}</CardTitle>
             <CardDescription>{t("proposals.count", { count: userProposals.length })}</CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="flex-1">
             {userProposals.length === 0 ? (
               <EmptyState icon={<Lightbulb className="h-5 w-5 text-muted-foreground" />} text={t("dashboard.noProposals")} />
             ) : (
-              <ul className="space-y-2" role="list">
+              <ul className="max-h-80 space-y-2 overflow-y-auto" role="list">
                 <CollapsibleList total={userProposals.length}>
                   {userProposals.map((p) => (
                     <li key={p.id}>
@@ -178,11 +178,11 @@ export default async function DashboardPage() {
             <CardTitle className="text-lg">{t("dashboard.recentVotes")}</CardTitle>
             <CardDescription>{t("dashboard.totalVotes", { count: userVoteCount })}</CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="flex-1">
             {recentVotes.length === 0 ? (
               <EmptyState icon={<ThumbsUp className="h-5 w-5 text-muted-foreground" />} text={t("dashboard.noVotes")} />
             ) : (
-              <ul className="space-y-2" role="list">
+              <ul className="max-h-80 space-y-2 overflow-y-auto" role="list">
                 <CollapsibleList total={recentVotes.length}>
                   {recentVotes.map((v) => (
                     <li key={`${v.proposalId}-${v.createdAt?.getTime()}`}
@@ -219,11 +219,11 @@ export default async function DashboardPage() {
             <CardTitle className="text-lg">{t("dashboard.activity")}</CardTitle>
             <CardDescription>{t("dashboard.activityDesc")}</CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="flex-1">
             {recentActivity.length === 0 ? (
               <EmptyState icon={<MessageSquare className="h-5 w-5 text-muted-foreground" />} text={t("dashboard.noActivity")} />
             ) : (
-              <ul className="space-y-2" role="list">
+              <ul className="max-h-80 space-y-2 overflow-y-auto" role="list">
                 <CollapsibleList total={recentActivity.length}>
                   {recentActivity.map((a) => (
                     <li key={a.id} className="text-sm">
@@ -256,14 +256,15 @@ export default async function DashboardPage() {
       </div>
 
       {/* Analytics Charts */}
-      <div className="mt-6 sm:mt-8">
-        <h2 className="mb-4 text-xl font-bold">{t("dashboard.analytics")}</h2>
+      <hr className="my-8 border-border" />
+      <section aria-labelledby="analytics-heading">
+        <h2 id="analytics-heading" className="mb-4 text-xl font-bold">{t("dashboard.analytics")}</h2>
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
           <VotesOverTimeChart data={chartData.votesOverTime} />
           <TopProposalsChart data={chartData.topProposals} />
           <ActivityHeatmapChart data={chartData.activityHeatmap} />
         </div>
-      </div>
+      </section>
     </div>
   );
 }
