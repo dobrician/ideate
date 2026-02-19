@@ -4,7 +4,13 @@ Reverse chronological. Click each sprint for full details.
 
 ---
 
-### 🔄 [Sprint 47 — Security, DX & Quality](Sprint-47) *(2026-02-18)*
+### ✅ [Sprint 48 — Realistic Data Factories & High-Volume Simulation](Sprint-48) *(2026-02-19)*
+**Focus:** Factory system for 20+ realistic users, projects, proposals, votes, threaded comments. CLI seeder + admin API endpoint.
+**Stats:** 13/13 goals | 1423 tests
+
+---
+
+### ✅ [Sprint 47 — Security, DX & Quality](Sprint-47) *(2026-02-18)*
 **Focus:** Fix search XSS, action/API wrappers, analytics N+1, i18n errors, test fix, onboarding, proposal tags UI, a11y polish
 **Stats:** 8/8 goals | 1391 tests
 
