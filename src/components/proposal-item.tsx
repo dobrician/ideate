@@ -120,14 +120,14 @@ export function ProposalItem({
                 <div className="pointer-events-none absolute inset-0" aria-hidden="true">
                   {greenWidth > 0 && (
                     <div
-                      className="absolute left-0 top-0 h-full bg-emerald-200/40 dark:bg-emerald-400/15 transition-all duration-300"
+                      className="absolute left-0 top-0 h-full bg-emerald-100 dark:bg-emerald-900/30 transition-all duration-300"
                       style={{ width: `${greenWidth}%` }}
                     />
                   )}
                   {redWidth > 0 && (
                     <div
-                      className="absolute right-0 top-0 h-full bg-rose-200/40 dark:bg-rose-400/15 transition-all duration-300"
-                      style={{ width: `${redWidth}%` }}
+                      className="absolute top-0 h-full bg-rose-100 dark:bg-rose-900/30 transition-all duration-300"
+                      style={{ left: `${greenWidth}%`, width: `${redWidth}%` }}
                     />
                   )}
                 </div>
