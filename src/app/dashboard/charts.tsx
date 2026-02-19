@@ -32,11 +32,11 @@ function ChartPatternDefs() {
   return (
     <defs>
       <pattern id="dash-pro" patternUnits="userSpaceOnUse" width="6" height="6">
-        <rect width="6" height="6" fill="#86efac" />
+        <rect width="6" height="6" fill="#a3b88c" />
         <circle cx="3" cy="3" r="1.5" fill="#fff" opacity="0.3" />
       </pattern>
       <pattern id="dash-contra" patternUnits="userSpaceOnUse" width="6" height="6">
-        <rect width="6" height="6" fill="#fda4af" />
+        <rect width="6" height="6" fill="#c8907a" />
         <path d="M0 0L6 6M6 0L0 6" stroke="#fff" strokeWidth="1" opacity="0.3" />
       </pattern>
       <pattern id="dash-activity" patternUnits="userSpaceOnUse" width="6" height="6">
@@ -100,12 +100,12 @@ export const VotesOverTimeChart = memo(function VotesOverTimeChart({ data }: { d
               <Legend wrapperStyle={{ fontSize: 12 }} />
               <Line
                 type="monotone" dataKey="pro"
-                name={t("vote.pro")} stroke="#86efac"
+                name={t("vote.pro")} stroke="#a3b88c"
                 strokeWidth={2} dot={false}
               />
               <Line
                 type="monotone" dataKey="contra"
-                name={t("vote.contra")} stroke="#fda4af"
+                name={t("vote.contra")} stroke="#c8907a"
                 strokeWidth={2} strokeDasharray="6 3" dot={false}
               />
             </LineChart>
