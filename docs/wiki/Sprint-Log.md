@@ -4,6 +4,12 @@ Reverse chronological. Click each sprint for full details.
 
 ---
 
+### 🔄 [Sprint 50 — Horizontal Scaling: Redis Infrastructure & Database Flexibility](Sprint-50) *(2026-02-19)*
+**Focus:** Redis pub/sub, PostgreSQL adapter, cache L2 with Redis, graceful fallback
+**Stats:** 0/5 goals in progress
+
+---
+
 ### ✅ [Sprint 49 — Performance & Scale Hardening: Background Jobs & Query Optimization](Sprint-49) *(2026-02-19)*
 **Focus:** Background job queue, query optimization with indexes, caching infrastructure, performance monitoring, resource limits
 **Stats:** 5/5 goals
