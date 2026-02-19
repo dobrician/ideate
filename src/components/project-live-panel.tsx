@@ -6,8 +6,8 @@
  * and displays live participant count and activity feed.
  */
 
-import { useEffect, useRef, useState } from "react";
-import { createWsClient, type WsClient } from "@/lib/websocket/client";
+import { useEffect, useMemo } from "react";
+import { createWsClient } from "@/lib/websocket/client";
 import { useProjectUpdates } from "@/lib/use-project-updates";
 import { LiveParticipantCount } from "@/components/live-participant-count";
 import { LiveActivityFeed } from "@/components/live-activity-feed";
@@ -21,21 +21,19 @@ interface ProjectLivePanelProps {
 
 export function ProjectLivePanel({ projectId, sessionToken }: ProjectLivePanelProps) {
   const { t } = useLocale();
-  const [client, setClient] = useState<WsClient | null>(null);
-  const clientRef = useRef<WsClient | null>(null);
   const channel = `project:${projectId}`;
 
-  useEffect(() => {
-    const ws = createWsClient({ token: sessionToken });
-    clientRef.current = ws;
-    setClient(ws);
-    ws.connect();
+  const client = useMemo(
+    () => createWsClient({ token: sessionToken }),
+    [sessionToken],
+  );
 
+  useEffect(() => {
+    client.connect();
     return () => {
-      ws.disconnect();
-      clientRef.current = null;
+      client.disconnect();
     };
-  }, [sessionToken]);
+  }, [client]);
 
   const { activities, participantCount } = useProjectUpdates(client, channel);
 

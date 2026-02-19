@@ -4,6 +4,66 @@ Reverse chronological. Click each sprint for full details.
 
 ---
 
+### 📋 [Sprint 63 — Final Polish & Documentation: Production Excellence](Sprint-Plan-Advanced) *(planned)*
+**Focus:** Integration testing, security audit, performance benchmarking, admin docs, production readiness
+
+---
+
+### 📋 [Sprint 62 — Mobile & Accessibility: Advanced Mobile Features & Universal Access](Sprint-Plan-Advanced) *(planned)*
+**Focus:** Offline-first, push notifications, mobile-optimized UI, WCAG 2.1 AAA, PWA excellence
+
+---
+
+### 📋 [Sprint 61 — Integration & API Excellence: Webhook Enhancement & External Integrations](Sprint-Plan-Advanced) *(planned)*
+**Focus:** Advanced webhooks, Slack/Teams/Discord integrations, API rate limiting, webhook dashboard
+
+---
+
+### 📋 [Sprint 60 — Performance & Scale: Advanced Caching & Optimization](Sprint-Plan-Advanced) *(planned)*
+**Focus:** Multi-layer caching, CDN integration, DB query optimization, frontend performance, monitoring suite
+
+---
+
+### 📋 [Sprint 59 — Search & Discovery: Advanced Features & Integration](Sprint-Plan-Advanced) *(planned)*
+**Focus:** Advanced filters, federated cross-entity search, search analytics, smart suggestions, search API
+
+---
+
+### 📋 [Sprint 58 — AI Lifecycle Management: Advanced AI Features & Learning Systems](Sprint-Plan-Advanced) *(planned)*
+**Focus:** AI feedback learning, advanced predictions, automated insights, smart notifications, model management
+
+---
+
+### 📋 [Sprint 57 — Real-time Collaboration: Live Editing & Advanced Presence](Sprint-Plan-Advanced) *(planned)*
+**Focus:** Operational transforms, collaborative editor, advanced presence, document sync, collaboration UX
+
+---
+
+### 📋 [Sprint 56 — Advanced Permissions: Time-based & Dynamic Permission Controls](Sprint-Plan-Advanced) *(planned)*
+**Focus:** Time-based rules, dynamic permission evaluation, fine-grained ACLs, permission monitoring, testing tools
+
+---
+
+### 📋 [Sprint 55 — Advanced Permissions & Workflow Engine: Custom Stages & Approval Chains](Sprint-Plan-Advanced) *(planned)*
+**Focus:** Configurable workflow stages, custom stage management, approval chains, conditional permissions
+
+---
+
+### 📋 [Sprint 54 — Advanced Analytics & Insights: Vote Velocity & Social Network Analysis](Sprint-Plan-Advanced) *(planned)*
+**Focus:** Vote velocity tracking, social network analysis, momentum scoring, predictive success scoring
+
+---
+
+### 📋 [Sprint 53 — AI Lifecycle Management: Smart Routing & Conflict Detection](Sprint-Plan-Advanced) *(planned)*
+**Focus:** Smart proposal routing, conflict detection, predictive deadlines, auto-generated roadmaps, AI dashboard
+
+---
+
+### 📋 [Sprint 52 — Advanced Search & Discovery: Semantic Search with Embeddings](Sprint-Plan-Advanced) *(planned)*
+**Focus:** Vector embeddings, semantic search, content recommendations, trend detection, discovery UI
+
+---
+
 ### 🔄 [Sprint 51 — Real-time Collaboration Foundation: Live Presence & WebSocket](Sprint-51) *(2026-02-19)*
 **Focus:** WebSocket server, user presence, typing indicators, project-level live updates, connection management
 **Stats:** 0/5 goals in progress
