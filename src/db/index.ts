@@ -4,13 +4,69 @@ import * as schema from "./schema";
 import { resolve } from "path";
 import { readFileSync, existsSync } from "fs";
 import { logger } from "@/lib/logger";
+import { updatePoolStats } from "@/lib/resource-monitor";
 
 const DB_PATH = process.env.DATABASE_URL ?? resolve("data/ideate.db");
 
-const sqlite = new Database(DB_PATH);
-sqlite.pragma("journal_mode = WAL");
-sqlite.pragma("busy_timeout = 15000");
-sqlite.pragma("foreign_keys = ON");
+const MAX_POOL_SIZE = Number(process.env.DB_POOL_SIZE ?? 4);
+
+function createConnection(): InstanceType<typeof Database> {
+  const conn = new Database(DB_PATH);
+  conn.pragma("journal_mode = WAL");
+  conn.pragma("busy_timeout = 15000");
+  conn.pragma("foreign_keys = ON");
+  return conn;
+}
+
+// Primary write connection
+const sqlite = createConnection();
+
+// Read-only connection pool for concurrent reads
+const readPool: InstanceType<typeof Database>[] = [];
+const poolInUse = new Set<InstanceType<typeof Database>>();
+
+function initReadPool(): void {
+  for (let i = 0; i < MAX_POOL_SIZE; i++) {
+    const conn = createConnection();
+    conn.pragma("query_only = ON");
+    readPool.push(conn);
+  }
+  syncPoolStats();
+}
+
+function syncPoolStats(): void {
+  updatePoolStats({
+    maxConnections: MAX_POOL_SIZE + 1,
+    activeConnections: poolInUse.size + 1,
+    idleConnections: readPool.length,
+  });
+}
+
+export function acquireReadConnection(): InstanceType<typeof Database> {
+  const conn = readPool.pop();
+  if (conn) {
+    poolInUse.add(conn);
+    syncPoolStats();
+    return conn;
+  }
+  // Fallback to write connection if pool exhausted
+  return sqlite;
+}
+
+export function releaseReadConnection(conn: InstanceType<typeof Database>): void {
+  if (conn === sqlite) return;
+  poolInUse.delete(conn);
+  readPool.push(conn);
+  syncPoolStats();
+}
+
+export function getPoolStats() {
+  return {
+    maxConnections: MAX_POOL_SIZE + 1,
+    activeConnections: poolInUse.size + 1,
+    idleConnections: readPool.length,
+  };
+}
 
 interface JournalEntry { idx: number; tag: string }
 interface Journal { entries: JournalEntry[] }
@@ -121,6 +177,9 @@ for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
     process.exit(1);
   }
 }
+
+// Initialize read pool after migrations are applied
+initReadPool();
 
 export const db = drizzle(sqlite, { schema });
 export type DB = typeof db;

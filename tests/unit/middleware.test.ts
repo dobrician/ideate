@@ -4,7 +4,7 @@ vi.mock("@/lib/perf-monitor", () => ({
   recordTiming: vi.fn(),
 }));
 
-import { middleware, config } from "@/middleware";
+import { middleware, config, REQUEST_TIMEOUT_MS } from "@/middleware";
 import { recordTiming } from "@/lib/perf-monitor";
 
 const mockRecordTiming = vi.mocked(recordTiming);
@@ -50,6 +50,21 @@ describe("Request Timing Middleware", () => {
         timestamp: expect.any(Number),
       }),
     );
+  });
+
+  it("adds x-request-deadline header", () => {
+    const res = middleware(makeRequest());
+    const deadline = Number(res.headers.get("x-request-deadline"));
+    expect(deadline).toBeGreaterThan(Date.now() - 1000);
+  });
+
+  it("adds x-request-timeout header with 30s value", () => {
+    const res = middleware(makeRequest());
+    expect(res.headers.get("x-request-timeout")).toBe(String(REQUEST_TIMEOUT_MS));
+  });
+
+  it("exports REQUEST_TIMEOUT_MS as 30000", () => {
+    expect(REQUEST_TIMEOUT_MS).toBe(30_000);
   });
 
   it("exports matcher config excluding static assets", () => {

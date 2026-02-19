@@ -1,9 +1,10 @@
 "use client";
 
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Activity, Database, Layers, Clock, Zap } from "lucide-react";
+import { Activity, Database, Layers, Clock, Zap, HardDrive, Server } from "lucide-react";
 import { useLocale } from "@/lib/use-locale";
 import type { PerfStats } from "@/lib/perf-monitor";
+import type { ResourceStats } from "@/lib/resource-monitor";
 
 interface CacheStats {
   hits: number;
@@ -20,14 +21,25 @@ interface QueueStats {
   dead: number;
 }
 
+function formatUptime(seconds: number): string {
+  const h = Math.floor(seconds / 3600);
+  const m = Math.floor((seconds % 3600) / 60);
+  const s = seconds % 60;
+  if (h > 0) return `${h}h ${m}m ${s}s`;
+  if (m > 0) return `${m}m ${s}s`;
+  return `${s}s`;
+}
+
 export function MonitoringPanel({
   perfStats,
   cacheStats,
   queueStats,
+  resourceStats,
 }: {
   perfStats: PerfStats;
   cacheStats: CacheStats;
   queueStats: QueueStats;
+  resourceStats: ResourceStats;
 }) {
   const { t } = useLocale();
 
@@ -125,6 +137,66 @@ export function MonitoringPanel({
             <div className="rounded-lg border p-3">
               <p className="text-2xl font-bold">{cacheStats.hitRate}%</p>
               <p className="text-xs text-muted-foreground">{t("monitoring.hitRate")}</p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Memory & Resources */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <HardDrive className="h-5 w-5" />
+            {t("monitoring.memoryUsage")}
+          </CardTitle>
+          <CardDescription>
+            {t("monitoring.uptime", { time: formatUptime(resourceStats.uptimeSeconds) })}
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+            <div className="rounded-lg border p-3 text-center">
+              <p className="text-2xl font-bold">{resourceStats.memory.heapUsedMB}MB</p>
+              <p className="text-xs text-muted-foreground">{t("monitoring.heapUsed")}</p>
+            </div>
+            <div className="rounded-lg border p-3 text-center">
+              <p className="text-2xl font-bold">{resourceStats.memory.heapTotalMB}MB</p>
+              <p className="text-xs text-muted-foreground">{t("monitoring.heapTotal")}</p>
+            </div>
+            <div className="rounded-lg border p-3 text-center">
+              <p className="text-2xl font-bold">{resourceStats.memory.rssMB}MB</p>
+              <p className="text-xs text-muted-foreground">{t("monitoring.rss")}</p>
+            </div>
+            <div className="rounded-lg border p-3 text-center">
+              <p className="text-2xl font-bold">{resourceStats.memory.heapUsagePercent}%</p>
+              <p className="text-xs text-muted-foreground">{t("monitoring.heapUsage")}</p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Connection Pool */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Server className="h-5 w-5" />
+            {t("monitoring.connectionPool")}
+          </CardTitle>
+          <CardDescription>{t("monitoring.connectionPoolDesc")}</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-3 gap-4 text-center">
+            <div className="rounded-lg border p-3">
+              <p className="text-2xl font-bold">{resourceStats.connectionPool.maxConnections}</p>
+              <p className="text-xs text-muted-foreground">{t("monitoring.maxConnections")}</p>
+            </div>
+            <div className="rounded-lg border p-3">
+              <p className="text-2xl font-bold text-green-600">{resourceStats.connectionPool.activeConnections}</p>
+              <p className="text-xs text-muted-foreground">{t("monitoring.activeConnections")}</p>
+            </div>
+            <div className="rounded-lg border p-3">
+              <p className="text-2xl font-bold">{resourceStats.connectionPool.idleConnections}</p>
+              <p className="text-xs text-muted-foreground">{t("monitoring.idleConnections")}</p>
             </div>
           </div>
         </CardContent>

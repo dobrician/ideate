@@ -9,6 +9,7 @@ import { getTranslations } from "@/lib/i18n-server";
 import { getPerfStats } from "@/lib/perf-monitor";
 import { getCacheStats } from "@/lib/cache";
 import { getQueueStats } from "@/lib/queue";
+import { getResourceStats } from "@/lib/resource-monitor";
 import { MonitoringPanel } from "./monitoring-panel";
 
 export default async function MonitoringPage() {
@@ -29,10 +30,11 @@ export default async function MonitoringPage() {
     );
   }
 
-  const [perfStats, cacheStats, queueStats] = await Promise.all([
+  const [perfStats, cacheStats, queueStats, resourceStats] = await Promise.all([
     getPerfStats(),
     getCacheStats(),
     getQueueStats(),
+    getResourceStats(),
   ]);
 
   return (
@@ -47,7 +49,7 @@ export default async function MonitoringPage() {
         </div>
       </div>
 
-      <MonitoringPanel perfStats={perfStats} cacheStats={cacheStats} queueStats={queueStats} />
+      <MonitoringPanel perfStats={perfStats} cacheStats={cacheStats} queueStats={queueStats} resourceStats={resourceStats} />
     </div>
   );
 }

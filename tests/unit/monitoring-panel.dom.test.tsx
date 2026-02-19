@@ -29,6 +29,17 @@ vi.mock("@/lib/use-locale", () => ({
         "monitoring.method": "Method",
         "monitoring.status": "Status",
         "monitoring.duration": "Duration",
+        "monitoring.memoryUsage": "Memory Usage",
+        "monitoring.uptime": `Uptime: ${vars?.time ?? ""}`,
+        "monitoring.heapUsed": "Heap Used",
+        "monitoring.heapTotal": "Heap Total",
+        "monitoring.rss": "RSS",
+        "monitoring.heapUsage": "Heap %",
+        "monitoring.connectionPool": "Connection Pool",
+        "monitoring.connectionPoolDesc": "SQLite read/write connection pool status",
+        "monitoring.maxConnections": "Max",
+        "monitoring.activeConnections": "Active",
+        "monitoring.idleConnections": "Idle",
       };
       return translations[key] ?? key;
     },
@@ -50,10 +61,15 @@ const perfStats = {
 
 const cacheStats = { hits: 80, misses: 20, hitRate: 80, memEntries: 45 };
 const queueStats = { pending: 3, processing: 1, completed: 50, failed: 2, dead: 0 };
+const resourceStats = {
+  memory: { heapUsedMB: 64.5, heapTotalMB: 128, rssMB: 180.2, externalMB: 2.1, heapUsagePercent: 50 },
+  connectionPool: { maxConnections: 5, activeConnections: 2, idleConnections: 3 },
+  uptimeSeconds: 3661,
+};
 
 describe("MonitoringPanel", () => {
   it("renders overview stat cards", () => {
-    render(<MonitoringPanel perfStats={perfStats} cacheStats={cacheStats} queueStats={queueStats} />);
+    render(<MonitoringPanel perfStats={perfStats} cacheStats={cacheStats} queueStats={queueStats} resourceStats={resourceStats} />);
 
     expect(screen.getByText("Total Requests")).toBeInTheDocument();
     expect(screen.getByText("150")).toBeInTheDocument();
@@ -63,21 +79,21 @@ describe("MonitoringPanel", () => {
   });
 
   it("renders job queue status grid", () => {
-    render(<MonitoringPanel perfStats={perfStats} cacheStats={cacheStats} queueStats={queueStats} />);
+    render(<MonitoringPanel perfStats={perfStats} cacheStats={cacheStats} queueStats={queueStats} resourceStats={resourceStats} />);
 
     expect(screen.getByText("Job Queue Status")).toBeInTheDocument();
     expect(screen.getByText("50")).toBeTruthy();
   });
 
   it("renders cache statistics", () => {
-    render(<MonitoringPanel perfStats={perfStats} cacheStats={cacheStats} queueStats={queueStats} />);
+    render(<MonitoringPanel perfStats={perfStats} cacheStats={cacheStats} queueStats={queueStats} resourceStats={resourceStats} />);
 
     expect(screen.getByText("Cache Statistics")).toBeInTheDocument();
     expect(screen.getByText("45 in-memory entries")).toBeInTheDocument();
   });
 
   it("renders slowest paths table", () => {
-    render(<MonitoringPanel perfStats={perfStats} cacheStats={cacheStats} queueStats={queueStats} />);
+    render(<MonitoringPanel perfStats={perfStats} cacheStats={cacheStats} queueStats={queueStats} resourceStats={resourceStats} />);
 
     expect(screen.getByText("Slowest Paths")).toBeInTheDocument();
     expect(screen.getByText("/api/slow")).toBeInTheDocument();
@@ -85,15 +101,38 @@ describe("MonitoringPanel", () => {
   });
 
   it("renders recent requests", () => {
-    render(<MonitoringPanel perfStats={perfStats} cacheStats={cacheStats} queueStats={queueStats} />);
+    render(<MonitoringPanel perfStats={perfStats} cacheStats={cacheStats} queueStats={queueStats} resourceStats={resourceStats} />);
 
     expect(screen.getByText("Recent Requests")).toBeInTheDocument();
     expect(screen.getByText("/api/test")).toBeInTheDocument();
   });
 
+  it("renders memory usage section", () => {
+    render(<MonitoringPanel perfStats={perfStats} cacheStats={cacheStats} queueStats={queueStats} resourceStats={resourceStats} />);
+
+    expect(screen.getByText("Memory Usage")).toBeInTheDocument();
+    expect(screen.getByText("64.5MB")).toBeInTheDocument();
+    expect(screen.getByText("128MB")).toBeInTheDocument();
+    expect(screen.getByText("180.2MB")).toBeInTheDocument();
+    expect(screen.getByText("Heap Used")).toBeInTheDocument();
+  });
+
+  it("renders connection pool section", () => {
+    render(<MonitoringPanel perfStats={perfStats} cacheStats={cacheStats} queueStats={queueStats} resourceStats={resourceStats} />);
+
+    expect(screen.getByText("Connection Pool")).toBeInTheDocument();
+    expect(screen.getByText("Idle")).toBeInTheDocument();
+  });
+
+  it("renders uptime", () => {
+    render(<MonitoringPanel perfStats={perfStats} cacheStats={cacheStats} queueStats={queueStats} resourceStats={resourceStats} />);
+
+    expect(screen.getByText("Uptime: 1h 1m 1s")).toBeInTheDocument();
+  });
+
   it("hides slowest paths when empty", () => {
     const emptyPerf = { ...perfStats, slowestPaths: [], recentTimings: [] };
-    render(<MonitoringPanel perfStats={emptyPerf} cacheStats={cacheStats} queueStats={queueStats} />);
+    render(<MonitoringPanel perfStats={emptyPerf} cacheStats={cacheStats} queueStats={queueStats} resourceStats={resourceStats} />);
 
     expect(screen.queryByText("Slowest Paths")).not.toBeInTheDocument();
     expect(screen.queryByText("Recent Requests")).not.toBeInTheDocument();
