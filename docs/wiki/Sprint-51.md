@@ -9,7 +9,7 @@
 - [x] **Goal 2: User Presence System** — Create `src/lib/presence/` module with `UserPresence` service. Track online users per project/proposal. Add presence table or Redis-backed presence with TTL.
 - [x] **Goal 3: Typing Indicators Infrastructure** — Add typing events to WebSocket messages. Create `useTypingIndicator` hook in `src/lib/use-typing.ts`. Add typing state management with debounced cleanup.
 - [x] **Goal 4: Project-level Live Updates** — Extend WebSocket to broadcast project changes (new proposals, status changes). Update project detail page to show live participant count and recent activity feed.
-- [ ] **Goal 5: Connection Management** — Add connection state monitoring to admin dashboard. Implement connection limits per user (max 5). Add graceful fallback when WebSocket fails (polling mode).
+- [x] **Goal 5: Connection Management** — Add connection state monitoring to admin dashboard. Implement connection limits per user (max 5). Add graceful fallback when WebSocket fails (polling mode).
 
 ## Notes
 - WebSocket must work behind reverse proxies and CDNs
