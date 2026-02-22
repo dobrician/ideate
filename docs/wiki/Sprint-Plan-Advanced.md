@@ -3,15 +3,6 @@
 **Total Estimated Sprints:** 15 sprints  
 **Estimated Timeline:** ~20-30 development hours
 
-## ⚠️ MANDATORY: Wiki Sync After EVERY Goal
-
-After completing each individual goal (not just each sprint), Claude Code MUST:
-1. `cd /home/dc/work/ideate && git add -A && git commit -m "sprint N: goal X description" && git push`
-2. Edit `docs/wiki/Sprint-NN.md`: change `- [ ]` to `- [x]` for that goal
-3. `git add -A && git commit -m "docs: mark Sprint N Goal X complete" && git push`
-4. Wiki sync: `cd /tmp/ideate.wiki && git pull && cp /home/dc/work/ideate/docs/wiki/*.md . && git add -A && git diff --stat --cached` — if changes, `git commit -m "sync: Sprint N Goal X" && git push`
-
-
 ## Sprint Execution Order & Dependencies
 
 **Infrastructure Foundation (Sprints 49-51)** → **Scale & Performance (Sprints 52-54)** → **Advanced Features (Sprints 55-63)**
