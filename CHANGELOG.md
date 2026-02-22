@@ -1,4 +1,18 @@
 # Changelog
+## [1.2.0] — 2026-02-22
+
+### Sprint 52 — Advanced Search & Discovery
+- Vector embeddings infrastructure with OpenAI and local TF-IDF fallback
+- Semantic search engine: FTS, semantic, and hybrid modes with Reciprocal Rank Fusion
+- Content recommendations based on embedding similarity, voting patterns, and popularity
+- Trend detection: keyword frequency, vote momentum, growth tracking
+- Search bar with FTS/Semantic/Smart mode toggle
+- Trending widget and recommendations widget on dashboard
+- Similar proposals component with embedding-based matching
+- GET endpoint for proposal similarity via embeddings
+- PostgreSQL schema parity for embeddings table
+- Full i18n support (English and Romanian)
+
 ## [1.1.0] — 2026-02-16
 
 ### Sprint 9 — Email/Password Authentication
