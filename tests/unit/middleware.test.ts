@@ -4,7 +4,7 @@ vi.mock("@/lib/perf-monitor", () => ({
   recordTiming: vi.fn(),
 }));
 
-import { middleware, config, REQUEST_TIMEOUT_MS } from "@/middleware";
+import { proxy as middleware, config, REQUEST_TIMEOUT_MS } from "@/proxy";
 import { recordTiming } from "@/lib/perf-monitor";
 
 const mockRecordTiming = vi.mocked(recordTiming);
@@ -13,10 +13,15 @@ beforeEach(() => {
   vi.clearAllMocks();
 });
 
-function makeRequest(url = "http://localhost:3000/api/test", method = "GET") {
+function makeRequest(url = "http://localhost:3000/api/health", method = "GET") {
   return {
     method,
+    url,
     nextUrl: { pathname: new URL(url).pathname },
+    headers: new Headers(),
+    cookies: {
+      get: vi.fn().mockReturnValue(undefined),
+    },
   } as unknown as Parameters<typeof middleware>[0];
 }
 

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { recordTiming } from "@/lib/perf-monitor";
 
-const REQUEST_TIMEOUT_MS = 30_000;
+export const REQUEST_TIMEOUT_MS = 30_000;
 
 /**
  * Lightweight JWT validation for proxy.
