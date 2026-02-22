@@ -23,7 +23,6 @@ Based on unified analysis from Claude + Codex (see docs/sprint27-unified-plan.md
 
 ## Constraints
 - Commit + push after EACH goal
-- After each goal, edit this file: change `- [ ]` to `- [x]` (do NOT add new lines)
 - Lint + type check + tests + build must pass before each push
 - All files < 300 lines
 - Full unified plan in docs/sprint27-unified-plan.md

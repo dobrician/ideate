@@ -24,7 +24,6 @@ Based on unified analysis from both Claude and Codex (see docs/sprint22-unified-
 
 ## Constraints
 - Commit + push after EACH goal
-- After each goal, edit this file: change `- [ ]` to `- [x]` (do NOT add new lines)
 - Lint + type check + tests + build must pass before each push
 - All files < 300 lines
 - Deploy to staging and verify after security fixes

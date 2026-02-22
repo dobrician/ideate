@@ -26,5 +26,4 @@
 
 - The core issue: buttons are using a mix of `size="sm"`, `size="default"`, `size="icon"`, plus manual className overrides like `h-8 w-8 p-0`, `min-h-[44px]`, etc.
 - Every interactive element must be minimum 44px touch target (Apple/Google HIG)
-- After each goal, edit this file: change `- [ ]` to `- [x]` for that goal. Do NOT add new lines or create separate doc commits.
 - Commit + push after EACH goal.

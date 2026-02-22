@@ -20,7 +20,6 @@
 
 ## Constraints
 - Commit + push after EACH fix
-- After each goal, edit this file: change `- [ ]` to `- [x]` (do NOT add new lines)
 - Lint + type check + tests + build must pass before each push
 
 ## Outcomes

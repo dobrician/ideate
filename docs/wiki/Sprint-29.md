@@ -25,5 +25,4 @@
 ## Notes
 
 - Review report at `docs/ui-ux-review-chatgpt.md`
-- After each goal, edit this file: change `- [ ]` to `- [x]` for that goal. Do NOT add new lines or create separate doc commits.
 - Commit + push after EACH goal.

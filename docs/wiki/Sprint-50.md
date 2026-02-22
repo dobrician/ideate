@@ -14,5 +14,4 @@
 ## Notes
 - Database driver selection via `DATABASE_DRIVER=sqlite|postgresql` env var
 - Redis is optional — system degrades gracefully to in-memory pub/sub
-- After each goal: commit+push code, update this file's checkbox, commit+push, then wiki sync to /tmp/ideate.wiki
 - Run tests after each goal: `npm run lint && npx tsc --noEmit && npm test`

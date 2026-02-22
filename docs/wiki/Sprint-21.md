@@ -14,7 +14,6 @@
 
 ## Constraints
 - Commit + push after EACH goal
-- After each goal, edit this file: change `- [ ]` to `- [x]` (do NOT add new lines)
 - Lint + type check + tests + build must pass before each push
 - All files < 300 lines
 - Playwright tests must run against http://localhost:4100 (staging) with PLAYWRIGHT_BASE_URL

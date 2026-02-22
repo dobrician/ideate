@@ -25,4 +25,4 @@
 - 5 new API routes, 4 new pages
 
 ## Notes
-- Key lesson: Claude Code must commit+push after EACH goal, not bulk at end
+- Key lesson: incremental commits improved visibility versus bulk end-of-sprint commits

@@ -11,7 +11,6 @@ After completing each individual goal (not just each sprint), Claude Code MUST:
 3. `git add -A && git commit -m "docs: mark Sprint N Goal X complete" && git push`
 4. Wiki sync: `cd /tmp/ideate.wiki && git pull && cp /home/dc/work/ideate/docs/wiki/*.md . && git add -A && git diff --stat --cached` — if changes, `git commit -m "sync: Sprint N Goal X" && git push`
 
-**No exceptions. Every goal = code commit + wiki update + wiki sync. The GitHub Wiki must reflect progress in real-time.**
 
 ## Sprint Execution Order & Dependencies
 
@@ -41,7 +40,6 @@ After completing each individual goal (not just each sprint), Claude Code MUST:
 - [ ] **Goal 5: Memory & Resource Limits** — Add memory usage tracking to admin dashboard. Implement connection pooling for database. Add request timeout middleware (30s) to prevent hanging requests.
 
 #### Notes
-- After each goal, edit `docs/wiki/Sprint-49.md`: change `- [ ]` to `- [x]` for that goal. Do NOT add new lines.
 - Run tests after each goal: `npm run lint && npx tsc --noEmit && npm test`
 
 ---

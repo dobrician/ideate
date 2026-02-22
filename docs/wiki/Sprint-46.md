@@ -11,5 +11,4 @@
 
 ## Notes
 
-- After each goal, edit this file: change `- [ ]` to `- [x]` for that goal. Do NOT add new lines.
 - Commit + push after EACH goal.

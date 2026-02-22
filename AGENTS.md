@@ -97,8 +97,9 @@ They are NOT part of the unit/E2E suite — they test the real deployed containe
 
 ## Documentation — MANDATORY
 - **README.md** must be maintained and kept up-to-date with every sprint
-- **Sprint Log** (`docs/wiki/Sprint-Log.md`): update after EVERY completed task (check off the goal, add to Outcomes). Mark ✅ COMPLETE when sprint finishes, add next sprint section.
-- **GitHub Wiki sync**: After updating any file in `docs/wiki/`, ALWAYS also push to the GitHub Wiki repo. Run: `cd /tmp && ([ -d ideate.wiki ] || git clone https://github.com/dobrician/ideate.wiki.git) && cp /home/dc/work/ideate/docs/wiki/*.md /tmp/ideate.wiki/ && cd /tmp/ideate.wiki && git add -A && git commit -m "docs: sync wiki" && git push`
+- **Sprint Log** (`docs/wiki/Sprint-Log.md`) is project documentation for humans (status, outcomes, decisions)
+- **GitHub Wiki sync**: After updating any file in `docs/wiki/`, also sync to the GitHub Wiki repo. Run: `cd /tmp && ([ -d ideate.wiki ] || git clone https://github.com/dobrician/ideate.wiki.git) && cp /home/dc/work/ideate/docs/wiki/*.md /tmp/ideate.wiki/ && cd /tmp/ideate.wiki && git add -A && git commit -m "docs: sync wiki" && git push`
+- Keep operational agent prompts/instructions in orchestration scripts or agent config, **not** in wiki sprint pages
 - Include: project description, setup instructions, Docker usage, env vars, tech stack, architecture overview
 - Update README.md whenever features, setup steps, or architecture changes
 

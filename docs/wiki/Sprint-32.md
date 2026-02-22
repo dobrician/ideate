@@ -26,5 +26,4 @@
 
 - Full visual review report at `docs/visual-review-report.md`
 - 56 screenshots at `tests/visual-review/screenshots/`
-- After each goal, edit this file: change `- [ ]` to `- [x]` for that goal. Do NOT add new lines or create separate doc commits.
 - Commit + push after EACH goal.

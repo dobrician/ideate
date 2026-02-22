@@ -15,5 +15,4 @@
 - WebSocket must work behind reverse proxies and CDNs
 - Implement connection authentication using JWT tokens
 - All existing SSE functionality must be preserved as fallback
-- After each goal: commit+push code, update this file's checkbox, commit+push, then wiki sync
 - Run tests after each goal: `npm run lint && npx tsc --noEmit && npm test`

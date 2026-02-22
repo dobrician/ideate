@@ -12,5 +12,4 @@
 - [x] **Goal 5: Memory & Resource Limits** — Add memory usage tracking to admin dashboard. Implement connection pooling for database. Add request timeout middleware (30s) to prevent hanging requests.
 
 ## Notes
-- After each goal: commit+push code, update this file's checkbox, commit+push, then wiki sync to /tmp/ideate.wiki
 - Run tests after each goal: `npm run lint && npx tsc --noEmit && npm test`
