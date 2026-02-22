@@ -1,8 +1,9 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { requireAuth } from "@/lib/auth";
 import { completeWithFallback } from "@/lib/llm";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { getClientIp } from "@/lib/request-utils";
+import { findSimilarProposals } from "@/lib/semantic-search";
 import { z } from "zod";
 
 const LOCALE = process.env.LOCALE || "en";
@@ -130,6 +131,33 @@ function buildPrompt(req: SimilarityRequest): string {
     `New proposal:`,
     JSON.stringify({ title: req.proposal.title, description: req.proposal.description }),
   ].join("\n");
+}
+
+/**
+ * GET /api/proposals/similarity?proposalId=<id>&limit=<n>
+ * Find proposals similar to the given one using embeddings.
+ */
+export async function GET(request: NextRequest) {
+  try {
+    await requireAuth();
+  } catch {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  const proposalId = request.nextUrl.searchParams.get("proposalId");
+  if (!proposalId) {
+    return NextResponse.json({ similar: [] });
+  }
+
+  const parsedLimit = parseInt(request.nextUrl.searchParams.get("limit") || "5", 10);
+  const limit = Number.isNaN(parsedLimit) ? 5 : Math.min(Math.max(parsedLimit, 1), 20);
+
+  try {
+    const similar = await findSimilarProposals(proposalId, limit);
+    return NextResponse.json({ similar });
+  } catch {
+    return NextResponse.json({ similar: [] });
+  }
 }
 
 /**

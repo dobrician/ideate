@@ -16,6 +16,9 @@ import { statusBadgeClass, statusLabel, deadlineBadge } from "@/lib/status-utils
 import { getDashboardData, getChartData } from "./queries";
 import { CollapsibleList } from "./collapsible-list";
 import { VotesOverTimeChart, TopProposalsChart, ActivityHeatmapChart } from "./charts";
+import { ClientOnly } from "@/components/client-only";
+import { TrendingWidget } from "@/components/trending-widget";
+import { RecommendationsWidget } from "@/components/recommendations";
 
 function EmptyState({ icon, text }: { icon: React.ReactNode; text: React.ReactNode }) {
   return (
@@ -253,6 +256,16 @@ export default async function DashboardPage() {
             )}
           </CardContent>
         </Card>
+      </div>
+
+      {/* Discovery: Trending & Recommendations */}
+      <div className="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-2">
+        <ClientOnly>
+          <TrendingWidget />
+        </ClientOnly>
+        <ClientOnly>
+          <RecommendationsWidget />
+        </ClientOnly>
       </div>
 
       {/* Analytics Charts */}

@@ -6,6 +6,8 @@ import { Input } from "@/components/ui/input";
 import { useLocale } from "@/lib/use-locale";
 import { sanitizeSnippet } from "@/lib/sanitize";
 
+type SearchMode = "fts" | "semantic" | "hybrid";
+
 interface SearchResult {
   id: string;
   title: string;
@@ -22,11 +24,12 @@ export function SearchBar() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [activeIndex, setActiveIndex] = useState(-1);
+  const [mode, setMode] = useState<SearchMode>("fts");
   const containerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const doSearch = useCallback(async (q: string) => {
+  const doSearch = useCallback(async (q: string, searchMode: SearchMode) => {
     if (q.length < 2) {
       setResults([]);
       setError(null);
@@ -36,7 +39,8 @@ export function SearchBar() {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch(`/api/search?q=${encodeURIComponent(q)}`);
+      const params = new URLSearchParams({ q, mode: searchMode });
+      const res = await fetch(`/api/search?${params}`);
       if (res.ok) {
         const data = await res.json();
         setResults(data.results || []);
@@ -63,7 +67,15 @@ export function SearchBar() {
   const handleChange = (value: string) => {
     setQuery(value);
     if (debounceRef.current !== null) clearTimeout(debounceRef.current);
-    debounceRef.current = setTimeout(() => doSearch(value), 300);
+    debounceRef.current = setTimeout(() => doSearch(value, mode), 300);
+  };
+
+  const handleModeChange = (newMode: SearchMode) => {
+    setMode(newMode);
+    if (query.length >= 2) {
+      if (debounceRef.current !== null) clearTimeout(debounceRef.current);
+      doSearch(query, newMode);
+    }
   };
 
   const resultHref = (result: SearchResult) => {
@@ -136,6 +148,12 @@ export function SearchBar() {
     }
   };
 
+  const modeLabels: Record<SearchMode, string> = {
+    fts: t("search.modeFts"),
+    semantic: t("search.modeSemantic"),
+    hybrid: t("search.modeHybrid"),
+  };
+
   const hasResults = results.length > 0;
   const activeId = activeIndex >= 0 ? `search-result-${activeIndex}` : undefined;
 
@@ -160,11 +178,32 @@ export function SearchBar() {
           onChange={(e) => handleChange(e.target.value)}
           onFocus={() => (results.length > 0 || error) && setIsOpen(true)}
           onKeyDown={handleKeyDown}
-          className="pl-8 h-9"
+          className="pl-8 pr-24 h-9"
         />
-        <kbd className="pointer-events-none absolute right-2 top-1.5 hidden h-6 select-none items-center gap-0.5 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium opacity-60 sm:flex" aria-hidden="true">
-          <span className="text-xs">{typeof navigator !== "undefined" && /Mac/i.test(navigator.userAgent) ? "\u2318" : "Ctrl"}</span>K
-        </kbd>
+        <div className="absolute right-2 top-1 flex items-center gap-1">
+          <div
+            className="flex h-7 rounded-md border bg-muted text-[10px] font-medium"
+            role="radiogroup"
+            aria-label={t("search.modeTooltip")}
+          >
+            {(["fts", "semantic", "hybrid"] as const).map((m) => (
+              <button
+                key={m}
+                type="button"
+                role="radio"
+                aria-checked={mode === m}
+                onClick={() => handleModeChange(m)}
+                className={`px-1.5 rounded-md transition-colors ${
+                  mode === m
+                    ? "bg-background text-foreground shadow-sm"
+                    : "text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                {modeLabels[m]}
+              </button>
+            ))}
+          </div>
+        </div>
       </div>
 
       {isOpen && (

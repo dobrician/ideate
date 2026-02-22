@@ -268,3 +268,15 @@ export const customRoles = pgTable("custom_roles", {
   isSystem: boolean("is_system").notNull().default(false),
   createdAt: ts(), updatedAt: tsUp(),
 });
+
+// ─── Embeddings ──────────────────────────────────────────────────────────
+
+export const embeddings = pgTable("embeddings", {
+  id: pk(),
+  entityType: text("entity_type", { enum: ["project", "proposal", "comment"] }).notNull(),
+  entityId: text("entity_id").notNull(),
+  vector: text("vector").notNull(),
+  model: text("model").notNull().default("tfidf"),
+  dimensions: integer("dimensions").notNull(),
+  createdAt: ts(), updatedAt: tsUp(),
+});

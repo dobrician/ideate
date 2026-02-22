@@ -886,4 +886,36 @@ export const en: Record<string, string> = {
   "monitoring.wsTotal": "Total",
   "monitoring.wsAuthenticated": "Authenticated",
   "monitoring.wsChannels": "Channels",
+
+  // Search modes
+  "search.modeFts": "Keyword",
+  "search.modeSemantic": "Semantic",
+  "search.modeHybrid": "Smart",
+  "search.modeTooltip": "Search mode",
+
+  // Trending
+  "trending.title": "Trending",
+  "trending.topics": "Hot Topics",
+  "trending.proposals": "Rising Proposals",
+  "trending.noTopics": "No trending topics yet",
+  "trending.noProposals": "No trending proposals yet",
+  "trending.mentions": "{count} mentions",
+  "trending.mentions_one": "{count} mention",
+  "trending.growth": "+{pct}%",
+  "trending.momentum": "Momentum: {score}",
+  "trending.votesPerDay": "{rate}/day votes",
+  "trending.commentsPerDay": "{rate}/day comments",
+
+  // Recommendations
+  "recommendations.title": "Recommended for You",
+  "recommendations.empty": "Vote on proposals to get personalized recommendations",
+  "recommendations.similarContent": "Similar to your interests",
+  "recommendations.votingPattern": "Popular with similar voters",
+  "recommendations.popular": "Trending now",
+  "recommendations.score": "{pct}% match",
+
+  // Similar proposals
+  "similar.title": "Similar Proposals",
+  "similar.empty": "No similar proposals found",
+  "similar.score": "{pct}% similar",
 };

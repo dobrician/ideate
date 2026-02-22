@@ -18,6 +18,10 @@ vi.mock("@/lib/use-locale", () => ({
         "search.typeComment": "Comments",
         "search.errorUnauthorized": "Please sign in to search",
         "search.errorGeneric": "Search failed. Please try again.",
+        "search.modeFts": "Keyword",
+        "search.modeSemantic": "Semantic",
+        "search.modeHybrid": "Smart",
+        "search.modeTooltip": "Search mode",
       };
       return map[key] ?? key;
     },
@@ -201,6 +205,32 @@ describe("SearchBar keyboard navigation", () => {
     await waitFor(() => {
       expect(screen.queryByText("Please sign in to search")).not.toBeInTheDocument();
       expect(screen.getByText("Project Alpha")).toBeInTheDocument();
+    });
+  });
+
+  it("renders search mode toggle buttons", async () => {
+    await renderSearchBar();
+    expect(screen.getByRole("radiogroup", { name: "Search mode" })).toBeInTheDocument();
+    expect(screen.getByRole("radio", { name: /Keyword/i })).toBeInTheDocument();
+    expect(screen.getByRole("radio", { name: /Semantic/i })).toBeInTheDocument();
+    expect(screen.getByRole("radio", { name: /Smart/i })).toBeInTheDocument();
+  });
+
+  it("passes mode parameter when searching", async () => {
+    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
+    await renderSearchBar();
+
+    // Click Semantic mode
+    await user.click(screen.getByRole("radio", { name: /Semantic/i }));
+
+    const input = screen.getByLabelText("Search...");
+    await user.type(input, "test");
+    await vi.advanceTimersByTimeAsync(350);
+
+    await waitFor(() => {
+      const calls = (global.fetch as ReturnType<typeof vi.fn>).mock.calls;
+      const lastCall = calls[calls.length - 1][0] as string;
+      expect(lastCall).toContain("mode=semantic");
     });
   });
 

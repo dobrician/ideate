@@ -905,4 +905,36 @@ export const ro: Record<string, string> = {
   "monitoring.wsTotal": "Total",
   "monitoring.wsAuthenticated": "Autentificate",
   "monitoring.wsChannels": "Canale",
+
+  // Search modes
+  "search.modeFts": "Cuvinte cheie",
+  "search.modeSemantic": "Semantic",
+  "search.modeHybrid": "Inteligent",
+  "search.modeTooltip": "Mod de căutare",
+
+  // Trending
+  "trending.title": "Tendințe",
+  "trending.topics": "Subiecte populare",
+  "trending.proposals": "Propuneri în creștere",
+  "trending.noTopics": "Niciun subiect în tendințe",
+  "trending.noProposals": "Nicio propunere în tendințe",
+  "trending.mentions": "{count} mențiuni",
+  "trending.mentions_one": "{count} mențiune",
+  "trending.growth": "+{pct}%",
+  "trending.momentum": "Impuls: {score}",
+  "trending.votesPerDay": "{rate}/zi voturi",
+  "trending.commentsPerDay": "{rate}/zi comentarii",
+
+  // Recommendations
+  "recommendations.title": "Recomandate pentru tine",
+  "recommendations.empty": "Votează propuneri pentru recomandări personalizate",
+  "recommendations.similarContent": "Similar cu interesele tale",
+  "recommendations.votingPattern": "Popular printre votanți similari",
+  "recommendations.popular": "În tendințe acum",
+  "recommendations.score": "{pct}% potrivire",
+
+  // Similar proposals
+  "similar.title": "Propuneri similare",
+  "similar.empty": "Nicio propunere similară găsită",
+  "similar.score": "{pct}% similar",
 };

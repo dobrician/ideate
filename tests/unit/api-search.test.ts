@@ -54,14 +54,14 @@ describe("Search API Route", () => {
       const response = await GET(req("/api/search?q="));
       const data = await response.json();
       expect(response.status).toBe(200);
-      expect(data).toEqual({ results: [], query: "" });
+      expect(data).toEqual({ results: [], query: "", mode: "fts" });
       expect(mockSearch).not.toHaveBeenCalled();
     });
 
     it("should return empty results for query shorter than 2 chars", async () => {
       const response = await GET(req("/api/search?q=a"));
       expect(response.status).toBe(200);
-      expect((await response.json())).toEqual({ results: [], query: "a" });
+      expect((await response.json())).toEqual({ results: [], query: "a", mode: "fts" });
       expect(mockSearch).not.toHaveBeenCalled();
     });
 
@@ -74,7 +74,7 @@ describe("Search API Route", () => {
       const response = await GET(req("/api/search?q=React"));
       const data = await response.json();
       expect(response.status).toBe(200);
-      expect(data).toEqual({ results: mockResults, query: "React" });
+      expect(data).toEqual({ results: mockResults, query: "React", mode: "fts" });
       expect(mockSearch).toHaveBeenCalledWith("React", 20);
     });
 
@@ -112,7 +112,7 @@ describe("Search API Route", () => {
       const response = await GET(req("/api/search"));
       const data = await response.json();
       expect(response.status).toBe(200);
-      expect(data).toEqual({ results: [], query: "" });
+      expect(data).toEqual({ results: [], query: "", mode: "fts" });
       expect(mockSearch).not.toHaveBeenCalled();
     });
 
