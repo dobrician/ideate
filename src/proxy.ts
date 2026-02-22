@@ -1,4 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
+import { recordTiming } from "@/lib/perf-monitor";
+
+const REQUEST_TIMEOUT_MS = 30_000;
 
 /**
  * Lightweight JWT validation for proxy.
@@ -111,6 +114,24 @@ function isProtectedPath(pathname: string): boolean {
   );
 }
 
+function withPerfHeaders(response: NextResponse, request: NextRequest, start: number): NextResponse {
+  const durationMs = Date.now() - start;
+  response.headers.set("x-response-time", `${durationMs}ms`);
+  response.headers.set("server-timing", `total;dur=${durationMs}`);
+  response.headers.set("x-request-deadline", String(start + REQUEST_TIMEOUT_MS));
+  response.headers.set("x-request-timeout", String(REQUEST_TIMEOUT_MS));
+
+  recordTiming({
+    path: request.nextUrl.pathname,
+    method: request.method,
+    status: response.status,
+    durationMs,
+    timestamp: Date.now(),
+  });
+
+  return response;
+}
+
 /**
  * Add security headers to the response
  */
@@ -148,6 +169,7 @@ function addSecurityHeaders(response: NextResponse): NextResponse {
  * its client router cache when locale changes.
  */
 export function proxy(request: NextRequest) {
+  const start = Date.now();
   const { pathname } = request.nextUrl;
   const locale = request.cookies.get("locale")?.value || "en";
 
@@ -157,7 +179,7 @@ export function proxy(request: NextRequest) {
       request: { headers: new Headers(request.headers) },
     });
     response.headers.set("x-locale", locale);
-    return addSecurityHeaders(response);
+    return withPerfHeaders(addSecurityHeaders(response), request, start);
   }
 
   const sessionCookie = request.cookies.get("session");
@@ -171,14 +193,14 @@ export function proxy(request: NextRequest) {
     if (sessionCookie?.value) {
       response.cookies.delete("session");
     }
-    return addSecurityHeaders(response);
+    return withPerfHeaders(addSecurityHeaders(response), request, start);
   }
 
   const response = NextResponse.next({
     request: { headers: new Headers(request.headers) },
   });
   response.headers.set("x-locale", locale);
-  return addSecurityHeaders(response);
+  return withPerfHeaders(addSecurityHeaders(response), request, start);
 }
 
 export const config = {
