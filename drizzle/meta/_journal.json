@@ -176,6 +176,13 @@
       "when": 1771278800000,
       "tag": "0024_sprint49_cache_entries",
       "breakpoints": true
+    },
+    {
+      "idx": 25,
+      "version": "6",
+      "when": 1771279200000,
+      "tag": "0025_sprint52_embeddings",
+      "breakpoints": true
     }
   ]
 }

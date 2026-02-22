@@ -248,6 +248,18 @@ export const cacheEntries = sqliteTable("cache_entries", {
   createdAt: integer("created_at").default(sql`(unixepoch())`),
 });
 
+// ─── Embeddings ─────────────────────────────────────────────────────────
+
+export const embeddings = sqliteTable("embeddings", {
+  id: pk(),
+  entityType: text("entity_type", { enum: ["project", "proposal", "comment"] }).notNull(),
+  entityId: text("entity_id").notNull(),
+  vector: text("vector").notNull(), // JSON-serialized float array
+  model: text("model").notNull().default("tfidf"),
+  dimensions: integer("dimensions").notNull(),
+  createdAt: ts(), updatedAt: tsUp(),
+});
+
 // ─── Custom Roles ───────────────────────────────────────────────────────
 
 export const customRoles = sqliteTable("custom_roles", {
