@@ -17,8 +17,9 @@ test.describe("Comments E2E", () => {
     // Type a comment
     await textarea.fill("This is a test comment via send button");
 
-    // Click the send button
-    const sendBtn = page.locator("button[type='submit']").last();
+    // Click the send button (scoped to the comment form containing the textarea)
+    const commentForm = textarea.locator("xpath=ancestor::form");
+    const sendBtn = commentForm.locator("button[type='submit']");
     await sendBtn.click();
 
     // Comment should appear in the thread
@@ -58,7 +59,8 @@ test.describe("Comments E2E", () => {
     await textarea.scrollIntoViewIfNeeded();
 
     // Try to submit empty comment - textarea has required attribute
-    const sendBtn = page.locator("button[type='submit']").last();
+    const commentForm = textarea.locator("xpath=ancestor::form");
+    const sendBtn = commentForm.locator("button[type='submit']");
     await sendBtn.click();
     await expect(textarea).toBeVisible();
   });
