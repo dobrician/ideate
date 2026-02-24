@@ -62,7 +62,7 @@ test.describe("Visual Regression — Mobile (390px)", () => {
     page,
   }) => {
     await page.goto("/auth/login");
-    const submitBtn = page.getByRole("button", { name: /Sign In/i });
+    const submitBtn = page.getByRole("button", { name: /Sign In with Password/i });
     await expect(submitBtn).toBeVisible();
     const box = await submitBtn.boundingBox();
     expect(box!.height).toBeGreaterThanOrEqual(MIN_TAP);
@@ -226,7 +226,7 @@ test.describe("Visual Regression — Romanian locale", () => {
     ]);
     await page.goto("/auth/login");
     // Should show Romanian text
-    await expect(page.getByText("Autentificare")).toBeVisible();
+    await expect(page.getByText("Autentifică-te pe Ideate")).toBeVisible();
   });
 });
 
@@ -244,7 +244,7 @@ test.describe("Visual Regression — English locale", () => {
       },
     ]);
     await page.goto("/auth/login");
-    await expect(page.getByText("Sign In")).toBeVisible();
+    await expect(page.getByText("Sign in to Ideate")).toBeVisible();
   });
 });
 

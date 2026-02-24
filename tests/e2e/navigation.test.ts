@@ -4,9 +4,11 @@ test.describe("Navigation & Public Pages", () => {
   test("homepage shows welcome content and feature cards", async ({ page }) => {
     await page.goto("/");
     await expect(page.getByText("Welcome to Ideate")).toBeVisible();
-    await expect(page.getByText("Projects")).toBeVisible();
-    await expect(page.getByText("Proposals")).toBeVisible();
-    await expect(page.getByText("Consensus")).toBeVisible();
+    // Use role-based selectors to avoid strict mode (nav/buttons also contain "Projects")
+    const features = page.getByRole("region", { name: /features/i });
+    await expect(features.getByText("Projects")).toBeVisible();
+    await expect(features.getByText("Proposals")).toBeVisible();
+    await expect(features.getByText("Consensus")).toBeVisible();
   });
 
   test("homepage has navigation buttons", async ({ page }) => {
@@ -15,7 +17,7 @@ test.describe("Navigation & Public Pages", () => {
       page.getByRole("link", { name: /View Projects/i })
     ).toBeVisible();
     await expect(
-      page.getByRole("link", { name: /Dashboard/i })
+      page.getByRole("link", { name: /Get Started/i })
     ).toBeVisible();
   });
 

@@ -36,7 +36,7 @@ test.describe("Mobile — Touch Targets & Overflow (Sprint 28)", () => {
     page,
   }) => {
     await page.goto("/auth/forgot-password");
-    const back = page.getByRole("link", { name: /Back to login/i });
+    const back = page.getByRole("link", { name: /Back to Sign In/i });
     await expect(back).toBeVisible();
     const box = await back.boundingBox();
     expect(box!.height).toBeGreaterThanOrEqual(MIN_TAP);

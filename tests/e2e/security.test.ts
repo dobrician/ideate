@@ -21,9 +21,12 @@ test.describe("Security Headers", () => {
     expect(csp).toContain("frame-ancestors 'none'");
   });
 
-  test("protected API returns 401 without auth", async ({ request }) => {
-    const response = await request.get("/api/projects/test");
-    expect(response.status()).toBe(401);
+  test("protected API redirects without auth", async ({ request }) => {
+    const response = await request.get("/api/projects/test", {
+      maxRedirects: 0,
+    });
+    // Proxy redirects protected API routes to login
+    expect(response.status()).toBe(307);
   });
 
   test("admin panel redirects non-admin users", async ({ page }) => {

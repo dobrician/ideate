@@ -1,26 +1,27 @@
 import { test, expect } from "@playwright/test";
 
 test.describe("API Endpoints", () => {
-  test("search API returns results for empty query", async ({ request }) => {
+  test("search API requires authentication", async ({ request }) => {
+    // /api/search is public in proxy but requires auth in the route handler
     const response = await request.get("/api/search?q=");
-    expect(response.ok()).toBeTruthy();
-    const body = await response.json();
-    expect(body).toHaveProperty("results");
-  });
-
-  test("export API requires authentication", async ({ request }) => {
-    const response = await request.get(
-      "/api/projects/nonexistent/export?format=csv"
-    );
     expect(response.status()).toBe(401);
   });
 
-  test("export API validates format parameter", async ({ request }) => {
-    // This will redirect to login since we're not authenticated
+  test("export API requires authentication (redirects)", async ({ request }) => {
     const response = await request.get(
-      "/api/projects/test/export?format=invalid"
+      "/api/projects/nonexistent/export?format=csv",
+      { maxRedirects: 0 }
     );
-    expect([400, 401]).toContain(response.status());
+    // Proxy redirects protected API routes to login
+    expect(response.status()).toBe(307);
+  });
+
+  test("export API redirects unauthenticated requests", async ({ request }) => {
+    const response = await request.get(
+      "/api/projects/test/export?format=invalid",
+      { maxRedirects: 0 }
+    );
+    expect(response.status()).toBe(307);
   });
 
   test("me API returns 401 when not authenticated", async ({ request }) => {
