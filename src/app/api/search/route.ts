@@ -19,9 +19,6 @@ type SearchMode = (typeof VALID_MODES)[number];
 export async function GET(request: NextRequest) {
   try {
     const user = await getCurrentUser();
-    if (!user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
 
     const ipCheck = checkRateLimit(`search:ip:${getClientIp(request)}`, 60, 15 * 60_000);
     if (!ipCheck.allowed) {

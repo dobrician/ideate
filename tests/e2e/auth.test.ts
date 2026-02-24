@@ -5,7 +5,7 @@ test.describe("Authentication", () => {
     await page.goto("/auth/login");
     await expect(page.getByText("Sign in to Ideate")).toBeVisible();
     await expect(page.getByLabel("Email")).toBeVisible();
-    await expect(page.getByLabel("Password")).toBeVisible();
+    await expect(page.getByLabel("Password", { exact: true })).toBeVisible();
     await expect(
       page.getByRole("button", { name: /Sign In with Password/i })
     ).toBeVisible();
@@ -25,7 +25,7 @@ test.describe("Authentication", () => {
     await page.goto("/auth/login");
     const emailInput = page.getByLabel("Email");
     await emailInput.fill("invalid");
-    await page.getByLabel("Password").fill("SomePass1");
+    await page.getByLabel("Password", { exact: true }).fill("SomePass1");
     await page
       .getByRole("button", { name: /Sign In with Password/i })
       .click();
@@ -91,7 +91,7 @@ test.describe("Authentication - Mobile Viewport", () => {
     await page.goto("/auth/login");
     await expect(page.getByText("Sign in to Ideate")).toBeVisible();
     await expect(page.getByLabel("Email")).toBeVisible();
-    await expect(page.getByLabel("Password")).toBeVisible();
+    await expect(page.getByLabel("Password", { exact: true })).toBeVisible();
     await expect(
       page.getByRole("button", { name: /Sign In with Password/i })
     ).toBeVisible();

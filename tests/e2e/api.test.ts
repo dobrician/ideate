@@ -16,7 +16,6 @@ test.describe("API Endpoints", () => {
   });
 
   test("export API validates format parameter", async ({ request }) => {
-    // This will redirect to login since we're not authenticated
     const response = await request.get(
       "/api/projects/test/export?format=invalid"
     );

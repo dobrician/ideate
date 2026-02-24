@@ -14,9 +14,11 @@ vi.mock("@/db/schema", () => ({}));
 
 const mockExistsSync = vi.fn();
 const mockReadFileSync = vi.fn();
+const mockMkdirSync = vi.fn();
 vi.mock("fs", () => ({
   existsSync: (...args: unknown[]) => mockExistsSync(...args),
   readFileSync: (...args: unknown[]) => mockReadFileSync(...args),
+  mkdirSync: (...args: unknown[]) => mockMkdirSync(...args),
 }));
 
 const mockLogInfo = vi.fn(), mockLogFatal = vi.fn();
@@ -39,7 +41,7 @@ describe("db/index migration logic", () => {
   beforeEach(() => {
     vi.resetModules();
     [mockExec, mockPrepare, mockPragma, mockExistsSync, mockReadFileSync,
-      mockLogInfo, mockLogFatal].forEach(m => m.mockReset());
+      mockMkdirSync, mockLogInfo, mockLogFatal].forEach(m => m.mockReset());
     mockExit.mockClear();
   });
 

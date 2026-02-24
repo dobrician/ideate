@@ -191,9 +191,11 @@ jobs:
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
       - name: Build for Cloudflare Pages
-        run: npx @cloudflare/next-on-pages
+        run: mkdir -p data && npx @cloudflare/next-on-pages
         env:
           NODE_ENV: production
+          DATABASE_URL: ${{ github.workspace }}/data/ideate.db
+          JWT_SECRET: ci-build-placeholder
       - name: Deploy to Cloudflare Pages
         run: npx wrangler pages deploy .vercel/output/static --project-name=ideate
         env:

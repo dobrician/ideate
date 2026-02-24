@@ -1,12 +1,18 @@
 import Database from "better-sqlite3";
 import { drizzle } from "drizzle-orm/better-sqlite3";
 import * as schema from "./schema";
-import { resolve } from "path";
-import { readFileSync, existsSync } from "fs";
+import { resolve, dirname } from "path";
+import { readFileSync, existsSync, mkdirSync } from "fs";
 import { logger } from "@/lib/logger";
 import { updatePoolStats } from "@/lib/resource-monitor";
 
 const DB_PATH = process.env.DATABASE_URL ?? resolve("data/ideate.db");
+
+// Ensure the parent directory exists before opening the database
+const dbDir = dirname(DB_PATH);
+if (!existsSync(dbDir)) {
+  mkdirSync(dbDir, { recursive: true });
+}
 
 const MAX_POOL_SIZE = Number(process.env.DB_POOL_SIZE ?? 4);
 
