@@ -34,11 +34,11 @@ beforeEach(() => {
 
 describe("Search API Route", () => {
   describe("GET /api/search", () => {
-    it("should succeed when user is null (auth handled by proxy)", async () => {
+    it("should return 401 when not authenticated", async () => {
       mockGetCurrentUser.mockResolvedValue(null);
-      mockSearch.mockReturnValue([]);
       const response = await GET(req("/api/search?q=test"));
-      expect(response.status).toBe(200);
+      expect(response.status).toBe(401);
+      expect((await response.json()).error).toBe("Unauthorized");
     });
 
     it("should return 429 when rate-limited", async () => {

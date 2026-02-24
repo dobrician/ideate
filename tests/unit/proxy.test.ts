@@ -136,6 +136,6 @@ describe("proxy — security headers", () => {
 
 describe("proxy — unknown + non-public API", () => {
   it("lets unknown paths through for Next.js 404", () => expect(isPass(proxy(req("/nonexistent")))).toBe(true));
-  it("returns 401 for /api/projects without session", () => expect(proxy(req("/api/projects")).status).toBe(401));
+  it("redirects /api/projects without session", () => expect(proxy(req("/api/projects")).status).toBe(307));
   it("allows /api/projects with valid session", () => expect(isPass(proxy(req("/api/projects", validJwt())))).toBe(true));
 });

@@ -184,19 +184,8 @@ export function proxy(request: NextRequest) {
 
   const sessionCookie = request.cookies.get("session");
 
-  // Return 401 JSON for unauthenticated API routes (don't redirect to login)
+  // Redirect to login if cookie is missing, empty, expired, or malformed
   if (!sessionCookie?.value || !isValidSessionJwt(sessionCookie.value)) {
-    if (pathname.startsWith("/api/")) {
-      const response = NextResponse.json(
-        { error: "Unauthorized" },
-        { status: 401 },
-      );
-      if (sessionCookie?.value) {
-        response.cookies.delete("session");
-      }
-      return withPerfHeaders(addSecurityHeaders(response), request, start);
-    }
-
     const loginUrl = new URL("/auth/login", request.url);
     loginUrl.searchParams.set("redirect", pathname);
     const response = NextResponse.redirect(loginUrl);

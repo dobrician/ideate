@@ -12,28 +12,24 @@ test.describe("Proposal Creation Flow", () => {
     await page.goto(`/projects/${seed.projectId}`);
     await page.waitForLoadState("domcontentloaded");
 
-    // Open the proposal form sheet via "New Proposal" button
-    const newBtn = page.getByRole("button", { name: /new proposal/i });
-    await expect(newBtn).toBeVisible({ timeout: 5000 });
-    await newBtn.click();
-
-    const sheet = page.locator("[data-slot='sheet-content']");
-    await expect(sheet).toBeVisible({ timeout: 10000 });
+    // Sidebar with inline proposal form should be visible on desktop
+    const sidebar = page.locator("aside").first();
+    await expect(sidebar).toBeVisible();
 
     // Wait for CSRF token to hydrate before interacting with form
     await expect(
-      sheet.locator("input[name='csrfToken']")
+      sidebar.locator("input[name='csrfToken']").first()
     ).not.toHaveValue("", { timeout: 5000 });
 
     // Fill in proposal details
-    const titleInput = sheet.locator("#proposal-title");
+    const titleInput = sidebar.locator("#proposal-title").first();
     await titleInput.fill("E2E Full Flow Proposal");
 
-    const descInput = sheet.locator("#proposal-description");
+    const descInput = sidebar.locator("#proposal-description").first();
     await descInput.fill("Created during the full end-to-end flow test.");
 
     // Submit the form
-    const submitBtn = sheet
+    const submitBtn = sidebar
       .getByRole("button", { name: /submit/i })
       .first();
     await submitBtn.click();
@@ -44,7 +40,7 @@ test.describe("Proposal Creation Flow", () => {
     });
   });
 
-  test("creates proposal via mobile sheet", async ({ page }) => {
+  test("creates proposal via mobile dialog", async ({ page }) => {
     const seed = await seedTestData(page.request);
     await loginAsTestUser(page, seed);
 
@@ -52,29 +48,32 @@ test.describe("Proposal Creation Flow", () => {
     await page.goto(`/projects/${seed.projectId}`);
     await page.waitForLoadState("domcontentloaded");
 
-    // Open the sheet via "New Proposal" button
+    // Desktop sidebar should be hidden on mobile
+    await expect(page.locator("aside")).toBeHidden();
+
+    // Open the dialog via "New Proposal" button
     const newBtn = page.getByRole("button", { name: /new proposal/i });
     await expect(newBtn).toBeVisible({ timeout: 5000 });
     await newBtn.click();
 
-    const sheet = page.locator("[data-slot='sheet-content']");
-    await expect(sheet).toBeVisible({ timeout: 10000 });
+    const dialog = page.locator("[data-slot='dialog-content']");
+    await expect(dialog).toBeVisible({ timeout: 10000 });
 
     // Wait for CSRF token to hydrate
     await expect(
-      sheet.locator("input[name='csrfToken']")
+      dialog.locator("input[name='csrfToken']")
     ).not.toHaveValue("", { timeout: 5000 });
 
     // Fill and submit
-    await sheet.locator("#proposal-title").fill("E2E Mobile Sheet Proposal");
-    await sheet
+    await dialog.locator("#proposal-title").fill("E2E Mobile Dialog Proposal");
+    await dialog
       .locator("#proposal-description")
-      .fill("Created from mobile sheet.");
+      .fill("Created from mobile dialog.");
 
-    await sheet.getByRole("button", { name: /submit/i }).click();
+    await dialog.getByRole("button", { name: /submit/i }).click();
 
-    // Proposal should appear after sheet closes and page revalidates
-    await expect(page.getByText("E2E Mobile Sheet Proposal")).toBeVisible({
+    // Proposal should appear after dialog closes and page revalidates
+    await expect(page.getByText("E2E Mobile Dialog Proposal")).toBeVisible({
       timeout: 15000,
     });
   });
@@ -87,25 +86,20 @@ test.describe("Proposal Creation Flow", () => {
     await page.goto(`/projects/${seed.projectId}`);
     await page.waitForLoadState("domcontentloaded");
 
-    // Open the proposal form sheet
-    const newBtn = page.getByRole("button", { name: /new proposal/i });
-    await newBtn.click();
-
-    const sheet = page.locator("[data-slot='sheet-content']");
-    await expect(sheet).toBeVisible({ timeout: 10000 });
+    const sidebar = page.locator("aside").first();
     await expect(
-      sheet.locator("input[name='csrfToken']")
+      sidebar.locator("input[name='csrfToken']").first()
     ).not.toHaveValue("", { timeout: 5000 });
 
-    const titleInput = sheet.locator("#proposal-title");
+    const titleInput = sidebar.locator("#proposal-title").first();
     await titleInput.fill("Hi");
 
-    const submitBtn = sheet
+    const submitBtn = sidebar
       .getByRole("button", { name: /submit/i })
       .first();
     await submitBtn.click();
 
-    // Client-side validation prevents submission — field keeps value
+    // Browser minLength=5 validation prevents submission — field keeps value
     await expect(titleInput).toHaveValue("Hi");
   });
 
@@ -117,32 +111,28 @@ test.describe("Proposal Creation Flow", () => {
     await page.goto(`/projects/${seed.projectId}`);
     await page.waitForLoadState("domcontentloaded");
 
-    // Open the proposal form sheet
-    const newBtn = page.getByRole("button", { name: /new proposal/i });
-    await newBtn.click();
-
-    const sheet = page.locator("[data-slot='sheet-content']");
-    await expect(sheet).toBeVisible({ timeout: 10000 });
+    const sidebar = page.locator("aside").first();
     await expect(
-      sheet.locator("input[name='csrfToken']")
+      sidebar.locator("input[name='csrfToken']").first()
     ).not.toHaveValue("", { timeout: 5000 });
 
     // Click the Contra vote button before submitting
-    const contraBtn = sheet
+    const contraBtn = sidebar
       .getByRole("button", { name: /contra/i })
       .first();
     await contraBtn.click();
 
     // Hidden input should reflect the contra vote
-    const voteInput = sheet.locator("input[name='initialVote']");
+    const voteInput = sidebar.locator("input[name='initialVote']");
     await expect(voteInput).toHaveValue("-1");
 
-    await sheet.locator("#proposal-title").fill("E2E Contra Proposal");
-    await sheet
+    await sidebar.locator("#proposal-title").first().fill("E2E Contra Proposal");
+    await sidebar
       .locator("#proposal-description")
+      .first()
       .fill("Testing contra vote.");
 
-    await sheet.getByRole("button", { name: /submit/i }).first().click();
+    await sidebar.getByRole("button", { name: /submit/i }).first().click();
 
     await expect(page.getByText("E2E Contra Proposal")).toBeVisible({
       timeout: 15000,

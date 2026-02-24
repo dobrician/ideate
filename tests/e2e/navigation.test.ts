@@ -4,9 +4,9 @@ test.describe("Navigation & Public Pages", () => {
   test("homepage shows welcome content and feature cards", async ({ page }) => {
     await page.goto("/");
     await expect(page.getByText("Welcome to Ideate")).toBeVisible();
-    await expect(page.getByText("Projects").first()).toBeVisible();
-    await expect(page.getByText("Proposals").first()).toBeVisible();
-    await expect(page.getByText("Consensus").first()).toBeVisible();
+    await expect(page.getByText("Projects")).toBeVisible();
+    await expect(page.getByText("Proposals")).toBeVisible();
+    await expect(page.getByText("Consensus")).toBeVisible();
   });
 
   test("homepage has navigation buttons", async ({ page }) => {

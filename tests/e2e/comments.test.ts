@@ -17,8 +17,8 @@ test.describe("Comments E2E", () => {
     const textarea = page.locator("textarea[name='content']").last();
     await textarea.fill("This is a test comment via send button");
 
-    // Click the send button (uses aria-label, not title)
-    const sendBtn = page.locator("button[aria-label]").filter({
+    // Click the send button
+    const sendBtn = page.locator("button[title]").filter({
       has: page.locator("svg.lucide-send"),
     }).last();
     await sendBtn.click();
@@ -59,7 +59,7 @@ test.describe("Comments E2E", () => {
     await commentSection.scrollIntoViewIfNeeded();
 
     // Try to submit empty comment - textarea has required attribute
-    const sendBtn = page.locator("button[aria-label]").filter({
+    const sendBtn = page.locator("button[title]").filter({
       has: page.locator("svg.lucide-send"),
     }).last();
     await sendBtn.click();
@@ -152,8 +152,10 @@ test.describe("Comments E2E", () => {
     await page.goto(`/projects/${seed.projectId}`);
     await page.waitForLoadState("domcontentloaded");
 
-    // Open the discussion sheet for the seeded proposal (uses aria-label, not title)
-    const commentBtn = page.getByRole("button", { name: /Open discussion/i }).first();
+    // Open the discussion sheet for the seeded proposal
+    const commentBtn = page.locator("button[title]").filter({
+      has: page.locator("svg.lucide-message-square"),
+    }).first();
     await commentBtn.click();
 
     // Sheet should open
