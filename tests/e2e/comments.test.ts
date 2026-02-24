@@ -9,12 +9,12 @@ test.describe("Comments E2E", () => {
     await page.goto(`/projects/${seed.projectId}`);
     await page.waitForLoadState("domcontentloaded");
 
-    // Scroll to project comments section
-    const commentSection = page.locator("text=Discussion").first();
-    await commentSection.scrollIntoViewIfNeeded();
+    // Wait for ClientOnly hydration then scroll to comment section
+    const textarea = page.locator("textarea[name='content']").last();
+    await expect(textarea).toBeVisible({ timeout: 15000 });
+    await textarea.scrollIntoViewIfNeeded();
 
     // Type a comment
-    const textarea = page.locator("textarea[name='content']").last();
     await textarea.fill("This is a test comment via send button");
 
     // Click the send button
@@ -34,10 +34,10 @@ test.describe("Comments E2E", () => {
     await page.goto(`/projects/${seed.projectId}`);
     await page.waitForLoadState("domcontentloaded");
 
-    const commentSection = page.locator("text=Discussion").first();
-    await commentSection.scrollIntoViewIfNeeded();
-
     const textarea = page.locator("textarea[name='content']").last();
+    await expect(textarea).toBeVisible({ timeout: 15000 });
+    await textarea.scrollIntoViewIfNeeded();
+
     await textarea.fill("Comment sent with Enter key");
     await textarea.press("Enter");
 
@@ -53,15 +53,13 @@ test.describe("Comments E2E", () => {
     await page.goto(`/projects/${seed.projectId}`);
     await page.waitForLoadState("domcontentloaded");
 
-    const commentSection = page.locator("text=Discussion").first();
-    await commentSection.scrollIntoViewIfNeeded();
+    const textarea = page.locator("textarea[name='content']").last();
+    await expect(textarea).toBeVisible({ timeout: 15000 });
+    await textarea.scrollIntoViewIfNeeded();
 
     // Try to submit empty comment - textarea has required attribute
     const sendBtn = page.locator("button[type='submit']").last();
     await sendBtn.click();
-
-    // The textarea should still be visible (form not submitted due to required)
-    const textarea = page.locator("textarea[name='content']").last();
     await expect(textarea).toBeVisible();
   });
 
@@ -72,11 +70,12 @@ test.describe("Comments E2E", () => {
     await page.goto(`/projects/${seed.projectId}`);
     await page.waitForLoadState("domcontentloaded");
 
-    const commentSection = page.locator("text=Discussion").first();
-    await commentSection.scrollIntoViewIfNeeded();
+    // Wait for ClientOnly hydration
+    const textarea = page.locator("textarea[name='content']").last();
+    await expect(textarea).toBeVisible({ timeout: 15000 });
+    await textarea.scrollIntoViewIfNeeded();
 
     // Post a comment
-    const textarea = page.locator("textarea[name='content']").last();
     await textarea.fill("Chat bubble test message");
     await textarea.press("Enter");
 
@@ -100,10 +99,10 @@ test.describe("Comments E2E", () => {
     await page.goto(`/projects/${seed.projectId}`);
     await page.waitForLoadState("domcontentloaded");
 
-    const commentSection = page.locator("text=Discussion").first();
-    await commentSection.scrollIntoViewIfNeeded();
-
     const textarea = page.locator("textarea[name='content']").last();
+    await expect(textarea).toBeVisible({ timeout: 15000 });
+    await textarea.scrollIntoViewIfNeeded();
+
     await textarea.fill("Line one");
     await textarea.press("Shift+Enter");
     await textarea.pressSequentially("Line two");
@@ -125,10 +124,10 @@ test.describe("Comments E2E", () => {
     await page.goto(`/projects/${seed.projectId}`);
     await page.waitForLoadState("domcontentloaded");
 
-    const commentSection = page.locator("text=Discussion").first();
-    await commentSection.scrollIntoViewIfNeeded();
-
     const textarea = page.locator("textarea[name='content']").last();
+    await expect(textarea).toBeVisible({ timeout: 15000 });
+    await textarea.scrollIntoViewIfNeeded();
+
     await textarea.fill("Avatar test");
     await textarea.press("Enter");
 

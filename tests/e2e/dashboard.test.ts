@@ -16,8 +16,9 @@ test.describe("Dashboard — Authenticated", () => {
     await expect(page.getByRole("heading", { name: /Dashboard/i })).toBeVisible();
     const statsRegion = page.getByRole("region", { name: /Your statistics/i }).first();
     await expect(statsRegion).toBeVisible();
-    await expect(page.getByText(/My Projects/i).first()).toBeVisible();
-    await expect(page.getByText(/My Proposals/i).first()).toBeVisible();
+    // Scope to visible desktop card titles (mobile pills use sm:hidden)
+    await expect(statsRegion.getByText(/My Projects/i).first()).toBeVisible();
+    await expect(statsRegion.getByText(/My Proposals/i).first()).toBeVisible();
     await expect(page.getByText(/Recent Votes/i).first()).toBeVisible();
     await expect(page.getByText(/Recent Activity/i).first()).toBeVisible();
   });
@@ -34,7 +35,7 @@ test.describe("Dashboard — Authenticated", () => {
 
   test("user projects section shows seeded project with deadline badge", async ({ page }) => {
     // The seeded project has a 30-day deadline so it should show a green badge
-    const projectsCard = page.locator("text=Your Projects").locator("..").locator("..").locator("..");
+    const projectsCard = page.locator("text=My Projects").locator("..").locator("..").locator("..");
     await expect(projectsCard.getByText(/E2E Test Project/i).first()).toBeVisible();
     // Deadline badge should be present (30d left = green)
     await expect(projectsCard.getByText(/d left/i).first()).toBeVisible();
@@ -88,6 +89,6 @@ test.describe("Dashboard — Mobile viewport", () => {
     await expect(searchBtn).toBeVisible();
     await searchBtn.click();
     // After clicking, the search bar overlay should appear
-    await expect(page.getByPlaceholder(/Search/i).first()).toBeVisible();
+    await expect(page.getByPlaceholder(/Search/i).last()).toBeVisible();
   });
 });
