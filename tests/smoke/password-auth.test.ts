@@ -196,11 +196,17 @@ test.describe("Smoke Tests - Password Auth Flow", () => {
     );
     expect(verifyUrl).toBeTruthy();
 
-    // Step 4: Verify email
-    const verifyResponse = await request.get(verifyUrl, {
-      maxRedirects: 0,
-    });
-    expect([200, 302, 307, 308]).toContain(verifyResponse.status());
+    // Step 4: Verify email via API (the page is client-rendered, so GET won't trigger verification)
+    const token = new URL(verifyUrl).searchParams.get("token");
+    expect(token).toBeTruthy();
+    const verifyResponse = await request.post(
+      `${APP_URL}/api/auth/verify-email`,
+      {
+        data: { token },
+        headers: { "Content-Type": "application/json" },
+      }
+    );
+    expect(verifyResponse.status()).toBe(200);
 
     // Step 5: Login with password after verification
     const loginResponse = await request.post(

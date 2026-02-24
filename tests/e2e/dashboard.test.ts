@@ -64,7 +64,8 @@ test.describe("Dashboard — Empty state", () => {
 });
 
 test.describe("Dashboard — Mobile viewport", () => {
-  test.use({ ...devices["iPhone 13"] });
+  const { defaultBrowserType: _, ...iPhone13 } = devices["iPhone 13"];
+  test.use({ ...iPhone13 });
 
   test.beforeAll(async ({ request }) => {
     seed = await seedTestData(request);

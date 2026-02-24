@@ -84,7 +84,8 @@ test.describe("Authentication", () => {
 });
 
 test.describe("Authentication - Mobile Viewport", () => {
-  test.use({ ...devices["iPhone 13"] });
+  const { defaultBrowserType: _, ...iPhone13 } = devices["iPhone 13"];
+  test.use({ ...iPhone13 });
 
   test("login page renders correctly on mobile", async ({ page }) => {
     await page.goto("/auth/login");
