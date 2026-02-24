@@ -7,7 +7,8 @@ const MIN_TAP = 44;
 // ============================================================
 
 test.describe("Visual Regression — Mobile (390px)", () => {
-  test.use({ ...devices["iPhone 13"] });
+  const { defaultBrowserType: _, ...iPhone13 } = devices["iPhone 13"];
+  test.use({ ...iPhone13 });
 
   test("login card fits within mobile viewport with proper padding (#64)", async ({
     page,
@@ -252,7 +253,8 @@ test.describe("Visual Regression — English locale", () => {
 // ============================================================
 
 test.describe("Visual Regression — Romanian + Mobile", () => {
-  test.use({ ...devices["iPhone 13"] });
+  const { defaultBrowserType: _, ...iPhone13 } = devices["iPhone 13"];
+  test.use({ ...iPhone13 });
 
   test("login page in Romanian fits mobile viewport (#67)", async ({
     page,

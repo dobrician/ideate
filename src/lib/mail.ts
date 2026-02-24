@@ -72,6 +72,13 @@ interface EmailPayload {
 }
 
 async function sendEmail(payload: EmailPayload, logType: string, logUrl: string, errorMsg: string): Promise<void> {
+  // In test/CI mode (MAIL_LOG_FILE set, no SMTP), log and return without sending
+  const mailLogOnly = process.env.MAIL_LOG_FILE && !getSmtpHost();
+  if (mailLogOnly) {
+    logMail(payload.to, logType, logUrl);
+    return;
+  }
+
   if (isCloudflare()) {
     try {
       await sendViaResend({ from: getSmtpFrom(), ...payload });
