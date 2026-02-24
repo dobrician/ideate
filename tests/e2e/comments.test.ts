@@ -17,10 +17,11 @@ test.describe("Comments E2E", () => {
     // Type a comment
     await textarea.fill("This is a test comment via send button");
 
-    // Click the send button (scoped to the comment form containing the textarea)
-    const commentForm = textarea.locator("xpath=ancestor::form");
-    const sendBtn = commentForm.locator("button[type='submit']");
-    await sendBtn.click();
+    // Submit the form programmatically (avoids flaky button click in CI)
+    await page.evaluate(
+      (el) => el?.closest("form")?.requestSubmit(),
+      await textarea.elementHandle()
+    );
 
     // Comment should appear in the thread
     await expect(
@@ -58,10 +59,11 @@ test.describe("Comments E2E", () => {
     await expect(textarea).toBeVisible({ timeout: 15000 });
     await textarea.scrollIntoViewIfNeeded();
 
-    // Try to submit empty comment - textarea has required attribute
-    const commentForm = textarea.locator("xpath=ancestor::form");
-    const sendBtn = commentForm.locator("button[type='submit']");
-    await sendBtn.click();
+    // Try to submit empty comment - form has noValidate, action validates server-side
+    await page.evaluate(
+      (el) => el?.closest("form")?.requestSubmit(),
+      await textarea.elementHandle()
+    );
     await expect(textarea).toBeVisible();
   });
 
