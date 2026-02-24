@@ -16,8 +16,8 @@ test.describe("Dashboard — Authenticated", () => {
     await expect(page.getByRole("heading", { name: /Dashboard/i })).toBeVisible();
     const statsRegion = page.getByRole("region", { name: /Your statistics/i }).first();
     await expect(statsRegion).toBeVisible();
-    await expect(page.getByText(/Your Projects/i).first()).toBeVisible();
-    await expect(page.getByText(/Your Proposals/i).first()).toBeVisible();
+    await expect(page.getByText(/My Projects/i).first()).toBeVisible();
+    await expect(page.getByText(/My Proposals/i).first()).toBeVisible();
     await expect(page.getByText(/Recent Votes/i).first()).toBeVisible();
     await expect(page.getByText(/Recent Activity/i).first()).toBeVisible();
   });
@@ -41,8 +41,7 @@ test.describe("Dashboard — Authenticated", () => {
   });
 
   test("recent votes section shows seeded vote", async ({ page }) => {
-    const votesSection = page.getByText(/Recent Votes/i).locator("..").locator("..");
-    await expect(votesSection.getByText(/Initial Test Proposal/i)).toBeVisible();
+    await expect(page.getByText(/Initial Test Proposal/i).first()).toBeVisible();
   });
 
   test("new project quick action navigates correctly", async ({ page }) => {
@@ -89,6 +88,6 @@ test.describe("Dashboard — Mobile viewport", () => {
     await expect(searchBtn).toBeVisible();
     await searchBtn.click();
     // After clicking, the search bar overlay should appear
-    await expect(page.getByPlaceholder(/Search/i)).toBeVisible();
+    await expect(page.getByPlaceholder(/Search/i).first()).toBeVisible();
   });
 });

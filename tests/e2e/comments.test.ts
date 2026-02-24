@@ -18,9 +18,7 @@ test.describe("Comments E2E", () => {
     await textarea.fill("This is a test comment via send button");
 
     // Click the send button
-    const sendBtn = page.locator("button[title]").filter({
-      has: page.locator("svg.lucide-send"),
-    }).last();
+    const sendBtn = page.locator("button[type='submit']").last();
     await sendBtn.click();
 
     // Comment should appear in the thread
@@ -59,9 +57,7 @@ test.describe("Comments E2E", () => {
     await commentSection.scrollIntoViewIfNeeded();
 
     // Try to submit empty comment - textarea has required attribute
-    const sendBtn = page.locator("button[title]").filter({
-      has: page.locator("svg.lucide-send"),
-    }).last();
+    const sendBtn = page.locator("button[type='submit']").last();
     await sendBtn.click();
 
     // The textarea should still be visible (form not submitted due to required)
@@ -153,7 +149,7 @@ test.describe("Comments E2E", () => {
     await page.waitForLoadState("domcontentloaded");
 
     // Open the discussion sheet for the seeded proposal
-    const commentBtn = page.locator("button[title]").filter({
+    const commentBtn = page.locator("button[aria-label]").filter({
       has: page.locator("svg.lucide-message-square"),
     }).first();
     await commentBtn.click();
