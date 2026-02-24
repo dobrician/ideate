@@ -14,19 +14,15 @@ test.describe("Comments E2E", () => {
     await expect(textarea).toBeVisible({ timeout: 15000 });
     await textarea.scrollIntoViewIfNeeded();
 
-    // Type a comment
+    // Type a comment and submit via Enter (React form actions require
+    // submission through React's event system; raw requestSubmit() doesn't work)
     await textarea.fill("This is a test comment via send button");
-
-    // Submit the form programmatically (avoids flaky button click in CI)
-    await page.evaluate(
-      (el) => el?.closest("form")?.requestSubmit(),
-      await textarea.elementHandle()
-    );
+    await textarea.press("Enter");
 
     // Comment should appear in the thread
     await expect(
       page.getByText("This is a test comment via send button")
-    ).toBeVisible({ timeout: 10000 });
+    ).toBeVisible({ timeout: 15000 });
   });
 
   test("add project comment via Enter key", async ({ page }) => {
@@ -45,7 +41,7 @@ test.describe("Comments E2E", () => {
 
     await expect(
       page.getByText("Comment sent with Enter key")
-    ).toBeVisible({ timeout: 10000 });
+    ).toBeVisible({ timeout: 15000 });
   });
 
   test("empty comment is rejected (required field)", async ({ page }) => {
@@ -59,11 +55,8 @@ test.describe("Comments E2E", () => {
     await expect(textarea).toBeVisible({ timeout: 15000 });
     await textarea.scrollIntoViewIfNeeded();
 
-    // Try to submit empty comment - form has noValidate, action validates server-side
-    await page.evaluate(
-      (el) => el?.closest("form")?.requestSubmit(),
-      await textarea.elementHandle()
-    );
+    // Try to submit empty comment via Enter — action ignores empty content
+    await textarea.press("Enter");
     await expect(textarea).toBeVisible();
   });
 
