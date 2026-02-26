@@ -937,4 +937,45 @@ export const ro: Record<string, string> = {
   "similar.title": "Propuneri similare",
   "similar.empty": "Nicio propunere similară găsită",
   "similar.score": "{pct}% similar",
+
+  // AI Routing
+  "routing.title": "Proiecte sugerate",
+  "routing.empty": "Nicio sugestie de proiect disponibilă",
+  "routing.match": "{score}% potrivire",
+
+  // AI Conflicts
+  "conflicts.title": "Conflicte potențiale",
+  "conflicts.empty": "Niciun conflict detectat",
+  "conflicts.severity.high": "Ridicat",
+  "conflicts.severity.medium": "Mediu",
+  "conflicts.severity.low": "Scăzut",
+  "conflicts.confidence": "{pct}% încredere",
+
+  // AI Deadlines
+  "deadlines.prediction": "Termen sugerat",
+  "deadlines.health.onTrack": "Pe drum bun",
+  "deadlines.health.atRisk": "La risc",
+  "deadlines.health.overdue": "Întârziat",
+  "deadlines.confidence": "{pct}% încredere",
+  "deadlines.basedOn": "Bazat pe {count} proiecte similare",
+
+  // AI Roadmap
+  "roadmap.title": "Foaie de parcurs",
+  "roadmap.empty": "Nu există date despre foaia de parcurs",
+  "roadmap.milestone": "Etapa {num}",
+  "roadmap.proposals": "{count} propuneri",
+
+  // AI Insights
+  "aiInsights.title": "Perspectivele AI",
+  "aiInsights.subtitle": "Performanța și analiza funcțiilor AI",
+  "aiInsights.backToAdmin": "Înapoi la Admin",
+  "aiInsights.routingAccuracy": "Acuratețe rutare",
+  "aiInsights.conflictsDetected": "Conflicte detectate",
+  "aiInsights.deadlinePredictions": "Predicții termen",
+  "aiInsights.roadmapsGenerated": "Foi de parcurs generate",
+  "aiInsights.recentJobs": "Sarcini AI recente",
+  "aiInsights.jobType": "Tip",
+  "aiInsights.jobStatus": "Status",
+  "aiInsights.jobCreated": "Creat",
+  "aiInsights.noJobs": "Nicio sarcină AI găsită",
 };

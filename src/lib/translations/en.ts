@@ -918,4 +918,45 @@ export const en: Record<string, string> = {
   "similar.title": "Similar Proposals",
   "similar.empty": "No similar proposals found",
   "similar.score": "{pct}% similar",
+
+  // AI Routing
+  "routing.title": "Suggested Projects",
+  "routing.empty": "No project suggestions available",
+  "routing.match": "{score}% match",
+
+  // AI Conflicts
+  "conflicts.title": "Potential Conflicts",
+  "conflicts.empty": "No conflicts detected",
+  "conflicts.severity.high": "High",
+  "conflicts.severity.medium": "Medium",
+  "conflicts.severity.low": "Low",
+  "conflicts.confidence": "{pct}% confidence",
+
+  // AI Deadlines
+  "deadlines.prediction": "Suggested Deadline",
+  "deadlines.health.onTrack": "On Track",
+  "deadlines.health.atRisk": "At Risk",
+  "deadlines.health.overdue": "Overdue",
+  "deadlines.confidence": "{pct}% confidence",
+  "deadlines.basedOn": "Based on {count} similar projects",
+
+  // AI Roadmap
+  "roadmap.title": "Roadmap",
+  "roadmap.empty": "No roadmap data available",
+  "roadmap.milestone": "Milestone {num}",
+  "roadmap.proposals": "{count} proposals",
+
+  // AI Insights
+  "aiInsights.title": "AI Insights",
+  "aiInsights.subtitle": "AI feature performance and analytics",
+  "aiInsights.backToAdmin": "Back to Admin",
+  "aiInsights.routingAccuracy": "Routing Accuracy",
+  "aiInsights.conflictsDetected": "Conflicts Detected",
+  "aiInsights.deadlinePredictions": "Deadline Predictions",
+  "aiInsights.roadmapsGenerated": "Roadmaps Generated",
+  "aiInsights.recentJobs": "Recent AI Jobs",
+  "aiInsights.jobType": "Type",
+  "aiInsights.jobStatus": "Status",
+  "aiInsights.jobCreated": "Created",
+  "aiInsights.noJobs": "No AI jobs found",
 };
