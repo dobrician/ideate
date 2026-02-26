@@ -9,7 +9,7 @@
 - [x] **Goal 1: Smart Proposal Routing** — `src/lib/ai/routing.ts` module using embeddings to suggest project assignments for proposals. Routing suggestions in proposal creation flow. Job handler for async routing.
 - [x] **Goal 2: Conflict Detection Engine** — `src/lib/ai/conflicts.ts` to detect contradictory proposals using semantic analysis. Conflict warnings in UI with explanations. Periodic conflict detection via job queue.
 - [x] **Goal 3: Predictive Deadline Analysis** — `src/lib/ai/deadlines.ts` analyzing historical completion times to suggest realistic deadlines. Deadline suggestions in project creation and "deadline health" indicators.
-- [ ] **Goal 4: Auto-generated Roadmaps** — `src/lib/ai/roadmap.ts` generating project roadmaps from approved proposals. Roadmap API at `/api/projects/[id]/roadmap`.
+- [x] **Goal 4: Auto-generated Roadmaps** — `src/lib/ai/roadmap.ts` generating project roadmaps from approved proposals. Roadmap API at `/api/projects/[id]/roadmap`.
 - [ ] **Goal 5: AI Insights Dashboard** — Admin dashboard at `/admin/ai-insights` showing routing accuracy, conflict detection rates, deadline prediction success, AI recommendation logs.
 
 ## Outcomes
