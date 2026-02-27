@@ -319,34 +319,21 @@ async function getAuthorScore(userId: string | null): Promise<number> {
   if (!userId) return 50;
 
   try {
-    // Get author's proposals and their vote ratios
-    const authorProposals = await db
-      .select({ id: proposals.id })
-      .from(proposals)
-      .where(eq(proposals.userId, userId))
-      .limit(50);
+    // Single aggregated query: join votes with proposals by author
+    const [result] = await db
+      .select({
+        pro: sql<number>`SUM(CASE WHEN ${votes.value} > 0 THEN 1 ELSE 0 END)`,
+        contra: sql<number>`SUM(CASE WHEN ${votes.value} < 0 THEN 1 ELSE 0 END)`,
+      })
+      .from(votes)
+      .innerJoin(proposals, eq(votes.proposalId, proposals.id))
+      .where(eq(proposals.userId, userId));
 
-    if (authorProposals.length === 0) return 50;
-
-    let totalPositive = 0;
-    let totalNegative = 0;
-
-    for (const p of authorProposals) {
-      const [data] = await db
-        .select({
-          pro: sql<number>`SUM(CASE WHEN value > 0 THEN 1 ELSE 0 END)`,
-          contra: sql<number>`SUM(CASE WHEN value < 0 THEN 1 ELSE 0 END)`,
-        })
-        .from(votes)
-        .where(eq(votes.proposalId, p.id));
-
-      totalPositive += Number(data?.pro ?? 0);
-      totalNegative += Number(data?.contra ?? 0);
-    }
-
+    const totalPositive = Number(result?.pro ?? 0);
+    const totalNegative = Number(result?.contra ?? 0);
     const total = totalPositive + totalNegative;
-    if (total === 0) return 50;
 
+    if (total === 0) return 50;
     return Math.round((totalPositive / total) * 100);
   } catch {
     return 50;

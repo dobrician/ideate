@@ -35,7 +35,7 @@ export default async function AdvancedAnalyticsPage() {
   const data = await getAdvancedAnalyticsData();
 
   return (
-    <div className="mx-auto max-w-6xl py-4 sm:py-8">
+    <div className="mx-auto max-w-6xl px-4 py-4 sm:py-8">
       <div className="mb-5 flex items-center gap-3 sm:mb-8">
         <Button variant="ghost" size="sm" asChild>
           <Link href="/admin">
@@ -111,16 +111,16 @@ export default async function AdvancedAnalyticsPage() {
             {data.velocity.fastestGrowing.length === 0 ? (
               <p className="text-sm text-muted-foreground">{t("advancedAnalytics.noData")}</p>
             ) : (
-              <div className="space-y-3">
+              <div className="space-y-2">
                 {data.velocity.fastestGrowing.map((v) => (
-                  <div key={v.proposalId} className="flex items-center justify-between text-sm">
+                  <div key={v.proposalId} className="flex items-center justify-between rounded-md px-2 py-2.5 text-sm transition-colors hover:bg-muted">
                     <div className="min-w-0 flex-1">
                       <p className="truncate font-medium">{v.proposalTitle}</p>
                       <p className="text-xs text-muted-foreground">{v.projectTitle}</p>
                     </div>
                     <div className="ml-3 text-right">
                       <p className="font-mono text-xs">{v.currentRate} {t("advancedAnalytics.votesPerDay")}</p>
-                      <p className="text-xs text-green-600">+{v.acceleration} {t("advancedAnalytics.acceleration")}</p>
+                      <p className="text-xs text-green-600 dark:text-green-400">+{v.acceleration} {t("advancedAnalytics.acceleration")}</p>
                     </div>
                   </div>
                 ))}
@@ -138,7 +138,7 @@ export default async function AdvancedAnalyticsPage() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="mb-4 grid grid-cols-3 gap-3 text-center">
+            <div className="mb-4 grid grid-cols-2 gap-3 text-center sm:grid-cols-3">
               <div>
                 <p className="text-2xl font-bold">{data.social.stats.activeUsers}</p>
                 <p className="text-xs text-muted-foreground">{t("advancedAnalytics.activeUsers")}</p>
