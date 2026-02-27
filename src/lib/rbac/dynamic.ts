@@ -59,29 +59,32 @@ type AclRow = typeof resourceAcls.$inferSelect;
 export async function getApplicableRules(
   userId: string,
   userRole: string,
+  permission?: string,
 ): Promise<RuleRow[]> {
   const now = new Date();
+  const conditions = [
+    eq(permissionRules.active, true),
+    or(
+      isNull(permissionRules.startsAt),
+      lte(permissionRules.startsAt, now),
+    ),
+    or(
+      isNull(permissionRules.expiresAt),
+      gte(permissionRules.expiresAt, now),
+    ),
+    or(
+      and(eq(permissionRules.targetType, "user"), eq(permissionRules.targetId, userId)),
+      and(eq(permissionRules.targetType, "role"), eq(permissionRules.targetId, userRole)),
+      eq(permissionRules.targetType, "all"),
+    ),
+  ];
+  if (permission) {
+    conditions.push(eq(permissionRules.permission, permission));
+  }
   const rows = await db
     .select()
     .from(permissionRules)
-    .where(
-      and(
-        eq(permissionRules.active, true),
-        or(
-          isNull(permissionRules.startsAt),
-          lte(permissionRules.startsAt, now),
-        ),
-        or(
-          isNull(permissionRules.expiresAt),
-          gte(permissionRules.expiresAt, now),
-        ),
-        or(
-          and(eq(permissionRules.targetType, "user"), eq(permissionRules.targetId, userId)),
-          and(eq(permissionRules.targetType, "role"), eq(permissionRules.targetId, userRole)),
-          eq(permissionRules.targetType, "all"),
-        ),
-      ),
-    );
+    .where(and(...conditions));
   return rows;
 }
 
@@ -244,8 +247,8 @@ export async function evaluatePermission(ctx: PermissionContext): Promise<{
     }
   }
 
-  // 2. Check dynamic permission rules
-  const rules = await getApplicableRules(ctx.userId, ctx.userRole);
+  // 2. Check dynamic permission rules (filtered by permission for performance)
+  const rules = await getApplicableRules(ctx.userId, ctx.userRole, ctx.permission);
 
   // Deny rules first
   const denyRule = rules.find(r => r.effect === "deny" && doesRuleApply(r, ctx));
@@ -292,9 +295,8 @@ export async function simulatePermission(ctx: PermissionContext): Promise<{
     ? hasPermission(ctx.userRole as Role, ctx.permission)
     : false;
 
-  const rules = await getApplicableRules(ctx.userId, ctx.userRole);
+  const rules = await getApplicableRules(ctx.userId, ctx.userRole, ctx.permission);
   const matchingRules = rules
-    .filter(r => r.permission === ctx.permission)
     .map(r => ({
       id: r.id,
       name: r.name,

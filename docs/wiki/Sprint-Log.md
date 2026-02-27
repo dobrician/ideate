@@ -39,13 +39,15 @@ Reverse chronological. Click each sprint for full details.
 
 ---
 
-### 📋 [Sprint 56 — Advanced Permissions: Time-based & Dynamic Permission Controls](Sprint-Plan-Advanced) *(planned)*
+### ✅ [Sprint 56 — Advanced Permissions: Time-based & Dynamic Permission Controls](Sprint-56) *(2026-02-27)*
 **Focus:** Time-based rules, dynamic permission evaluation, fine-grained ACLs, permission monitoring, testing tools
+**Stats:** 5/5 goals | 1917 tests
 
 ---
 
-### 📋 [Sprint 55 — Advanced Permissions & Workflow Engine: Custom Stages & Approval Chains](Sprint-Plan-Advanced) *(planned)*
+### ✅ [Sprint 55 — Advanced Permissions & Workflow Engine: Custom Stages & Approval Chains](Sprint-55) *(2026-02-27)*
 **Focus:** Configurable workflow stages, custom stage management, approval chains, conditional permissions
+**Stats:** 5/5 goals | 1871 tests
 
 ---
 

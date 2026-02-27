@@ -42,6 +42,25 @@ export async function createPermissionRuleAction(input: CreateRuleInput, csrfTok
     if (!["grant", "deny"].includes(input.effect)) {
       return { error: "Invalid effect" };
     }
+    if (input.name.length > 255) return { error: "Name too long (max 255)" };
+
+    // Validate JSON fields
+    if (input.schedule) {
+      try {
+        const s = JSON.parse(input.schedule);
+        if (!Array.isArray(s.days) || typeof s.startHour !== "number" || typeof s.endHour !== "number") {
+          return { error: "Invalid schedule format: requires days, startHour, endHour" };
+        }
+      } catch { return { error: "Invalid schedule JSON" }; }
+    }
+    if (input.condition) {
+      try {
+        const c = JSON.parse(input.condition);
+        if (!c.type || !c.operator || c.value === undefined) {
+          return { error: "Invalid condition format: requires type, operator, value" };
+        }
+      } catch { return { error: "Invalid condition JSON" }; }
+    }
 
     const id = randomUUID();
     await db.insert(permissionRules).values({

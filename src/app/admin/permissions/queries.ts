@@ -11,22 +11,21 @@ export async function getResourceAclsList() {
 }
 
 export async function getPermissionRuleStats() {
-  const [totalRules] = await db.select({ count: sql<number>`count(*)` }).from(permissionRules);
-  const [activeRules] = await db
-    .select({ count: sql<number>`count(*)` })
-    .from(permissionRules)
-    .where(eq(permissionRules.active, true));
-  const [totalAcls] = await db.select({ count: sql<number>`count(*)` }).from(resourceAcls);
-  const [denyRules] = await db
-    .select({ count: sql<number>`count(*)` })
-    .from(permissionRules)
-    .where(eq(permissionRules.effect, "deny"));
+  // Consolidated into parallel queries for performance
+  const [[totalRules], [totalAcls], [ruleBreakdown]] = await Promise.all([
+    db.select({ count: sql<number>`count(*)` }).from(permissionRules),
+    db.select({ count: sql<number>`count(*)` }).from(resourceAcls),
+    db.select({
+      active: sql<number>`sum(case when active = 1 then 1 else 0 end)`,
+      deny: sql<number>`sum(case when effect = 'deny' then 1 else 0 end)`,
+    }).from(permissionRules),
+  ]);
 
   return {
     totalRules: totalRules?.count ?? 0,
-    activeRules: activeRules?.count ?? 0,
+    activeRules: ruleBreakdown?.active ?? 0,
     totalAcls: totalAcls?.count ?? 0,
-    denyRules: denyRules?.count ?? 0,
+    denyRules: ruleBreakdown?.deny ?? 0,
   };
 }
 
