@@ -40,8 +40,8 @@ test.describe("Mobile Navigation", () => {
     await page.goto("/dashboard");
     await page.waitForLoadState("domcontentloaded");
 
-    // Check all links have at least 44px tap target
-    const navLinks = page.getByLabel(/mobile/i).first().getByRole("link");
+    // Check bottom nav links have at least 44px tap target
+    const navLinks = page.getByLabel(/mobile navigation/i).getByRole("link");
     const count = await navLinks.count();
 
     for (let i = 0; i < Math.min(count, 5); i++) {

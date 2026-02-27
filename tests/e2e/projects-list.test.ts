@@ -26,12 +26,12 @@ test.describe("Projects List Page", () => {
   test("clicking a project navigates to detail page", async ({ page }) => {
     await page.goto("/projects");
     await page.waitForLoadState("domcontentloaded");
-    // Click the seeded project link
-    const projectLink = page.getByText(/E2E Test Project/).first();
+    // Click the seeded project link (use role=link for reliable click navigation)
+    const projectLink = page.getByRole("link", { name: /E2E Test Project/ }).first();
     await projectLink.click();
-    await page.waitForLoadState("domcontentloaded");
+    await page.waitForURL(/\/projects\/.+/, { timeout: 10000 });
     // Should be on project detail page
-    expect(page.url()).toContain("/projects/");
+    expect(page.url()).toMatch(/\/projects\/.+/);
   });
 
   test("new project button is visible", async ({ page }) => {

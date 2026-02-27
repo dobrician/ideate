@@ -177,7 +177,7 @@ export function Header() {
                 href={item.href}
                 aria-current={isActive ? "page" : undefined}
                 className={cn(
-                  "shrink-0 whitespace-nowrap rounded-md px-3 py-2.5 text-sm font-medium transition-colors duration-150",
+                  "shrink-0 whitespace-nowrap rounded-md px-3 py-3 text-sm font-medium transition-colors duration-150 min-h-[44px] flex items-center",
                   isActive
                     ? "bg-accent text-accent-foreground"
                     : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
