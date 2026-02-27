@@ -17,6 +17,7 @@ import { PerfDashboardPanel } from "./perf-dashboard-panel";
 import { CiBuildTrendsPanel } from "./ci-build-trends";
 import { getRecentCiBuilds, getCiBuildStats, getCiBuildAlertSummary } from "@/lib/ci-builds";
 import { getBundleSizeAnalytics, checkBundleSizeRegression } from "@/lib/bundle-tracker";
+import { getAvailableBranches, compareBranches } from "@/lib/ci-build-comparison";
 
 export default async function PerfDashboardPage() {
   const user = await getCurrentUser();
@@ -44,13 +45,19 @@ export default async function PerfDashboardPage() {
   const tagStats = getTagStats();
   const alertCounts = getAlertCounts();
   const recentAlerts = getAlerts().slice(-10).reverse();
-  const [ciBuilds, ciBuildStats, ciAlertSummary, bundleAnalytics, bundleRegression] = await Promise.all([
+  const [ciBuilds, ciBuildStats, ciAlertSummary, bundleAnalytics, bundleRegression, branches] = await Promise.all([
     getRecentCiBuilds(50),
     getCiBuildStats(50),
     getCiBuildAlertSummary(),
     getBundleSizeAnalytics(),
     checkBundleSizeRegression(),
+    getAvailableBranches(),
   ]);
+
+  // Compare top 2 branches if available
+  const branchComparison = branches.length >= 2
+    ? await compareBranches(branches[0], branches[1])
+    : null;
 
   return (
     <div className="mx-auto max-w-6xl py-4 sm:py-8">
@@ -149,6 +156,97 @@ export default async function PerfDashboardPage() {
               <p className="text-sm text-red-600 dark:text-red-400">{bundleRegression.message}</p>
             </div>
           )}
+        </div>
+      )}
+
+      {/* Branch Comparison */}
+      {branchComparison && (
+        <div className="mt-6 rounded-lg border bg-card">
+          <div className="p-4 border-b">
+            <h2 className="font-semibold">{t("admin.ciBuildComparison")}</h2>
+            <p className="text-xs text-muted-foreground mt-1">{t("admin.ciBuildComparisonDesc")}</p>
+          </div>
+          <div className="p-4">
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+              {/* Branch A */}
+              <div className="rounded-lg border p-4">
+                <h3 className="font-semibold text-sm mb-3">{t("admin.branchA")}: <span className="font-mono">{branchComparison.branchA.branch}</span></h3>
+                <div className="space-y-2 text-sm">
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Builds</span>
+                    <span className="font-medium">{branchComparison.branchA.buildCount}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">{t("admin.buildDuration")}</span>
+                    <span className="font-medium">{(branchComparison.branchA.avgDurationMs / 1000).toFixed(1)}s</span>
+                  </div>
+                  {branchComparison.branchA.avgSizeBytes !== null && (
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">{t("admin.buildSize")}</span>
+                      <span className="font-medium">{(branchComparison.branchA.avgSizeBytes / (1024 * 1024)).toFixed(1)} MB</span>
+                    </div>
+                  )}
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">{t("admin.buildStatus")}</span>
+                    <span className={`font-medium ${branchComparison.branchA.successRate >= 90 ? "text-green-600 dark:text-green-400" : branchComparison.branchA.successRate >= 70 ? "text-amber-600 dark:text-amber-400" : "text-red-600 dark:text-red-400"}`}>
+                      {branchComparison.branchA.successRate}% pass
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Branch B */}
+              <div className="rounded-lg border p-4">
+                <h3 className="font-semibold text-sm mb-3">{t("admin.branchB")}: <span className="font-mono">{branchComparison.branchB.branch}</span></h3>
+                <div className="space-y-2 text-sm">
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Builds</span>
+                    <span className="font-medium">{branchComparison.branchB.buildCount}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">{t("admin.buildDuration")}</span>
+                    <span className="font-medium">{(branchComparison.branchB.avgDurationMs / 1000).toFixed(1)}s</span>
+                  </div>
+                  {branchComparison.branchB.avgSizeBytes !== null && (
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">{t("admin.buildSize")}</span>
+                      <span className="font-medium">{(branchComparison.branchB.avgSizeBytes / (1024 * 1024)).toFixed(1)} MB</span>
+                    </div>
+                  )}
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">{t("admin.buildStatus")}</span>
+                    <span className={`font-medium ${branchComparison.branchB.successRate >= 90 ? "text-green-600 dark:text-green-400" : branchComparison.branchB.successRate >= 70 ? "text-amber-600 dark:text-amber-400" : "text-red-600 dark:text-red-400"}`}>
+                      {branchComparison.branchB.successRate}% pass
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Comparison Summary */}
+            <div className="mt-4 flex flex-wrap gap-3">
+              <div className="rounded-lg border px-3 py-2 text-sm">
+                <span className="text-muted-foreground">{t("admin.durationDiff")}:</span>{" "}
+                <span className={`font-medium ${branchComparison.durationDiffPct > 5 ? "text-red-600 dark:text-red-400" : branchComparison.durationDiffPct < -5 ? "text-green-600 dark:text-green-400" : ""}`}>
+                  {branchComparison.durationDiffPct > 0 ? "+" : ""}{branchComparison.durationDiffPct}%
+                </span>
+              </div>
+              {branchComparison.sizeDiffPct !== null && (
+                <div className="rounded-lg border px-3 py-2 text-sm">
+                  <span className="text-muted-foreground">{t("admin.sizeDiff")}:</span>{" "}
+                  <span className={`font-medium ${branchComparison.sizeDiffPct > 5 ? "text-red-600 dark:text-red-400" : branchComparison.sizeDiffPct < -5 ? "text-green-600 dark:text-green-400" : ""}`}>
+                    {branchComparison.sizeDiffPct > 0 ? "+" : ""}{branchComparison.sizeDiffPct}%
+                  </span>
+                </div>
+              )}
+              <div className="rounded-lg border px-3 py-2 text-sm">
+                <span className="text-muted-foreground">Success Rate Diff:</span>{" "}
+                <span className={`font-medium ${branchComparison.successRateDiff > 0 ? "text-green-600 dark:text-green-400" : branchComparison.successRateDiff < 0 ? "text-red-600 dark:text-red-400" : ""}`}>
+                  {branchComparison.successRateDiff > 0 ? "+" : ""}{branchComparison.successRateDiff}%
+                </span>
+              </div>
+            </div>
+          </div>
         </div>
       )}
 
