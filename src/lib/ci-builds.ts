@@ -98,6 +98,115 @@ export async function getCiBuildStats(limit = 30): Promise<{
   return { count: builds.length, avgDurationMs: avg, minDurationMs: min, maxDurationMs: max, latestDurationMs: latest, trend };
 }
 
+/** Default threshold for CI alert: 3 consecutive regressing builds */
+const DEFAULT_ALERT_CONSECUTIVE = 3;
+
+/** Configurable alert threshold from env */
+export function getCiAlertThreshold(): number {
+  const env = process.env.CI_ALERT_THRESHOLD;
+  if (env) {
+    const parsed = parseInt(env, 10);
+    if (!Number.isNaN(parsed) && parsed >= 2 && parsed <= 20) return parsed;
+  }
+  return DEFAULT_ALERT_CONSECUTIVE;
+}
+
+/**
+ * Check for CI build alerts — detects consecutive regressions.
+ * Returns alert details if recent builds are significantly slower than baseline.
+ */
+export async function checkCiBuildAlerts(): Promise<{
+  alert: boolean;
+  type: "regression" | "failure_streak" | null;
+  message: string | null;
+  details: {
+    consecutiveCount: number;
+    avgRecentMs: number;
+    avgBaselineMs: number;
+    threshold: number;
+  } | null;
+}> {
+  const threshold = getCiAlertThreshold();
+  const builds = await getRecentCiBuilds(threshold * 2 + 5);
+
+  if (builds.length < threshold + 3) {
+    return { alert: false, type: null, message: null, details: null };
+  }
+
+  // Check failure streak
+  const recentBuilds = builds.slice(0, threshold);
+  const failureStreak = recentBuilds.every((b) => b.status === "failure");
+  if (failureStreak) {
+    return {
+      alert: true,
+      type: "failure_streak",
+      message: `CI alert: ${threshold} consecutive build failures detected`,
+      details: {
+        consecutiveCount: threshold,
+        avgRecentMs: 0,
+        avgBaselineMs: 0,
+        threshold,
+      },
+    };
+  }
+
+  // Check duration regression
+  const successfulRecent = recentBuilds.filter((b) => b.status === "success");
+  const baselineBuilds = builds.slice(threshold, threshold * 2).filter((b) => b.status === "success");
+
+  if (successfulRecent.length < threshold || baselineBuilds.length < 2) {
+    return { alert: false, type: null, message: null, details: null };
+  }
+
+  const avgRecent = successfulRecent.reduce((s, b) => s + b.durationMs, 0) / successfulRecent.length;
+  const avgBaseline = baselineBuilds.reduce((s, b) => s + b.durationMs, 0) / baselineBuilds.length;
+
+  // Alert if recent builds are >20% slower than baseline
+  const regressionPct = (avgRecent - avgBaseline) / avgBaseline;
+  if (regressionPct > 0.2) {
+    return {
+      alert: true,
+      type: "regression",
+      message: `CI alert: builds are ${Math.round(regressionPct * 100)}% slower than baseline (${Math.round(avgRecent)}ms vs ${Math.round(avgBaseline)}ms)`,
+      details: {
+        consecutiveCount: threshold,
+        avgRecentMs: Math.round(avgRecent),
+        avgBaselineMs: Math.round(avgBaseline),
+        threshold,
+      },
+    };
+  }
+
+  return { alert: false, type: null, message: null, details: null };
+}
+
+/**
+ * Get CI build alert summary — recent failures, rate, trend, and current alert.
+ */
+export async function getCiBuildAlertSummary(): Promise<{
+  recentFailures: number;
+  totalBuilds: number;
+  failureRate: number;
+  trend: "improving" | "stable" | "regressing" | "insufficient";
+  currentAlert: Awaited<ReturnType<typeof checkCiBuildAlerts>>;
+}> {
+  const [stats, alertCheck] = await Promise.all([
+    getCiBuildStats(30),
+    checkCiBuildAlerts(),
+  ]);
+
+  const builds = await getRecentCiBuilds(30);
+  const recentFailures = builds.filter((b) => b.status === "failure").length;
+
+  return {
+    recentFailures,
+    totalBuilds: stats.count,
+    failureRate: stats.count > 0 ? Math.round((recentFailures / stats.count) * 100) : 0,
+    trend: stats.trend,
+    currentAlert: alertCheck,
+  };
+}
+
 /** Get retention days from env, default 90 */
 export function getCiBuildRetentionDays(): number {
   const env = process.env.CI_BUILD_RETENTION_DAYS;

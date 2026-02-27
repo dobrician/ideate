@@ -15,7 +15,7 @@ import { getTagStats } from "@/lib/cache/tags";
 import { getAlerts, getAlertCounts } from "@/lib/perf-alerts";
 import { PerfDashboardPanel } from "./perf-dashboard-panel";
 import { CiBuildTrendsPanel } from "./ci-build-trends";
-import { getRecentCiBuilds, getCiBuildStats } from "@/lib/ci-builds";
+import { getRecentCiBuilds, getCiBuildStats, getCiBuildAlertSummary } from "@/lib/ci-builds";
 
 export default async function PerfDashboardPage() {
   const user = await getCurrentUser();
@@ -43,9 +43,10 @@ export default async function PerfDashboardPage() {
   const tagStats = getTagStats();
   const alertCounts = getAlertCounts();
   const recentAlerts = getAlerts().slice(-10).reverse();
-  const [ciBuilds, ciBuildStats] = await Promise.all([
+  const [ciBuilds, ciBuildStats, ciAlertSummary] = await Promise.all([
     getRecentCiBuilds(50),
     getCiBuildStats(50),
+    getCiBuildAlertSummary(),
   ]);
 
   return (
@@ -77,6 +78,31 @@ export default async function PerfDashboardPage() {
       <div className="mt-8">
         <CiBuildTrendsPanel builds={ciBuilds} stats={ciBuildStats} />
       </div>
+
+      {/* CI Alert Summary */}
+      {ciAlertSummary.currentAlert.alert && (
+        <div className="mt-4 rounded-lg border border-red-300 bg-red-50 p-4 dark:border-red-800 dark:bg-red-950/30">
+          <div className="flex items-center gap-2 text-red-700 dark:text-red-400">
+            <span className="font-semibold">{t("perfDashboard.ciAlert")}</span>
+          </div>
+          <p className="mt-1 text-sm text-red-600 dark:text-red-300">
+            {ciAlertSummary.currentAlert.message}
+          </p>
+          {ciAlertSummary.currentAlert.details && (
+            <div className="mt-2 flex gap-4 text-xs text-red-500 dark:text-red-400">
+              <span>{t("perfDashboard.ciAlertRecent")}: {ciAlertSummary.currentAlert.details.avgRecentMs}ms</span>
+              <span>{t("perfDashboard.ciAlertBaseline")}: {ciAlertSummary.currentAlert.details.avgBaselineMs}ms</span>
+            </div>
+          )}
+        </div>
+      )}
+      {ciAlertSummary.recentFailures > 0 && !ciAlertSummary.currentAlert.alert && (
+        <div className="mt-4 rounded-lg border border-amber-300 bg-amber-50 p-4 dark:border-amber-800 dark:bg-amber-950/30">
+          <p className="text-sm text-amber-700 dark:text-amber-300">
+            {t("perfDashboard.ciFailures").replace("{count}", String(ciAlertSummary.recentFailures)).replace("{total}", String(ciAlertSummary.totalBuilds))}
+          </p>
+        </div>
+      )}
     </div>
   );
 }

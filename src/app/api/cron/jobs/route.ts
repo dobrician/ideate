@@ -2,7 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { timingSafeEqual } from "crypto";
 import { process as processJobs } from "@/lib/queue";
 import { registerEmbeddingHandlers, enqueueStaleRefresh } from "@/lib/embeddings/jobs";
-import { pruneCiBuilds } from "@/lib/ci-builds";
+import { pruneCiBuilds, checkCiBuildAlerts } from "@/lib/ci-builds";
+import { dispatchToIntegrations } from "@/lib/integrations";
 
 // Register handlers on module load so they're available when processJobs() runs
 registerEmbeddingHandlers();
@@ -43,5 +44,14 @@ export async function POST(request: NextRequest) {
   // Enqueue stale embedding refresh (processed in next run)
   await enqueueStaleRefresh().catch(() => {});
 
-  return NextResponse.json({ ...result, ciBuildsDeleted: ciPruned });
+  // Check for CI build alerts and dispatch notifications
+  const ciAlert = await checkCiBuildAlerts().catch(() => ({ alert: false, message: null }));
+  if (ciAlert.alert && ciAlert.message) {
+    await dispatchToIntegrations("build.completed" as never, {
+      alert: true,
+      message: ciAlert.message,
+    }).catch(() => {});
+  }
+
+  return NextResponse.json({ ...result, ciBuildsDeleted: ciPruned, ciAlert: ciAlert.alert });
 }

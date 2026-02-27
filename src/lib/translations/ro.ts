@@ -1265,6 +1265,10 @@ export const ro: Record<string, string> = {
   "perfDashboard.totalRequests": "Total cereri",
   "perfDashboard.slowestPaths": "Cele mai lente căi",
   "perfDashboard.recentAlerts": "Alerte recente",
+  "perfDashboard.ciAlert": "Alertă Build CI",
+  "perfDashboard.ciAlertRecent": "Media recentă",
+  "perfDashboard.ciAlertBaseline": "Media de referință",
+  "perfDashboard.ciFailures": "{count} build-uri eșuate din {total} build-uri recente",
 
   // CI Build Trends
   "ciBuild.title": "Tendințe Build CI",

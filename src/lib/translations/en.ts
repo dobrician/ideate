@@ -1246,6 +1246,10 @@ export const en: Record<string, string> = {
   "perfDashboard.totalRequests": "Total Requests",
   "perfDashboard.slowestPaths": "Slowest Paths",
   "perfDashboard.recentAlerts": "Recent Alerts",
+  "perfDashboard.ciAlert": "CI Build Alert",
+  "perfDashboard.ciAlertRecent": "Recent avg",
+  "perfDashboard.ciAlertBaseline": "Baseline avg",
+  "perfDashboard.ciFailures": "{count} failed builds out of {total} recent builds",
 
   // CI Build Trends
   "ciBuild.title": "CI Build Trends",

@@ -17,6 +17,11 @@ vi.mock("@/lib/embeddings/jobs", () => ({
 
 vi.mock("@/lib/ci-builds", () => ({
   pruneCiBuilds: vi.fn().mockResolvedValue(0),
+  checkCiBuildAlerts: vi.fn().mockResolvedValue({ alert: false, message: null }),
+}));
+
+vi.mock("@/lib/integrations", () => ({
+  dispatchToIntegrations: vi.fn().mockResolvedValue({ sent: 0, failed: 0 }),
 }));
 
 import { POST } from "@/app/api/cron/jobs/route";
@@ -60,7 +65,7 @@ describe("POST /api/cron/jobs", () => {
     const res = await POST(makeRequest({ authorization: "Bearer test-cron-secret" }));
     expect(res.status).toBe(200);
     const body = await res.json();
-    expect(body).toEqual({ processed: 3, succeeded: 2, failed: 1, ciBuildsDeleted: 0 });
+    expect(body).toEqual({ processed: 3, succeeded: 2, failed: 1, ciBuildsDeleted: 0, ciAlert: false });
     expect(mockProcess).toHaveBeenCalledTimes(1);
   });
 
