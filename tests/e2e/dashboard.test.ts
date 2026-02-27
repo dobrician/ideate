@@ -4,11 +4,8 @@ import { seedTestData, loginAsTestUser, type SeedData } from "./helpers";
 let seed: SeedData;
 
 test.describe("Dashboard — Authenticated", () => {
-  test.beforeAll(async ({ request }) => {
-    seed = await seedTestData(request);
-  });
-
   test.beforeEach(async ({ page }) => {
+    seed = await seedTestData(page.request);
     await loginAsTestUser(page, seed);
   });
 

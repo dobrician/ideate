@@ -460,6 +460,7 @@ export const en: Record<string, string> = {
   // Search
   "nav.mainNavigation": "Main navigation",
   "nav.mobileNavigation": "Mobile navigation",
+  "nav.mobilePageLinks": "Mobile page links",
 
   // Search
   "search.placeholder": "Search projects & proposals...",

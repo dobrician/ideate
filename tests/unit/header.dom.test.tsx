@@ -22,6 +22,7 @@ vi.mock("@/lib/use-locale", () => ({
         "nav.signOut": "Sign Out",
         "nav.mainNavigation": "Main navigation",
         "nav.mobileNavigation": "Mobile navigation",
+        "nav.mobilePageLinks": "Mobile page links",
         "theme.toggle": "Toggle theme",
         "search.placeholder": "Search projects & proposals...",
         "locale.switchToRo": "Switch to Romanian",
@@ -111,7 +112,7 @@ describe("Header", () => {
       mockFetchResponse(null, false);
       await renderHeader();
 
-      const mobileNav = screen.getByRole("navigation", { name: "Mobile navigation" });
+      const mobileNav = screen.getByRole("navigation", { name: "Mobile page links" });
       expect(mobileNav).toBeInTheDocument();
 
       const dashLink = mobileNav.querySelector('a[href="/dashboard"]');
@@ -125,7 +126,7 @@ describe("Header", () => {
       mockFetchResponse(null, false);
       await renderHeader();
 
-      const mobileNav = screen.getByRole("navigation", { name: "Mobile navigation" });
+      const mobileNav = screen.getByRole("navigation", { name: "Mobile page links" });
       const dashLink = mobileNav.querySelector('a[href="/dashboard"]');
       expect(dashLink).toHaveAttribute("aria-current", "page");
     });
@@ -147,7 +148,7 @@ describe("Header", () => {
       await renderHeader();
 
       await waitFor(() => {
-        const mobileNav = screen.getByRole("navigation", { name: "Mobile navigation" });
+        const mobileNav = screen.getByRole("navigation", { name: "Mobile page links" });
         expect(mobileNav.querySelector('a[href="/admin"]')).toBeInTheDocument();
       });
     });

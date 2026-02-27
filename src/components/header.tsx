@@ -167,7 +167,7 @@ export function Header() {
         </div>
       </div>
 
-      <nav className="border-t md:hidden" aria-label={t("nav.mobileNavigation")}>
+      <nav className="border-t md:hidden" aria-label={t("nav.mobilePageLinks")}>
         <div className="mx-auto flex max-w-7xl items-center gap-1 overflow-x-auto px-4 py-1">
           {allNavItems.map((item) => {
             const isActive = pathname.startsWith(item.href);

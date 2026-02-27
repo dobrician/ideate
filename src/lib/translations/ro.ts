@@ -479,6 +479,7 @@ export const ro: Record<string, string> = {
   // Search
   "nav.mainNavigation": "Navigare principală",
   "nav.mobileNavigation": "Navigare mobilă",
+  "nav.mobilePageLinks": "Legături pagini mobile",
 
   // Search
   "search.placeholder": "Caută proiecte și propuneri...",
