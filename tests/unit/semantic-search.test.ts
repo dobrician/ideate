@@ -9,6 +9,7 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 const mockFtsSearch = vi.fn().mockReturnValue([]);
 vi.mock("@/lib/search", () => ({
   search: (...args: unknown[]) => mockFtsSearch(...args),
+  getRrfK: () => 60,
 }));
 
 const mockGenerateEmbedding = vi.fn().mockResolvedValue({

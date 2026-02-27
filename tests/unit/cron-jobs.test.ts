@@ -12,6 +12,11 @@ const { mockRegisterEmbeddingHandlers } = vi.hoisted(() => ({
 }));
 vi.mock("@/lib/embeddings/jobs", () => ({
   registerEmbeddingHandlers: () => mockRegisterEmbeddingHandlers(),
+  enqueueStaleRefresh: vi.fn().mockResolvedValue(undefined),
+}));
+
+vi.mock("@/lib/ci-builds", () => ({
+  pruneCiBuilds: vi.fn().mockResolvedValue(0),
 }));
 
 import { POST } from "@/app/api/cron/jobs/route";
@@ -55,7 +60,7 @@ describe("POST /api/cron/jobs", () => {
     const res = await POST(makeRequest({ authorization: "Bearer test-cron-secret" }));
     expect(res.status).toBe(200);
     const body = await res.json();
-    expect(body).toEqual({ processed: 3, succeeded: 2, failed: 1 });
+    expect(body).toEqual({ processed: 3, succeeded: 2, failed: 1, ciBuildsDeleted: 0 });
     expect(mockProcess).toHaveBeenCalledTimes(1);
   });
 

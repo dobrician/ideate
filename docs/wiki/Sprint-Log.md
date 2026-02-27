@@ -30,6 +30,12 @@ Reverse chronological. Click each sprint for full details.
 
 ---
 
+### ✅ [Sprint 67 — Search Quality, Embedding Freshness, CI Retention, E2E Flows & WCAG AAA 100%](Sprint-67) *(2026-02-27)*
+**Focus:** Hybrid search RRF tuning with quality feedback, embedding freshness tracking with auto-regeneration, CI build retention cron, E2E expansion (project/voting/admin), WCAG AAA 100%
+**Stats:** 5/5 goals | 2715 tests (+45) + 165 E2E (+20) | Audit: low risk, WCAG AAA 100%
+
+---
+
 ### ✅ [Sprint 66 — Search UX, Embedding Config, CI Trends, E2E Expansion & WCAG AAA 95%](Sprint-66) *(2026-02-27)*
 **Focus:** Semantic search UI polish (scores, response time, method labels), embedding admin config page, CI build timing trends with trend detection, E2E test expansion (search/admin/projects), WCAG AAA 95% (forced-colors, focus indicators, ARIA progressbar)
 **Stats:** 5/5 goals | 2670 tests (+31) + 30 E2E (+14) | Audit: low risk, 95% WCAG AAA
