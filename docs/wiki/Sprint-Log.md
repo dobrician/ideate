@@ -30,6 +30,12 @@ Reverse chronological. Click each sprint for full details.
 
 ---
 
+### ✅ [Sprint 66 — Search UX, Embedding Config, CI Trends, E2E Expansion & WCAG AAA 95%](Sprint-66) *(2026-02-27)*
+**Focus:** Semantic search UI polish (scores, response time, method labels), embedding admin config page, CI build timing trends with trend detection, E2E test expansion (search/admin/projects), WCAG AAA 95% (forced-colors, focus indicators, ARIA progressbar)
+**Stats:** 5/5 goals | 2670 tests (+31) + 30 E2E (+14) | Audit: low risk, 95% WCAG AAA
+
+---
+
 ### ✅ [Sprint 65 — Observability & Search: CI Metrics, Query Profiling, WCAG AAA, Embeddings & E2E](Sprint-65) *(2026-02-27)*
 **Focus:** CI build metrics + artifact fix, query profiling expansion (16 queries), WCAG AAA high contrast + aria-keyshortcuts, semantic search embedding wiring, admin + search E2E tests
 **Stats:** 5/5 goals | 2639 tests (+30) + 16 E2E | Audit: low risk, 90% WCAG AAA
