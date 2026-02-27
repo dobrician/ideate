@@ -30,6 +30,12 @@ Reverse chronological. Click each sprint for full details.
 
 ---
 
+### ✅ [Sprint 68 — Search Analytics Dashboard, Embedding Model Upgrades, CI Alerting, E2E & Performance Profiling](Sprint-68) *(2026-02-27)*
+**Focus:** Search feedback analytics dashboard, embedding model migration path, CI build alerting with notifications, E2E expansion (search/embedding/mobile), performance profiling and bundle tracking
+**Stats:** 5/5 goals | 2755 tests (+40) + 183 E2E (+18) | Audit: low risk
+
+---
+
 ### ✅ [Sprint 67 — Search Quality, Embedding Freshness, CI Retention, E2E Flows & WCAG AAA 100%](Sprint-67) *(2026-02-27)*
 **Focus:** Hybrid search RRF tuning with quality feedback, embedding freshness tracking with auto-regeneration, CI build retention cron, E2E expansion (project/voting/admin), WCAG AAA 100%
 **Stats:** 5/5 goals | 2715 tests (+45) + 165 E2E (+20) | Audit: low risk, WCAG AAA 100%
