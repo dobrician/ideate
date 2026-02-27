@@ -6,7 +6,7 @@
 
 import { db } from "@/db";
 import { embeddings, projects, proposals } from "@/db/schema";
-import { eq, and, count } from "drizzle-orm";
+import { eq, and, count, lte, sql } from "drizzle-orm";
 import { logger } from "@/lib/logger";
 
 const log = logger.child({ module: "embeddings" });
@@ -231,6 +231,67 @@ export async function findSimilar(
   return scored;
 }
 
+/** Get max embedding age in days from env, default 30 */
+export function getEmbeddingMaxAgeDays(): number {
+  const env = process.env.EMBEDDING_MAX_AGE_DAYS;
+  if (env) {
+    const parsed = parseInt(env, 10);
+    if (!Number.isNaN(parsed) && parsed > 0) return parsed;
+  }
+  return 30;
+}
+
+/**
+ * Get stale embeddings — embeddings whose updatedAt is older than maxAgeDays.
+ */
+export async function getStaleEmbeddings(
+  maxAgeDays?: number,
+  limit = 50
+): Promise<Array<{ id: string; entityType: string; entityId: string; updatedAt: Date | null }>> {
+  const ageDays = maxAgeDays ?? getEmbeddingMaxAgeDays();
+  const cutoff = new Date(Date.now() - ageDays * 86400 * 1000);
+
+  return db
+    .select({
+      id: embeddings.id,
+      entityType: embeddings.entityType,
+      entityId: embeddings.entityId,
+      updatedAt: embeddings.updatedAt,
+    })
+    .from(embeddings)
+    .where(lte(embeddings.updatedAt, cutoff))
+    .limit(limit);
+}
+
+/**
+ * Get embedding freshness statistics.
+ */
+export async function getEmbeddingFreshnessStats(): Promise<{
+  fresh: number;
+  stale: number;
+  avgAgeDays: number;
+}> {
+  const maxAgeDays = getEmbeddingMaxAgeDays();
+  const cutoff = Math.floor(Date.now() / 1000) - maxAgeDays * 86400;
+
+  const [stats] = await db
+    .select({
+      total: sql<number>`COUNT(*)`.as("total"),
+      staleCount: sql<number>`SUM(CASE WHEN ${embeddings.updatedAt} <= ${cutoff} THEN 1 ELSE 0 END)`.as("stale_count"),
+      avgAge: sql<number>`ROUND(AVG((unixepoch() - ${embeddings.updatedAt}) / 86400.0), 1)`.as("avg_age"),
+    })
+    .from(embeddings);
+
+  const total = stats?.total ?? 0;
+  const stale = stats?.staleCount ?? 0;
+
+  return {
+    fresh: total - stale,
+    stale,
+    avgAgeDays: stats?.avgAge ?? 0,
+  };
+}
+
 /**
  * Get embedding coverage statistics by entity type and model.
  */
@@ -241,11 +302,13 @@ export async function getEmbeddingStats(): Promise<{
   entityTotals: Record<string, number>;
   apiAvailable: boolean;
   activeModel: string;
+  freshness: { fresh: number; stale: number; avgAgeDays: number };
 }> {
-  const [rows, [projectCount], [proposalCount]] = await Promise.all([
+  const [rows, [projectCount], [proposalCount], freshness] = await Promise.all([
     db.select({ entityType: embeddings.entityType, model: embeddings.model }).from(embeddings),
     db.select({ count: count() }).from(projects),
     db.select({ count: count() }).from(proposals),
+    getEmbeddingFreshnessStats(),
   ]);
 
   const byType: Record<string, number> = {};
@@ -266,6 +329,7 @@ export async function getEmbeddingStats(): Promise<{
     },
     apiAvailable: isEmbeddingApiAvailable(),
     activeModel: isEmbeddingApiAvailable() ? OPENAI_EMBEDDING_MODEL : "tfidf",
+    freshness,
   };
 }
 

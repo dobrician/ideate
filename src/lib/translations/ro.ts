@@ -356,6 +356,12 @@ export const ro: Record<string, string> = {
   "admin.embeddingModelInfo": "Informații model",
   "admin.embeddingLocalDesc": "Embeddings locale TF-IDF (256 dimensiuni, nu necesită cheie API)",
   "admin.embeddingOpenaiDesc": "OpenAI {model} (precizie ridicată, necesită cheie API)",
+  "admin.embeddingFreshness": "Prospețimea Embedding-urilor",
+  "admin.embeddingFresh": "Proaspete",
+  "admin.embeddingStale": "Vechi",
+  "admin.embeddingAvgAge": "Vârsta Medie",
+  "admin.embeddingDays": "zile",
+  "admin.embeddingStaleWarning": "{count} embedding-uri sunt vechi și vor fi regenerate la următorul cron.",
 
   // Auth
   "auth.signIn": "Autentifică-te pe Ideate",

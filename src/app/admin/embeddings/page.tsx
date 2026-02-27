@@ -13,6 +13,8 @@ import {
   AlertTriangle,
   Layers,
   Brain,
+  Clock,
+  RefreshCw,
 } from "lucide-react";
 import { getTranslations } from "@/lib/i18n-server";
 import { getEmbeddingStats } from "@/lib/embeddings";
@@ -198,6 +200,51 @@ export default async function EmbeddingsPage() {
             )}
           </div>
         </div>
+      </div>
+
+      {/* Freshness Stats */}
+      <div className="mt-6 rounded-lg border bg-card">
+        <div className="p-4 border-b">
+          <h2 className="font-semibold flex items-center gap-2">
+            <Clock className="h-4 w-4" />
+            {t("admin.embeddingFreshness")}
+          </h2>
+        </div>
+        <div className="grid grid-cols-1 gap-4 p-4 sm:grid-cols-3">
+          <div className="rounded-lg border p-3">
+            <div className="text-sm text-muted-foreground mb-1 flex items-center gap-1">
+              <CheckCircle2 className="h-3 w-3 text-green-500" />
+              {t("admin.embeddingFresh")}
+            </div>
+            <div className="text-xl font-bold text-green-600 dark:text-green-400">
+              {stats.freshness.fresh}
+            </div>
+          </div>
+          <div className="rounded-lg border p-3">
+            <div className="text-sm text-muted-foreground mb-1 flex items-center gap-1">
+              <RefreshCw className="h-3 w-3 text-amber-500" />
+              {t("admin.embeddingStale")}
+            </div>
+            <div className={`text-xl font-bold ${stats.freshness.stale > 0 ? "text-amber-600 dark:text-amber-400" : ""}`}>
+              {stats.freshness.stale}
+            </div>
+          </div>
+          <div className="rounded-lg border p-3">
+            <div className="text-sm text-muted-foreground mb-1">
+              {t("admin.embeddingAvgAge")}
+            </div>
+            <div className="text-xl font-bold">
+              {stats.freshness.avgAgeDays} {t("admin.embeddingDays")}
+            </div>
+          </div>
+        </div>
+        {stats.freshness.stale > 0 && (
+          <div className="px-4 pb-4">
+            <p className="text-sm text-amber-600 dark:text-amber-400">
+              {t("admin.embeddingStaleWarning").replace("{count}", String(stats.freshness.stale))}
+            </p>
+          </div>
+        )}
       </div>
 
       {/* Model Information */}

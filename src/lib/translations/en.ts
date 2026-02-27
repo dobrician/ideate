@@ -346,6 +346,12 @@ export const en: Record<string, string> = {
   "admin.embeddingModelInfo": "Model Information",
   "admin.embeddingLocalDesc": "TF-IDF local embeddings (256 dimensions, no API key required)",
   "admin.embeddingOpenaiDesc": "OpenAI {model} (high accuracy, requires API key)",
+  "admin.embeddingFreshness": "Embedding Freshness",
+  "admin.embeddingFresh": "Fresh",
+  "admin.embeddingStale": "Stale",
+  "admin.embeddingAvgAge": "Average Age",
+  "admin.embeddingDays": "days",
+  "admin.embeddingStaleWarning": "{count} embeddings are stale and will be regenerated in the next cron run.",
 
   // Auth
   "auth.signIn": "Sign in to Ideate",

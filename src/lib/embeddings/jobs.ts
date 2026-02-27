@@ -6,7 +6,7 @@
 import { db } from "@/db";
 import { projects, proposals, comments } from "@/db/schema";
 import { eq } from "drizzle-orm";
-import { generateEmbedding, storeEmbedding } from "@/lib/embeddings";
+import { generateEmbedding, storeEmbedding, getStaleEmbeddings } from "@/lib/embeddings";
 import { registerHandler, enqueue } from "@/lib/queue";
 import { logger } from "@/lib/logger";
 
@@ -80,6 +80,7 @@ async function handleGenerateEmbedding(
  */
 export function registerEmbeddingHandlers(): void {
   registerHandler("generate_embedding", handleGenerateEmbedding);
+  registerHandler("refresh_stale_embeddings", handleRefreshStale);
 }
 
 /**
@@ -90,4 +91,26 @@ export async function enqueueEmbedding(
   entityId: string
 ): Promise<string> {
   return enqueue("generate_embedding", { entityType, entityId });
+}
+
+/**
+ * Job handler: find and re-enqueue stale embeddings for regeneration.
+ */
+async function handleRefreshStale(): Promise<void> {
+  const stale = await getStaleEmbeddings();
+  log.info({ count: stale.length }, "Found stale embeddings for regeneration");
+
+  for (const entry of stale) {
+    await enqueue("generate_embedding", {
+      entityType: entry.entityType,
+      entityId: entry.entityId,
+    });
+  }
+}
+
+/**
+ * Enqueue a stale embedding refresh job.
+ */
+export async function enqueueStaleRefresh(): Promise<string> {
+  return enqueue("refresh_stale_embeddings", {});
 }
