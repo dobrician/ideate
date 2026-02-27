@@ -24,13 +24,15 @@ Reverse chronological. Click each sprint for full details.
 
 ---
 
-### 📋 [Sprint 59 — Search & Discovery: Advanced Features & Integration](Sprint-Plan-Advanced) *(planned)*
+### ✅ [Sprint 59 — Search & Discovery: Advanced Features & Integration](Sprint-59) *(2026-02-27)*
 **Focus:** Advanced filters, federated cross-entity search, search analytics, smart suggestions, search API
+**Stats:** 5/5 goals | 2116 tests
 
 ---
 
-### 📋 [Sprint 58 — AI Lifecycle Management: Advanced AI Features & Learning Systems](Sprint-Plan-Advanced) *(planned)*
-**Focus:** AI feedback learning, advanced predictions, automated insights, smart notifications, model management
+### ✅ [Sprint 58 — AI Lifecycle Management: Advanced AI Features & Learning Systems](Sprint-58) *(2026-02-27)*
+**Focus:** AI feedback learning, automated insights, smart notifications, model management, CI build recovery
+**Stats:** 5/5 goals | 1963 tests
 
 ---
 
