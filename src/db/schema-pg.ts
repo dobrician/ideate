@@ -312,6 +312,44 @@ export const approvalRecords = pgTable("approval_records", {
   createdAt: ts(),
 });
 
+// ─── Permission Rules ───────────────────────────────────────────────────
+
+export const permissionRules = pgTable("permission_rules", {
+  id: pk(),
+  name: text("name").notNull(),
+  description: text("description"),
+  ruleType: text("rule_type", { enum: ["time_expiry", "schedule", "deadline", "condition"] }).notNull(),
+  targetType: text("target_type", { enum: ["user", "role", "all"] }).notNull(),
+  targetId: text("target_id"),
+  permission: text("permission").notNull(),
+  effect: text("effect", { enum: ["grant", "deny"] }).notNull().default("grant"),
+  startsAt: timestamp("starts_at"),
+  expiresAt: timestamp("expires_at"),
+  schedule: text("schedule"),
+  condition: text("condition"),
+  entityType: text("entity_type", { enum: ["project", "proposal"] }),
+  entityId: text("entity_id"),
+  active: boolean("active").notNull().default(true),
+  createdBy: text("created_by").references(() => users.id, { onDelete: "set null" }),
+  createdAt: ts(), updatedAt: tsUp(),
+});
+
+// ─── Resource ACLs ──────────────────────────────────────────────────────
+
+export const resourceAcls = pgTable("resource_acls", {
+  id: pk(),
+  entityType: text("entity_type", { enum: ["project", "proposal"] }).notNull(),
+  entityId: text("entity_id").notNull(),
+  granteeType: text("grantee_type", { enum: ["user", "role"] }).notNull(),
+  granteeId: text("grantee_id").notNull(),
+  permission: text("permission").notNull(),
+  effect: text("effect", { enum: ["grant", "deny"] }).notNull().default("grant"),
+  expiresAt: timestamp("expires_at"),
+  grantedBy: text("granted_by").references(() => users.id, { onDelete: "set null" }),
+  reason: text("reason"),
+  createdAt: ts(),
+});
+
 // ─── Embeddings ──────────────────────────────────────────────────────────
 
 export const embeddings = pgTable("embeddings", {

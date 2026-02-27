@@ -313,3 +313,41 @@ export const approvalRecords = sqliteTable("approval_records", {
   comment: text("comment"),
   createdAt: ts(),
 });
+
+// ─── Permission Rules ───────────────────────────────────────────────────
+
+export const permissionRules = sqliteTable("permission_rules", {
+  id: pk(),
+  name: text("name").notNull(),
+  description: text("description"),
+  ruleType: text("rule_type", { enum: ["time_expiry", "schedule", "deadline", "condition"] }).notNull(),
+  targetType: text("target_type", { enum: ["user", "role", "all"] }).notNull(),
+  targetId: text("target_id"),
+  permission: text("permission").notNull(),
+  effect: text("effect", { enum: ["grant", "deny"] }).notNull().default("grant"),
+  startsAt: integer("starts_at", { mode: "timestamp" }),
+  expiresAt: integer("expires_at", { mode: "timestamp" }),
+  schedule: text("schedule"), // JSON
+  condition: text("condition"), // JSON
+  entityType: text("entity_type", { enum: ["project", "proposal"] }),
+  entityId: text("entity_id"),
+  active: integer("active", { mode: "boolean" }).notNull().default(true),
+  createdBy: text("created_by").references(() => users.id, { onDelete: "set null" }),
+  createdAt: ts(), updatedAt: tsUp(),
+});
+
+// ─── Resource ACLs ──────────────────────────────────────────────────────
+
+export const resourceAcls = sqliteTable("resource_acls", {
+  id: pk(),
+  entityType: text("entity_type", { enum: ["project", "proposal"] }).notNull(),
+  entityId: text("entity_id").notNull(),
+  granteeType: text("grantee_type", { enum: ["user", "role"] }).notNull(),
+  granteeId: text("grantee_id").notNull(),
+  permission: text("permission").notNull(),
+  effect: text("effect", { enum: ["grant", "deny"] }).notNull().default("grant"),
+  expiresAt: integer("expires_at", { mode: "timestamp" }),
+  grantedBy: text("granted_by").references(() => users.id, { onDelete: "set null" }),
+  reason: text("reason"),
+  createdAt: ts(),
+});

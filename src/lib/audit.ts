@@ -35,7 +35,12 @@ type AuditAction =
   | "workflow.delete"
   | "workflow.assign"
   | "workflow.advance"
-  | "workflow.reject";
+  | "workflow.reject"
+  | "permission_rule.create"
+  | "permission_rule.update"
+  | "permission_rule.delete"
+  | "acl.grant"
+  | "acl.revoke";
 
 type AuditEntity =
   | "project"
@@ -49,7 +54,9 @@ type AuditEntity =
   | "tag"
   | "team"
   | "custom_role"
-  | "workflow";
+  | "workflow"
+  | "permission_rule"
+  | "resource_acl";
 
 interface AuditEntry {
   userId: string | null;
