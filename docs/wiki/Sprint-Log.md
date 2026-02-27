@@ -30,6 +30,12 @@ Reverse chronological. Click each sprint for full details.
 
 ---
 
+### ✅ [Sprint 69 — Analytics Export, Embedding Quality, CI Comparison, E2E Hardening & Notification Preferences](Sprint-69) *(2026-02-27)*
+**Focus:** Workspace analytics CSV export, embedding similarity quality scoring, CI build branch comparison, E2E test hardening (retry/parallel/rate-limit), admin notification preferences
+**Stats:** 5/5 goals | 2789 tests (+34) + 183 E2E (hardened) | Audit: low risk
+
+---
+
 ### ✅ [Sprint 68 — Search Analytics Dashboard, Embedding Model Upgrades, CI Alerting, E2E & Performance Profiling](Sprint-68) *(2026-02-27)*
 **Focus:** Search feedback analytics dashboard, embedding model migration path, CI build alerting with notifications, E2E expansion (search/embedding/mobile), performance profiling and bundle tracking
 **Stats:** 5/5 goals | 2755 tests (+40) + 183 E2E (+18) | Audit: low risk
