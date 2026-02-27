@@ -137,7 +137,14 @@ export default async function EmbeddingsPage() {
                     <div className="text-sm text-muted-foreground">{coverageLabel(type)}</div>
                   </div>
                   <div className="flex items-center gap-3">
-                    <div className="w-24 h-2 rounded-full bg-muted overflow-hidden">
+                    <div
+                      className="w-24 h-2 rounded-full bg-muted overflow-hidden"
+                      role="progressbar"
+                      aria-valuenow={pct}
+                      aria-valuemin={0}
+                      aria-valuemax={100}
+                      aria-label={`${type === "project" ? t("admin.embeddingProjects") : t("admin.embeddingProposals")} ${t("admin.embeddingCoverage")}: ${pct}%`}
+                    >
                       <div
                         className={`h-full rounded-full transition-all ${
                           pct >= 80 ? "bg-green-500" : pct >= 40 ? "bg-amber-500" : "bg-red-500"

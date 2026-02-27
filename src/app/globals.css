@@ -132,4 +132,63 @@
   .skeleton {
     background: GrayText;
   }
+  /* Search dropdown and listbox */
+  [role="listbox"] {
+    border: 2px solid ButtonText;
+  }
+  [role="option"][aria-selected="true"] {
+    outline: 2px solid Highlight;
+    outline-offset: -2px;
+  }
+  /* Form inputs */
+  input,
+  textarea,
+  select {
+    border: 1px solid ButtonText;
+  }
+  input:focus,
+  textarea:focus,
+  select:focus {
+    outline: 2px solid Highlight;
+  }
+  /* Progress bars */
+  [role="progressbar"],
+  .progress-bar {
+    border: 1px solid ButtonText;
+  }
+  /* Links: ensure underline visibility */
+  a {
+    text-decoration: underline;
+  }
+  /* Dialog overlays */
+  [role="dialog"] {
+    border: 2px solid ButtonText;
+  }
+  /* Radio group items */
+  [role="radio"][aria-checked="true"] {
+    outline: 2px solid Highlight;
+    outline-offset: -1px;
+  }
+  /* Tab panels */
+  [role="tabpanel"] {
+    border: 1px solid ButtonText;
+  }
+  [role="tab"][aria-selected="true"] {
+    outline: 2px solid Highlight;
+  }
+}
+
+/* WCAG AAA: enhanced focus indicators */
+@layer base {
+  /* Ensure 3px focus ring on all focusable elements */
+  :focus-visible {
+    outline: 3px solid var(--ring);
+    outline-offset: 2px;
+  }
+  /* Cards as links: focus ring */
+  a[data-slot="card"]:focus-visible,
+  [data-slot="card"]:has(> a:focus-visible) {
+    outline: 3px solid var(--ring);
+    outline-offset: 2px;
+  }
 }
