@@ -1,4 +1,24 @@
 # Changelog
+## [Unreleased]
+
+### Sprint 60 — Performance & Scale: Advanced Caching & Optimization
+- Configurable TTL tiers (5 tiers) with entity-type mapping for 14+ data types
+- Tag-based cache invalidation with bidirectional index (tag->keys, key->tags)
+- Cache warming system with registered warmers, batch and single-key operations
+- HTTP cache header utilities with 5 policies (static/apiPublic/apiPrivate/page/none)
+- ETag generation with conditional request support (If-None-Match/304)
+- CDN-ready static asset headers (immutable 1-year for JS/CSS)
+- Query result caching decorator with automatic TTL and tag association
+- Prepared statement metadata tracking with LRU eviction
+- Enhanced connection pool stats (peak active, total acquired/released)
+- Performance budgets with Core Web Vitals thresholds
+- Client-side Web Vitals collection via sendBeacon
+- Unified performance monitoring dashboard at /admin/perf-dashboard
+- Web Vitals collection API (POST/GET) with P75 summary
+- Performance alerting with configurable warning/critical thresholds
+- Prefix-based bulk cache invalidation
+- 22 new EN/RO translation keys
+
 ## [1.2.0] — 2026-02-22
 
 ### Sprint 52 — Advanced Search & Discovery

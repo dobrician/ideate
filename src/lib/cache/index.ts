@@ -221,3 +221,8 @@ export function resetCacheStats(): void {
   cacheStats.redisHits = 0;
   cacheStats.redisMisses = 0;
 }
+
+/** Get all keys currently stored in the in-memory L1 cache. */
+export function getMemoryKeys(): string[] {
+  return Array.from(memStore.keys());
+}

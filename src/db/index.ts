@@ -49,9 +49,11 @@ function syncPoolStats(): void {
 }
 
 export function acquireReadConnection(): InstanceType<typeof Database> {
+  totalAcquired++;
   const conn = readPool.pop();
   if (conn) {
     poolInUse.add(conn);
+    if (poolInUse.size + 1 > peakActive) peakActive = poolInUse.size + 1;
     syncPoolStats();
     return conn;
   }
@@ -61,16 +63,25 @@ export function acquireReadConnection(): InstanceType<typeof Database> {
 
 export function releaseReadConnection(conn: InstanceType<typeof Database>): void {
   if (conn === sqlite) return;
+  totalReleased++;
   poolInUse.delete(conn);
   readPool.push(conn);
   syncPoolStats();
 }
 
+let totalAcquired = 0;
+let totalReleased = 0;
+let peakActive = 0;
+
 export function getPoolStats() {
+  const active = poolInUse.size + 1;
   return {
     maxConnections: MAX_POOL_SIZE + 1,
-    activeConnections: poolInUse.size + 1,
+    activeConnections: active,
     idleConnections: readPool.length,
+    totalAcquired,
+    totalReleased,
+    peakActive,
   };
 }
 

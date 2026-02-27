@@ -5,7 +5,7 @@ import { hasPermission } from "@/lib/rbac";
 import type { Role } from "@/lib/rbac";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Users, FolderOpen, Lightbulb, ThumbsUp, ShieldX, BarChart3, Gauge, Activity, TrendingUp, GitBranch, Shield, Search } from "lucide-react";
+import { Users, FolderOpen, Lightbulb, ThumbsUp, ShieldX, BarChart3, Gauge, Activity, TrendingUp, GitBranch, Shield, Search, Zap } from "lucide-react";
 import { UserRoleManager } from "./user-role-manager";
 import { AuditLog } from "./audit-log";
 import { InvitationPanel } from "./invitation-panel";
@@ -68,6 +68,9 @@ export default async function AdminPage() {
           </Button>
           <Button variant="outline" asChild>
             <Link href="/admin/search-analytics"><Search className="mr-1.5 h-4 w-4" />{t("admin.searchAnalytics")}</Link>
+          </Button>
+          <Button variant="outline" asChild>
+            <Link href="/admin/perf-dashboard"><Zap className="mr-1.5 h-4 w-4" />{t("perfDashboard.title")}</Link>
           </Button>
         </div>
       </div>
