@@ -29,12 +29,37 @@ export interface WsTypingMessage {
   channel: string;
 }
 
+export interface WsEditMessage {
+  type: "edit";
+  channel: string;
+  docId: string;
+  operation: string;
+  revision: number;
+}
+
+export interface WsCursorMessage {
+  type: "cursor";
+  channel: string;
+  docId: string;
+  position: number;
+  selectionEnd?: number;
+}
+
+export interface WsActivityMessage {
+  type: "activity";
+  channel: string;
+  activity: "editing" | "reviewing" | "idle";
+}
+
 export type WsClientMessage =
   | WsAuthMessage
   | WsPingMessage
   | WsSubscribeMessage
   | WsUnsubscribeMessage
-  | WsTypingMessage;
+  | WsTypingMessage
+  | WsEditMessage
+  | WsCursorMessage
+  | WsActivityMessage;
 
 // ─── Server → Client Messages ───────────────────────────────────────
 
@@ -113,6 +138,45 @@ export interface WsProjectUpdateMessage {
   };
 }
 
+/** Remote edit broadcast */
+export interface WsEditBroadcast {
+  type: "edit_broadcast";
+  channel: string;
+  docId: string;
+  operation: string;
+  revision: number;
+  userId: string;
+  userName?: string;
+}
+
+/** Server edit acknowledgement */
+export interface WsEditAckBroadcast {
+  type: "edit_ack";
+  channel: string;
+  docId: string;
+  revision: number;
+}
+
+/** Remote cursor broadcast */
+export interface WsCursorBroadcast {
+  type: "cursor_broadcast";
+  channel: string;
+  docId: string;
+  userId: string;
+  userName?: string;
+  position: number;
+  selectionEnd?: number;
+}
+
+/** Activity status broadcast */
+export interface WsActivityBroadcast {
+  type: "activity_broadcast";
+  channel: string;
+  userId: string;
+  userName?: string;
+  activity: "editing" | "reviewing" | "idle";
+}
+
 export type WsServerMessage =
   | WsPongMessage
   | WsAuthOkMessage
@@ -123,7 +187,11 @@ export type WsServerMessage =
   | WsVoteUpdateMessage
   | WsPresenceMessage
   | WsTypingBroadcast
-  | WsProjectUpdateMessage;
+  | WsProjectUpdateMessage
+  | WsEditBroadcast
+  | WsEditAckBroadcast
+  | WsCursorBroadcast
+  | WsActivityBroadcast;
 
 // ─── Channel helpers ─────────────────────────────────────────────────
 

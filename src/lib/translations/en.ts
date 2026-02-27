@@ -1113,4 +1113,17 @@ export const en: Record<string, string> = {
   "permissions.matchingAcls": "Matching ACLs",
   "permissions.applies": "Applies",
   "permissions.doesNotApply": "Does not apply",
+
+  // Collaboration
+  "collaboration.connected": "Connected",
+  "collaboration.disconnected": "Disconnected",
+  "collaboration.editing": "editing",
+  "collaboration.participants": "{count} participants",
+  "collaboration.editingNow": "{name} is editing",
+  "collaboration.multipleEditing": "{count} people editing",
+  "collaboration.followUser": "Follow",
+  "collaboration.unfollowUser": "Unfollow",
+  "collaboration.autoSaved": "Auto-saved",
+  "collaboration.syncing": "Syncing...",
+  "collaboration.conflictDetected": "Conflict detected — changes merged automatically",
 };

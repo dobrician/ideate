@@ -1132,4 +1132,17 @@ export const ro: Record<string, string> = {
   "permissions.matchingAcls": "ACL-uri potrivite",
   "permissions.applies": "Se aplică",
   "permissions.doesNotApply": "Nu se aplică",
+
+  // Collaboration
+  "collaboration.connected": "Conectat",
+  "collaboration.disconnected": "Deconectat",
+  "collaboration.editing": "editează",
+  "collaboration.participants": "{count} participanți",
+  "collaboration.editingNow": "{name} editează",
+  "collaboration.multipleEditing": "{count} persoane editează",
+  "collaboration.followUser": "Urmărește",
+  "collaboration.unfollowUser": "Nu mai urmări",
+  "collaboration.autoSaved": "Salvat automat",
+  "collaboration.syncing": "Se sincronizează...",
+  "collaboration.conflictDetected": "Conflict detectat — modificările au fost îmbinate automat",
 };
