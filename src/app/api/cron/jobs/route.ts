@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { timingSafeEqual } from "crypto";
 import { process as processJobs } from "@/lib/queue";
-import { registerEmbeddingHandlers } from "@/lib/embeddings/jobs";
+import { registerEmbeddingHandlers, enqueueStaleRefresh } from "@/lib/embeddings/jobs";
+import { pruneCiBuilds } from "@/lib/ci-builds";
 
 // Register handlers on module load so they're available when processJobs() runs
 registerEmbeddingHandlers();
@@ -33,6 +34,14 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const result = await processJobs();
-  return NextResponse.json(result);
+  // Run scheduled maintenance tasks
+  const [result, ciPruned] = await Promise.all([
+    processJobs(),
+    pruneCiBuilds().catch(() => 0),
+  ]);
+
+  // Enqueue stale embedding refresh (processed in next run)
+  await enqueueStaleRefresh().catch(() => {});
+
+  return NextResponse.json({ ...result, ciBuildsDeleted: ciPruned });
 }
