@@ -30,7 +30,12 @@ type AuditAction =
   | "change_email"
   | "add_member"
   | "remove_member"
-  | "complete_onboarding";
+  | "complete_onboarding"
+  | "workflow.create"
+  | "workflow.delete"
+  | "workflow.assign"
+  | "workflow.advance"
+  | "workflow.reject";
 
 type AuditEntity =
   | "project"
@@ -43,7 +48,8 @@ type AuditEntity =
   | "attachment"
   | "tag"
   | "team"
-  | "custom_role";
+  | "custom_role"
+  | "workflow";
 
 interface AuditEntry {
   userId: string | null;

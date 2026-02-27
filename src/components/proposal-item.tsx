@@ -42,6 +42,13 @@ export interface AttachmentInfo {
   size: number;
 }
 
+export interface ProposalWorkflowInfo {
+  currentStageName: string;
+  status: "active" | "completed" | "rejected";
+  stageIndex: number;
+  totalStages: number;
+}
+
 export interface ProposalWithStats {
   id: string;
   title: string;
@@ -57,6 +64,7 @@ export interface ProposalWithStats {
   authorName: string;
   attachments: AttachmentInfo[];
   tags: { id: string; name: string }[];
+  workflowState?: ProposalWorkflowInfo | null;
 }
 
 export function ProposalItem({
@@ -180,8 +188,22 @@ export function ProposalItem({
               {proposal.attachments.length}
             </span>
           )}
-          {proposal.tags.length > 0 && (
+          {(proposal.tags.length > 0 || proposal.workflowState) && (
             <div className="flex flex-wrap gap-1 text-left">
+              {proposal.workflowState && (
+                <Badge
+                  variant="outline"
+                  className={`px-1.5 py-0 text-[10px] ${
+                    proposal.workflowState.status === "completed"
+                      ? "border-green-300 text-green-700 dark:border-green-700 dark:text-green-400"
+                      : proposal.workflowState.status === "rejected"
+                        ? "border-red-300 text-red-700 dark:border-red-700 dark:text-red-400"
+                        : "border-blue-300 text-blue-700 dark:border-blue-700 dark:text-blue-400"
+                  }`}
+                >
+                  {proposal.workflowState.currentStageName} ({proposal.workflowState.stageIndex + 1}/{proposal.workflowState.totalStages})
+                </Badge>
+              )}
               {proposal.tags.map((tag) => (
                 <Badge key={tag.id} variant="secondary" className="px-1.5 py-0 text-[10px]">
                   {tag.name}

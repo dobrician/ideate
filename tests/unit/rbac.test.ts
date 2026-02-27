@@ -389,8 +389,8 @@ describe("Permission boundary verifications", () => {
 // ---------------------------------------------------------------------------
 
 describe("ALL_PERMISSIONS", () => {
-  it("should contain 13 permissions", () => {
-    expect(ALL_PERMISSIONS).toHaveLength(13);
+  it("should contain 14 permissions", () => {
+    expect(ALL_PERMISSIONS).toHaveLength(14);
   });
 
   it("should include all expected permissions", () => {
@@ -409,7 +409,7 @@ describe("BUILT_IN_ROLES", () => {
 describe("getPermissionsForRole", () => {
   it("should return all permissions for admin", () => {
     const perms = getPermissionsForRole("admin");
-    expect(perms.size).toBe(13);
+    expect(perms.size).toBe(14);
   });
 
   it("should return 3 permissions for viewer", () => {

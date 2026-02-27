@@ -1,5 +1,5 @@
 import { db } from "@/db";
-import { projects, proposals, votes, comments, users, attachments, proposalTags, tags } from "@/db/schema";
+import { projects, proposals, votes, comments, users, attachments, proposalTags, tags, proposalWorkflowState, workflowStages } from "@/db/schema";
 import { eq, desc, asc, sql, count, and, inArray } from "drizzle-orm";
 
 export const PROPOSALS_PAGE_SIZE = 20;
@@ -228,6 +228,47 @@ export async function getProjectProposals(
     }
   }
 
+  // Fetch workflow state for all proposals on this page
+  const workflowStateMap = new Map<string, { currentStageName: string; status: string; stageIndex: number; totalStages: number }>();
+  if (proposalIds.length > 0) {
+    const stateRows = await db
+      .select({
+        proposalId: proposalWorkflowState.proposalId,
+        status: proposalWorkflowState.status,
+        currentStageId: proposalWorkflowState.currentStageId,
+        stageName: workflowStages.name,
+        stageOrder: workflowStages.stageOrder,
+        workflowId: proposalWorkflowState.workflowId,
+      })
+      .from(proposalWorkflowState)
+      .innerJoin(workflowStages, eq(proposalWorkflowState.currentStageId, workflowStages.id))
+      .where(
+        sql`${proposalWorkflowState.proposalId} IN (${sql.join(
+          proposalIds.map((pid) => sql`${pid}`),
+          sql`, `
+        )})`
+      );
+    // Count total stages per workflow
+    const wfIds = [...new Set(stateRows.map((r) => r.workflowId))];
+    const stageCounts = new Map<string, number>();
+    if (wfIds.length > 0) {
+      const countRows = await db
+        .select({ workflowId: workflowStages.workflowId, cnt: count() })
+        .from(workflowStages)
+        .where(sql`${workflowStages.workflowId} IN (${sql.join(wfIds.map((id) => sql`${id}`), sql`, `)})`)
+        .groupBy(workflowStages.workflowId);
+      for (const r of countRows) stageCounts.set(r.workflowId, r.cnt);
+    }
+    for (const r of stateRows) {
+      workflowStateMap.set(r.proposalId, {
+        currentStageName: r.stageName,
+        status: r.status,
+        stageIndex: r.stageOrder,
+        totalStages: stageCounts.get(r.workflowId) ?? 1,
+      });
+    }
+  }
+
   const mapped = proposalRows.map((p) => {
     const pComments = commentsByProposal.get(p.id) || [];
     const authorName =
@@ -259,6 +300,7 @@ export async function getProjectProposals(
       authorName,
       attachments: attachmentsByProposal.get(p.id) || [],
       tags: tagsByProposal.get(p.id) || [],
+      workflowState: workflowStateMap.get(p.id) ?? null,
     };
   });
 

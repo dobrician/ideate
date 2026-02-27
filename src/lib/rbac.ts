@@ -20,23 +20,26 @@ export type Permission =
   | "comment:create"
   | "comment:read"
   | "user:manage"
+  | "proposal:manage"
   | "user:view_all";
 
 export const ALL_PERMISSIONS: readonly Permission[] = [
   "project:create", "project:read", "project:update", "project:delete",
   "project:manage_all", "proposal:create", "proposal:read", "proposal:delete",
-  "vote:cast", "comment:create", "comment:read", "user:manage", "user:view_all",
+  "proposal:manage", "vote:cast", "comment:create", "comment:read",
+  "user:manage", "user:view_all",
 ];
 
 const ROLE_PERMISSIONS: Record<Role, ReadonlySet<Permission>> = {
   admin: new Set<Permission>([
     "project:create", "project:read", "project:update", "project:delete",
     "project:manage_all", "proposal:create", "proposal:read", "proposal:delete",
-    "vote:cast", "comment:create", "comment:read", "user:manage", "user:view_all",
+    "proposal:manage", "vote:cast", "comment:create", "comment:read",
+    "user:manage", "user:view_all",
   ]),
   manager: new Set<Permission>([
     "project:create", "project:read", "project:update", "project:delete",
-    "proposal:create", "proposal:read", "proposal:delete",
+    "proposal:create", "proposal:read", "proposal:delete", "proposal:manage",
     "vote:cast", "comment:create", "comment:read", "user:view_all",
   ]),
   member: new Set<Permission>([
