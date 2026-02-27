@@ -16,6 +16,7 @@ import { getAlerts, getAlertCounts } from "@/lib/perf-alerts";
 import { PerfDashboardPanel } from "./perf-dashboard-panel";
 import { CiBuildTrendsPanel } from "./ci-build-trends";
 import { getRecentCiBuilds, getCiBuildStats, getCiBuildAlertSummary } from "@/lib/ci-builds";
+import { getBundleSizeAnalytics, checkBundleSizeRegression } from "@/lib/bundle-tracker";
 
 export default async function PerfDashboardPage() {
   const user = await getCurrentUser();
@@ -43,10 +44,12 @@ export default async function PerfDashboardPage() {
   const tagStats = getTagStats();
   const alertCounts = getAlertCounts();
   const recentAlerts = getAlerts().slice(-10).reverse();
-  const [ciBuilds, ciBuildStats, ciAlertSummary] = await Promise.all([
+  const [ciBuilds, ciBuildStats, ciAlertSummary, bundleAnalytics, bundleRegression] = await Promise.all([
     getRecentCiBuilds(50),
     getCiBuildStats(50),
     getCiBuildAlertSummary(),
+    getBundleSizeAnalytics(),
+    checkBundleSizeRegression(),
   ]);
 
   return (
@@ -78,6 +81,70 @@ export default async function PerfDashboardPage() {
       <div className="mt-8">
         <CiBuildTrendsPanel builds={ciBuilds} stats={ciBuildStats} />
       </div>
+
+      {/* Bundle Size Tracking */}
+      {bundleAnalytics.current && (
+        <div className="mt-6 rounded-lg border bg-card">
+          <div className="p-4 border-b">
+            <h2 className="font-semibold">{t("perfDashboard.bundleSize")}</h2>
+          </div>
+          <div className="grid grid-cols-2 gap-3 p-4 sm:grid-cols-4">
+            <div className="rounded-lg border p-3">
+              <div className="text-sm text-muted-foreground mb-1">{t("perfDashboard.bundleCurrent")}</div>
+              <div className="text-xl font-bold">{bundleAnalytics.current.sizeMb} MB</div>
+            </div>
+            <div className="rounded-lg border p-3">
+              <div className="text-sm text-muted-foreground mb-1">{t("perfDashboard.bundleTrend")}</div>
+              <div className={`text-lg font-bold ${bundleAnalytics.trend === "growing" ? "text-red-500" : bundleAnalytics.trend === "shrinking" ? "text-green-500" : ""}`}>
+                {bundleAnalytics.trend === "growing" ? "Growing" : bundleAnalytics.trend === "shrinking" ? "Shrinking" : bundleAnalytics.trend === "stable" ? "Stable" : "N/A"}
+              </div>
+            </div>
+            <div className="rounded-lg border p-3">
+              <div className="text-sm text-muted-foreground mb-1">{t("perfDashboard.bundleBudget")}</div>
+              <div className="flex items-center gap-2">
+                <div
+                  className="flex-1 h-2 rounded-full bg-muted overflow-hidden"
+                  role="progressbar"
+                  aria-valuenow={bundleAnalytics.budgetStatus.sizeUsagePct}
+                  aria-valuemin={0}
+                  aria-valuemax={100}
+                  aria-label={`${t("perfDashboard.bundleBudget")}: ${bundleAnalytics.budgetStatus.sizeUsagePct}%`}
+                >
+                  <div
+                    className={`h-full rounded-full ${bundleAnalytics.budgetStatus.sizeWithinBudget ? "bg-green-500" : "bg-red-500"}`}
+                    style={{ width: `${Math.min(bundleAnalytics.budgetStatus.sizeUsagePct, 100)}%` }}
+                  />
+                </div>
+                <span className="text-xs font-medium">{bundleAnalytics.budgetStatus.sizeUsagePct}%</span>
+              </div>
+            </div>
+            <div className="rounded-lg border p-3">
+              <div className="text-sm text-muted-foreground mb-1">{t("perfDashboard.bundleDuration")}</div>
+              <div className="flex items-center gap-2">
+                <div
+                  className="flex-1 h-2 rounded-full bg-muted overflow-hidden"
+                  role="progressbar"
+                  aria-valuenow={bundleAnalytics.budgetStatus.durationUsagePct}
+                  aria-valuemin={0}
+                  aria-valuemax={100}
+                  aria-label={`${t("perfDashboard.bundleDuration")}: ${bundleAnalytics.budgetStatus.durationUsagePct}%`}
+                >
+                  <div
+                    className={`h-full rounded-full ${bundleAnalytics.budgetStatus.durationWithinBudget ? "bg-green-500" : "bg-red-500"}`}
+                    style={{ width: `${Math.min(bundleAnalytics.budgetStatus.durationUsagePct, 100)}%` }}
+                  />
+                </div>
+                <span className="text-xs font-medium">{bundleAnalytics.budgetStatus.durationUsagePct}%</span>
+              </div>
+            </div>
+          </div>
+          {bundleRegression.regression && (
+            <div className="px-4 pb-4">
+              <p className="text-sm text-red-600 dark:text-red-400">{bundleRegression.message}</p>
+            </div>
+          )}
+        </div>
+      )}
 
       {/* CI Alert Summary */}
       {ciAlertSummary.currentAlert.alert && (

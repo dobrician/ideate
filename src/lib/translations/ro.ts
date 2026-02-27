@@ -1269,6 +1269,11 @@ export const ro: Record<string, string> = {
   "perfDashboard.ciAlertRecent": "Media recentă",
   "perfDashboard.ciAlertBaseline": "Media de referință",
   "perfDashboard.ciFailures": "{count} build-uri eșuate din {total} build-uri recente",
+  "perfDashboard.bundleSize": "Urmărire Dimensiune Bundle",
+  "perfDashboard.bundleCurrent": "Dimensiune Curentă",
+  "perfDashboard.bundleTrend": "Tendință Dimensiune",
+  "perfDashboard.bundleBudget": "Buget Dimensiune",
+  "perfDashboard.bundleDuration": "Buget Durată",
 
   // CI Build Trends
   "ciBuild.title": "Tendințe Build CI",

@@ -1250,6 +1250,11 @@ export const en: Record<string, string> = {
   "perfDashboard.ciAlertRecent": "Recent avg",
   "perfDashboard.ciAlertBaseline": "Baseline avg",
   "perfDashboard.ciFailures": "{count} failed builds out of {total} recent builds",
+  "perfDashboard.bundleSize": "Bundle Size Tracking",
+  "perfDashboard.bundleCurrent": "Current Size",
+  "perfDashboard.bundleTrend": "Size Trend",
+  "perfDashboard.bundleBudget": "Size Budget",
+  "perfDashboard.bundleDuration": "Duration Budget",
 
   // CI Build Trends
   "ciBuild.title": "CI Build Trends",
