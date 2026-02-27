@@ -30,6 +30,12 @@ Reverse chronological. Click each sprint for full details.
 
 ---
 
+### ✅ [Sprint 64 — Infrastructure & Quality: DB Indexes, CVE Fixes, WCAG AAA, CI & Bundle Optimization](Sprint-64) *(2026-02-27)*
+**Focus:** 7 FK indexes, 5 CVE fixes, WCAG AAA (aria-busy, motion-reduce), CI artifact sharing + Playwright cache, bundle optimization
+**Stats:** 5/5 goals | 2609 tests (+68) | Audit: low risk, 85% WCAG AAA
+
+---
+
 ### ✅ [Sprint 63 — Final Polish & Documentation: Production Excellence](Sprint-63) *(2026-02-27)*
 **Focus:** Performance fixes, security hardening, integration testing, production docs, production readiness
 **Stats:** 5/5 goals | 2541 tests (+121) | Audit: low risk, production ready
