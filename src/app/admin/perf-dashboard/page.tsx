@@ -4,7 +4,7 @@ import { getCurrentUser } from "@/lib/auth";
 import { hasPermission } from "@/lib/rbac";
 import type { Role } from "@/lib/rbac";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, ShieldX } from "lucide-react";
+import { ArrowLeft, ShieldX, Download } from "lucide-react";
 import { getTranslations } from "@/lib/i18n-server";
 import { getPerfStats } from "@/lib/perf-monitor";
 import { getCacheStats } from "@/lib/cache";
@@ -61,10 +61,16 @@ export default async function PerfDashboardPage() {
             {t("analytics.backToAdmin")}
           </Link>
         </Button>
-        <div>
+        <div className="flex-1">
           <h1 className="text-2xl font-bold sm:text-3xl">{t("perfDashboard.title")}</h1>
           <p className="text-muted-foreground">{t("perfDashboard.subtitle")}</p>
         </div>
+        <Button variant="outline" size="sm" asChild>
+          <a href="/api/admin/export/ci-builds" download>
+            <Download className="mr-1 h-4 w-4" />
+            {t("admin.exportCsv")}
+          </a>
+        </Button>
       </div>
 
       <PerfDashboardPanel

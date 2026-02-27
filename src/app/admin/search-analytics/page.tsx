@@ -14,6 +14,7 @@ import {
   ThumbsUp,
   ThumbsDown,
   BarChart3,
+  Download,
 } from "lucide-react";
 import { getTranslations } from "@/lib/i18n-server";
 import {
@@ -63,9 +64,15 @@ export default async function SearchAnalyticsPage() {
             {t("aiInsights.backToAdmin")}
           </Link>
         </Button>
-        <div>
+        <div className="flex-1">
           <h1 className="text-2xl font-bold sm:text-3xl">{t("admin.searchAnalytics")}</h1>
         </div>
+        <Button variant="outline" size="sm" asChild>
+          <a href="/api/admin/export/search-analytics" download>
+            <Download className="mr-1 h-4 w-4" />
+            {t("admin.exportCsv")}
+          </a>
+        </Button>
       </div>
 
       {/* Stats Cards */}
