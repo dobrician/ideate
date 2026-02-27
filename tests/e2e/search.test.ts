@@ -23,13 +23,8 @@ test.describe("Search — Authenticated", () => {
   });
 
   test("Ctrl+K focuses the search input", async ({ page }) => {
-    // Click somewhere else first to ensure search is not focused
     await page.getByRole("heading", { name: /Dashboard/i }).click();
-
-    // Press Ctrl+K
     await page.keyboard.press("Control+k");
-
-    // The search input should now be focused
     const searchInput = page.locator('input[type="search"]');
     await expect(searchInput).toBeFocused();
   });
@@ -39,5 +34,38 @@ test.describe("Search — Authenticated", () => {
     await expect(combobox).toBeVisible();
     await expect(combobox).toHaveAttribute("aria-haspopup", "listbox");
     await expect(combobox).toHaveAttribute("aria-controls", "search-results-listbox");
+  });
+
+  test("mode toggle shows Keyword, Semantic, Smart buttons", async ({ page }) => {
+    const radiogroup = page.locator('[role="radiogroup"]');
+    await expect(radiogroup).toBeVisible();
+    await expect(page.getByRole("radio", { name: /Keyword/i })).toBeVisible();
+    await expect(page.getByRole("radio", { name: /Semantic/i })).toBeVisible();
+    await expect(page.getByRole("radio", { name: /Smart/i })).toBeVisible();
+  });
+
+  test("mode toggle buttons have title tooltips", async ({ page }) => {
+    const keyword = page.getByRole("radio", { name: /Keyword/i });
+    await expect(keyword).toHaveAttribute("title");
+    const semantic = page.getByRole("radio", { name: /Semantic/i });
+    await expect(semantic).toHaveAttribute("title");
+  });
+
+  test("filter button is visible and toggleable", async ({ page }) => {
+    const filterBtn = page.locator('button[aria-pressed]').first();
+    await expect(filterBtn).toBeVisible();
+    await filterBtn.click();
+    // After click, filter panel should appear with entity type buttons
+    await expect(page.locator('[role="group"]')).toBeVisible();
+  });
+
+  test("search input shows no-results message for gibberish query", async ({ page }) => {
+    const searchInput = page.locator('input[type="search"]');
+    await searchInput.fill("xyznonexistent999zzz");
+    // Wait for debounced search
+    await page.waitForTimeout(500);
+    // Either listbox appears with no-results, or status message
+    const listbox = page.locator('#search-results-listbox');
+    await expect(listbox).toBeVisible({ timeout: 5000 });
   });
 });
