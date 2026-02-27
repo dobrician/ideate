@@ -351,3 +351,66 @@ export const resourceAcls = sqliteTable("resource_acls", {
   reason: text("reason"),
   createdAt: ts(),
 });
+
+// ─── AI Feedback ──────────────────────────────────────────────────────────
+
+export const aiFeedback = sqliteTable("ai_feedback", {
+  id: pk(),
+  userId: text("user_id").references(() => users.id, { onDelete: "set null" }),
+  feature: text("feature", { enum: ["routing", "conflicts", "deadlines", "predictions", "suggestions"] }).notNull(),
+  entityType: text("entity_type", { enum: ["proposal", "project"] }).notNull(),
+  entityId: text("entity_id").notNull(),
+  rating: integer("rating").notNull(),
+  feedbackType: text("feedback_type", { enum: ["rating", "thumbs", "correction"] }).notNull().default("rating"),
+  comment: text("comment"),
+  aiOutput: text("ai_output"),
+  correction: text("correction"),
+  modelVersion: text("model_version"),
+  createdAt: ts(),
+});
+
+// ─── AI Models ────────────────────────────────────────────────────────────
+
+export const aiModels = sqliteTable("ai_models", {
+  id: pk(),
+  name: text("name").notNull(),
+  feature: text("feature").notNull(),
+  version: text("version").notNull(),
+  provider: text("provider", { enum: ["gemini", "openai", "local"] }).notNull(),
+  config: text("config"),
+  accuracy: integer("accuracy"),
+  totalPredictions: integer("total_predictions").notNull().default(0),
+  correctPredictions: integer("correct_predictions").notNull().default(0),
+  status: text("status", { enum: ["active", "inactive", "testing"] }).notNull().default("active"),
+  deployedAt: integer("deployed_at", { mode: "timestamp" }).default(sql`(unixepoch())`),
+  createdAt: ts(),
+});
+
+// ─── AI Insights ──────────────────────────────────────────────────────────
+
+export const aiInsights = sqliteTable("ai_insights", {
+  id: pk(),
+  projectId: text("project_id").references(() => projects.id, { onDelete: "cascade" }),
+  insightType: text("insight_type", { enum: ["trend", "bottleneck", "recommendation", "anomaly"] }).notNull(),
+  title: text("title").notNull(),
+  description: text("description").notNull(),
+  severity: text("severity", { enum: ["info", "warning", "critical"] }).notNull().default("info"),
+  data: text("data"),
+  status: text("status", { enum: ["active", "dismissed", "resolved"] }).notNull().default("active"),
+  dismissedBy: text("dismissed_by").references(() => users.id, { onDelete: "set null" }),
+  createdAt: ts(),
+});
+
+// ─── Notification Channel Preferences (AI-powered) ───────────────────────
+
+export const notificationChannelPrefs = sqliteTable("notification_channel_prefs", {
+  id: pk(),
+  userId: text("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  channel: text("channel", { enum: ["in_app", "email", "digest"] }).notNull().default("in_app"),
+  category: text("category", { enum: ["votes", "comments", "proposals", "ai_insights", "system"] }).notNull(),
+  enabled: integer("enabled", { mode: "boolean" }).notNull().default(true),
+  digestFrequency: text("digest_frequency", { enum: ["daily", "weekly"] }),
+  smartFilter: integer("smart_filter", { mode: "boolean" }).notNull().default(false),
+  createdAt: ts(),
+  updatedAt: tsUp(),
+});

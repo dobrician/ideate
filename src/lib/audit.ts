@@ -40,7 +40,13 @@ type AuditAction =
   | "permission_rule.update"
   | "permission_rule.delete"
   | "acl.grant"
-  | "acl.revoke";
+  | "acl.revoke"
+  | "ai_feedback.submit"
+  | "ai_model.create"
+  | "ai_model.update"
+  | "ai_insight.generate"
+  | "ai_insight.dismiss"
+  | "notification_pref.update";
 
 type AuditEntity =
   | "project"
@@ -56,7 +62,11 @@ type AuditEntity =
   | "custom_role"
   | "workflow"
   | "permission_rule"
-  | "resource_acl";
+  | "resource_acl"
+  | "ai_feedback"
+  | "ai_model"
+  | "ai_insight"
+  | "notification_preference";
 
 interface AuditEntry {
   userId: string | null;

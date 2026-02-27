@@ -15,7 +15,7 @@ const nextConfig: NextConfig = {
   experimental: {
     optimizePackageImports: ["lucide-react"],
   },
-  serverExternalPackages: ["ioredis", "pg"],
+  serverExternalPackages: ["ioredis", "pg", "better-sqlite3"],
 };
 
 const config = withBundleAnalyzer(nextConfig);

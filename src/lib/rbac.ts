@@ -1,34 +1,15 @@
 /**
  * Role-based access control (RBAC) for Ideate.
  * Supports 4 built-in roles and dynamic custom roles stored in the DB.
+ *
+ * NOTE: Client-safe types/constants live in ./rbac/permissions.ts.
+ * This file contains server-only logic (DB access) and must not be
+ * imported from "use client" components.
  */
 
-export type Role = "admin" | "manager" | "member" | "viewer";
-
-export const BUILT_IN_ROLES: readonly Role[] = ["admin", "manager", "member", "viewer"];
-
-export type Permission =
-  | "project:create"
-  | "project:read"
-  | "project:update"
-  | "project:delete"
-  | "project:manage_all"
-  | "proposal:create"
-  | "proposal:read"
-  | "proposal:delete"
-  | "vote:cast"
-  | "comment:create"
-  | "comment:read"
-  | "user:manage"
-  | "proposal:manage"
-  | "user:view_all";
-
-export const ALL_PERMISSIONS: readonly Permission[] = [
-  "project:create", "project:read", "project:update", "project:delete",
-  "project:manage_all", "proposal:create", "proposal:read", "proposal:delete",
-  "proposal:manage", "vote:cast", "comment:create", "comment:read",
-  "user:manage", "user:view_all",
-];
+export { type Role, BUILT_IN_ROLES, type Permission, ALL_PERMISSIONS } from "./rbac/permissions";
+import type { Role, Permission } from "./rbac/permissions";
+import { ALL_PERMISSIONS, BUILT_IN_ROLES } from "./rbac/permissions";
 
 const ROLE_PERMISSIONS: Record<Role, ReadonlySet<Permission>> = {
   admin: new Set<Permission>([

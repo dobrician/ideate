@@ -9,7 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { useLocale } from "@/lib/use-locale";
 import { getCsrfTokenClient } from "@/lib/csrf-client";
 import { Plus, Trash2, Clock, Calendar, GitBranch, Zap, ShieldCheck, ShieldOff } from "lucide-react";
-import { ALL_PERMISSIONS } from "@/lib/rbac";
+import { ALL_PERMISSIONS } from "@/lib/rbac/permissions";
 import {
   createPermissionRuleAction,
   deletePermissionRuleAction,
