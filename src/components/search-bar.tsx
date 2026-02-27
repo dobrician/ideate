@@ -299,6 +299,7 @@ export function SearchBar() {
           type="search"
           placeholder={t("search.placeholder")}
           aria-label={t("search.placeholder")}
+          aria-keyshortcuts="Control+K Meta+K"
           aria-activedescendant={activeId}
           value={query}
           onChange={(e) => handleChange(e.target.value)}

@@ -116,3 +116,20 @@
     box-shadow: 0 0 0 1px oklch(1 0 0 / 6%);
   }
 }
+
+/* WCAG AAA: forced-colors / high-contrast mode support */
+@media (forced-colors: active) {
+  [data-slot="card"] {
+    border: 1px solid ButtonText;
+  }
+  [data-slot="badge"] {
+    border: 1px solid ButtonText;
+  }
+  button,
+  [role="button"] {
+    border: 1px solid ButtonText;
+  }
+  .skeleton {
+    background: GrayText;
+  }
+}

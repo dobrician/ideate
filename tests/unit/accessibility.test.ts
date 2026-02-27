@@ -1,4 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import { readFileSync } from "fs";
+import { resolve } from "path";
 import {
   prefersReducedMotion,
   prefersHighContrast,
@@ -102,6 +104,34 @@ describe("Accessibility Utilities", () => {
       expect(prefersHighContrast()).toBe(false);
       vi.unstubAllGlobals();
     });
+
+    it("should return true when forced-colors is active", () => {
+      vi.stubGlobal("window", {
+        matchMedia: vi.fn((query: string) => ({
+          matches: query === "(forced-colors: active)",
+        })),
+      });
+      expect(prefersHighContrast()).toBe(true);
+      vi.unstubAllGlobals();
+    });
+
+    it("should return true when prefers-contrast is more", () => {
+      vi.stubGlobal("window", {
+        matchMedia: vi.fn((query: string) => ({
+          matches: query === "(prefers-contrast: more)",
+        })),
+      });
+      expect(prefersHighContrast()).toBe(true);
+      vi.unstubAllGlobals();
+    });
+
+    it("should return false in SSR (no window)", () => {
+      const origWindow = globalThis.window;
+      // @ts-expect-error - testing SSR
+      delete globalThis.window;
+      expect(prefersHighContrast()).toBe(false);
+      globalThis.window = origWindow;
+    });
   });
 
   describe("generateAriaId", () => {
@@ -192,6 +222,24 @@ describe("Accessibility Utilities", () => {
         writable: true,
         configurable: true,
       });
+    });
+  });
+
+  describe("CSS forced-colors support", () => {
+    const css = readFileSync(resolve("src/app/globals.css"), "utf-8");
+
+    it("includes forced-colors media query", () => {
+      expect(css).toContain("@media (forced-colors: active)");
+    });
+
+    it("adds visible borders to cards in forced-colors", () => {
+      expect(css).toContain("[data-slot=\"card\"]");
+      expect(css).toContain("ButtonText");
+    });
+
+    it("adds visible borders to buttons in forced-colors", () => {
+      const forcedSection = css.split("@media (forced-colors: active)")[1] ?? "";
+      expect(forcedSection).toContain("button");
     });
   });
 });

@@ -254,4 +254,11 @@ describe("SearchBar keyboard navigation", () => {
     const first = screen.getByText("Project Alpha").closest("[role=option]");
     expect(first).toHaveAttribute("aria-selected", "true");
   });
+
+  it("has aria-keyshortcuts on the search input", async () => {
+    const { SearchBar } = await import("@/components/search-bar");
+    render(<SearchBar />);
+    const input = screen.getByRole("searchbox");
+    expect(input).toHaveAttribute("aria-keyshortcuts", "Control+K Meta+K");
+  });
 });
