@@ -6,7 +6,8 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
  */
 export default function AdminLoading() {
   return (
-    <div className="container mx-auto max-w-6xl px-4 py-8">
+    <div className="container mx-auto max-w-6xl px-4 py-8" aria-busy="true" role="status">
+      <span className="sr-only">Loading admin panel...</span>
       <div className="mb-8">
         <Skeleton className="h-9 w-40" />
         <Skeleton className="mt-2 h-5 w-64" />

@@ -3,7 +3,8 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 
 export default function DashboardLoading() {
   return (
-    <div className="mx-auto max-w-6xl py-4 sm:py-8">
+    <div className="mx-auto max-w-6xl py-4 sm:py-8" aria-busy="true" role="status">
+      <span className="sr-only">Loading dashboard...</span>
       <div className="mb-5 sm:mb-8">
         <Skeleton className="h-9 w-48" />
         <Skeleton className="mt-2 h-5 w-64" />

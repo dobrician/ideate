@@ -1,12 +1,10 @@
+import { Skeleton } from "@/components/ui/skeleton";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
-
-function Skeleton({ className }: { className?: string }) {
-  return <div className={`animate-pulse rounded-md bg-muted ${className ?? ""}`} />;
-}
 
 export default function WorkflowsLoading() {
   return (
-    <div className="mx-auto max-w-4xl px-4 py-4 sm:py-8">
+    <div className="mx-auto max-w-4xl px-4 py-4 sm:py-8" aria-busy="true" role="status">
+      <span className="sr-only">Loading workflows...</span>
       <div className="mb-5 flex items-center gap-3 sm:mb-8">
         <Skeleton className="h-8 w-16" />
         <div>
