@@ -14,6 +14,8 @@ import { getStatementCacheStats } from "@/lib/db/statement-cache";
 import { getTagStats } from "@/lib/cache/tags";
 import { getAlerts, getAlertCounts } from "@/lib/perf-alerts";
 import { PerfDashboardPanel } from "./perf-dashboard-panel";
+import { CiBuildTrendsPanel } from "./ci-build-trends";
+import { getRecentCiBuilds, getCiBuildStats } from "@/lib/ci-builds";
 
 export default async function PerfDashboardPage() {
   const user = await getCurrentUser();
@@ -41,6 +43,10 @@ export default async function PerfDashboardPage() {
   const tagStats = getTagStats();
   const alertCounts = getAlertCounts();
   const recentAlerts = getAlerts().slice(-10).reverse();
+  const [ciBuilds, ciBuildStats] = await Promise.all([
+    getRecentCiBuilds(50),
+    getCiBuildStats(50),
+  ]);
 
   return (
     <div className="mx-auto max-w-6xl py-4 sm:py-8">
@@ -67,6 +73,10 @@ export default async function PerfDashboardPage() {
         alertCounts={alertCounts}
         recentAlerts={recentAlerts}
       />
+
+      <div className="mt-8">
+        <CiBuildTrendsPanel builds={ciBuilds} stats={ciBuildStats} />
+      </div>
     </div>
   );
 }

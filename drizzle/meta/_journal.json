@@ -239,6 +239,13 @@
       "when": 1771282400000,
       "tag": "0033_sprint64_fk_indexes",
       "breakpoints": true
+    },
+    {
+      "idx": 34,
+      "version": "6",
+      "when": 1771282800000,
+      "tag": "0034_sprint66_ci_builds",
+      "breakpoints": true
     }
   ]
 }

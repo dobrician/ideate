@@ -509,3 +509,16 @@ export const integrations = pgTable("integrations", {
   createdBy: text("created_by").references(() => users.id, { onDelete: "set null" }),
   createdAt: ts(), updatedAt: tsUp(),
 });
+
+// ─── CI Build Metrics ──────────────────────────────────────────────────
+
+export const ciBuilds = pgTable("ci_builds", {
+  id: pk(),
+  commitHash: text("commit_hash").notNull(),
+  branch: text("branch").notNull().default("main"),
+  durationMs: integer("duration_ms").notNull(),
+  buildSizeBytes: integer("build_size_bytes"),
+  status: text("status", { enum: ["success", "failure"] }).notNull().default("success"),
+  runId: text("run_id"),
+  createdAt: ts(),
+});

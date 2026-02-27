@@ -1214,6 +1214,21 @@ export const en: Record<string, string> = {
   "perfDashboard.slowestPaths": "Slowest Paths",
   "perfDashboard.recentAlerts": "Recent Alerts",
 
+  // CI Build Trends
+  "ciBuild.title": "CI Build Trends",
+  "ciBuild.latest": "Latest Build",
+  "ciBuild.average": "Average Duration",
+  "ciBuild.minMax": "Min/Max",
+  "ciBuild.totalBuilds": "Total Builds",
+  "ciBuild.trend": "Trend",
+  "ciBuild.trendImproving": "Improving",
+  "ciBuild.trendStable": "Stable",
+  "ciBuild.trendRegressing": "Regressing",
+  "ciBuild.trendInsufficient": "Not enough data",
+  "ciBuild.durationChart": "Build Duration Over Time",
+  "ciBuild.recentBuilds": "Recent Builds",
+  "ciBuild.noData": "No CI build data recorded yet. Configure CI to report metrics via POST /api/admin/ci-builds.",
+
   // Integrations Dashboard (Sprint 61)
   "integrations.title": "Integrations & API",
   "integrations.description": "Manage platform integrations, API keys, and webhook delivery",

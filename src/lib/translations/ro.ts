@@ -1233,6 +1233,21 @@ export const ro: Record<string, string> = {
   "perfDashboard.slowestPaths": "Cele mai lente căi",
   "perfDashboard.recentAlerts": "Alerte recente",
 
+  // CI Build Trends
+  "ciBuild.title": "Tendințe Build CI",
+  "ciBuild.latest": "Ultimul Build",
+  "ciBuild.average": "Durată medie",
+  "ciBuild.minMax": "Min/Max",
+  "ciBuild.totalBuilds": "Total Build-uri",
+  "ciBuild.trend": "Tendință",
+  "ciBuild.trendImproving": "În îmbunătățire",
+  "ciBuild.trendStable": "Stabil",
+  "ciBuild.trendRegressing": "În regres",
+  "ciBuild.trendInsufficient": "Date insuficiente",
+  "ciBuild.durationChart": "Durata Build-urilor în Timp",
+  "ciBuild.recentBuilds": "Build-uri Recente",
+  "ciBuild.noData": "Nu sunt date CI înregistrate. Configurează CI să raporteze metrici via POST /api/admin/ci-builds.",
+
   // Integrations Dashboard (Sprint 61)
   "integrations.title": "Integrări & API",
   "integrations.description": "Gestionează integrări platforme, chei API și livrări webhook",
