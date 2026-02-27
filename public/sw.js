@@ -11,11 +11,75 @@ const PAGES_CACHE = `${CACHE_VERSION}-pages`;
 
 const ALL_CACHES = [STATIC_CACHE, ASSETS_CACHE, API_CACHE, PAGES_CACHE];
 
+// Cache size limits (LRU eviction when exceeded)
+const CACHE_LIMITS = {
+  [STATIC_CACHE]: 50,
+  [ASSETS_CACHE]: 100,
+  [API_CACHE]: 200,
+  [PAGES_CACHE]: 20,
+};
+
+// TTL per cache in seconds
+const CACHE_TTLS = {
+  [STATIC_CACHE]: 365 * 24 * 3600, // 1 year (hashed filenames)
+  [ASSETS_CACHE]: 7 * 24 * 3600,   // 7 days
+  [API_CACHE]: 300,                 // 5 minutes
+  [PAGES_CACHE]: 3600,              // 1 hour
+};
+
 // Precache critical resources
 const PRECACHE_URLS = [
   OFFLINE_URL,
   "/manifest.json",
 ];
+
+// ─── Cache management ──────────────────────────────────────────────────
+
+function getCacheTTL(cacheName) {
+  return CACHE_TTLS[cacheName] || 3600;
+}
+
+function isCacheStale(response, maxAge) {
+  const dateStr = response.headers.get("date");
+  if (!dateStr) return false;
+  const cached = new Date(dateStr).getTime();
+  if (isNaN(cached)) return false;
+  const age = (Date.now() - cached) / 1000;
+  return age > maxAge;
+}
+
+async function cleanupCacheSizes() {
+  const cacheNames = await caches.keys();
+
+  for (const cacheName of cacheNames) {
+    const limit = CACHE_LIMITS[cacheName];
+    if (!limit) continue;
+
+    const cache = await caches.open(cacheName);
+    const requests = await cache.keys();
+
+    if (requests.length > limit) {
+      const entries = await Promise.all(
+        requests.map(async (req) => {
+          const response = await cache.match(req);
+          const dateStr = response?.headers.get("date") || "0";
+          return {
+            request: req,
+            time: new Date(dateStr).getTime() || 0,
+          };
+        })
+      );
+
+      // Sort oldest first, remove excess
+      entries.sort((a, b) => a.time - b.time);
+      const toRemove = entries.slice(0, entries.length - limit);
+
+      for (const entry of toRemove) {
+        await cache.delete(entry.request);
+      }
+    }
+  }
+}
 
 // ─── Install ────────────────────────────────────────────────────────────
 
@@ -32,20 +96,27 @@ self.addEventListener("install", (event) => {
 self.addEventListener("activate", (event) => {
   event.waitUntil(
     caches.keys().then((keys) =>
-      Promise.all(
-        keys
-          .filter((key) => !ALL_CACHES.includes(key))
-          .map((key) => caches.delete(key))
-      )
+      Promise.all([
+        // Remove old cache versions
+        Promise.all(
+          keys
+            .filter((key) => !ALL_CACHES.includes(key))
+            .map((key) => caches.delete(key))
+        ),
+        // Enforce cache size limits
+        cleanupCacheSizes(),
+      ])
     ).then(() => self.clients.claim())
   );
 });
 
-// ─── Strategy helpers ───────────────────────────────────────────────────
+// ─── Strategy helpers (TTL-aware) ─────────────────────────────────────
 
 async function cacheFirst(request, cacheName) {
   const cached = await caches.match(request);
-  if (cached) return cached;
+  if (cached && !isCacheStale(cached, getCacheTTL(cacheName))) {
+    return cached;
+  }
   try {
     const response = await fetch(request);
     if (response.ok) {
@@ -54,7 +125,7 @@ async function cacheFirst(request, cacheName) {
     }
     return response;
   } catch {
-    return new Response("Offline", { status: 503 });
+    return cached || new Response("Offline", { status: 503 });
   }
 }
 
@@ -68,6 +139,9 @@ async function networkFirst(request, cacheName) {
     return response;
   } catch {
     const cached = await caches.match(request);
+    if (cached && !isCacheStale(cached, getCacheTTL(cacheName))) {
+      return cached;
+    }
     return cached || new Response(JSON.stringify({ error: "offline" }), {
       status: 503,
       headers: { "Content-Type": "application/json" },
@@ -128,6 +202,13 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 });
+
+// ─── Periodic cache cleanup ──────────────────────────────────────────────
+
+// Run cache cleanup periodically (every 6 hours)
+setInterval(() => {
+  cleanupCacheSizes();
+}, 6 * 60 * 60 * 1000);
 
 // ─── Push notifications ─────────────────────────────────────────────────
 

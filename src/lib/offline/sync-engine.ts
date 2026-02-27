@@ -1,9 +1,12 @@
 /**
- * Offline Sync Engine
+ * Offline Sync Engine with connection pooling
  *
  * Queues mutations (votes, comments, proposals) in IndexedDB when offline,
  * then replays them in order when connectivity returns.
  * Conflict resolution uses last-write-wins with server timestamp comparison.
+ *
+ * Connection pooling: single cached IDBDatabase instance with 5-second TTL
+ * to avoid N+1 open/close overhead during bulk operations.
  */
 
 export interface QueuedAction {
@@ -28,61 +31,107 @@ const DB_NAME = "ideate-offline";
 const DB_VERSION = 1;
 const STORE_NAME = "sync-queue";
 const MAX_RETRIES = 3;
+const MAX_QUEUE_SIZE = 100;
+const DB_CLOSE_TIMEOUT = 5000;
 
-function openDB(): Promise<IDBDatabase> {
+// Connection pool — reuse a single IDBDatabase across calls
+let cachedDb: IDBDatabase | null = null;
+let closeTimer: ReturnType<typeof setTimeout> | null = null;
+
+function resetCloseTimer() {
+  if (closeTimer) clearTimeout(closeTimer);
+  closeTimer = setTimeout(() => {
+    if (cachedDb) {
+      cachedDb.close();
+      cachedDb = null;
+    }
+  }, DB_CLOSE_TIMEOUT);
+}
+
+function getDB(): Promise<IDBDatabase> {
+  if (cachedDb) {
+    resetCloseTimer();
+    return Promise.resolve(cachedDb);
+  }
+
   return new Promise((resolve, reject) => {
     const request = indexedDB.open(DB_NAME, DB_VERSION);
+
     request.onupgradeneeded = () => {
       const db = request.result;
       if (!db.objectStoreNames.contains(STORE_NAME)) {
         const store = db.createObjectStore(STORE_NAME, { keyPath: "id" });
         store.createIndex("timestamp", "timestamp", { unique: false });
-        store.createIndex("type", "type", { unique: false });
       }
     };
-    request.onsuccess = () => resolve(request.result);
-    request.onerror = () => reject(request.error);
+
+    request.onsuccess = () => {
+      cachedDb = request.result;
+      cachedDb.onclose = () => { cachedDb = null; };
+      resetCloseTimer();
+      resolve(cachedDb);
+    };
+
+    request.onerror = () => {
+      reject(request.error);
+    };
   });
 }
 
 export async function enqueueAction(
   action: Omit<QueuedAction, "id" | "timestamp" | "retries">,
 ): Promise<string> {
-  const db = await openDB();
+  const db = await getDB();
   const id = `${action.type}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
   const entry: QueuedAction = { ...action, id, timestamp: Date.now(), retries: 0 };
 
   return new Promise((resolve, reject) => {
     const tx = db.transaction(STORE_NAME, "readwrite");
     tx.objectStore(STORE_NAME).add(entry);
-    tx.oncomplete = () => { db.close(); resolve(id); };
-    tx.onerror = () => { db.close(); reject(tx.error); };
+    tx.oncomplete = () => resolve(id);
+    tx.onerror = () => reject(tx.error);
   });
 }
 
+export async function enqueueActionSafe(
+  action: Omit<QueuedAction, "id" | "timestamp" | "retries">,
+): Promise<string> {
+  const currentSize = await getQueueSize();
+
+  if (currentSize >= MAX_QUEUE_SIZE) {
+    const toRemove = Math.ceil(MAX_QUEUE_SIZE * 0.2);
+    const oldest = await getOldestActions(toRemove);
+    for (const old of oldest) {
+      await removeAction(old.id);
+    }
+  }
+
+  return enqueueAction(action);
+}
+
 export async function getQueuedActions(): Promise<QueuedAction[]> {
-  const db = await openDB();
+  const db = await getDB();
   return new Promise((resolve, reject) => {
     const tx = db.transaction(STORE_NAME, "readonly");
     const index = tx.objectStore(STORE_NAME).index("timestamp");
     const request = index.getAll();
-    request.onsuccess = () => { db.close(); resolve(request.result); };
-    request.onerror = () => { db.close(); reject(request.error); };
+    request.onsuccess = () => resolve(request.result);
+    request.onerror = () => reject(request.error);
   });
 }
 
 export async function removeAction(id: string): Promise<void> {
-  const db = await openDB();
+  const db = await getDB();
   return new Promise((resolve, reject) => {
     const tx = db.transaction(STORE_NAME, "readwrite");
     tx.objectStore(STORE_NAME).delete(id);
-    tx.oncomplete = () => { db.close(); resolve(); };
-    tx.onerror = () => { db.close(); reject(tx.error); };
+    tx.oncomplete = () => resolve();
+    tx.onerror = () => reject(tx.error);
   });
 }
 
 export async function updateActionRetries(id: string, retries: number): Promise<void> {
-  const db = await openDB();
+  const db = await getDB();
   return new Promise((resolve, reject) => {
     const tx = db.transaction(STORE_NAME, "readwrite");
     const store = tx.objectStore(STORE_NAME);
@@ -92,28 +141,41 @@ export async function updateActionRetries(id: string, retries: number): Promise<
         store.put({ ...getReq.result, retries });
       }
     };
-    tx.oncomplete = () => { db.close(); resolve(); };
-    tx.onerror = () => { db.close(); reject(tx.error); };
+    tx.oncomplete = () => resolve();
+    tx.onerror = () => reject(tx.error);
   });
 }
 
 export async function clearQueue(): Promise<void> {
-  const db = await openDB();
+  const db = await getDB();
   return new Promise((resolve, reject) => {
     const tx = db.transaction(STORE_NAME, "readwrite");
     tx.objectStore(STORE_NAME).clear();
-    tx.oncomplete = () => { db.close(); resolve(); };
-    tx.onerror = () => { db.close(); reject(tx.error); };
+    tx.oncomplete = () => resolve();
+    tx.onerror = () => reject(tx.error);
   });
 }
 
 export async function getQueueSize(): Promise<number> {
-  const db = await openDB();
+  const db = await getDB();
   return new Promise((resolve, reject) => {
     const tx = db.transaction(STORE_NAME, "readonly");
     const request = tx.objectStore(STORE_NAME).count();
-    request.onsuccess = () => { db.close(); resolve(request.result); };
-    request.onerror = () => { db.close(); reject(request.error); };
+    request.onsuccess = () => resolve(request.result);
+    request.onerror = () => reject(request.error);
+  });
+}
+
+export async function getOldestActions(count: number): Promise<QueuedAction[]> {
+  const db = await getDB();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(STORE_NAME, "readonly");
+    const index = tx.objectStore(STORE_NAME).index("timestamp");
+    const request = index.getAll();
+    request.onsuccess = () => {
+      resolve(request.result.slice(0, count));
+    };
+    request.onerror = () => reject(request.error);
   });
 }
 
@@ -159,9 +221,12 @@ export async function replayAction(action: QueuedAction): Promise<SyncResult> {
 
 /**
  * Replay all queued actions in timestamp order.
+ * Uses pooled connection for efficiency.
  */
 export async function replayAll(): Promise<SyncResult[]> {
   const actions = await getQueuedActions();
+  if (actions.length === 0) return [];
+
   const results: SyncResult[] = [];
   for (const action of actions) {
     results.push(await replayAction(action));

@@ -1,7 +1,9 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import {
   enqueueAction,
+  enqueueActionSafe,
   getQueuedActions,
+  getOldestActions,
   removeAction,
   clearQueue,
   getQueueSize,
@@ -260,6 +262,82 @@ describe("Offline Sync Engine", () => {
     it("should return empty array when queue is empty", async () => {
       const results = await replayAll();
       expect(results).toEqual([]);
+    });
+  });
+
+  describe("enqueueActionSafe", () => {
+    it("should enqueue when under limit", async () => {
+      const id = await enqueueActionSafe({
+        type: "vote",
+        method: "POST",
+        url: "/api/votes",
+        body: "{}",
+      });
+      expect(id).toContain("vote-");
+      expect(store.size).toBe(1);
+    });
+
+    it("should evict oldest entries when at max queue size", async () => {
+      // Fill queue to 100 entries
+      for (let i = 0; i < 100; i++) {
+        store.set(`vote-${i}`, {
+          id: `vote-${i}`,
+          type: "vote",
+          method: "POST",
+          url: "/api/votes",
+          body: "{}",
+          timestamp: i,
+          retries: 0,
+        });
+      }
+
+      const id = await enqueueActionSafe({
+        type: "comment",
+        method: "POST",
+        url: "/api/comments",
+        body: "{}",
+      });
+
+      expect(id).toContain("comment-");
+      // Should have evicted 20% (20) then added 1 = 81
+      expect(store.size).toBe(81);
+    });
+  });
+
+  describe("getOldestActions", () => {
+    it("should return N oldest actions by timestamp", async () => {
+      await enqueueAction({ type: "vote", method: "POST", url: "/api/votes", body: "1" });
+      await enqueueAction({ type: "comment", method: "POST", url: "/api/comments", body: "2" });
+      await enqueueAction({ type: "proposal", method: "POST", url: "/api/proposals", body: "3" });
+
+      const oldest = await getOldestActions(2);
+      expect(oldest.length).toBe(2);
+    });
+
+    it("should return all actions if count exceeds queue size", async () => {
+      await enqueueAction({ type: "vote", method: "POST", url: "/api/votes", body: "{}" });
+      const oldest = await getOldestActions(10);
+      expect(oldest.length).toBe(1);
+    });
+  });
+
+  describe("connection pooling", () => {
+    it("should perform multiple operations without error (reuses connection)", async () => {
+      await enqueueAction({ type: "vote", method: "POST", url: "/api/votes", body: "{}" });
+      await enqueueAction({ type: "comment", method: "POST", url: "/api/comments", body: "{}" });
+      const size = await getQueueSize();
+      const actions = await getQueuedActions();
+
+      expect(size).toBe(2);
+      expect(actions.length).toBe(2);
+    });
+
+    it("should not close db after each operation", async () => {
+      await enqueueAction({ type: "vote", method: "POST", url: "/api/votes", body: "{}" });
+      await getQueueSize();
+
+      // close should NOT be called between operations (pooled)
+      expect(mockDb.close).not.toHaveBeenCalled();
     });
   });
 });

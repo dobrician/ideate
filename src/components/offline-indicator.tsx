@@ -61,7 +61,7 @@ export function OfflineIndicator() {
     };
   }, []);
 
-  // Poll pending count
+  // Poll pending count with adaptive interval
   useEffect(() => {
     async function checkPending() {
       try {
@@ -72,10 +72,19 @@ export function OfflineIndicator() {
         // IndexedDB not available
       }
     }
+
     checkPending();
-    const interval = setInterval(checkPending, 5000);
-    return () => clearInterval(interval);
-  }, []);
+
+    // Adaptive: 2s offline, 10s when syncing, none when idle+online
+    const interval = online
+      ? (pendingCount > 0 ? 10000 : null)
+      : 2000;
+
+    if (interval === null) return;
+
+    const timerId = setInterval(checkPending, interval);
+    return () => clearInterval(timerId);
+  }, [online, pendingCount]);
 
   if (online && pendingCount === 0 && syncStatus === "idle") return null;
 
