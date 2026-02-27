@@ -98,6 +98,17 @@
 - **Low:** CSV export has no pagination; very large datasets could produce large response bodies (mitigated by limit params)
 - **Low:** Notification preference enum extension is backward-compatible (existing rows unaffected)
 
+## Post-Release CI Incident (2026-02-27)
+
+All Sprint 69 CI runs failed due to E2E test issues introduced in Goal 4 (E2E Hardening):
+
+1. **Parse error** — `mobile-nav.test.ts` spread `devices["Pixel 5"]` with `defaultBrowserType` inside `test.describe()`, which Playwright forbids. This blocked all 183 E2E tests.
+2. **Latent test bugs** — Once the parse error was fixed, 6 additional test issues surfaced: strict mode violations from `.or()` locator patterns, missing `.first()` on multi-match locators, incorrect mobile nav targeting, 40px touch targets in header mobile links, and unreliable click navigation checks.
+
+Fixed in 4 commits (`83883a0`, `5abf80d`, `329af08`, `d120bf8`). Also improved header mobile nav links to 44px for WCAG AAA compliance. CI fully green at run [#22504034441](https://github.com/dobrician/ideate/actions/runs/22504034441).
+
+See Sprint-Log.md for full incident audit and preventive rules.
+
 ## Next Priorities
 
 - Interactive CSV/PDF export with date range filters

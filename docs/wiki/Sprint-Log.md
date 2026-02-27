@@ -4,6 +4,19 @@ Reverse chronological. Click each sprint for full details.
 
 ---
 
+### CI Incident Audit — 2026-02-27 (Sprint 69 post-release E2E failures)
+
+| Field | Detail |
+|-------|--------|
+| **Failing runs** | [#22502059369](https://github.com/dobrician/ideate/actions/runs/22502059369) through [#22503697586](https://github.com/dobrician/ideate/actions/runs/22503697586) (4 consecutive failures) |
+| **Failed job** | E2E Tests — parse error blocked all 183 tests, then 2-6 test failures after parse fix |
+| **Root causes** | 1. `mobile-nav.test.ts` used `test.use({ ...devices["Pixel 5"] })` inside `test.describe()`, spreading the worker-scoped `defaultBrowserType` property which Playwright forbids inside describe blocks. This prevented ALL E2E tests from running. 2. Once parse error was fixed, 6 latent test bugs surfaced: (a) `.or()` locator pattern with `.first()` caused strict mode violations when both operands matched elements; (b) `getByText(/E2E Test Project/)` without `.first()` matched 12 accumulated seed projects; (c) `getByLabel(/mobile/i).first()` matched the header's "Mobile page links" nav (40px links) instead of the bottom MobileNav (44px links); (d) header mobile nav links were 40px, below the 44px WCAG AAA touch target; (e) project click used `getByText` matching a `<div>` instead of `getByRole("link")`; (f) admin page check on mobile matched hidden desktop nav elements. |
+| **Fixes** | 4 commits: `83883a0` (strip defaultBrowserType), `5abf80d` (strict mode + touch target fixes), `329af08` (correct nav selector + project click), `d120bf8` (mobile nav stabilization). Also fixed header.tsx mobile links to meet 44px WCAG AAA. |
+| **Verification** | Run [#22504034441](https://github.com/dobrician/ideate/actions/runs/22504034441) — all 7 jobs green (Lint, Type Check, Unit Tests, Build, Smoke Tests, E2E Tests, Docker Push). 170 passed, 2 flaky, 9 skipped, 0 failed. |
+| **Preventive rules** | 1. Never spread raw `devices[...]` inside `test.describe()` — always destructure out `defaultBrowserType` first (see `mobile.test.ts` for the correct pattern). 2. Never use `.or()` with Playwright locators when both operands could match visible elements — use URL/content checks instead. 3. Always use `.first()` on locators that could match multiple elements from seed data. 4. Scope mobile nav test selectors to specific `aria-label` values (e.g., `/mobile navigation/i`) to avoid ambiguity between header and bottom nav. 5. Use `waitForURL()` instead of checking `page.url()` after click for reliable navigation assertions. |
+
+---
+
 ### CI Incident Audit — 2026-02-27 (E2E strict mode + rate limit)
 
 | Field | Detail |
