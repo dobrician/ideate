@@ -62,14 +62,13 @@ jobs:
       - run: npm ci
       - run: mkdir -p data
       - run: npm run build
+      - name: Tar build output
+        run: tar cf nextjs-build.tar .next/ data/
       - name: Upload build artifact
         uses: actions/upload-artifact@v4
         with:
           name: nextjs-build
-          path: |
-            .next/
-            data/
-          include-hidden-files: true
+          path: nextjs-build.tar
           retention-days: 1
 
   smoke-tests:
@@ -99,6 +98,8 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: nextjs-build
+      - name: Extract build artifact
+        run: tar xf nextjs-build.tar
       - name: Start server and run smoke tests
         run: |
           npm start &
@@ -141,6 +142,8 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: nextjs-build
+      - name: Extract build artifact
+        run: tar xf nextjs-build.tar
       - name: Start server and run E2E tests
         run: |
           npm start &
