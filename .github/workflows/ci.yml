@@ -69,6 +69,7 @@ jobs:
           path: |
             .next/
             data/
+          include-hidden-files: true
           retention-days: 1
 
   smoke-tests:
