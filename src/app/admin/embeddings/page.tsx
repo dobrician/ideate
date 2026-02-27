@@ -15,9 +15,11 @@ import {
   Brain,
   Clock,
   RefreshCw,
+  Activity,
 } from "lucide-react";
 import { getTranslations } from "@/lib/i18n-server";
 import { getEmbeddingStats, getModelDistribution, getEmbeddingMigrationStatus } from "@/lib/embeddings";
+import { getEmbeddingQualityScore, getEmbeddingDimensionStats } from "@/lib/embeddings/quality";
 
 export default async function EmbeddingsPage() {
   const user = await getCurrentUser();
@@ -37,10 +39,12 @@ export default async function EmbeddingsPage() {
     );
   }
 
-  const [stats, distribution, migrationStatus] = await Promise.all([
+  const [stats, distribution, migrationStatus, qualityScore, dimensionStats] = await Promise.all([
     getEmbeddingStats(),
     getModelDistribution(),
     getEmbeddingMigrationStatus(),
+    getEmbeddingQualityScore(),
+    getEmbeddingDimensionStats(),
   ]);
 
   const coveragePercent = (type: string) => {
@@ -313,6 +317,80 @@ export default async function EmbeddingsPage() {
                     </div>
                     <span className="w-20 text-right text-muted-foreground">{d.count} ({d.percentage}%)</span>
                   </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Embedding Quality Score */}
+      <div className="mt-6 rounded-lg border bg-card">
+        <div className="p-4 border-b">
+          <h2 className="font-semibold flex items-center gap-2">
+            <Activity className="h-4 w-4" />
+            {t("admin.embeddingQuality")}
+          </h2>
+          <p className="text-xs text-muted-foreground mt-1">{t("admin.embeddingQualityDesc")}</p>
+        </div>
+        <div className="p-4">
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 mb-4">
+            <div className="rounded-lg border p-3">
+              <div className="text-sm text-muted-foreground mb-1">{t("admin.qualityScore")}</div>
+              <div className={`text-2xl font-bold ${qualityScore.grade === "good" ? "text-green-600 dark:text-green-400" : qualityScore.grade === "fair" ? "text-amber-600 dark:text-amber-400" : "text-red-600 dark:text-red-400"}`}>
+                {qualityScore.overallScore}
+                <span className="text-sm font-normal ml-1">/ 100</span>
+              </div>
+              <div className={`text-xs mt-1 ${qualityScore.grade === "good" ? "text-green-600 dark:text-green-400" : qualityScore.grade === "fair" ? "text-amber-600 dark:text-amber-400" : "text-red-600 dark:text-red-400"}`}>
+                {t(`admin.quality${qualityScore.grade.charAt(0).toUpperCase() + qualityScore.grade.slice(1)}`)}
+              </div>
+            </div>
+            <div className="rounded-lg border p-3">
+              <div className="text-sm text-muted-foreground mb-1">{t("admin.selfSimilarity")}</div>
+              <div className="text-xl font-bold">{qualityScore.selfSimilarity.toFixed(3)}</div>
+            </div>
+            <div className="rounded-lg border p-3">
+              <div className="text-sm text-muted-foreground mb-1">{t("admin.crossSimilarity")}</div>
+              <div className="text-xl font-bold">{qualityScore.crossSimilarity.toFixed(3)}</div>
+            </div>
+            <div className="rounded-lg border p-3">
+              <div className="text-sm text-muted-foreground mb-1">{t("admin.sampleSize")}</div>
+              <div className="text-xl font-bold">{qualityScore.sampleSize}</div>
+            </div>
+          </div>
+
+          {/* Per-model quality */}
+          {Object.keys(qualityScore.byModel).length > 0 && (
+            <div className="space-y-2">
+              <h3 className="text-sm font-semibold">{t("admin.qualityTrend")}</h3>
+              {Object.entries(qualityScore.byModel).map(([model, data]) => (
+                <div key={model} className="flex items-center gap-3 text-sm">
+                  <span className="font-mono w-40 truncate">{model}</span>
+                  <div className="flex-1 h-2 rounded-full bg-muted overflow-hidden">
+                    <div
+                      className={`h-full rounded-full ${data.avgSimilarity >= 0.3 ? "bg-green-500" : data.avgSimilarity >= 0.1 ? "bg-amber-500" : "bg-red-500"}`}
+                      style={{ width: `${Math.min(100, Math.max(0, data.avgSimilarity * 100))}%` }}
+                    />
+                  </div>
+                  <span className="w-24 text-right text-muted-foreground">
+                    {data.avgSimilarity.toFixed(3)} ({data.count})
+                  </span>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Dimension consistency */}
+          {dimensionStats.length > 0 && (
+            <div className="mt-4">
+              <h3 className="text-sm font-semibold mb-2">Dimensions</h3>
+              <div className="flex flex-wrap gap-2">
+                {dimensionStats.map((d, i) => (
+                  <span key={i} className="inline-flex items-center gap-1 rounded-full border px-3 py-1 text-xs">
+                    <span className="font-mono">{d.model}</span>
+                    <span className="text-muted-foreground">{d.dimensions}d</span>
+                    <span className="font-medium">({d.count})</span>
+                  </span>
                 ))}
               </div>
             </div>
