@@ -48,3 +48,7 @@ CREATE INDEX IF NOT EXISTS idx_proposal_workflow_state_workflow ON proposal_work
 CREATE INDEX IF NOT EXISTS idx_approval_records_proposal ON approval_records(proposal_id);
 --> statement-breakpoint
 CREATE INDEX IF NOT EXISTS idx_approval_records_stage ON approval_records(stage_id);
+--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS idx_workflows_project ON workflows(project_id);
+--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS idx_approval_records_user ON approval_records(user_id);

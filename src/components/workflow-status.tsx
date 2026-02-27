@@ -31,9 +31,9 @@ export function WorkflowStatus({ proposalId, state, canAdvance, canReject }: Wor
   if (!state) return null;
 
   const statusColor = {
-    active: "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300",
-    completed: "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300",
-    rejected: "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300",
+    active: "bg-blue-100 text-blue-800 dark:bg-blue-950 dark:text-blue-200",
+    completed: "bg-green-100 text-green-800 dark:bg-green-950 dark:text-green-200",
+    rejected: "bg-red-100 text-red-800 dark:bg-red-950 dark:text-red-200",
   }[state.status];
 
   async function handleAdvance() {
@@ -70,7 +70,14 @@ export function WorkflowStatus({ proposalId, state, canAdvance, canReject }: Wor
       </div>
 
       {/* Progress bar */}
-      <div className="flex items-center gap-1">
+      <div
+        className="flex items-center gap-1"
+        role="progressbar"
+        aria-valuenow={state.stageIndex + 1}
+        aria-valuemin={1}
+        aria-valuemax={state.totalStages}
+        aria-label={`Stage ${state.stageIndex + 1} of ${state.totalStages}`}
+      >
         {Array.from({ length: state.totalStages }).map((_, i) => (
           <div
             key={i}

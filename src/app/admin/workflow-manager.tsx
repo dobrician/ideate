@@ -126,7 +126,7 @@ export function WorkflowManager({ initialWorkflows, projects }: WorkflowManagerP
             <select
               value={projectId}
               onChange={(e) => setProjectId(e.target.value)}
-              className="w-full rounded-md border bg-background px-3 py-2 text-sm"
+              className="w-full rounded-md border bg-background text-foreground px-3 py-2 text-sm"
             >
               <option value="">{t("workflow.selectProject")}</option>
               {availableProjects.map((p) => (
@@ -140,7 +140,7 @@ export function WorkflowManager({ initialWorkflows, projects }: WorkflowManagerP
           <label className="mb-2 block text-sm font-medium">{t("workflow.stages")}</label>
           <div className="space-y-2">
             {stages.map((stage, i) => (
-              <div key={i} className="flex items-center gap-2 rounded border p-2">
+              <div key={i} className="space-y-2 rounded border p-2 sm:flex sm:items-center sm:gap-2 sm:space-y-0">
                 <span className="w-6 text-center text-xs text-muted-foreground">{i + 1}</span>
                 <Input
                   value={stage.name}
@@ -148,16 +148,21 @@ export function WorkflowManager({ initialWorkflows, projects }: WorkflowManagerP
                   placeholder={t("workflow.stageNamePlaceholder")}
                   className="flex-1"
                 />
-                <div className="flex gap-1">
+                <div className="flex flex-wrap gap-1">
                   {AVAILABLE_ROLES.map((role) => (
-                    <Badge
+                    <button
                       key={role}
-                      variant={stage.roles.includes(role) ? "default" : "outline"}
-                      className="cursor-pointer select-none py-0.5 text-xs"
+                      type="button"
                       onClick={() => toggleRole(i, role)}
+                      aria-pressed={stage.roles.includes(role)}
+                      className={`inline-flex items-center rounded-full border px-2 py-1 text-xs font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
+                        stage.roles.includes(role)
+                          ? "bg-primary text-primary-foreground border-primary"
+                          : "border-border text-muted-foreground hover:bg-accent"
+                      }`}
                     >
                       {role}
-                    </Badge>
+                    </button>
                   ))}
                 </div>
                 {stages.length > 1 && (
