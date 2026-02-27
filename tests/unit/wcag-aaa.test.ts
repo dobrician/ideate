@@ -161,3 +161,85 @@ describe("WCAG AAA — Dialog close button touch target", () => {
     expect(content).toContain("Close");
   });
 });
+
+describe("WCAG AAA — Sprint 67: Form error forced-colors", () => {
+  const css = readFileSync(resolve("src/app/globals.css"), "utf-8");
+  const forcedSection = css.split("@media (forced-colors: active)")[1] ?? "";
+
+  it("form validation errors get LinkText color in forced-colors", () => {
+    expect(forcedSection).toContain('[role="alert"]');
+    expect(forcedSection).toContain("LinkText");
+  });
+
+  it("aria-invalid inputs get outlined in forced-colors", () => {
+    expect(forcedSection).toContain('[aria-invalid="true"]');
+  });
+
+  it("tooltips and popovers get border in forced-colors", () => {
+    expect(forcedSection).toContain('[role="tooltip"]');
+    expect(forcedSection).toContain('[data-slot="tooltip-content"]');
+    expect(forcedSection).toContain('[data-slot="popover-content"]');
+  });
+
+  it("pressed vote buttons get Highlight outline in forced-colors", () => {
+    expect(forcedSection).toContain('[aria-pressed="true"]');
+    expect(forcedSection).toContain("Highlight");
+  });
+
+  it("table elements get border in forced-colors", () => {
+    expect(forcedSection).toMatch(/\btable\b/);
+    expect(forcedSection).toContain("th,");
+    expect(forcedSection).toContain("td {");
+  });
+
+  it("switch and checkbox controls get border in forced-colors", () => {
+    expect(forcedSection).toContain('[role="switch"]');
+    expect(forcedSection).toContain('[role="checkbox"]');
+  });
+
+  it("checked switch/checkbox get Highlight outline", () => {
+    expect(forcedSection).toContain('[role="switch"][aria-checked="true"]');
+    expect(forcedSection).toContain('[role="checkbox"][aria-checked="true"]');
+  });
+
+  it("separators get border-color in forced-colors", () => {
+    expect(forcedSection).toContain('[role="separator"]');
+  });
+
+  it("status role elements get border in forced-colors", () => {
+    expect(forcedSection).toContain('[role="status"]');
+  });
+});
+
+describe("WCAG AAA — Sprint 67: High contrast chart palette", () => {
+  const css = readFileSync(resolve("src/app/globals.css"), "utf-8");
+
+  it("should have prefers-contrast: more media query", () => {
+    expect(css).toContain("@media (prefers-contrast: more)");
+  });
+
+  it("chart variables override in high contrast mode", () => {
+    const contrastSection = css.split("@media (prefers-contrast: more)")[1] ?? "";
+    expect(contrastSection).toContain("--chart-1:");
+    expect(contrastSection).toContain("--chart-2:");
+    expect(contrastSection).toContain("--chart-3:");
+  });
+
+  it("dark mode chart overrides exist in high contrast", () => {
+    const contrastSection = css.split("@media (prefers-contrast: more)")[1] ?? "";
+    expect(contrastSection).toContain(".dark");
+  });
+});
+
+describe("WCAG AAA — Skip navigation", () => {
+  it("skip nav component targets #main-content", () => {
+    const content = readFileSync(resolve("src/components/skip-nav.tsx"), "utf-8");
+    expect(content).toContain('#main-content');
+  });
+
+  it("skip nav link has 44px minimum touch target", () => {
+    const content = readFileSync(resolve("src/components/skip-nav.tsx"), "utf-8");
+    expect(content).toContain("min-h-[44px]");
+    expect(content).toContain("min-w-[44px]");
+  });
+});

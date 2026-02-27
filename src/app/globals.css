@@ -176,6 +176,74 @@
   [role="tab"][aria-selected="true"] {
     outline: 2px solid Highlight;
   }
+  /* Form validation errors */
+  [role="alert"],
+  .text-destructive,
+  [aria-invalid="true"] {
+    border-color: LinkText;
+    color: LinkText;
+  }
+  [aria-invalid="true"] {
+    outline: 2px solid LinkText;
+  }
+  /* Tooltips and popovers */
+  [role="tooltip"],
+  [data-slot="tooltip-content"],
+  [data-slot="popover-content"] {
+    border: 2px solid ButtonText;
+  }
+  /* Vote bar containers — color-dependent UI */
+  .vote-bar-pro,
+  .vote-bar-contra {
+    border: 1px solid ButtonText;
+  }
+  [aria-pressed="true"] {
+    outline: 2px solid Highlight;
+    outline-offset: -2px;
+  }
+  /* Tables */
+  table,
+  th,
+  td {
+    border: 1px solid ButtonText;
+  }
+  /* Switch / checkbox controls */
+  [role="switch"],
+  [role="checkbox"] {
+    border: 1px solid ButtonText;
+  }
+  [role="switch"][aria-checked="true"],
+  [role="checkbox"][aria-checked="true"] {
+    outline: 2px solid Highlight;
+    outline-offset: -1px;
+  }
+  /* Separators */
+  [role="separator"],
+  hr {
+    border-color: ButtonText;
+  }
+  /* Alert/notification banners */
+  [role="status"] {
+    border: 1px solid ButtonText;
+  }
+}
+
+/* WCAG AAA: high contrast preference — chart palette override */
+@media (prefers-contrast: more) {
+  :root {
+    --chart-1: oklch(0.3 0 0);
+    --chart-2: oklch(0.5 0 0);
+    --chart-3: oklch(0.7 0 0);
+    --chart-4: oklch(0.15 0 0);
+    --chart-5: oklch(0.85 0 0);
+  }
+  .dark {
+    --chart-1: oklch(0.95 0 0);
+    --chart-2: oklch(0.75 0 0);
+    --chart-3: oklch(0.55 0 0);
+    --chart-4: oklch(0.85 0 0);
+    --chart-5: oklch(0.35 0 0);
+  }
 }
 
 /* WCAG AAA: enhanced focus indicators */
