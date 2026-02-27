@@ -211,6 +211,13 @@
       "when": 1771280800000,
       "tag": "0029_sprint58_ai_lifecycle",
       "breakpoints": true
+    },
+    {
+      "idx": 30,
+      "version": "6",
+      "when": 1771281200000,
+      "tag": "0030_sprint59_search_discovery",
+      "breakpoints": true
     }
   ]
 }

@@ -424,3 +424,41 @@ export const embeddings = pgTable("embeddings", {
   dimensions: integer("dimensions").notNull(),
   createdAt: ts(), updatedAt: tsUp(),
 });
+
+// ─── Search Analytics ────────────────────────────────────────────────────
+
+export const searchAnalytics = pgTable("search_analytics", {
+  id: pk(),
+  userId: text("user_id").references(() => users.id, { onDelete: "set null" }),
+  query: text("query").notNull(),
+  mode: text("mode", { enum: ["fts", "semantic", "hybrid"] }).notNull().default("fts"),
+  filters: text("filters"), // JSON
+  resultCount: integer("result_count").notNull().default(0),
+  responseTimeMs: integer("response_time_ms"),
+  clickedResultId: text("clicked_result_id"),
+  clickedResultType: text("clicked_result_type", { enum: ["project", "proposal", "comment"] }),
+  createdAt: ts(),
+});
+
+// ─── Saved Searches ──────────────────────────────────────────────────────
+
+export const savedSearches = pgTable("saved_searches", {
+  id: pk(),
+  userId: text("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  name: text("name").notNull(),
+  query: text("query").notNull(),
+  mode: text("mode", { enum: ["fts", "semantic", "hybrid"] }).notNull().default("fts"),
+  filters: text("filters"), // JSON
+  createdAt: ts(),
+});
+
+// ─── Search Suggestions ──────────────────────────────────────────────────
+
+export const searchSuggestions = pgTable("search_suggestions", {
+  id: pk(),
+  query: text("query").notNull().unique(),
+  frequency: integer("frequency").notNull().default(1),
+  lastSearchedAt: timestamp("last_searched_at").defaultNow(),
+  avgResults: integer("avg_results").notNull().default(0),
+  createdAt: ts(),
+});

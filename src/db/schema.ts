@@ -414,3 +414,41 @@ export const notificationChannelPrefs = sqliteTable("notification_channel_prefs"
   createdAt: ts(),
   updatedAt: tsUp(),
 });
+
+// ─── Search Analytics ────────────────────────────────────────────────────
+
+export const searchAnalytics = sqliteTable("search_analytics", {
+  id: pk(),
+  userId: text("user_id").references(() => users.id, { onDelete: "set null" }),
+  query: text("query").notNull(),
+  mode: text("mode", { enum: ["fts", "semantic", "hybrid"] }).notNull().default("fts"),
+  filters: text("filters"), // JSON
+  resultCount: integer("result_count").notNull().default(0),
+  responseTimeMs: integer("response_time_ms"),
+  clickedResultId: text("clicked_result_id"),
+  clickedResultType: text("clicked_result_type", { enum: ["project", "proposal", "comment"] }),
+  createdAt: ts(),
+});
+
+// ─── Saved Searches ──────────────────────────────────────────────────────
+
+export const savedSearches = sqliteTable("saved_searches", {
+  id: pk(),
+  userId: text("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  name: text("name").notNull(),
+  query: text("query").notNull(),
+  mode: text("mode", { enum: ["fts", "semantic", "hybrid"] }).notNull().default("fts"),
+  filters: text("filters"), // JSON
+  createdAt: ts(),
+});
+
+// ─── Search Suggestions ──────────────────────────────────────────────────
+
+export const searchSuggestions = sqliteTable("search_suggestions", {
+  id: pk(),
+  query: text("query").notNull().unique(),
+  frequency: integer("frequency").notNull().default(1),
+  lastSearchedAt: integer("last_searched_at", { mode: "timestamp" }).default(sql`(unixepoch())`),
+  avgResults: integer("avg_results").notNull().default(0),
+  createdAt: ts(),
+});

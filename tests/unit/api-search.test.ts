@@ -4,12 +4,31 @@ import { NextRequest } from "next/server";
 // ── Mocks ──────────────────────────────────────────────────────────────────
 
 const mockSearch = vi.fn();
+const mockFilteredSearch = vi.fn();
+const mockTrackSearch = vi.fn().mockResolvedValue(undefined);
 const mockGetCurrentUser = vi.fn();
 const mockCheckRateLimit = vi.fn().mockReturnValue({ allowed: true, remaining: 59, retryAfterMs: 0 });
 
-vi.mock("@/lib/search", () => ({ search: (...a: unknown[]) => mockSearch(...a) }));
+vi.mock("@/lib/search", () => ({
+  search: (...a: unknown[]) => mockSearch(...a),
+  filteredSearch: (...a: unknown[]) => mockFilteredSearch(...a),
+  trackSearch: (...a: unknown[]) => mockTrackSearch(...a),
+}));
+vi.mock("@/lib/semantic-search", () => ({
+  semanticSearch: vi.fn().mockResolvedValue([]),
+}));
 vi.mock("@/lib/auth", () => ({ getCurrentUser: () => mockGetCurrentUser() }));
 vi.mock("@/lib/rate-limit", () => ({ checkRateLimit: (...a: unknown[]) => mockCheckRateLimit(...a) }));
+vi.mock("@/lib/request-utils", () => ({ getClientIp: () => "127.0.0.1" }));
+vi.mock("@/lib/logger", () => ({
+  logger: {
+    child: () => ({ info: vi.fn(), warn: vi.fn(), error: vi.fn() }),
+    info: vi.fn(), warn: vi.fn(), error: vi.fn(),
+  },
+}));
+vi.mock("crypto", () => ({
+  randomUUID: () => "test-analytics-uuid",
+}));
 
 // ── Import SUT ─────────────────────────────────────────────────────────────
 
@@ -54,14 +73,19 @@ describe("Search API Route", () => {
       const response = await GET(req("/api/search?q="));
       const data = await response.json();
       expect(response.status).toBe(200);
-      expect(data).toEqual({ results: [], query: "", mode: "fts" });
+      expect(data.results).toEqual([]);
+      expect(data.query).toBe("");
+      expect(data.mode).toBe("fts");
       expect(mockSearch).not.toHaveBeenCalled();
     });
 
     it("should return empty results for query shorter than 2 chars", async () => {
       const response = await GET(req("/api/search?q=a"));
       expect(response.status).toBe(200);
-      expect((await response.json())).toEqual({ results: [], query: "a", mode: "fts" });
+      const data = await response.json();
+      expect(data.results).toEqual([]);
+      expect(data.query).toBe("a");
+      expect(data.mode).toBe("fts");
       expect(mockSearch).not.toHaveBeenCalled();
     });
 
@@ -74,7 +98,9 @@ describe("Search API Route", () => {
       const response = await GET(req("/api/search?q=React"));
       const data = await response.json();
       expect(response.status).toBe(200);
-      expect(data).toEqual({ results: mockResults, query: "React", mode: "fts" });
+      expect(data.query).toBe("React");
+      expect(data.mode).toBe("fts");
+      expect(data.results).toHaveLength(2);
       expect(mockSearch).toHaveBeenCalledWith("React", 20);
     });
 
@@ -112,7 +138,9 @@ describe("Search API Route", () => {
       const response = await GET(req("/api/search"));
       const data = await response.json();
       expect(response.status).toBe(200);
-      expect(data).toEqual({ results: [], query: "", mode: "fts" });
+      expect(data.results).toEqual([]);
+      expect(data.query).toBe("");
+      expect(data.mode).toBe("fts");
       expect(mockSearch).not.toHaveBeenCalled();
     });
 
@@ -159,7 +187,9 @@ describe("Search API Route", () => {
         { id: "proj-1", title: "Q4 Roadmap", description: "Planning for Q4", type: "project", snippet: "Q4 <mark>Roadmap</mark>" },
       ]);
       const response = await GET(req("/api/search?q=roadmap"));
-      expect((await response.json()).results[0].type).toBe("project");
+      const data = await response.json();
+      expect(data.results[0].type).toBe("project");
+      expect(data.results[0].score).toBeDefined();
     });
 
     it("should return proposal results", async () => {

@@ -20,6 +20,18 @@ vi.mock("better-sqlite3", () => {
   };
 });
 
+// Mock @/db and related modules needed by barrel-exported sub-modules (analytics, suggestions, saved)
+vi.mock("@/db", () => ({
+  db: { select: vi.fn(), insert: vi.fn(), update: vi.fn(), delete: vi.fn() },
+}));
+vi.mock("@/db/schema", () => ({}));
+vi.mock("@/lib/logger", () => ({
+  logger: {
+    child: () => ({ info: vi.fn(), warn: vi.fn(), error: vi.fn() }),
+    info: vi.fn(), warn: vi.fn(), error: vi.fn(),
+  },
+}));
+
 // ── Import SUT ─────────────────────────────────────────────────────────────
 
 import { search, rebuildSearchIndex } from "@/lib/search";
