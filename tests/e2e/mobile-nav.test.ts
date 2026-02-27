@@ -1,8 +1,10 @@
 import { test, expect, devices } from "@playwright/test";
 import { seedTestData, loginAsTestUser } from "./helpers";
 
+const { defaultBrowserType: _, ...pixel5 } = devices["Pixel 5"];
+
 test.describe("Mobile Navigation", () => {
-  test.use({ ...devices["Pixel 5"] });
+  test.use({ ...pixel5 });
 
   test("mobile nav is accessible at small viewport", async ({ page }) => {
     const seed = await seedTestData(page.request);
