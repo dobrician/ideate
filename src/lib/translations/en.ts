@@ -328,6 +328,25 @@ export const en: Record<string, string> = {
   "admin.zeroResultSearches": "Zero-Result Searches",
   "admin.noData": "No data available",
 
+  // Embeddings admin
+  "admin.embeddings": "Embeddings",
+  "admin.embeddingsDesc": "Vector embedding configuration and coverage",
+  "admin.embeddingModel": "Active Model",
+  "admin.embeddingApiStatus": "API Status",
+  "admin.embeddingApiAvailable": "Connected",
+  "admin.embeddingApiUnavailable": "Using local fallback",
+  "admin.embeddingTotal": "Total Embeddings",
+  "admin.embeddingCoverage": "Coverage",
+  "admin.embeddingByType": "By Entity Type",
+  "admin.embeddingByModel": "By Model",
+  "admin.embeddingProjects": "Projects",
+  "admin.embeddingProposals": "Proposals",
+  "admin.embeddingComments": "Comments",
+  "admin.embeddingCoveragePercent": "{covered}/{total} ({percent}%)",
+  "admin.embeddingModelInfo": "Model Information",
+  "admin.embeddingLocalDesc": "TF-IDF local embeddings (256 dimensions, no API key required)",
+  "admin.embeddingOpenaiDesc": "OpenAI {model} (high accuracy, requires API key)",
+
   // Auth
   "auth.signIn": "Sign in to Ideate",
   "auth.signInDesc": "Sign in with your email and password",

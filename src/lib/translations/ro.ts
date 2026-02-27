@@ -338,6 +338,25 @@ export const ro: Record<string, string> = {
   "admin.zeroResultSearches": "Căutări Fără Rezultate",
   "admin.noData": "Nu sunt date disponibile",
 
+  // Embeddings admin
+  "admin.embeddings": "Embeddings",
+  "admin.embeddingsDesc": "Configurare și acoperire embeddings vectoriale",
+  "admin.embeddingModel": "Model activ",
+  "admin.embeddingApiStatus": "Status API",
+  "admin.embeddingApiAvailable": "Conectat",
+  "admin.embeddingApiUnavailable": "Se folosește varianta locală",
+  "admin.embeddingTotal": "Total Embeddings",
+  "admin.embeddingCoverage": "Acoperire",
+  "admin.embeddingByType": "Pe tip de entitate",
+  "admin.embeddingByModel": "Pe model",
+  "admin.embeddingProjects": "Proiecte",
+  "admin.embeddingProposals": "Propuneri",
+  "admin.embeddingComments": "Comentarii",
+  "admin.embeddingCoveragePercent": "{covered}/{total} ({percent}%)",
+  "admin.embeddingModelInfo": "Informații model",
+  "admin.embeddingLocalDesc": "Embeddings locale TF-IDF (256 dimensiuni, nu necesită cheie API)",
+  "admin.embeddingOpenaiDesc": "OpenAI {model} (precizie ridicată, necesită cheie API)",
+
   // Auth
   "auth.signIn": "Autentifică-te pe Ideate",
   "auth.signInDesc": "Autentifică-te cu email și parolă",

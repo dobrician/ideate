@@ -5,8 +5,8 @@
  */
 
 import { db } from "@/db";
-import { embeddings } from "@/db/schema";
-import { eq, and } from "drizzle-orm";
+import { embeddings, projects, proposals } from "@/db/schema";
+import { eq, and, count } from "drizzle-orm";
 import { logger } from "@/lib/logger";
 
 const log = logger.child({ module: "embeddings" });
@@ -229,6 +229,44 @@ export async function findSimilar(
     .slice(0, limit);
 
   return scored;
+}
+
+/**
+ * Get embedding coverage statistics by entity type and model.
+ */
+export async function getEmbeddingStats(): Promise<{
+  total: number;
+  byType: Record<string, number>;
+  byModel: Record<string, number>;
+  entityTotals: Record<string, number>;
+  apiAvailable: boolean;
+  activeModel: string;
+}> {
+  const [rows, [projectCount], [proposalCount]] = await Promise.all([
+    db.select({ entityType: embeddings.entityType, model: embeddings.model }).from(embeddings),
+    db.select({ count: count() }).from(projects),
+    db.select({ count: count() }).from(proposals),
+  ]);
+
+  const byType: Record<string, number> = {};
+  const byModel: Record<string, number> = {};
+
+  for (const row of rows) {
+    byType[row.entityType] = (byType[row.entityType] ?? 0) + 1;
+    byModel[row.model] = (byModel[row.model] ?? 0) + 1;
+  }
+
+  return {
+    total: rows.length,
+    byType,
+    byModel,
+    entityTotals: {
+      project: projectCount?.count ?? 0,
+      proposal: proposalCount?.count ?? 0,
+    },
+    apiAvailable: isEmbeddingApiAvailable(),
+    activeModel: isEmbeddingApiAvailable() ? OPENAI_EMBEDDING_MODEL : "tfidf",
+  };
 }
 
 // ─── Internal helpers ─────────────────────────────────────────────────
