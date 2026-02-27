@@ -363,6 +363,24 @@ export const ro: Record<string, string> = {
   "admin.embeddingDays": "zile",
   "admin.embeddingStaleWarning": "{count} embedding-uri sunt vechi și vor fi regenerate la următorul cron.",
 
+  // Search feedback analytics
+  "admin.searchFeedback": "Feedback Căutare",
+  "admin.searchFeedbackDesc": "Feedback-ul utilizatorilor pentru rezultatele căutării — scoruri de calitate pe mod, tendințe și rezultate slab evaluate",
+  "admin.feedbackTotal": "Total Feedback",
+  "admin.feedbackPositiveRate": "Rată Pozitivă",
+  "admin.feedbackByMode": "Calitate după Modul de Căutare",
+  "admin.feedbackTrend": "Tendință Feedback (30 zile)",
+  "admin.feedbackLowRated": "Rezultate Slab Evaluate",
+  "admin.feedbackPositive": "Pozitiv",
+  "admin.feedbackNegative": "Negativ",
+  "admin.feedbackNoLowRated": "Niciun rezultat slab evaluat în ultimele 30 de zile.",
+  "admin.feedbackResultType": "Tip",
+  "admin.feedbackQuery": "Interogare",
+  "admin.feedbackRatio": "Raport",
+  "admin.feedbackModeFts": "Text Complet",
+  "admin.feedbackModeSemantic": "Semantic",
+  "admin.feedbackModeHybrid": "Hibrid",
+
   // Auth
   "auth.signIn": "Autentifică-te pe Ideate",
   "auth.signInDesc": "Autentifică-te cu email și parolă",

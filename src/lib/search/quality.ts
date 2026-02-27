@@ -72,6 +72,82 @@ export async function recordSearchFeedback(params: {
 /**
  * Get search quality stats: positive/negative feedback counts by mode.
  */
+/**
+ * Get daily feedback trend (aggregated by day) for charting.
+ */
+export async function getSearchFeedbackTrend(daysBack = 30): Promise<
+  Array<{ date: string; positive: number; negative: number; total: number }>
+> {
+  const cutoff = Math.floor(Date.now() / 1000) - daysBack * 86400;
+
+  try {
+    const rows = await db
+      .select({
+        date: sql<string>`DATE(${searchFeedback.createdAt})`.as("date"),
+        rating: searchFeedback.rating,
+        count: sql<number>`COUNT(*)`.as("count"),
+      })
+      .from(searchFeedback)
+      .where(gte(searchFeedback.createdAt, new Date(cutoff * 1000)))
+      .groupBy(sql`DATE(${searchFeedback.createdAt})`, searchFeedback.rating)
+      .orderBy(sql`DATE(${searchFeedback.createdAt})`);
+
+    const byDate: Record<string, { positive: number; negative: number; total: number }> = {};
+
+    for (const row of rows) {
+      const d = row.date ?? "unknown";
+      if (!byDate[d]) byDate[d] = { positive: 0, negative: 0, total: 0 };
+      if (row.rating > 0) byDate[d].positive += row.count;
+      else byDate[d].negative += row.count;
+      byDate[d].total += row.count;
+    }
+
+    return Object.entries(byDate).map(([date, data]) => ({ date, ...data }));
+  } catch {
+    return [];
+  }
+}
+
+/**
+ * Get low-rated search results (most negative feedback).
+ */
+export async function getLowRatedResults(limit = 20, daysBack = 30): Promise<
+  Array<{ resultId: string; resultType: string; negativeCount: number; positiveCount: number; query: string }>
+> {
+  const cutoff = Math.floor(Date.now() / 1000) - daysBack * 86400;
+
+  try {
+    const rows = await db
+      .select({
+        resultId: searchFeedback.resultId,
+        resultType: searchFeedback.resultType,
+        negativeCount: sql<number>`SUM(CASE WHEN ${searchFeedback.rating} < 0 THEN 1 ELSE 0 END)`.as("neg"),
+        positiveCount: sql<number>`SUM(CASE WHEN ${searchFeedback.rating} > 0 THEN 1 ELSE 0 END)`.as("pos"),
+        query: sql<string>`MIN(${searchAnalytics.query})`.as("query"),
+      })
+      .from(searchFeedback)
+      .innerJoin(searchAnalytics, eq(searchFeedback.analyticsId, searchAnalytics.id))
+      .where(gte(searchFeedback.createdAt, new Date(cutoff * 1000)))
+      .groupBy(searchFeedback.resultId, searchFeedback.resultType)
+      .having(sql`SUM(CASE WHEN ${searchFeedback.rating} < 0 THEN 1 ELSE 0 END) > 0`)
+      .orderBy(desc(sql`neg`))
+      .limit(limit);
+
+    return rows.map((r) => ({
+      resultId: r.resultId,
+      resultType: r.resultType,
+      negativeCount: r.negativeCount,
+      positiveCount: r.positiveCount,
+      query: r.query,
+    }));
+  } catch {
+    return [];
+  }
+}
+
+/**
+ * Get search quality stats: positive/negative feedback counts by mode.
+ */
 export async function getSearchQualityStats(daysBack = 30): Promise<{
   totalFeedback: number;
   positiveRate: number;

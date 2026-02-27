@@ -30,7 +30,7 @@ vi.mock("@/lib/logger", () => ({
   },
 }));
 
-import { getRrfK, recordSearchFeedback, getSearchQualityStats } from "@/lib/search/quality";
+import { getRrfK, recordSearchFeedback, getSearchQualityStats, getSearchFeedbackTrend, getLowRatedResults } from "@/lib/search/quality";
 
 beforeEach(() => {
   vi.clearAllMocks();
@@ -180,6 +180,151 @@ describe("Search Quality", () => {
       expect(stats.positiveRate).toBeCloseTo(88.24, 1);
       expect(stats.byMode.fts).toEqual({ positive: 10, negative: 2, total: 12 });
       expect(stats.byMode.hybrid).toEqual({ positive: 5, negative: 0, total: 5 });
+    });
+  });
+
+  describe("getSearchFeedbackTrend", () => {
+    it("returns empty array on error", async () => {
+      mockSelect.mockReturnValue({
+        from: () => ({
+          where: () => ({
+            groupBy: () => ({
+              orderBy: () => Promise.reject(new Error("db error")),
+            }),
+          }),
+        }),
+      });
+
+      const trend = await getSearchFeedbackTrend();
+      expect(trend).toEqual([]);
+    });
+
+    it("aggregates daily feedback", async () => {
+      mockSelect.mockReturnValue({
+        from: () => ({
+          where: () => ({
+            groupBy: () => ({
+              orderBy: () =>
+                Promise.resolve([
+                  { date: "2026-02-25", rating: 1, count: 5 },
+                  { date: "2026-02-25", rating: -1, count: 2 },
+                  { date: "2026-02-26", rating: 1, count: 8 },
+                ]),
+            }),
+          }),
+        }),
+      });
+
+      const trend = await getSearchFeedbackTrend();
+      expect(trend).toHaveLength(2);
+      expect(trend[0]).toEqual({ date: "2026-02-25", positive: 5, negative: 2, total: 7 });
+      expect(trend[1]).toEqual({ date: "2026-02-26", positive: 8, negative: 0, total: 8 });
+    });
+
+    it("handles single day with only negative", async () => {
+      mockSelect.mockReturnValue({
+        from: () => ({
+          where: () => ({
+            groupBy: () => ({
+              orderBy: () =>
+                Promise.resolve([
+                  { date: "2026-02-27", rating: -1, count: 3 },
+                ]),
+            }),
+          }),
+        }),
+      });
+
+      const trend = await getSearchFeedbackTrend();
+      expect(trend).toHaveLength(1);
+      expect(trend[0]).toEqual({ date: "2026-02-27", positive: 0, negative: 3, total: 3 });
+    });
+
+    it("returns empty array when no feedback exists", async () => {
+      mockSelect.mockReturnValue({
+        from: () => ({
+          where: () => ({
+            groupBy: () => ({
+              orderBy: () => Promise.resolve([]),
+            }),
+          }),
+        }),
+      });
+
+      const trend = await getSearchFeedbackTrend();
+      expect(trend).toEqual([]);
+    });
+  });
+
+  describe("getLowRatedResults", () => {
+    it("returns empty array on error", async () => {
+      mockSelect.mockReturnValue({
+        from: () => ({
+          innerJoin: () => ({
+            where: () => ({
+              groupBy: () => ({
+                having: () => ({
+                  orderBy: () => ({
+                    limit: () => Promise.reject(new Error("db error")),
+                  }),
+                }),
+              }),
+            }),
+          }),
+        }),
+      });
+
+      const results = await getLowRatedResults();
+      expect(results).toEqual([]);
+    });
+
+    it("returns low-rated results sorted by negative count", async () => {
+      mockSelect.mockReturnValue({
+        from: () => ({
+          innerJoin: () => ({
+            where: () => ({
+              groupBy: () => ({
+                having: () => ({
+                  orderBy: () => ({
+                    limit: () =>
+                      Promise.resolve([
+                        { resultId: "proj-1", resultType: "project", negativeCount: 5, positiveCount: 1, query: "test query" },
+                        { resultId: "prop-2", resultType: "proposal", negativeCount: 3, positiveCount: 2, query: "another search" },
+                      ]),
+                  }),
+                }),
+              }),
+            }),
+          }),
+        }),
+      });
+
+      const results = await getLowRatedResults();
+      expect(results).toHaveLength(2);
+      expect(results[0].resultId).toBe("proj-1");
+      expect(results[0].negativeCount).toBe(5);
+      expect(results[1].resultType).toBe("proposal");
+    });
+
+    it("respects limit parameter", async () => {
+      mockSelect.mockReturnValue({
+        from: () => ({
+          innerJoin: () => ({
+            where: () => ({
+              groupBy: () => ({
+                having: () => ({
+                  orderBy: () => ({
+                    limit: () => Promise.resolve([]),
+                  }),
+                }),
+              }),
+            }),
+          }),
+        }),
+      });
+
+      const results = await getLowRatedResults(5, 7);
+      expect(results).toEqual([]);
     });
   });
 });

@@ -353,6 +353,24 @@ export const en: Record<string, string> = {
   "admin.embeddingDays": "days",
   "admin.embeddingStaleWarning": "{count} embeddings are stale and will be regenerated in the next cron run.",
 
+  // Search feedback analytics
+  "admin.searchFeedback": "Search Feedback",
+  "admin.searchFeedbackDesc": "User feedback on search results — quality scores by mode, trends, and low-rated results",
+  "admin.feedbackTotal": "Total Feedback",
+  "admin.feedbackPositiveRate": "Positive Rate",
+  "admin.feedbackByMode": "Quality by Search Mode",
+  "admin.feedbackTrend": "Feedback Trend (30 days)",
+  "admin.feedbackLowRated": "Low-Rated Results",
+  "admin.feedbackPositive": "Positive",
+  "admin.feedbackNegative": "Negative",
+  "admin.feedbackNoLowRated": "No low-rated results in the last 30 days.",
+  "admin.feedbackResultType": "Type",
+  "admin.feedbackQuery": "Query",
+  "admin.feedbackRatio": "Ratio",
+  "admin.feedbackModeFts": "Full-Text",
+  "admin.feedbackModeSemantic": "Semantic",
+  "admin.feedbackModeHybrid": "Hybrid",
+
   // Auth
   "auth.signIn": "Sign in to Ideate",
   "auth.signInDesc": "Sign in with your email and password",
