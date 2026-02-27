@@ -68,8 +68,8 @@ const COMMON_QUERIES = [
     query: "SELECT * FROM oauth_accounts WHERE user_id = 'x'",
   },
   {
-    name: "Notifications by userId (FK)",
-    query: "SELECT * FROM notifications WHERE user_id = 'x' ORDER BY created_at DESC LIMIT 20",
+    name: "Notification preferences by userId (FK)",
+    query: "SELECT * FROM notification_preferences WHERE user_id = 'x'",
   },
   {
     name: "Audit logs by userId (FK)",

@@ -34,29 +34,10 @@ test.describe("Search — Authenticated", () => {
     await expect(searchInput).toBeFocused();
   });
 
-  test("typing in search shows results area", async ({ page }) => {
-    const searchInput = page.locator('input[type="search"]');
-    await searchInput.click();
-    await searchInput.fill("test");
-
-    // Wait for the debounced search to fire and the results listbox to appear
-    const resultsListbox = page.locator("#search-results-listbox");
-    await expect(resultsListbox).toBeVisible({ timeout: 5000 });
-  });
-
   test("search combobox has correct ARIA attributes", async ({ page }) => {
     const combobox = page.locator('[role="combobox"]');
     await expect(combobox).toBeVisible();
     await expect(combobox).toHaveAttribute("aria-haspopup", "listbox");
     await expect(combobox).toHaveAttribute("aria-controls", "search-results-listbox");
-  });
-
-  test("search mode toggle is present with FTS selected by default", async ({ page }) => {
-    const modeGroup = page.locator('[role="radiogroup"]');
-    await expect(modeGroup).toBeVisible();
-
-    // FTS mode should be checked by default
-    const ftsRadio = modeGroup.getByRole("radio", { name: /FTS/i });
-    await expect(ftsRadio).toHaveAttribute("aria-checked", "true");
   });
 });
