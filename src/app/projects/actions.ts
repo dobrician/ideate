@@ -13,6 +13,7 @@ import { randomUUID } from "crypto";
 import { logAudit } from "@/lib/audit";
 import { fireWebhookEvent } from "@/lib/webhooks";
 import { emitProjectEvent } from "@/lib/project-events";
+import { enqueueEmbedding } from "@/lib/embeddings/jobs";
 import { withActionAuth } from "@/lib/action-wrapper";
 
 /**
@@ -82,6 +83,7 @@ export async function createProject(formData: FormData) {
     });
 
     fireWebhookEvent("project.created", { projectId, title, userId: user.id }).catch((err) => logger.warn({ err }, "Webhook delivery failed"));
+    enqueueEmbedding("project", projectId).catch((err) => logger.warn({ err }, "Embedding enqueue failed"));
 
     revalidatePath("/projects");
     redirect(`/projects/${projectId}`);

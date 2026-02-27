@@ -17,6 +17,8 @@ vi.mock("@/lib/auth", () => ({ requireAuth: (...a: unknown[]) => mockAuth(...a) 
 vi.mock("@/lib/csrf", () => ({ requireCsrfToken: vi.fn().mockResolvedValue(undefined) }));
 const mockFireWebhook = vi.fn().mockResolvedValue(undefined);
 vi.mock("@/lib/webhooks", () => ({ fireWebhookEvent: (...a: unknown[]) => mockFireWebhook(...a) }));
+const mockEnqueueEmbedding = vi.fn().mockResolvedValue("job-1");
+vi.mock("@/lib/embeddings/jobs", () => ({ enqueueEmbedding: (...a: unknown[]) => mockEnqueueEmbedding(...a) }));
 
 const mockInsert = vi.fn(), mockSet = vi.fn(), mockSetWhere = vi.fn();
 const mockDelWhere = vi.fn(), mockSelLim = vi.fn();
@@ -44,8 +46,9 @@ const ownedProj = { id: "proj-1", title: "Old", description: null, deadline: new
 import { createProject, updateProject, deleteProject, unarchiveProject } from "@/app/projects/actions";
 
 beforeEach(() => {
-  [mockRevalidate, mockRedirect, mockInsert, mockSet, mockSetWhere, mockDelWhere, mockSelLim, mockFireWebhook].forEach(m => m.mockReset());
+  [mockRevalidate, mockRedirect, mockInsert, mockSet, mockSetWhere, mockDelWhere, mockSelLim, mockFireWebhook, mockEnqueueEmbedding].forEach(m => m.mockReset());
   mockFireWebhook.mockResolvedValue(undefined);
+  mockEnqueueEmbedding.mockResolvedValue("job-1");
   mockAuth.mockReset().mockResolvedValue(mkUser());
   mockSelLim.mockResolvedValue([]);
 });
@@ -85,6 +88,15 @@ describe("createProject", () => {
   });
   it("succeeds even when webhook rejects", async () => {
     mockFireWebhook.mockRejectedValue(new Error("webhook down"));
+    await expect(createProject(vfd())).rejects.toThrow("NEXT_REDIRECT");
+  });
+  it("enqueues embedding on successful creation", async () => {
+    mockEnqueueEmbedding.mockResolvedValue("job-1");
+    await expect(createProject(vfd())).rejects.toThrow("NEXT_REDIRECT");
+    expect(mockEnqueueEmbedding).toHaveBeenCalledWith("project", expect.any(String));
+  });
+  it("succeeds even when embedding enqueue rejects", async () => {
+    mockEnqueueEmbedding.mockRejectedValue(new Error("queue full"));
     await expect(createProject(vfd())).rejects.toThrow("NEXT_REDIRECT");
   });
 });

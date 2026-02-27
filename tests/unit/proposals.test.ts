@@ -18,6 +18,8 @@ vi.mock("@/lib/vote-update", () => ({ emitVoteUpdate: vi.fn().mockResolvedValue(
 vi.mock("@/lib/notifications", () => ({ notifyVote: vi.fn() }));
 const mockFireWebhook = vi.fn().mockResolvedValue(undefined);
 vi.mock("@/lib/webhooks", () => ({ fireWebhookEvent: (...a: unknown[]) => mockFireWebhook(...a) }));
+const mockEnqueueEmbedding = vi.fn().mockResolvedValue("job-1");
+vi.mock("@/lib/embeddings/jobs", () => ({ enqueueEmbedding: (...a: unknown[]) => mockEnqueueEmbedding(...a) }));
 
 const mockInsert = vi.fn(), mockSelLim = vi.fn(), mockDelWhere = vi.fn();
 vi.mock("@/db", () => ({
@@ -51,8 +53,9 @@ const setupLive = () => { mockSelLim.mockResolvedValueOnce(future()).mockResolve
 import { createProposal, deleteProposal, castVote, removeVote } from "@/app/projects/[id]/proposals/actions";
 
 beforeEach(() => {
-  [mockRevalidatePath, mockInsert, mockSelLim, mockDelWhere, mockFireWebhook].forEach(m => m.mockReset());
+  [mockRevalidatePath, mockInsert, mockSelLim, mockDelWhere, mockFireWebhook, mockEnqueueEmbedding].forEach(m => m.mockReset());
   mockFireWebhook.mockResolvedValue(undefined);
+  mockEnqueueEmbedding.mockResolvedValue("job-1");
   mockRequireAuth.mockReset().mockResolvedValue(mkUser());
   mockBuildSummary.mockReset().mockResolvedValue("AI summary");
   mockSelLim.mockResolvedValue([]);
@@ -104,6 +107,15 @@ describe("createProposal", () => {
   });
   it("succeeds even when webhook rejects", async () => {
     mockFireWebhook.mockRejectedValue(new Error("webhook down"));
+    expect(await createProposal(null, vfd())).toEqual({ success: true });
+  });
+  it("enqueues embedding on successful creation", async () => {
+    mockEnqueueEmbedding.mockResolvedValue("job-1");
+    expect(await createProposal(null, vfd())).toEqual({ success: true });
+    expect(mockEnqueueEmbedding).toHaveBeenCalledWith("proposal", expect.any(String));
+  });
+  it("succeeds even when embedding enqueue rejects", async () => {
+    mockEnqueueEmbedding.mockRejectedValue(new Error("queue full"));
     expect(await createProposal(null, vfd())).toEqual({ success: true });
   });
   it("returns Forbidden from CSRF rejection", async () => {

@@ -1,6 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { timingSafeEqual } from "crypto";
 import { process as processJobs } from "@/lib/queue";
+import { registerEmbeddingHandlers } from "@/lib/embeddings/jobs";
+
+// Register handlers on module load so they're available when processJobs() runs
+registerEmbeddingHandlers();
 
 function verifyCronAuth(authHeader: string | null, secret: string): boolean {
   const expected = `Bearer ${secret}`;

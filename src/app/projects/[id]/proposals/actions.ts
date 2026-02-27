@@ -17,6 +17,7 @@ import { isDeadlinePassed, isProjectArchived } from "@/lib/project-utils";
 import { fireWebhookEvent } from "@/lib/webhooks";
 import { emitProjectEvent } from "@/lib/project-events";
 import { withActionAuth } from "@/lib/action-wrapper";
+import { enqueueEmbedding } from "@/lib/embeddings/jobs";
 
 async function resolveProposalProject(
   proposalId: string
@@ -104,6 +105,7 @@ export async function createProposal(
     });
 
     fireWebhookEvent("proposal.created", { proposalId, title, projectId, userId: user.id }).catch((err) => logger.warn({ err }, "Webhook delivery failed"));
+    enqueueEmbedding("proposal", proposalId).catch((err) => logger.warn({ err }, "Embedding enqueue failed"));
 
     emitProjectEvent({
       projectId,

@@ -5,6 +5,13 @@ const mockProcess = vi.fn();
 
 vi.mock("@/lib/queue", () => ({
   process: (...args: unknown[]) => mockProcess(...args),
+  registerHandler: vi.fn(),
+}));
+const { mockRegisterEmbeddingHandlers } = vi.hoisted(() => ({
+  mockRegisterEmbeddingHandlers: vi.fn(),
+}));
+vi.mock("@/lib/embeddings/jobs", () => ({
+  registerEmbeddingHandlers: () => mockRegisterEmbeddingHandlers(),
 }));
 
 import { POST } from "@/app/api/cron/jobs/route";
@@ -50,5 +57,12 @@ describe("POST /api/cron/jobs", () => {
     const body = await res.json();
     expect(body).toEqual({ processed: 3, succeeded: 2, failed: 1 });
     expect(mockProcess).toHaveBeenCalledTimes(1);
+  });
+
+  it("imports registerEmbeddingHandlers from embeddings/jobs", async () => {
+    const mod = await import("@/app/api/cron/jobs/route");
+    // The route module imports and calls registerEmbeddingHandlers at top level.
+    // Verify the route exports POST (which means it loaded successfully with the import).
+    expect(typeof mod.POST).toBe("function");
   });
 });
