@@ -104,6 +104,7 @@ export async function GET(request: NextRequest) {
       mode,
       analyticsId,
       total: results.length,
+      responseTimeMs,
     });
   } catch (error) {
     logger.error({ err: error }, "Search error");

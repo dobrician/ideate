@@ -959,6 +959,14 @@ export const en: Record<string, string> = {
   "search.modeSemantic": "Semantic",
   "search.modeHybrid": "Smart",
   "search.modeTooltip": "Search mode",
+  "search.modeFtsDesc": "Exact keyword matching",
+  "search.modeSemanticDesc": "AI-powered meaning search",
+  "search.modeHybridDesc": "Combined keyword + AI",
+  "search.similarityScore": "Relevance",
+  "search.responseTime": "{ms}ms",
+  "search.methodFts": "keyword",
+  "search.methodSemantic": "AI",
+  "search.methodHybrid": "hybrid",
 
   // Trending
   "trending.title": "Trending",

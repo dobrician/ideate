@@ -243,5 +243,17 @@ describe("Search API Route", () => {
       await GET(req("/api/search?q=test&limit=10.5"));
       expect(mockSearch).toHaveBeenCalledWith("test", 10);
     });
+
+    it("should include responseTimeMs in response", async () => {
+      mockSearch.mockReturnValue([
+        { id: "p1", title: "Test", type: "project", snippet: "test" },
+      ]);
+      const response = await GET(req("/api/search?q=test"));
+      const data = await response.json();
+      expect(response.status).toBe(200);
+      expect(data).toHaveProperty("responseTimeMs");
+      expect(typeof data.responseTimeMs).toBe("number");
+      expect(data.responseTimeMs).toBeGreaterThanOrEqual(0);
+    });
   });
 });

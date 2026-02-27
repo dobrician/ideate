@@ -978,6 +978,14 @@ export const ro: Record<string, string> = {
   "search.modeSemantic": "Semantic",
   "search.modeHybrid": "Inteligent",
   "search.modeTooltip": "Mod de căutare",
+  "search.modeFtsDesc": "Potrivire exactă cuvinte cheie",
+  "search.modeSemanticDesc": "Căutare AI după semnificație",
+  "search.modeHybridDesc": "Combinat cuvinte cheie + AI",
+  "search.similarityScore": "Relevanță",
+  "search.responseTime": "{ms}ms",
+  "search.methodFts": "cuvinte cheie",
+  "search.methodSemantic": "AI",
+  "search.methodHybrid": "hibrid",
 
   // Trending
   "trending.title": "Tendințe",

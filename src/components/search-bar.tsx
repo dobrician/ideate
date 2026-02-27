@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback } from "react";
-import { Search, FileText, Lightbulb, MessageSquare, Filter, TrendingUp, Tag, Sparkles } from "lucide-react";
+import { Search, FileText, Lightbulb, MessageSquare, Filter, TrendingUp, Tag, Sparkles, Clock, Zap } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { useLocale } from "@/lib/use-locale";
 import { sanitizeSnippet } from "@/lib/sanitize";
@@ -18,6 +18,7 @@ interface SearchResult {
   authorName?: string;
   voteCount?: number;
   score?: number;
+  method?: "fts" | "semantic" | "hybrid";
 }
 
 interface Suggestion {
@@ -41,6 +42,7 @@ export function SearchBar() {
   const [showFilters, setShowFilters] = useState(false);
   const [entityFilter, setEntityFilter] = useState<EntityType[]>([]);
   const [correction, setCorrection] = useState<string | null>(null);
+  const [responseTimeMs, setResponseTimeMs] = useState<number | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -57,6 +59,7 @@ export function SearchBar() {
     setError(null);
     setCorrection(null);
     setSuggestions([]);
+    setResponseTimeMs(null);
     try {
       const params = new URLSearchParams({ q, mode: searchMode });
       if (types.length > 0) {
@@ -67,6 +70,7 @@ export function SearchBar() {
         const data = await res.json();
         setResults(data.results || []);
         setAnalyticsId(data.analyticsId || null);
+        setResponseTimeMs(data.responseTimeMs ?? null);
         setIsOpen(true);
         setActiveIndex(-1);
 
@@ -279,6 +283,26 @@ export function SearchBar() {
     hybrid: t("search.modeHybrid"),
   };
 
+  const modeDescs: Record<SearchMode, string> = {
+    fts: t("search.modeFtsDesc"),
+    semantic: t("search.modeSemanticDesc"),
+    hybrid: t("search.modeHybridDesc"),
+  };
+
+  const methodLabel = (method?: string) => {
+    switch (method) {
+      case "fts": return t("search.methodFts");
+      case "semantic": return t("search.methodSemantic");
+      case "hybrid": return t("search.methodHybrid");
+      default: return null;
+    }
+  };
+
+  const formatScore = (score?: number) => {
+    if (score === undefined || score === null) return null;
+    return Math.round(score * 100);
+  };
+
   const hasResults = results.length > 0;
   const hasSuggestions = suggestions.length > 0;
   const activeId = activeIndex >= 0 ? `search-result-${activeIndex}` : undefined;
@@ -334,6 +358,7 @@ export function SearchBar() {
                 type="button"
                 role="radio"
                 aria-checked={mode === m}
+                title={modeDescs[m]}
                 onClick={() => handleModeChange(m)}
                 className={`px-1.5 rounded-md transition-colors ${
                   mode === m
@@ -461,51 +486,90 @@ export function SearchBar() {
           {/* Search results */}
           {!loading && !error && hasResults && (() => {
             let flatIndex = -1;
-            return (["project", "proposal", "comment"] as const).map((type) => {
-              const items = grouped[type];
-              if (items.length === 0) return null;
-              return (
-                <div key={type}>
-                  <div className="px-3 py-1.5 text-xs font-semibold text-muted-foreground uppercase tracking-wider bg-muted/50">
-                    {typeLabel(type)} ({items.length})
+            return (
+              <>
+                {/* Response time + result count header */}
+                <div className="flex items-center justify-between px-3 py-1.5 text-xs text-muted-foreground border-b bg-muted/30">
+                  <span>{results.length} {results.length === 1 ? "result" : "results"}</span>
+                  <div className="flex items-center gap-2">
+                    {mode !== "fts" && (
+                      <span className="flex items-center gap-0.5">
+                        <Zap className="h-3 w-3" aria-hidden="true" />
+                        {modeLabels[mode]}
+                      </span>
+                    )}
+                    {responseTimeMs !== null && (
+                      <span className="flex items-center gap-0.5" aria-label={t("search.responseTime").replace("{ms}", String(responseTimeMs))}>
+                        <Clock className="h-3 w-3" aria-hidden="true" />
+                        {responseTimeMs}ms
+                      </span>
+                    )}
                   </div>
-                  {items.map((result) => {
-                    flatIndex++;
-                    const idx = flatIndex;
-                    const isActive = idx === activeIndex;
-                    return (
-                      <a
-                        key={`${result.type}-${result.id}`}
-                        id={`search-result-${idx}`}
-                        role="option"
-                        aria-selected={isActive}
-                        href={resultHref(result)}
-                        className={`flex items-start gap-2 p-3 transition-colors duration-150 border-b last:border-b-0 focus:outline-none ${isActive ? "bg-accent" : "hover:bg-accent"}`}
-                        onClick={() => {
-                          trackClick(result.id, result.type);
-                          setIsOpen(false);
-                        }}
-                        onMouseEnter={() => setActiveIndex(idx)}
-                      >
-                        {typeIcon(result.type)}
-                        <div className="min-w-0 flex-1">
-                          <div className="text-sm font-medium truncate">{result.title}</div>
-                          {result.snippet && (
-                            <div className="text-xs text-muted-foreground line-clamp-2" dangerouslySetInnerHTML={{ __html: sanitizeSnippet(result.snippet) }} />
-                          )}
-                          {(result.authorName || result.voteCount !== undefined) && (
-                            <div className="flex items-center gap-2 mt-0.5 text-xs text-muted-foreground">
-                              {result.authorName && <span>{result.authorName}</span>}
-                              {result.voteCount !== undefined && <span>{result.voteCount > 0 ? "+" : ""}{result.voteCount} votes</span>}
-                            </div>
-                          )}
-                        </div>
-                      </a>
-                    );
-                  })}
                 </div>
-              );
-            });
+                {(["project", "proposal", "comment"] as const).map((type) => {
+                  const items = grouped[type];
+                  if (items.length === 0) return null;
+                  return (
+                    <div key={type}>
+                      <div className="px-3 py-1.5 text-xs font-semibold text-muted-foreground uppercase tracking-wider bg-muted/50">
+                        {typeLabel(type)} ({items.length})
+                      </div>
+                      {items.map((result) => {
+                        flatIndex++;
+                        const idx = flatIndex;
+                        const isActive = idx === activeIndex;
+                        const scorePercent = formatScore(result.score);
+                        const method = methodLabel(result.method);
+                        return (
+                          <a
+                            key={`${result.type}-${result.id}`}
+                            id={`search-result-${idx}`}
+                            role="option"
+                            aria-selected={isActive}
+                            href={resultHref(result)}
+                            className={`flex items-start gap-2 p-3 transition-colors duration-150 border-b last:border-b-0 focus:outline-none ${isActive ? "bg-accent" : "hover:bg-accent"}`}
+                            onClick={() => {
+                              trackClick(result.id, result.type);
+                              setIsOpen(false);
+                            }}
+                            onMouseEnter={() => setActiveIndex(idx)}
+                          >
+                            {typeIcon(result.type)}
+                            <div className="min-w-0 flex-1">
+                              <div className="flex items-center gap-1.5">
+                                <span className="text-sm font-medium truncate">{result.title}</span>
+                                {scorePercent !== null && mode !== "fts" && (
+                                  <span
+                                    className="shrink-0 inline-flex items-center gap-0.5 px-1.5 py-0.5 text-[10px] font-medium rounded-full bg-primary/10 text-primary"
+                                    title={`${t("search.similarityScore")}: ${scorePercent}%`}
+                                  >
+                                    {scorePercent}%
+                                  </span>
+                                )}
+                                {method && mode !== "fts" && (
+                                  <span className="shrink-0 text-[10px] text-muted-foreground">
+                                    {method}
+                                  </span>
+                                )}
+                              </div>
+                              {result.snippet && (
+                                <div className="text-xs text-muted-foreground line-clamp-2" dangerouslySetInnerHTML={{ __html: sanitizeSnippet(result.snippet) }} />
+                              )}
+                              {(result.authorName || result.voteCount !== undefined) && (
+                                <div className="flex items-center gap-2 mt-0.5 text-xs text-muted-foreground">
+                                  {result.authorName && <span>{result.authorName}</span>}
+                                  {result.voteCount !== undefined && <span>{result.voteCount > 0 ? "+" : ""}{result.voteCount} votes</span>}
+                                </div>
+                              )}
+                            </div>
+                          </a>
+                        );
+                      })}
+                    </div>
+                  );
+                })}
+              </>
+            );
           })()}
         </div>
       )}

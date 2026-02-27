@@ -22,6 +22,14 @@ vi.mock("@/lib/use-locale", () => ({
         "search.modeSemantic": "Semantic",
         "search.modeHybrid": "Smart",
         "search.modeTooltip": "Search mode",
+        "search.modeFtsDesc": "Exact keyword matching",
+        "search.modeSemanticDesc": "AI-powered meaning search",
+        "search.modeHybridDesc": "Combined keyword + AI",
+        "search.similarityScore": "Relevance",
+        "search.responseTime": "{ms}ms",
+        "search.methodFts": "keyword",
+        "search.methodSemantic": "AI",
+        "search.methodHybrid": "hybrid",
       };
       return map[key] ?? key;
     },
@@ -260,5 +268,133 @@ describe("SearchBar keyboard navigation", () => {
     render(<SearchBar />);
     const input = screen.getByRole("searchbox");
     expect(input).toHaveAttribute("aria-keyshortcuts", "Control+K Meta+K");
+  });
+
+  it("mode toggle buttons have title tooltips", async () => {
+    await renderSearchBar();
+    const ftsBtn = screen.getByRole("radio", { name: /Keyword/i });
+    const semanticBtn = screen.getByRole("radio", { name: /Semantic/i });
+    const smartBtn = screen.getByRole("radio", { name: /Smart/i });
+    expect(ftsBtn).toHaveAttribute("title", "Exact keyword matching");
+    expect(semanticBtn).toHaveAttribute("title", "AI-powered meaning search");
+    expect(smartBtn).toHaveAttribute("title", "Combined keyword + AI");
+  });
+
+  it("displays response time when returned by API", async () => {
+    fetchHandler = async (url: string) => {
+      if (url.includes("/api/search/suggestions")) {
+        return new Response(JSON.stringify({ suggestions: [] }), { status: 200 });
+      }
+      return new Response(
+        JSON.stringify({ results: mockResults, responseTimeMs: 42 }),
+        { status: 200 }
+      );
+    };
+    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
+    await renderSearchBar();
+
+    const input = screen.getByLabelText("Search...");
+    await user.type(input, "test");
+    await vi.advanceTimersByTimeAsync(350);
+
+    await waitFor(() => {
+      expect(screen.getByText("42ms")).toBeInTheDocument();
+    });
+  });
+
+  it("displays result count header", async () => {
+    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
+    await renderSearchBar();
+
+    const input = screen.getByLabelText("Search...");
+    await user.type(input, "test");
+    await vi.advanceTimersByTimeAsync(350);
+
+    await waitFor(() => {
+      expect(screen.getByText("2 results")).toBeInTheDocument();
+    });
+  });
+
+  it("shows similarity score badges in semantic mode", async () => {
+    const semanticResults = [
+      { id: "p1", title: "Project Alpha", type: "project", snippet: "A project", score: 0.87, method: "semantic" },
+      { id: "p2", title: "Cool Proposal", type: "proposal", snippet: "A proposal", projectId: "p1", score: 0.65, method: "semantic" },
+    ];
+    fetchHandler = async (url: string) => {
+      if (url.includes("/api/search/suggestions")) {
+        return new Response(JSON.stringify({ suggestions: [] }), { status: 200 });
+      }
+      return new Response(
+        JSON.stringify({ results: semanticResults, responseTimeMs: 15 }),
+        { status: 200 }
+      );
+    };
+    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
+    await renderSearchBar();
+
+    // Switch to Semantic mode first
+    await user.click(screen.getByRole("radio", { name: /Semantic/i }));
+
+    const input = screen.getByLabelText("Search...");
+    await user.type(input, "test query");
+    await vi.advanceTimersByTimeAsync(350);
+
+    await waitFor(() => {
+      expect(screen.getByText("87%")).toBeInTheDocument();
+      expect(screen.getByText("65%")).toBeInTheDocument();
+    });
+  });
+
+  it("shows method labels in semantic/hybrid mode", async () => {
+    const semanticResults = [
+      { id: "p1", title: "Project Alpha", type: "project", snippet: "A project", score: 0.9, method: "semantic" },
+    ];
+    fetchHandler = async (url: string) => {
+      if (url.includes("/api/search/suggestions")) {
+        return new Response(JSON.stringify({ suggestions: [] }), { status: 200 });
+      }
+      return new Response(
+        JSON.stringify({ results: semanticResults, responseTimeMs: 10 }),
+        { status: 200 }
+      );
+    };
+    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
+    await renderSearchBar();
+
+    await user.click(screen.getByRole("radio", { name: /Semantic/i }));
+    const input = screen.getByLabelText("Search...");
+    await user.type(input, "test");
+    await vi.advanceTimersByTimeAsync(350);
+
+    await waitFor(() => {
+      expect(screen.getByText("AI")).toBeInTheDocument();
+    });
+  });
+
+  it("does not show scores in FTS mode", async () => {
+    const ftsResults = [
+      { id: "p1", title: "Project Alpha", type: "project", snippet: "A project", score: 0.87, method: "fts" },
+    ];
+    fetchHandler = async (url: string) => {
+      if (url.includes("/api/search/suggestions")) {
+        return new Response(JSON.stringify({ suggestions: [] }), { status: 200 });
+      }
+      return new Response(
+        JSON.stringify({ results: ftsResults, responseTimeMs: 5 }),
+        { status: 200 }
+      );
+    };
+    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
+    await renderSearchBar();
+
+    const input = screen.getByLabelText("Search...");
+    await user.type(input, "test");
+    await vi.advanceTimersByTimeAsync(350);
+
+    await waitFor(() => {
+      expect(screen.getByText("Project Alpha")).toBeInTheDocument();
+    });
+    // Score badge should NOT appear in FTS mode
+    expect(screen.queryByText("87%")).not.toBeInTheDocument();
   });
 });
