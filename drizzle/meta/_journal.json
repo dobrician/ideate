@@ -225,6 +225,13 @@
       "when": 1771281600000,
       "tag": "0031_sprint61_integrations",
       "breakpoints": true
+    },
+    {
+      "idx": 32,
+      "version": "6",
+      "when": 1771282000000,
+      "tag": "0032_sprint62_push_subscriptions",
+      "breakpoints": true
     }
   ]
 }

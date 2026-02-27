@@ -1238,4 +1238,56 @@ export const ro: Record<string, string> = {
   "integrations.revoke": "Revocă",
   "integrations.keyRevoked": "Cheie API revocată",
   "integrations.keyRevokeFailed": "Nu s-a putut revoca cheia API",
+
+  // Offline / Sync (Sprint 62)
+  "offline.offline": "Ești offline",
+  "offline.pendingActions": "{count} acțiuni în așteptare",
+  "offline.syncing": "Se sincronizează...",
+  "offline.syncComplete": "Toate modificările au fost sincronizate",
+  "offline.syncError": "Unele modificări nu au putut fi sincronizate",
+  "offline.conflict": "Conflict detectat — versiunea serverului păstrată",
+  "offline.queuedVote": "Vot adăugat în coadă — se sincronizează când ești online",
+  "offline.queuedComment": "Comentariu adăugat în coadă — se sincronizează când ești online",
+
+  // Push Notifications (Sprint 62)
+  "push.title": "Notificări Push",
+  "push.description": "Primește notificări pe dispozitiv pentru actualizări importante",
+  "push.enable": "Activează notificări Push",
+  "push.disable": "Dezactivează notificări Push",
+  "push.enabled": "Notificări push activate",
+  "push.disabled": "Notificări push dezactivate",
+  "push.denied": "Permisiune notificări refuzată de browser",
+  "push.unsupported": "Notificările push nu sunt suportate în acest browser",
+  "push.enableFailed": "Nu s-au putut activa notificările push",
+  "push.newProposal": "Propunere nouă",
+  "push.newVote": "Vot nou",
+  "push.newComment": "Comentariu nou",
+  "push.projectUpdate": "Actualizare proiect",
+
+  // PWA Update (Sprint 62)
+  "pwa.updateAvailable": "O versiune nouă este disponibilă",
+  "pwa.updateNow": "Actualizează acum",
+
+  // Mobile UI (Sprint 62)
+  "mobile.bottomSheet.close": "Închide",
+  "mobile.bottomSheet.drag": "Trage pentru redimensionare",
+  "mobile.nav.home": "Acasă",
+  "mobile.nav.projects": "Proiecte",
+  "mobile.nav.dashboard": "Panou",
+  "mobile.nav.profile": "Profil",
+  "mobile.nav.more": "Mai mult",
+  "mobile.swipeAction.vote": "Votează",
+  "mobile.swipeAction.bookmark": "Salvează",
+
+  // Accessibility (Sprint 62)
+  "a11y.highContrast": "Mod contrast ridicat",
+  "a11y.reducedMotion": "Mișcare redusă activată",
+  "a11y.announcement.pageLoaded": "Pagina încărcată",
+  "a11y.announcement.contentUpdated": "Conținut actualizat",
+  "a11y.announcement.formSubmitted": "Formular trimis cu succes",
+  "a11y.announcement.error": "A apărut o eroare",
+  "a11y.landmark.main": "Conținut principal",
+  "a11y.landmark.navigation": "Navigare principală",
+  "a11y.landmark.complementary": "Bara laterală",
+  "a11y.focusTrap.escape": "Apasă Escape pentru a închide",
 };

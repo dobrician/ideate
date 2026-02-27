@@ -1219,4 +1219,56 @@ export const en: Record<string, string> = {
   "integrations.revoke": "Revoke",
   "integrations.keyRevoked": "API key revoked",
   "integrations.keyRevokeFailed": "Failed to revoke API key",
+
+  // Offline / Sync (Sprint 62)
+  "offline.offline": "You are offline",
+  "offline.pendingActions": "{count} pending actions",
+  "offline.syncing": "Syncing...",
+  "offline.syncComplete": "All changes synced",
+  "offline.syncError": "Some changes could not be synced",
+  "offline.conflict": "Conflict detected — server version kept",
+  "offline.queuedVote": "Vote queued — will sync when online",
+  "offline.queuedComment": "Comment queued — will sync when online",
+
+  // Push Notifications (Sprint 62)
+  "push.title": "Push Notifications",
+  "push.description": "Receive notifications on your device for important updates",
+  "push.enable": "Enable Push Notifications",
+  "push.disable": "Disable Push Notifications",
+  "push.enabled": "Push notifications enabled",
+  "push.disabled": "Push notifications disabled",
+  "push.denied": "Notification permission denied by browser",
+  "push.unsupported": "Push notifications not supported in this browser",
+  "push.enableFailed": "Failed to enable push notifications",
+  "push.newProposal": "New Proposal",
+  "push.newVote": "New Vote",
+  "push.newComment": "New Comment",
+  "push.projectUpdate": "Project Update",
+
+  // PWA Update (Sprint 62)
+  "pwa.updateAvailable": "A new version is available",
+  "pwa.updateNow": "Update now",
+
+  // Mobile UI (Sprint 62)
+  "mobile.bottomSheet.close": "Close",
+  "mobile.bottomSheet.drag": "Drag to resize",
+  "mobile.nav.home": "Home",
+  "mobile.nav.projects": "Projects",
+  "mobile.nav.dashboard": "Dashboard",
+  "mobile.nav.profile": "Profile",
+  "mobile.nav.more": "More",
+  "mobile.swipeAction.vote": "Vote",
+  "mobile.swipeAction.bookmark": "Bookmark",
+
+  // Accessibility (Sprint 62)
+  "a11y.highContrast": "High contrast mode",
+  "a11y.reducedMotion": "Reduced motion enabled",
+  "a11y.announcement.pageLoaded": "Page loaded",
+  "a11y.announcement.contentUpdated": "Content updated",
+  "a11y.announcement.formSubmitted": "Form submitted successfully",
+  "a11y.announcement.error": "Error occurred",
+  "a11y.landmark.main": "Main content",
+  "a11y.landmark.navigation": "Primary navigation",
+  "a11y.landmark.complementary": "Sidebar",
+  "a11y.focusTrap.escape": "Press Escape to close",
 };

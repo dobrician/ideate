@@ -485,6 +485,17 @@ export const apiKeys = pgTable("api_keys", {
   createdAt: ts(),
 });
 
+// ─── Push Subscriptions ─────────────────────────────────────────────────
+
+export const pushSubscriptions = pgTable("push_subscriptions", {
+  id: pk(),
+  userId: text("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  endpoint: text("endpoint").notNull(),
+  p256dhKey: text("p256dh_key").notNull(),
+  authKey: text("auth_key").notNull(),
+  createdAt: ts(),
+});
+
 // ─── Platform Integrations ──────────────────────────────────────────────
 
 export const integrations = pgTable("integrations", {
