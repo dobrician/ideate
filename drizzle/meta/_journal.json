@@ -232,6 +232,13 @@
       "when": 1771282000000,
       "tag": "0032_sprint62_push_subscriptions",
       "breakpoints": true
+    },
+    {
+      "idx": 33,
+      "version": "6",
+      "when": 1771282400000,
+      "tag": "0033_sprint64_fk_indexes",
+      "breakpoints": true
     }
   ]
 }
