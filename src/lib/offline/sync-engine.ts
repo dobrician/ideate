@@ -127,6 +127,7 @@ export async function replayAction(action: QueuedAction): Promise<SyncResult> {
       method: action.method,
       headers: { "Content-Type": "application/json" },
       body: action.method !== "DELETE" ? action.body : undefined,
+      credentials: "include",
     });
 
     if (res.ok) {

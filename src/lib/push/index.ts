@@ -84,10 +84,13 @@ export function buildPushPayload(
     project: "ideate-project",
   };
 
+  // Only allow relative paths to prevent open redirects
+  const safeUrl = (url && url.startsWith("/")) ? url : "/";
+
   return {
     title,
     body,
-    url: url || "/",
+    url: safeUrl,
     tag: tagMap[type],
   };
 }

@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { WifiOff, RefreshCw, Check, AlertTriangle } from "lucide-react";
 import { useLocale } from "@/lib/use-locale";
+import { prefersReducedMotion } from "@/lib/a11y";
 
 type SyncStatus = "idle" | "syncing" | "done" | "error";
 
@@ -98,7 +99,7 @@ export function OfflineIndicator() {
         </span>
       )}
       {syncStatus === "syncing" && (
-        <RefreshCw className="h-4 w-4 animate-spin text-blue-500" aria-hidden="true" />
+        <RefreshCw className={`h-4 w-4 text-blue-500 ${!prefersReducedMotion() ? "animate-spin" : ""}`} aria-hidden="true" />
       )}
       {syncStatus === "done" && (
         <Check className="h-4 w-4 text-green-500" aria-hidden="true" />

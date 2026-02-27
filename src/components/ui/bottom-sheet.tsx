@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { X } from "lucide-react";
 import { useLocale } from "@/lib/use-locale";
+import { trapFocus, prefersReducedMotion } from "@/lib/a11y";
 
 interface BottomSheetProps {
   open: boolean;
@@ -56,26 +57,31 @@ export function BottomSheet({ open, onClose, title, children, snapPoints = [0.5,
     return () => { document.body.style.overflow = ""; };
   }, [open]);
 
-  // Trap focus
+  // Trap focus and escape key
   useEffect(() => {
-    if (!open) return;
+    if (!open || !sheetRef.current) return;
+    const cleanup = trapFocus(sheetRef.current);
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape") onClose();
     };
     document.addEventListener("keydown", handleKeyDown);
-    return () => document.removeEventListener("keydown", handleKeyDown);
+    return () => {
+      cleanup();
+      document.removeEventListener("keydown", handleKeyDown);
+    };
   }, [open, onClose]);
 
   if (!open) return null;
 
   const snapHeight = snapPoints[currentSnap] || 0.5;
   const height = `${snapHeight * 100}vh`;
+  const reduceMotion = prefersReducedMotion();
 
   return (
     <>
       {/* Backdrop */}
       <div
-        className="fixed inset-0 z-50 bg-black/50 transition-opacity"
+        className={`fixed inset-0 z-50 bg-black/50 ${!reduceMotion ? "transition-opacity" : ""}`}
         onClick={onClose}
         aria-hidden="true"
       />
@@ -85,7 +91,7 @@ export function BottomSheet({ open, onClose, title, children, snapPoints = [0.5,
         role="dialog"
         aria-modal="true"
         aria-label={title || t("mobile.bottomSheet.close")}
-        className="fixed bottom-0 left-0 right-0 z-50 rounded-t-2xl bg-background shadow-2xl transition-transform duration-200"
+        className={`fixed bottom-0 left-0 right-0 z-50 rounded-t-2xl bg-background shadow-2xl ${!reduceMotion ? "transition-transform duration-200" : ""}`}
         style={{
           height,
           transform: `translateY(${dragY}px)`,
@@ -94,14 +100,16 @@ export function BottomSheet({ open, onClose, title, children, snapPoints = [0.5,
       >
         {/* Drag handle */}
         <div
-          className="flex justify-center py-3 cursor-grab active:cursor-grabbing"
+          className="flex justify-center py-3 cursor-grab active:cursor-grabbing min-h-[44px] items-center"
           onTouchStart={handleTouchStart}
           onTouchMove={handleTouchMove}
           onTouchEnd={handleTouchEnd}
+          onKeyDown={(e) => { if (e.key === "ArrowDown") onClose(); }}
           aria-label={t("mobile.bottomSheet.drag")}
-          role="separator"
+          role="button"
+          tabIndex={0}
         >
-          <div className="h-1.5 w-12 rounded-full bg-muted-foreground/30" />
+          <div className="h-1.5 w-12 rounded-full bg-muted-foreground/30" aria-hidden="true" />
         </div>
         {/* Header */}
         {title && (

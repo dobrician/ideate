@@ -22,8 +22,9 @@ Reverse chronological. Click each sprint for full details.
 
 ---
 
-### 📋 [Sprint 62 — Mobile & Accessibility: Advanced Mobile Features & Universal Access](Sprint-Plan-Advanced) *(planned)*
-**Focus:** Offline-first, push notifications, mobile-optimized UI, WCAG 2.1 AAA, PWA excellence
+### ✅ [Sprint 62 — Mobile & Accessibility: Advanced Mobile Features & Universal Access](Sprint-62) *(2026-02-27)*
+**Focus:** Offline-first PWA, push notifications, mobile-optimized UI, WCAG 2.1 AAA, PWA excellence
+**Stats:** 5/5 goals | 2420 tests | Audit: 6 security fixes, 3 a11y fixes applied
 
 ---
 

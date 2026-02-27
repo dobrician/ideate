@@ -20,6 +20,16 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Invalid subscription" }, { status: 400 });
     }
 
+    // Validate endpoint is HTTPS URL
+    try {
+      const endpointUrl = new URL(body.endpoint);
+      if (endpointUrl.protocol !== "https:") {
+        return NextResponse.json({ error: "Endpoint must use HTTPS" }, { status: 400 });
+      }
+    } catch {
+      return NextResponse.json({ error: "Invalid endpoint URL" }, { status: 400 });
+    }
+
     await saveSubscription(user.id, body);
     return NextResponse.json({ ok: true });
   } catch {

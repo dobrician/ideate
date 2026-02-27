@@ -157,7 +157,9 @@ self.addEventListener("push", (event) => {
 self.addEventListener("notificationclick", (event) => {
   event.notification.close();
 
-  const url = event.notification.data?.url || "/";
+  const rawUrl = event.notification.data?.url || "/";
+  // Only allow relative paths or same-origin URLs to prevent open redirects
+  const url = rawUrl.startsWith("/") ? rawUrl : "/";
 
   event.waitUntil(
     self.clients.matchAll({ type: "window", includeUncontrolled: true }).then((clients) => {
@@ -190,7 +192,11 @@ self.addEventListener("message", (event) => {
     self.skipWaiting();
   }
   if (event.data?.type === "CACHE_URLS") {
-    const urls = event.data.urls || [];
+    // Only cache same-origin URLs to prevent cache poisoning
+    const urls = (event.data.urls || []).filter((u) => {
+      try { return new URL(u, self.location.origin).origin === self.location.origin; }
+      catch { return false; }
+    });
     event.waitUntil(
       caches.open(PAGES_CACHE).then((cache) => cache.addAll(urls))
     );
