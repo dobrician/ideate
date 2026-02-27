@@ -872,6 +872,8 @@ export const en: Record<string, string> = {
   "performance.indexName": "Index",
   "performance.tableName": "Table",
   "performance.definition": "Definition",
+  "performance.totalQueries": "Total Queries",
+  "performance.indexCoverage": "Index Coverage",
 
   // Monitoring
   "monitoring.title": "Performance Monitoring",

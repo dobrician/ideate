@@ -17,6 +17,8 @@ vi.mock("@/lib/use-locale", () => ({
         "performance.indexName": "Index",
         "performance.tableName": "Table",
         "performance.definition": "Definition",
+        "performance.totalQueries": "Total Queries",
+        "performance.indexCoverage": "Index Coverage",
       };
       return translations[key] ?? key;
     },
@@ -52,11 +54,11 @@ describe("QueryExplainPanel", () => {
     render(<QueryExplainPanel explainPlans={mockPlans} indexes={mockIndexes} />);
 
     expect(screen.getByText("Query Explain Plans")).toBeInTheDocument();
-    expect(screen.getByText("1 of 2 queries use indexes")).toBeInTheDocument();
+    expect(screen.getByText(/1 of 2 queries use indexes/)).toBeInTheDocument();
     expect(screen.getByText("Projects by deadline")).toBeInTheDocument();
     expect(screen.getByText("Full scan query")).toBeInTheDocument();
-    expect(screen.getByText("Uses index")).toBeInTheDocument();
-    expect(screen.getByText("Full table scan")).toBeInTheDocument();
+    expect(screen.getAllByText("Uses index").length).toBeGreaterThanOrEqual(1);
+    expect(screen.getAllByText("Full table scan").length).toBeGreaterThanOrEqual(1);
   });
 
   it("renders database indexes table", () => {
@@ -70,7 +72,22 @@ describe("QueryExplainPanel", () => {
   it("renders empty state when no plans", () => {
     render(<QueryExplainPanel explainPlans={[]} indexes={[]} />);
 
-    expect(screen.getByText("0 of 0 queries use indexes")).toBeInTheDocument();
+    expect(screen.getByText(/0 of 0 queries use indexes/)).toBeInTheDocument();
     expect(screen.getByText("0 indexes defined")).toBeInTheDocument();
+  });
+
+  it("renders summary cards with total, indexed count, and coverage", () => {
+    render(<QueryExplainPanel explainPlans={mockPlans} indexes={mockIndexes} />);
+
+    expect(screen.getByText("Total Queries")).toBeInTheDocument();
+    expect(screen.getByText("Index Coverage")).toBeInTheDocument();
+    expect(screen.getByText("50%")).toBeInTheDocument();
+  });
+
+  it("shows 100% coverage when all queries use indexes", () => {
+    const allIndexed = mockPlans.map((p) => ({ ...p, usesIndex: true }));
+    render(<QueryExplainPanel explainPlans={allIndexed} indexes={mockIndexes} />);
+
+    expect(screen.getByText("100%")).toBeInTheDocument();
   });
 });

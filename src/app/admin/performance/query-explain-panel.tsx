@@ -26,14 +26,40 @@ export function QueryExplainPanel({
 }) {
   const { t } = useLocale();
   const indexedCount = explainPlans.filter((p) => p.usesIndex).length;
+  const fullScanCount = explainPlans.length - indexedCount;
+  const coveragePercent = explainPlans.length > 0
+    ? Math.round((indexedCount / explainPlans.length) * 100)
+    : 0;
 
   return (
     <div className="grid gap-6">
+      <div className="grid grid-cols-3 gap-4">
+        <Card>
+          <CardContent className="pt-6">
+            <div className="text-2xl font-bold">{explainPlans.length}</div>
+            <p className="text-xs text-muted-foreground">{t("performance.totalQueries")}</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="pt-6">
+            <div className="text-2xl font-bold text-green-600">{indexedCount}</div>
+            <p className="text-xs text-muted-foreground">{t("performance.indexed")}</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="pt-6">
+            <div className="text-2xl font-bold">{coveragePercent}%</div>
+            <p className="text-xs text-muted-foreground">{t("performance.indexCoverage")}</p>
+          </CardContent>
+        </Card>
+      </div>
+
       <Card>
         <CardHeader>
           <CardTitle>{t("performance.explainPlans")}</CardTitle>
           <CardDescription>
             {t("performance.explainDesc", { indexed: indexedCount, total: explainPlans.length })}
+            {fullScanCount > 0 && ` (${fullScanCount} full scans)`}
           </CardDescription>
         </CardHeader>
         <CardContent>

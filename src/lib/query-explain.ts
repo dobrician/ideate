@@ -9,6 +9,7 @@ export interface ExplainResult {
 }
 
 const COMMON_QUERIES = [
+  // Original queries
   {
     name: "Projects by deadline",
     query: "SELECT * FROM projects WHERE deadline > unixepoch() ORDER BY deadline ASC LIMIT 20",
@@ -32,6 +33,47 @@ const COMMON_QUERIES = [
   {
     name: "Audit logs recent",
     query: "SELECT * FROM audit_logs ORDER BY created_at DESC LIMIT 20",
+  },
+  // FK join queries (Sprint 64 indexes)
+  {
+    name: "Proposals by projectId (FK)",
+    query: "SELECT * FROM proposals WHERE project_id = 'x' ORDER BY created_at DESC",
+  },
+  {
+    name: "Votes by proposalId (FK)",
+    query: "SELECT * FROM votes WHERE proposal_id = 'x'",
+  },
+  {
+    name: "Comments by proposalId (FK)",
+    query: "SELECT * FROM comments WHERE proposal_id = 'x'",
+  },
+  {
+    name: "Attachments by proposalId (FK)",
+    query: "SELECT * FROM attachments WHERE proposal_id = 'x'",
+  },
+  {
+    name: "Team members by teamId (FK)",
+    query: "SELECT * FROM team_members WHERE team_id = 'x'",
+  },
+  {
+    name: "Teams by ownerId (FK)",
+    query: "SELECT * FROM teams WHERE owner_id = 'x'",
+  },
+  {
+    name: "Webhook deliveries by webhookId (FK)",
+    query: "SELECT * FROM webhook_deliveries WHERE webhook_id = 'x'",
+  },
+  {
+    name: "OAuth accounts by userId (FK)",
+    query: "SELECT * FROM oauth_accounts WHERE user_id = 'x'",
+  },
+  {
+    name: "Notifications by userId (FK)",
+    query: "SELECT * FROM notifications WHERE user_id = 'x' ORDER BY created_at DESC LIMIT 20",
+  },
+  {
+    name: "Audit logs by userId (FK)",
+    query: "SELECT * FROM audit_logs WHERE user_id = 'x' ORDER BY created_at DESC LIMIT 20",
   },
 ] as const;
 
@@ -58,6 +100,12 @@ export function getQueryExplainPlans(): QueryExplainEntry[] {
     }
   }
   return results;
+}
+
+export function getQueryExplainSummary(): { total: number; indexed: number; fullScan: number } {
+  const plans = getQueryExplainPlans();
+  const indexed = plans.filter((p) => p.usesIndex).length;
+  return { total: plans.length, indexed, fullScan: plans.length - indexed };
 }
 
 export function listIndexes(): { name: string; tableName: string; sql: string | null }[] {

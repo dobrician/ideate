@@ -891,6 +891,8 @@ export const ro: Record<string, string> = {
   "performance.indexName": "Index",
   "performance.tableName": "Tabel",
   "performance.definition": "Definiție",
+  "performance.totalQueries": "Total Interogări",
+  "performance.indexCoverage": "Acoperire Indexuri",
 
   // Monitoring
   "monitoring.title": "Monitorizare Performanță",

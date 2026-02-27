@@ -89,4 +89,27 @@ describe("CI pipeline configuration", () => {
   it("should conditionally install Playwright deps when cache hits", () => {
     expect(content).toContain("install-deps chromium");
   });
+
+  it("build job should report build duration via GitHub notice", () => {
+    const buildSection = content.split(/\n  build:/)[1]?.split(/\n  \w+-?\w*:/)[0] ?? "";
+    expect(buildSection).toContain("::notice title=Build Duration::");
+  });
+
+  it("build job should report build size via GitHub notice", () => {
+    const buildSection = content.split(/\n  build:/)[1]?.split(/\n  \w+-?\w*:/)[0] ?? "";
+    expect(buildSection).toContain("::notice title=Build Size::");
+  });
+
+  it("build artifact should use tar to avoid filename character issues", () => {
+    const buildSection = content.split(/\n  build:/)[1]?.split(/\n  \w+-?\w*:/)[0] ?? "";
+    expect(buildSection).toContain("tar cf");
+    expect(buildSection).toContain("nextjs-build.tar");
+  });
+
+  it("smoke and e2e jobs should extract tar artifact", () => {
+    const smokeSection = content.split("smoke-tests:")[1]?.split(/\n  \w+-?\w*:/)[0] ?? "";
+    const e2eSection = content.split("e2e-tests:")[1]?.split(/\n  \w+-?\w*:/)[0] ?? "";
+    expect(smokeSection).toContain("tar xf nextjs-build.tar");
+    expect(e2eSection).toContain("tar xf nextjs-build.tar");
+  });
 });

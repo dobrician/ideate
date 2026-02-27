@@ -61,7 +61,20 @@ jobs:
           cache: npm
       - run: npm ci
       - run: mkdir -p data
-      - run: npm run build
+      - name: Build with timing
+        run: |
+          START=$SECONDS
+          npm run build
+          DURATION=$((SECONDS - START))
+          echo "::notice title=Build Duration::${DURATION}s"
+          echo "build_duration=${DURATION}" >> "$GITHUB_OUTPUT"
+        id: build
+      - name: Report build size
+        run: |
+          BUILD_SIZE=$(du -sh .next/ | cut -f1)
+          TARBALL_SIZE=$(du -sh .next/standalone/ 2>/dev/null | cut -f1 || echo "N/A")
+          echo "::notice title=Build Size::.next/ ${BUILD_SIZE}"
+          echo "Build output: .next/ = ${BUILD_SIZE}"
       - name: Tar build output
         run: tar cf nextjs-build.tar .next/ data/
       - name: Upload build artifact
