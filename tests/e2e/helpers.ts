@@ -12,10 +12,14 @@ export interface SeedData {
 
 /**
  * Seed a test user + project + proposal via the /api/test/seed endpoint.
+ * Pass an optional role ("admin" | "member" | etc.) to control the user's role.
  */
-export async function seedTestData(request: APIRequestContext): Promise<SeedData> {
+export async function seedTestData(
+  request: APIRequestContext,
+  options?: { role?: string }
+): Promise<SeedData> {
   const res = await request.post("/api/test/seed", {
-    data: { secret: E2E_TEST_SECRET },
+    data: { secret: E2E_TEST_SECRET, ...(options?.role ? { role: options.role } : {}) },
   });
 
   if (!res.ok()) {

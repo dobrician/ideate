@@ -23,7 +23,9 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
-  const email = "e2e-test@ideate.local";
+  const role = body.role || "admin";
+  const emailSuffix = role === "admin" ? "" : `-${role}`;
+  const email = `e2e-test${emailSuffix}@ideate.local`;
   const password = "TestPass123";
   const passwordHash = await hashPassword(password);
 
@@ -39,7 +41,7 @@ export async function POST(request: NextRequest) {
     userId = existing[0].id;
     await db
       .update(users)
-      .set({ passwordHash, emailVerified: true, role: "admin" })
+      .set({ passwordHash, emailVerified: true, role })
       .where(eq(users.id, userId));
   } else {
     userId = randomUUID();
@@ -48,7 +50,7 @@ export async function POST(request: NextRequest) {
       email,
       passwordHash,
       emailVerified: true,
-      role: "admin",
+      role,
     });
   }
 
