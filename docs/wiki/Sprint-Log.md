@@ -4,6 +4,19 @@ Reverse chronological. Click each sprint for full details.
 
 ---
 
+### CI Incident Audit — 2026-02-27
+
+| Field | Detail |
+|-------|--------|
+| **Run** | [#22483148488](https://github.com/dobrician/ideate/actions/runs/22483148488) |
+| **Failed job** | Cloudflare Pages Deploy |
+| **Root cause** | `@cloudflare/next-on-pages` requires `export const runtime = 'edge'` on all dynamic routes. This app uses `better-sqlite3`, `ioredis`, `pg` — Node-only APIs incompatible with Cloudflare's edge runtime. The job was masked with `continue-on-error: true` since Sprint 41 but always failed, producing a red annotation on every CI run. |
+| **Fix** | Removed `cloudflare-deploy` job from `.github/workflows/ci.yml`. The app deploys via Docker (`docker-push` job). `wrangler.toml` retained for reference. Commit: `7ff9dda`. |
+| **Verification** | Run [#22483503284](https://github.com/dobrician/ideate/actions/runs/22483503284) — all 7 jobs green, zero `continue-on-error` workarounds. |
+| **Preventive rule** | Never add a CI deploy job targeting an incompatible runtime (edge vs Node). If the app uses Node-only packages (`better-sqlite3`, `pg`, native addons), only deploy to Node-compatible targets (Docker, VPS, Railway, Fly.io). Cloudflare Pages/Workers require edge-compatible code. |
+
+---
+
 ### 📋 [Sprint 63 — Final Polish & Documentation: Production Excellence](Sprint-Plan-Advanced) *(planned)*
 **Focus:** Integration testing, security audit, performance benchmarking, admin docs, production readiness
 
