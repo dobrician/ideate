@@ -510,6 +510,18 @@ export const integrations = pgTable("integrations", {
   createdAt: ts(), updatedAt: tsUp(),
 });
 
+// ─── Search Feedback ──────────────────────────────────────────────────
+
+export const searchFeedback = pgTable("search_feedback", {
+  id: pk(),
+  userId: text("user_id").references(() => users.id, { onDelete: "set null" }),
+  analyticsId: text("analytics_id").references(() => searchAnalytics.id, { onDelete: "cascade" }),
+  resultId: text("result_id").notNull(),
+  resultType: text("result_type", { enum: ["project", "proposal", "comment"] }).notNull(),
+  rating: integer("rating").notNull(), // 1 = positive, -1 = negative
+  createdAt: ts(),
+});
+
 // ─── CI Build Metrics ──────────────────────────────────────────────────
 
 export const ciBuilds = pgTable("ci_builds", {

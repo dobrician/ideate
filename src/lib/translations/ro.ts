@@ -1005,6 +1005,9 @@ export const ro: Record<string, string> = {
   "search.methodFts": "cuvinte cheie",
   "search.methodSemantic": "AI",
   "search.methodHybrid": "hibrid",
+  "search.feedbackThanks": "Mulțumim pentru feedback!",
+  "search.feedbackPositive": "Rezultat util",
+  "search.feedbackNegative": "Nu e util",
 
   // Trending
   "trending.title": "Tendințe",

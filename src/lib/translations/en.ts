@@ -986,6 +986,9 @@ export const en: Record<string, string> = {
   "search.methodFts": "keyword",
   "search.methodSemantic": "AI",
   "search.methodHybrid": "hybrid",
+  "search.feedbackThanks": "Thanks for your feedback!",
+  "search.feedbackPositive": "Helpful result",
+  "search.feedbackNegative": "Not helpful",
 
   // Trending
   "trending.title": "Trending",

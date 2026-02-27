@@ -3,7 +3,7 @@
  * Falls back to FTS5 when embeddings are unavailable.
  */
 
-import { search as ftsSearch } from "@/lib/search";
+import { search as ftsSearch, getRrfK } from "@/lib/search";
 import {
   generateEmbedding,
   getEmbedding,
@@ -158,8 +158,8 @@ async function hybridSearch(
     semanticOnlySearch(query, limit).catch(() => []),
   ]);
 
-  // Merge using reciprocal rank fusion (RRF)
-  const RRF_K = 60;
+  // Merge using reciprocal rank fusion (RRF) with configurable K
+  const RRF_K = getRrfK();
   const scoreMap = new Map<string, { result: SemanticSearchResult; rrfScore: number }>();
 
   for (let i = 0; i < ftsResults.length; i++) {
