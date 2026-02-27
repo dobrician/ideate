@@ -182,8 +182,15 @@ export async function getOldestActions(count: number): Promise<QueuedAction[]> {
 /**
  * Replay a single queued action. Returns sync result.
  * 409 is treated as a conflict (server has newer data).
+ * URL validation: only relative paths allowed to prevent SSRF.
  */
 export async function replayAction(action: QueuedAction): Promise<SyncResult> {
+  // Only allow relative paths to prevent SSRF via compromised IndexedDB
+  if (!action.url.startsWith("/") || action.url.includes("://")) {
+    await removeAction(action.id);
+    return { id: action.id, success: false, error: "Invalid URL" };
+  }
+
   try {
     const res = await fetch(action.url, {
       method: action.method,

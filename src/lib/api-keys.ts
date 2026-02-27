@@ -1,7 +1,7 @@
 import { db } from "@/db";
 import { apiKeys } from "@/db/schema";
 import { eq, and, sql } from "drizzle-orm";
-import { createHash, randomBytes } from "crypto";
+import { createHash, randomBytes, timingSafeEqual } from "crypto";
 import { checkRateLimit } from "@/lib/rate-limit";
 
 // ─── Key Generation ─────────────────────────────────────────────────────
@@ -117,6 +117,15 @@ export async function validateApiKey(rawKey: string): Promise<ValidatedKey | nul
     .limit(1);
 
   if (!key) return null;
+
+  // Timing-safe comparison of hashes to prevent timing attacks
+  try {
+    const storedHashBuffer = Buffer.from(key.keyHash, "hex");
+    const inputHashBuffer = Buffer.from(hash, "hex");
+    if (!timingSafeEqual(storedHashBuffer, inputHashBuffer)) return null;
+  } catch {
+    return null;
+  }
 
   // Check expiry
   if (key.expiresAt && key.expiresAt < new Date()) return null;

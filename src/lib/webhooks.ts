@@ -1,7 +1,7 @@
 import { db } from "@/db";
 import { webhooks, webhookDeliveries } from "@/db/schema";
 import { eq, and, desc, sql } from "drizzle-orm";
-import { createHmac, randomUUID } from "crypto";
+import { createHmac, randomUUID, timingSafeEqual } from "crypto";
 import { logger } from "@/lib/logger";
 
 // ─── Event Types ────────────────────────────────────────────────────────
@@ -120,6 +120,25 @@ export function signPayload(payload: string, secret: string): string {
 }
 
 /**
+ * Verify webhook signature using timing-safe comparison.
+ */
+export function verifyWebhookSignature(payload: string, signature: string, secret: string): boolean {
+  const prefix = "sha256=";
+  const sig = signature.startsWith(prefix) ? signature.slice(prefix.length) : signature;
+  const expected = signPayload(payload, secret);
+  try {
+    const a = Buffer.from(expected, "hex");
+    const b = Buffer.from(sig, "hex");
+    if (a.length !== b.length) return false;
+    return timingSafeEqual(a, b);
+  } catch {
+    return false;
+  }
+}
+
+const MAX_PAYLOAD_SIZE = 1024 * 1024; // 1MB limit
+
+/**
  * Fire a webhook event to all active webhooks that subscribe to it.
  * Supports event pattern matching (e.g., "project.*").
  */
@@ -179,6 +198,16 @@ export async function deliverWebhook(
   retryConfig: RetryConfig = DEFAULT_RETRY,
 ): Promise<void> {
   const maxAttempts = retryConfig.maxAttempts;
+
+  // Enforce payload size limit
+  if (Buffer.byteLength(payload, "utf-8") > MAX_PAYLOAD_SIZE) {
+    logger.warn({ deliveryId, size: Buffer.byteLength(payload, "utf-8") }, "Webhook payload too large");
+    await db
+      .update(webhookDeliveries)
+      .set({ status: "failed", responseBody: "Payload exceeds 1MB limit" })
+      .where(eq(webhookDeliveries.id, deliveryId));
+    return;
+  }
 
   for (let attempt = 1; attempt <= maxAttempts; attempt++) {
     try {
