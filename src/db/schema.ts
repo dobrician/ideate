@@ -270,3 +270,46 @@ export const customRoles = sqliteTable("custom_roles", {
   isSystem: integer("is_system", { mode: "boolean" }).notNull().default(false),
   createdAt: ts(), updatedAt: tsUp(),
 });
+
+// ─── Workflows ──────────────────────────────────────────────────────────
+
+export const workflows = sqliteTable("workflows", {
+  id: pk(),
+  projectId: text("project_id").notNull().references(() => projects.id, { onDelete: "cascade" }),
+  name: text("name").notNull(),
+  description: text("description"),
+  stages: text("stages").notNull().default("[]"), // JSON stage order
+  isDefault: integer("is_default", { mode: "boolean" }).notNull().default(false),
+  createdAt: ts(), updatedAt: tsUp(),
+});
+
+export const workflowStages = sqliteTable("workflow_stages", {
+  id: pk(),
+  workflowId: text("workflow_id").notNull().references(() => workflows.id, { onDelete: "cascade" }),
+  name: text("name").notNull(),
+  description: text("description"),
+  stageOrder: integer("stage_order").notNull().default(0),
+  allowedRoles: text("allowed_roles").notNull().default("[]"), // JSON array of roles
+  autoAdvance: integer("auto_advance", { mode: "boolean" }).notNull().default(false),
+  autoAdvanceAfter: integer("auto_advance_after"), // seconds
+  createdAt: ts(),
+});
+
+export const proposalWorkflowState = sqliteTable("proposal_workflow_state", {
+  proposalId: text("proposal_id").primaryKey().references(() => proposals.id, { onDelete: "cascade" }),
+  workflowId: text("workflow_id").notNull().references(() => workflows.id, { onDelete: "cascade" }),
+  currentStageId: text("current_stage_id").notNull().references(() => workflowStages.id),
+  status: text("status", { enum: ["active", "completed", "rejected"] }).notNull().default("active"),
+  enteredAt: integer("entered_at", { mode: "timestamp" }).default(sql`(unixepoch())`),
+  updatedAt: tsUp(),
+});
+
+export const approvalRecords = sqliteTable("approval_records", {
+  id: pk(),
+  proposalId: text("proposal_id").notNull().references(() => proposals.id, { onDelete: "cascade" }),
+  stageId: text("stage_id").notNull().references(() => workflowStages.id),
+  userId: text("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  action: text("action", { enum: ["approve", "reject", "comment"] }).notNull(),
+  comment: text("comment"),
+  createdAt: ts(),
+});

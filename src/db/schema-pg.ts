@@ -269,6 +269,49 @@ export const customRoles = pgTable("custom_roles", {
   createdAt: ts(), updatedAt: tsUp(),
 });
 
+// ─── Workflows ──────────────────────────────────────────────────────────
+
+export const workflows = pgTable("workflows", {
+  id: pk(),
+  projectId: text("project_id").notNull().references(() => projects.id, { onDelete: "cascade" }),
+  name: text("name").notNull(),
+  description: text("description"),
+  stages: text("stages").notNull().default("[]"),
+  isDefault: boolean("is_default").notNull().default(false),
+  createdAt: ts(), updatedAt: tsUp(),
+});
+
+export const workflowStages = pgTable("workflow_stages", {
+  id: pk(),
+  workflowId: text("workflow_id").notNull().references(() => workflows.id, { onDelete: "cascade" }),
+  name: text("name").notNull(),
+  description: text("description"),
+  stageOrder: integer("stage_order").notNull().default(0),
+  allowedRoles: text("allowed_roles").notNull().default("[]"),
+  autoAdvance: boolean("auto_advance").notNull().default(false),
+  autoAdvanceAfter: integer("auto_advance_after"),
+  createdAt: ts(),
+});
+
+export const proposalWorkflowState = pgTable("proposal_workflow_state", {
+  proposalId: text("proposal_id").primaryKey().references(() => proposals.id, { onDelete: "cascade" }),
+  workflowId: text("workflow_id").notNull().references(() => workflows.id, { onDelete: "cascade" }),
+  currentStageId: text("current_stage_id").notNull().references(() => workflowStages.id),
+  status: text("status", { enum: ["active", "completed", "rejected"] }).notNull().default("active"),
+  enteredAt: timestamp("entered_at").defaultNow(),
+  updatedAt: tsUp(),
+});
+
+export const approvalRecords = pgTable("approval_records", {
+  id: pk(),
+  proposalId: text("proposal_id").notNull().references(() => proposals.id, { onDelete: "cascade" }),
+  stageId: text("stage_id").notNull().references(() => workflowStages.id),
+  userId: text("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  action: text("action", { enum: ["approve", "reject", "comment"] }).notNull(),
+  comment: text("comment"),
+  createdAt: ts(),
+});
+
 // ─── Embeddings ──────────────────────────────────────────────────────────
 
 export const embeddings = pgTable("embeddings", {
