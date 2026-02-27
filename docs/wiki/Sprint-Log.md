@@ -30,6 +30,12 @@ Reverse chronological. Click each sprint for full details.
 
 ---
 
+### ✅ [Sprint 65 — Observability & Search: CI Metrics, Query Profiling, WCAG AAA, Embeddings & E2E](Sprint-65) *(2026-02-27)*
+**Focus:** CI build metrics + artifact fix, query profiling expansion (16 queries), WCAG AAA high contrast + aria-keyshortcuts, semantic search embedding wiring, admin + search E2E tests
+**Stats:** 5/5 goals | 2639 tests (+30) + 16 E2E | Audit: low risk, 90% WCAG AAA
+
+---
+
 ### ✅ [Sprint 64 — Infrastructure & Quality: DB Indexes, CVE Fixes, WCAG AAA, CI & Bundle Optimization](Sprint-64) *(2026-02-27)*
 **Focus:** 7 FK indexes, 5 CVE fixes, WCAG AAA (aria-busy, motion-reduce), CI artifact sharing + Playwright cache, bundle optimization
 **Stats:** 5/5 goals | 2609 tests (+68) | Audit: low risk, 85% WCAG AAA
