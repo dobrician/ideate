@@ -4,6 +4,19 @@ Reverse chronological. Click each sprint for full details.
 
 ---
 
+### CI Incident Audit — 2026-02-27 (E2E strict mode + rate limit)
+
+| Field | Detail |
+|-------|--------|
+| **Run** | [#22486596620](https://github.com/dobrician/ideate/actions/runs/22486596620) |
+| **Failed job** | E2E Tests — 1 hard failure, 2 flaky |
+| **Root cause** | Sprint 62 added `MobileNav` bottom bar (`src/components/mobile-nav.tsx`) with `aria-label="Mobile navigation"`, but the existing header component (`src/components/header.tsx:170`) already had an inline mobile nav with the same aria-label. Playwright strict mode rejected `getByLabel('Mobile navigation')` resolving to 2 elements. Secondary: dashboard E2E tests hit the 5-per-email login rate limit (429) because `seedTestData` was called once in `beforeAll` but `loginAsTestUser` ran in each `beforeEach`, exhausting the limit without resetting it. |
+| **Fix** | Renamed header's inline mobile nav to `aria-label="Mobile page links"` (`nav.mobilePageLinks` i18n key, both en/ro). Moved dashboard E2E seed from `beforeAll` to `beforeEach` so `resetRateLimits()` runs before each login. Updated unit test assertions. Commit: `46a0d0a`. |
+| **Verification** | Run [#22487468377](https://github.com/dobrician/ideate/actions/runs/22487468377) — all 7 jobs green (Unit Tests, Lint, Type Check, Build, E2E Tests, Smoke Tests, Docker Push). |
+| **Preventive rule** | When adding new navigation landmarks, always use unique `aria-label` values to avoid Playwright strict mode violations. When E2E tests share a single seeded user across multiple logins, ensure rate limiters are reset between tests (call seed endpoint in `beforeEach`, not `beforeAll`). |
+
+---
+
 ### CI Incident Audit — 2026-02-27
 
 | Field | Detail |
