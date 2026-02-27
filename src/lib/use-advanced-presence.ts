@@ -13,6 +13,7 @@ export interface PresenceUser {
 }
 
 const PRESENCE_EXPIRY_MS = 30_000;
+const VALID_ACTIVITIES = new Set<ActivityStatus>(["editing", "reviewing", "typing", "idle", "online", "offline"]);
 
 /**
  * Enhanced presence hook with detailed activity states.
@@ -49,6 +50,7 @@ export function useAdvancedPresence(
       }
 
       if (data.type === "activity_broadcast" && data.channel === channel) {
+        if (!VALID_ACTIVITIES.has(data.activity)) return;
         setUsers(prev => {
           const next = new Map(prev);
           const existing = next.get(data.userId);

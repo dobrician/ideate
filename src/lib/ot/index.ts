@@ -86,17 +86,17 @@ export function apply(doc: string, operation: TextOperation): string {
     throw new Error(`Document length (${doc.length}) doesn't match operation base length (${operation.baseLength})`);
   }
 
-  let result = "";
+  const parts: string[] = [];
   let pos = 0;
 
   for (const op of operation.ops) {
     switch (op.type) {
       case "retain":
-        result += doc.slice(pos, pos + op.count);
+        parts.push(doc.slice(pos, pos + op.count));
         pos += op.count;
         break;
       case "insert":
-        result += op.text;
+        parts.push(op.text);
         break;
       case "delete":
         pos += op.count;
@@ -104,7 +104,7 @@ export function apply(doc: string, operation: TextOperation): string {
     }
   }
 
-  return result;
+  return parts.join("");
 }
 
 // ─── Compose ────────────────────────────────────────────────────────────

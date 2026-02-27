@@ -34,8 +34,9 @@ Reverse chronological. Click each sprint for full details.
 
 ---
 
-### 📋 [Sprint 57 — Real-time Collaboration: Live Editing & Advanced Presence](Sprint-Plan-Advanced) *(planned)*
+### ✅ [Sprint 57 — Real-time Collaboration: Live Editing & Advanced Presence](Sprint-57) *(2026-02-27)*
 **Focus:** Operational transforms, collaborative editor, advanced presence, document sync, collaboration UX
+**Stats:** 5/5 goals | 1963 tests
 
 ---
 

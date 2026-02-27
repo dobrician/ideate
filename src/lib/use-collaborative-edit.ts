@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { createFromDiff, transform, apply, type TextOperation } from "@/lib/ot";
+import { compose, createFromDiff, transform, apply, type TextOperation } from "@/lib/ot";
 import type { WsClient } from "@/lib/websocket/client";
 
 export interface RemoteCursor {
@@ -75,7 +75,6 @@ export function useCollaborativeEdit(
       // Already waiting for ack; buffer this change
       if (state.buffer) {
         try {
-          const { compose } = require("@/lib/ot");
           state.buffer = compose(state.buffer, op);
         } catch {
           state.buffer = op;
