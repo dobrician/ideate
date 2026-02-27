@@ -106,10 +106,13 @@ test.describe("Project RBAC E2E", () => {
     await page.goto("/admin");
     await page.waitForLoadState("domcontentloaded");
 
-    // Should show access denied or redirect
-    const denied = page.getByText(/access denied|unauthorized|forbidden/i).first();
-    const dashboard = page.getByText(/dashboard/i).first();
-    // Either access denied message or redirected to dashboard
-    await expect(denied.or(dashboard)).toBeVisible({ timeout: 5000 });
+    // Should show access denied or redirect to non-admin page
+    const currentUrl = page.url();
+    const bodyText = (await page.textContent("body")) || "";
+    const isBlocked =
+      currentUrl.includes("/dashboard") ||
+      currentUrl.includes("/auth/login") ||
+      /access denied|unauthorized|forbidden/i.test(bodyText);
+    expect(isBlocked).toBeTruthy();
   });
 });

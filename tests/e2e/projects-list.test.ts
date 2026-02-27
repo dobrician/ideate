@@ -20,7 +20,7 @@ test.describe("Projects List Page", () => {
     await page.goto("/projects");
     await page.waitForLoadState("domcontentloaded");
     // The seeded project should appear
-    await expect(page.getByText(/E2E Test Project/)).toBeVisible({ timeout: 10000 });
+    await expect(page.getByText(/E2E Test Project/).first()).toBeVisible({ timeout: 10000 });
   });
 
   test("clicking a project navigates to detail page", async ({ page }) => {

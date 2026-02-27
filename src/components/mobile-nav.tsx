@@ -44,7 +44,7 @@ export function MobileNav() {
             <Link
               key={item.href}
               href={item.href}
-              className={`flex min-h-[44px] min-w-[44px] flex-col items-center justify-center px-3 py-2 text-xs transition-colors ${
+              className={`flex min-h-[44px] min-w-[44px] flex-col items-center justify-center px-3 py-3 text-xs transition-colors ${
                 isActive
                   ? "text-primary"
                   : "text-muted-foreground hover:text-foreground"

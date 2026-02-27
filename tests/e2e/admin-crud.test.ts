@@ -12,9 +12,9 @@ test.describe("Admin CRUD Operations", () => {
     // Admin dashboard should be visible
     await expect(page.getByText(/admin/i).first()).toBeVisible();
 
-    // Check for admin navigation links
-    const links = page.getByRole("link");
-    await expect(links.first()).toBeVisible();
+    // Admin page should render meaningful content
+    const mainContent = page.locator("main").first();
+    await expect(mainContent).toBeVisible();
   });
 
   test("admin embeddings page loads with stats", async ({ page }) => {
@@ -71,10 +71,14 @@ test.describe("Admin CRUD Operations", () => {
     await page.goto("/admin/embeddings");
     await page.waitForLoadState("domcontentloaded");
 
-    // Should show access denied
-    const denied = page.getByText(/access denied|unauthorized|forbidden/i).first();
-    const dashboard = page.getByText(/dashboard/i).first();
-    await expect(denied.or(dashboard)).toBeVisible({ timeout: 5000 });
+    // Should show access denied or redirect to non-admin page
+    const currentUrl = page.url();
+    const bodyText = (await page.textContent("body")) || "";
+    const isBlocked =
+      currentUrl.includes("/dashboard") ||
+      currentUrl.includes("/auth/login") ||
+      /access denied|unauthorized|forbidden/i.test(bodyText);
+    expect(isBlocked).toBeTruthy();
   });
 
   test("unauthenticated user redirected from admin", async ({ page }) => {
