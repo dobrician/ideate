@@ -17,7 +17,7 @@ import {
   RefreshCw,
 } from "lucide-react";
 import { getTranslations } from "@/lib/i18n-server";
-import { getEmbeddingStats } from "@/lib/embeddings";
+import { getEmbeddingStats, getModelDistribution, getEmbeddingMigrationStatus } from "@/lib/embeddings";
 
 export default async function EmbeddingsPage() {
   const user = await getCurrentUser();
@@ -37,7 +37,11 @@ export default async function EmbeddingsPage() {
     );
   }
 
-  const stats = await getEmbeddingStats();
+  const [stats, distribution, migrationStatus] = await Promise.all([
+    getEmbeddingStats(),
+    getModelDistribution(),
+    getEmbeddingMigrationStatus(),
+  ]);
 
   const coveragePercent = (type: string) => {
     const covered = stats.byType[type] ?? 0;
@@ -245,6 +249,75 @@ export default async function EmbeddingsPage() {
             </p>
           </div>
         )}
+      </div>
+
+      {/* Model Migration Status */}
+      <div className="mt-6 rounded-lg border bg-card">
+        <div className="p-4 border-b">
+          <h2 className="font-semibold flex items-center gap-2">
+            <RefreshCw className="h-4 w-4" />
+            {t("admin.embeddingMigration")}
+          </h2>
+        </div>
+        <div className="p-4">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-3 mb-4">
+            <div className="rounded-lg border p-3">
+              <div className="text-sm text-muted-foreground mb-1">{t("admin.embeddingTargetModel")}</div>
+              <div className="text-sm font-bold font-mono">{migrationStatus.targetModel}</div>
+            </div>
+            <div className="rounded-lg border p-3">
+              <div className="text-sm text-muted-foreground mb-1">{t("admin.embeddingOnTarget")}</div>
+              <div className="text-xl font-bold text-green-600 dark:text-green-400">
+                {migrationStatus.onTarget}/{migrationStatus.total}
+              </div>
+            </div>
+            <div className="rounded-lg border p-3">
+              <div className="text-sm text-muted-foreground mb-1">{t("admin.embeddingMigrationProgress")}</div>
+              <div className="flex items-center gap-3">
+                <div
+                  className="flex-1 h-3 rounded-full bg-muted overflow-hidden"
+                  role="progressbar"
+                  aria-valuenow={migrationStatus.progressPercent}
+                  aria-valuemin={0}
+                  aria-valuemax={100}
+                  aria-label={`${t("admin.embeddingMigrationProgress")}: ${migrationStatus.progressPercent}%`}
+                >
+                  <div
+                    className={`h-full rounded-full transition-all ${migrationStatus.progressPercent === 100 ? "bg-green-500" : "bg-blue-500"}`}
+                    style={{ width: `${migrationStatus.progressPercent}%` }}
+                  />
+                </div>
+                <span className="text-sm font-bold">{migrationStatus.progressPercent}%</span>
+              </div>
+            </div>
+          </div>
+          {migrationStatus.offTarget > 0 && (
+            <p className="text-sm text-amber-600 dark:text-amber-400">
+              {t("admin.embeddingOffTargetWarning").replace("{count}", String(migrationStatus.offTarget))}
+            </p>
+          )}
+
+          {/* Model Distribution Breakdown */}
+          {distribution.length > 0 && (
+            <div className="mt-4">
+              <h3 className="text-sm font-semibold mb-2">{t("admin.embeddingDistribution")}</h3>
+              <div className="space-y-2">
+                {distribution.map((d) => (
+                  <div key={d.model} className="flex items-center gap-3 text-sm">
+                    <span className="font-mono w-40 truncate">{d.model}</span>
+                    <div className="flex-1 h-2 rounded-full bg-muted overflow-hidden">
+                      <div
+                        className={`h-full rounded-full ${d.model === migrationStatus.targetModel ? "bg-green-500" : "bg-muted-foreground/40"}`}
+                        style={{ width: `${d.percentage}%` }}
+                      />
+                    </div>
+                    <span className="w-20 text-right text-muted-foreground">{d.count} ({d.percentage}%)</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Model Information */}

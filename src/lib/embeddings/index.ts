@@ -333,6 +333,98 @@ export async function getEmbeddingStats(): Promise<{
   };
 }
 
+/**
+ * Get model distribution — count of embeddings per model.
+ */
+export async function getModelDistribution(): Promise<
+  Array<{ model: string; count: number; percentage: number }>
+> {
+  const rows = await db
+    .select({
+      model: embeddings.model,
+      cnt: sql<number>`COUNT(*)`.as("cnt"),
+    })
+    .from(embeddings)
+    .groupBy(embeddings.model);
+
+  const total = rows.reduce((s, r) => s + r.cnt, 0);
+  return rows.map((r) => ({
+    model: r.model,
+    count: r.cnt,
+    percentage: total > 0 ? Math.round((r.cnt / total) * 100) : 0,
+  }));
+}
+
+/**
+ * Migrate embeddings to a target model by marking non-matching embeddings
+ * as stale (resetting updatedAt to epoch) so the cron refresh picks them up.
+ * Returns the number of embeddings queued for regeneration.
+ */
+export async function migrateEmbeddingModel(targetModel: string): Promise<{
+  queued: number;
+  alreadyCurrent: number;
+}> {
+  // Count already on target model
+  const [current] = await db
+    .select({ cnt: sql<number>`COUNT(*)`.as("cnt") })
+    .from(embeddings)
+    .where(eq(embeddings.model, targetModel));
+
+  const [total] = await db
+    .select({ cnt: sql<number>`COUNT(*)`.as("cnt") })
+    .from(embeddings);
+
+  const alreadyCurrent = current?.cnt ?? 0;
+  const needsMigration = (total?.cnt ?? 0) - alreadyCurrent;
+
+  if (needsMigration > 0) {
+    // Mark non-target-model embeddings as stale by setting updatedAt to epoch
+    const epoch = new Date(0);
+    await db
+      .update(embeddings)
+      .set({ updatedAt: epoch })
+      .where(sql`${embeddings.model} != ${targetModel}`);
+
+    log.info({ targetModel, queued: needsMigration }, "Embedding model migration initiated");
+  }
+
+  return { queued: needsMigration, alreadyCurrent };
+}
+
+/**
+ * Get current embedding migration status — how many are on target vs off-target.
+ */
+export async function getEmbeddingMigrationStatus(): Promise<{
+  targetModel: string;
+  onTarget: number;
+  offTarget: number;
+  total: number;
+  progressPercent: number;
+}> {
+  const targetModel = isEmbeddingApiAvailable() ? OPENAI_EMBEDDING_MODEL : "tfidf";
+
+  const [onTargetRow] = await db
+    .select({ cnt: sql<number>`COUNT(*)`.as("cnt") })
+    .from(embeddings)
+    .where(eq(embeddings.model, targetModel));
+
+  const [totalRow] = await db
+    .select({ cnt: sql<number>`COUNT(*)`.as("cnt") })
+    .from(embeddings);
+
+  const onTarget = onTargetRow?.cnt ?? 0;
+  const total = totalRow?.cnt ?? 0;
+  const offTarget = total - onTarget;
+
+  return {
+    targetModel,
+    onTarget,
+    offTarget,
+    total,
+    progressPercent: total > 0 ? Math.round((onTarget / total) * 100) : 100,
+  };
+}
+
 // ─── Internal helpers ─────────────────────────────────────────────────
 
 /** Tokenize text into lowercase words, filtering stop words and short tokens */

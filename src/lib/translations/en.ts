@@ -352,6 +352,12 @@ export const en: Record<string, string> = {
   "admin.embeddingAvgAge": "Average Age",
   "admin.embeddingDays": "days",
   "admin.embeddingStaleWarning": "{count} embeddings are stale and will be regenerated in the next cron run.",
+  "admin.embeddingMigration": "Model Migration",
+  "admin.embeddingTargetModel": "Target Model",
+  "admin.embeddingOnTarget": "On Target",
+  "admin.embeddingMigrationProgress": "Migration Progress",
+  "admin.embeddingOffTargetWarning": "{count} embeddings need migration to the target model. They will be regenerated during cron runs.",
+  "admin.embeddingDistribution": "Model Distribution",
 
   // Search feedback analytics
   "admin.searchFeedback": "Search Feedback",

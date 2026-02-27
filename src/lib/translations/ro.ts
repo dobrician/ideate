@@ -362,6 +362,12 @@ export const ro: Record<string, string> = {
   "admin.embeddingAvgAge": "Vârsta Medie",
   "admin.embeddingDays": "zile",
   "admin.embeddingStaleWarning": "{count} embedding-uri sunt vechi și vor fi regenerate la următorul cron.",
+  "admin.embeddingMigration": "Migrare Model",
+  "admin.embeddingTargetModel": "Model Țintă",
+  "admin.embeddingOnTarget": "Pe Țintă",
+  "admin.embeddingMigrationProgress": "Progres Migrare",
+  "admin.embeddingOffTargetWarning": "{count} embedding-uri necesită migrare la modelul țintă. Vor fi regenerate în timpul rulărilor cron.",
+  "admin.embeddingDistribution": "Distribuție Modele",
 
   // Search feedback analytics
   "admin.searchFeedback": "Feedback Căutare",
