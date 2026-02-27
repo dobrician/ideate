@@ -13,7 +13,13 @@ const nextConfig: NextConfig = {
     remotePatterns: [],
   },
   experimental: {
-    optimizePackageImports: ["lucide-react"],
+    optimizePackageImports: [
+      "lucide-react",
+      "recharts",
+      "sonner",
+      "react-markdown",
+      "zod",
+    ],
   },
   serverExternalPackages: ["ioredis", "pg", "better-sqlite3"],
   headers: async () => [
