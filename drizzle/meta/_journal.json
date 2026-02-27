@@ -253,6 +253,13 @@
       "when": 1771283200000,
       "tag": "0035_sprint67_search_feedback",
       "breakpoints": true
+    },
+    {
+      "idx": 36,
+      "version": "6",
+      "when": 1771283600000,
+      "tag": "0036_sprint69_admin_alert_categories",
+      "breakpoints": true
     }
   ]
 }

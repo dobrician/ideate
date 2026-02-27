@@ -410,7 +410,7 @@ export const notificationChannelPrefs = sqliteTable("notification_channel_prefs"
   id: pk(),
   userId: text("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
   channel: text("channel", { enum: ["in_app", "email", "digest"] }).notNull().default("in_app"),
-  category: text("category", { enum: ["votes", "comments", "proposals", "ai_insights", "system"] }).notNull(),
+  category: text("category", { enum: ["votes", "comments", "proposals", "ai_insights", "system", "ci_alerts", "search_quality", "embedding_alerts", "system_events"] }).notNull(),
   enabled: integer("enabled", { mode: "boolean" }).notNull().default(true),
   digestFrequency: text("digest_frequency", { enum: ["daily", "weekly"] }),
   smartFilter: integer("smart_filter", { mode: "boolean" }).notNull().default(false),
