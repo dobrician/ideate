@@ -1,17 +1,116 @@
 import { db } from "@/db";
 import { webhooks, webhookDeliveries } from "@/db/schema";
-import { eq } from "drizzle-orm";
+import { eq, and, desc, sql } from "drizzle-orm";
 import { createHmac, randomUUID } from "crypto";
 import { logger } from "@/lib/logger";
 
+// ─── Event Types ────────────────────────────────────────────────────────
+
 export type WebhookEvent =
   | "project.created"
+  | "project.updated"
+  | "project.archived"
+  | "project.deadline"
   | "proposal.created"
+  | "proposal.updated"
+  | "proposal.status_changed"
   | "vote.cast"
-  | "project.archived";
+  | "comment.created"
+  | "user.joined"
+  | "workflow.stage_changed"
+  | "integration.test";
 
-const MAX_ATTEMPTS = 3;
-const BACKOFF_BASE_MS = 1000; // 1s, 2s, 4s
+export const ALL_WEBHOOK_EVENTS: WebhookEvent[] = [
+  "project.created",
+  "project.updated",
+  "project.archived",
+  "project.deadline",
+  "proposal.created",
+  "proposal.updated",
+  "proposal.status_changed",
+  "vote.cast",
+  "comment.created",
+  "user.joined",
+  "workflow.stage_changed",
+  "integration.test",
+];
+
+// ─── Retry Strategies ───────────────────────────────────────────────────
+
+export type RetryStrategy = "exponential" | "linear" | "fixed";
+
+export interface RetryConfig {
+  strategy: RetryStrategy;
+  maxAttempts: number;
+  baseDelayMs: number;
+}
+
+const DEFAULT_RETRY: RetryConfig = { strategy: "exponential", maxAttempts: 3, baseDelayMs: 1000 };
+
+export function computeRetryDelay(config: RetryConfig, attempt: number): number {
+  switch (config.strategy) {
+    case "exponential":
+      return config.baseDelayMs * Math.pow(2, attempt - 1);
+    case "linear":
+      return config.baseDelayMs * attempt;
+    case "fixed":
+      return config.baseDelayMs;
+    default:
+      return config.baseDelayMs * Math.pow(2, attempt - 1);
+  }
+}
+
+// ─── Payload Templates ──────────────────────────────────────────────────
+
+export type PayloadFormat = "default" | "slack" | "teams" | "discord" | "custom";
+
+export interface PayloadTemplate {
+  format: PayloadFormat;
+  customTemplate?: string; // JSON template with {{event}}, {{data}}, {{timestamp}} placeholders
+}
+
+export function formatPayload(
+  event: WebhookEvent,
+  data: Record<string, unknown>,
+  template?: PayloadTemplate,
+): string {
+  const timestamp = new Date().toISOString();
+  const defaultPayload = { event, data, timestamp };
+
+  if (!template || template.format === "default") {
+    return JSON.stringify(defaultPayload);
+  }
+
+  if (template.format === "custom" && template.customTemplate) {
+    try {
+      let result = template.customTemplate;
+      result = result.replace(/\{\{event\}\}/g, event);
+      result = result.replace(/\{\{timestamp\}\}/g, timestamp);
+      result = result.replace(/\{\{data\}\}/g, JSON.stringify(data));
+      // Validate it produces valid JSON
+      JSON.parse(result);
+      return result;
+    } catch {
+      return JSON.stringify(defaultPayload);
+    }
+  }
+
+  // Platform-specific formats handled by integration adapters
+  return JSON.stringify(defaultPayload);
+}
+
+// ─── Event Filtering ────────────────────────────────────────────────────
+
+export function matchesEventFilter(event: WebhookEvent, patterns: string[]): boolean {
+  return patterns.some((pattern) => {
+    if (pattern === "*") return true;
+    if (pattern.endsWith(".*")) {
+      const prefix = pattern.slice(0, -2);
+      return event.startsWith(prefix + ".");
+    }
+    return event === pattern;
+  });
+}
 
 /**
  * Sign a payload string with HMAC-SHA256 using the webhook secret.
@@ -22,11 +121,11 @@ export function signPayload(payload: string, secret: string): string {
 
 /**
  * Fire a webhook event to all active webhooks that subscribe to it.
- * Non-blocking: queues deliveries and processes them asynchronously.
+ * Supports event pattern matching (e.g., "project.*").
  */
 export async function fireWebhookEvent(
   event: WebhookEvent,
-  data: Record<string, unknown>
+  data: Record<string, unknown>,
 ): Promise<void> {
   try {
     const activeWebhooks = await db
@@ -36,15 +135,22 @@ export async function fireWebhookEvent(
 
     const matching = activeWebhooks.filter((wh) => {
       const events: string[] = JSON.parse(wh.events);
-      return events.includes(event);
+      return matchesEventFilter(event, events);
     });
 
     if (matching.length === 0) return;
 
-    const payload = JSON.stringify({ event, data, timestamp: new Date().toISOString() });
-
     for (const wh of matching) {
+      const retryConfig = wh.retryConfig
+        ? (JSON.parse(wh.retryConfig) as RetryConfig)
+        : DEFAULT_RETRY;
+      const payloadTemplate = wh.payloadTemplate
+        ? (JSON.parse(wh.payloadTemplate) as PayloadTemplate)
+        : undefined;
+
+      const payload = formatPayload(event, data, payloadTemplate);
       const deliveryId = randomUUID();
+
       await db.insert(webhookDeliveries).values({
         id: deliveryId,
         webhookId: wh.id,
@@ -55,7 +161,7 @@ export async function fireWebhookEvent(
       });
 
       // Fire-and-forget delivery
-      deliverWebhook(deliveryId, wh.url, wh.secret, payload).catch(() => {});
+      deliverWebhook(deliveryId, wh.url, wh.secret, payload, retryConfig).catch(() => {});
     }
   } catch (err) {
     logger.error({ err, event }, "Failed to fire webhook event");
@@ -63,15 +169,18 @@ export async function fireWebhookEvent(
 }
 
 /**
- * Deliver a single webhook with retry logic (3 attempts, exponential backoff).
+ * Deliver a single webhook with configurable retry logic.
  */
 export async function deliverWebhook(
   deliveryId: string,
   url: string,
   secret: string,
-  payload: string
+  payload: string,
+  retryConfig: RetryConfig = DEFAULT_RETRY,
 ): Promise<void> {
-  for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
+  const maxAttempts = retryConfig.maxAttempts;
+
+  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
     try {
       const signature = signPayload(payload, secret);
 
@@ -80,7 +189,7 @@ export async function deliverWebhook(
         headers: {
           "Content-Type": "application/json",
           "X-Webhook-Signature": `sha256=${signature}`,
-          "X-Webhook-Event": JSON.parse(payload).event,
+          "X-Webhook-Event": JSON.parse(payload).event ?? "unknown",
           "X-Webhook-Delivery": deliveryId,
         },
         body: payload,
@@ -94,7 +203,7 @@ export async function deliverWebhook(
           lastAttemptAt: new Date(),
           responseStatus: response.status,
           responseBody: (await response.text()).slice(0, 1000),
-          status: response.ok ? "success" : attempt === MAX_ATTEMPTS ? "failed" : "pending",
+          status: response.ok ? "success" : attempt === maxAttempts ? "failed" : "pending",
         })
         .where(eq(webhookDeliveries.id, deliveryId));
 
@@ -103,17 +212,17 @@ export async function deliverWebhook(
         return;
       }
 
-      if (attempt === MAX_ATTEMPTS) {
+      if (attempt === maxAttempts) {
         logger.error(
           { deliveryId, url, status: response.status, deadLetter: true },
-          "Webhook delivery permanently failed"
+          "Webhook delivery permanently failed",
         );
         return;
       }
 
       logger.warn(
         { deliveryId, url, attempt, status: response.status },
-        "Webhook delivery failed, will retry"
+        "Webhook delivery failed, will retry",
       );
     } catch (err) {
       await db
@@ -121,15 +230,15 @@ export async function deliverWebhook(
         .set({
           attempts: attempt,
           lastAttemptAt: new Date(),
-          status: attempt === MAX_ATTEMPTS ? "failed" : "pending",
+          status: attempt === maxAttempts ? "failed" : "pending",
           responseBody: err instanceof Error ? err.message.slice(0, 1000) : "Unknown error",
         })
         .where(eq(webhookDeliveries.id, deliveryId));
 
-      if (attempt === MAX_ATTEMPTS) {
+      if (attempt === maxAttempts) {
         logger.error(
           { deliveryId, url, err, deadLetter: true },
-          "Webhook delivery permanently failed"
+          "Webhook delivery permanently failed",
         );
         return;
       }
@@ -137,9 +246,133 @@ export async function deliverWebhook(
       logger.warn({ deliveryId, url, attempt, err }, "Webhook delivery error, retrying");
     }
 
-    // Exponential backoff
     await new Promise((resolve) =>
-      setTimeout(resolve, BACKOFF_BASE_MS * Math.pow(2, attempt - 1))
+      setTimeout(resolve, computeRetryDelay(retryConfig, attempt)),
     );
   }
+}
+
+/**
+ * Get recent webhook deliveries for a given webhook, ordered by newest first.
+ */
+export async function getDeliveryLogs(
+  webhookId: string,
+  limit = 20,
+): Promise<Array<{
+  id: string;
+  event: string;
+  status: string;
+  attempts: number;
+  responseStatus: number | null;
+  createdAt: Date | null;
+}>> {
+  return db
+    .select({
+      id: webhookDeliveries.id,
+      event: webhookDeliveries.event,
+      status: webhookDeliveries.status,
+      attempts: webhookDeliveries.attempts,
+      responseStatus: webhookDeliveries.responseStatus,
+      createdAt: webhookDeliveries.createdAt,
+    })
+    .from(webhookDeliveries)
+    .where(eq(webhookDeliveries.webhookId, webhookId))
+    .orderBy(desc(webhookDeliveries.createdAt))
+    .limit(limit);
+}
+
+/**
+ * Get delivery stats across all webhooks.
+ */
+export async function getDeliveryStats(): Promise<{
+  total: number;
+  success: number;
+  failed: number;
+  pending: number;
+}> {
+  const [stats] = await db
+    .select({
+      total: sql<number>`COUNT(*)`,
+      success: sql<number>`SUM(CASE WHEN status = 'success' THEN 1 ELSE 0 END)`,
+      failed: sql<number>`SUM(CASE WHEN status = 'failed' THEN 1 ELSE 0 END)`,
+      pending: sql<number>`SUM(CASE WHEN status = 'pending' THEN 1 ELSE 0 END)`,
+    })
+    .from(webhookDeliveries);
+
+  return {
+    total: Number(stats?.total ?? 0),
+    success: Number(stats?.success ?? 0),
+    failed: Number(stats?.failed ?? 0),
+    pending: Number(stats?.pending ?? 0),
+  };
+}
+
+/**
+ * Retry a failed delivery by re-delivering it.
+ */
+export async function retryDelivery(deliveryId: string): Promise<boolean> {
+  const [delivery] = await db
+    .select()
+    .from(webhookDeliveries)
+    .where(and(eq(webhookDeliveries.id, deliveryId), eq(webhookDeliveries.status, "failed")))
+    .limit(1);
+
+  if (!delivery) return false;
+
+  const [wh] = await db
+    .select()
+    .from(webhooks)
+    .where(eq(webhooks.id, delivery.webhookId))
+    .limit(1);
+
+  if (!wh) return false;
+
+  // Reset delivery status
+  await db
+    .update(webhookDeliveries)
+    .set({ status: "pending", attempts: 0, responseStatus: null, responseBody: null })
+    .where(eq(webhookDeliveries.id, deliveryId));
+
+  const retryConfig = wh.retryConfig
+    ? (JSON.parse(wh.retryConfig) as RetryConfig)
+    : DEFAULT_RETRY;
+
+  deliverWebhook(deliveryId, wh.url, wh.secret, delivery.payload, retryConfig).catch(() => {});
+  return true;
+}
+
+/**
+ * Send a test event to a specific webhook.
+ */
+export async function testWebhook(webhookId: string): Promise<string> {
+  const [wh] = await db.select().from(webhooks).where(eq(webhooks.id, webhookId)).limit(1);
+  if (!wh) throw new Error("Webhook not found");
+
+  const data = {
+    message: "This is a test webhook delivery",
+    webhookId: wh.id,
+    testedAt: new Date().toISOString(),
+  };
+
+  const payloadTemplate = wh.payloadTemplate
+    ? (JSON.parse(wh.payloadTemplate) as PayloadTemplate)
+    : undefined;
+  const payload = formatPayload("integration.test", data, payloadTemplate);
+  const deliveryId = randomUUID();
+
+  await db.insert(webhookDeliveries).values({
+    id: deliveryId,
+    webhookId: wh.id,
+    event: "integration.test",
+    payload,
+    status: "pending",
+    attempts: 0,
+  });
+
+  const retryConfig = wh.retryConfig
+    ? (JSON.parse(wh.retryConfig) as RetryConfig)
+    : DEFAULT_RETRY;
+
+  deliverWebhook(deliveryId, wh.url, wh.secret, payload, retryConfig).catch(() => {});
+  return deliveryId;
 }

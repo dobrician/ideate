@@ -72,6 +72,9 @@ export default async function AdminPage() {
           <Button variant="outline" asChild>
             <Link href="/admin/perf-dashboard"><Zap className="mr-1.5 h-4 w-4" />{t("perfDashboard.title")}</Link>
           </Button>
+          <Button variant="outline" asChild>
+            <Link href="/admin/integrations"><Activity className="mr-1.5 h-4 w-4" />{t("integrations.title")}</Link>
+          </Button>
         </div>
       </div>
 

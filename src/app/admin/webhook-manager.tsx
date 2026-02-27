@@ -18,9 +18,16 @@ interface Webhook {
 
 const ALL_EVENTS = [
   "project.created",
-  "proposal.created",
-  "vote.cast",
+  "project.updated",
   "project.archived",
+  "project.deadline",
+  "proposal.created",
+  "proposal.updated",
+  "proposal.status_changed",
+  "vote.cast",
+  "comment.created",
+  "user.joined",
+  "workflow.stage_changed",
 ] as const;
 
 export function WebhookManager({

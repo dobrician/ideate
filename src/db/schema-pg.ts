@@ -158,6 +158,9 @@ export const webhooks = pgTable("webhooks", {
   events: text("events").notNull(),
   secret: text("secret").notNull(),
   active: boolean("active").notNull().default(true),
+  retryConfig: text("retry_config"),
+  payloadTemplate: text("payload_template"),
+  description: text("description"),
   createdAt: ts(), updatedAt: tsUp(),
 });
 
@@ -461,4 +464,37 @@ export const searchSuggestions = pgTable("search_suggestions", {
   lastSearchedAt: timestamp("last_searched_at").defaultNow(),
   avgResults: integer("avg_results").notNull().default(0),
   createdAt: ts(),
+});
+
+// ─── API Keys ───────────────────────────────────────────────────────────
+
+export const apiKeys = pgTable("api_keys", {
+  id: pk(),
+  name: text("name").notNull(),
+  keyHash: text("key_hash").notNull().unique(),
+  keyPrefix: text("key_prefix").notNull(),
+  userId: text("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  scopes: text("scopes").notNull().default("[]"),
+  tier: text("tier", { enum: ["basic", "pro", "enterprise"] }).notNull().default("basic"),
+  rateLimit: integer("rate_limit").notNull().default(100),
+  rateLimitWindow: integer("rate_limit_window").notNull().default(3600),
+  lastUsedAt: timestamp("last_used_at"),
+  expiresAt: timestamp("expires_at"),
+  revoked: boolean("revoked").notNull().default(false),
+  totalRequests: integer("total_requests").notNull().default(0),
+  createdAt: ts(),
+});
+
+// ─── Platform Integrations ──────────────────────────────────────────────
+
+export const integrations = pgTable("integrations", {
+  id: pk(),
+  platform: text("platform", { enum: ["slack", "teams", "discord"] }).notNull(),
+  name: text("name").notNull(),
+  webhookUrl: text("webhook_url").notNull(),
+  events: text("events").notNull().default("[]"),
+  active: boolean("active").notNull().default(true),
+  config: text("config"),
+  createdBy: text("created_by").references(() => users.id, { onDelete: "set null" }),
+  createdAt: ts(), updatedAt: tsUp(),
 });

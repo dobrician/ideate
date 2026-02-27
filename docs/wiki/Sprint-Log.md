@@ -14,8 +14,9 @@ Reverse chronological. Click each sprint for full details.
 
 ---
 
-### 📋 [Sprint 61 — Integration & API Excellence: Webhook Enhancement & External Integrations](Sprint-Plan-Advanced) *(planned)*
-**Focus:** Advanced webhooks, Slack/Teams/Discord integrations, API rate limiting, webhook dashboard
+### ✅ [Sprint 61 — Integration & API Excellence: Webhook Enhancement & External Integrations](Sprint-61) *(2026-02-27)*
+**Focus:** Enhanced webhooks (12 events, retry strategies, payload templates), Slack/Teams/Discord integrations, API key management (tiered rate limits), integration dashboard
+**Stats:** 5/5 goals | 2328 tests
 
 ---
 

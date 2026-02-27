@@ -148,6 +148,9 @@ export const webhooks = sqliteTable("webhooks", {
   events: text("events").notNull(),
   secret: text("secret").notNull(),
   active: integer("active", { mode: "boolean" }).notNull().default(true),
+  retryConfig: text("retry_config"), // JSON RetryConfig
+  payloadTemplate: text("payload_template"), // JSON PayloadTemplate
+  description: text("description"),
   createdAt: ts(), updatedAt: tsUp(),
 });
 
@@ -451,4 +454,37 @@ export const searchSuggestions = sqliteTable("search_suggestions", {
   lastSearchedAt: integer("last_searched_at", { mode: "timestamp" }).default(sql`(unixepoch())`),
   avgResults: integer("avg_results").notNull().default(0),
   createdAt: ts(),
+});
+
+// ─── API Keys ───────────────────────────────────────────────────────────
+
+export const apiKeys = sqliteTable("api_keys", {
+  id: pk(),
+  name: text("name").notNull(),
+  keyHash: text("key_hash").notNull().unique(),
+  keyPrefix: text("key_prefix").notNull(), // e.g., "idk_abc1" for display
+  userId: text("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  scopes: text("scopes").notNull().default("[]"), // JSON array of permitted scopes
+  tier: text("tier", { enum: ["basic", "pro", "enterprise"] }).notNull().default("basic"),
+  rateLimit: integer("rate_limit").notNull().default(100), // requests per window
+  rateLimitWindow: integer("rate_limit_window").notNull().default(3600), // window in seconds
+  lastUsedAt: integer("last_used_at", { mode: "timestamp" }),
+  expiresAt: integer("expires_at", { mode: "timestamp" }),
+  revoked: integer("revoked", { mode: "boolean" }).notNull().default(false),
+  totalRequests: integer("total_requests").notNull().default(0),
+  createdAt: ts(),
+});
+
+// ─── Platform Integrations ──────────────────────────────────────────────
+
+export const integrations = sqliteTable("integrations", {
+  id: pk(),
+  platform: text("platform", { enum: ["slack", "teams", "discord"] }).notNull(),
+  name: text("name").notNull(),
+  webhookUrl: text("webhook_url").notNull(),
+  events: text("events").notNull().default("[]"), // JSON array
+  active: integer("active", { mode: "boolean" }).notNull().default(true),
+  config: text("config"), // JSON platform-specific config
+  createdBy: text("created_by").references(() => users.id, { onDelete: "set null" }),
+  createdAt: ts(), updatedAt: tsUp(),
 });

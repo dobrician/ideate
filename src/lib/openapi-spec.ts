@@ -35,6 +35,8 @@ export const openapiSpec = {
     { name: "Votes", description: "Real-time vote streaming" },
     { name: "Admin", description: "Admin management endpoints" },
     { name: "Webhooks", description: "Webhook management (admin)" },
+    { name: "Integrations", description: "Platform integrations (Slack, Teams, Discord)" },
+    { name: "API Keys", description: "API key management and rate limiting" },
     { name: "AI", description: "AI-powered features" },
   ],
   paths: {
