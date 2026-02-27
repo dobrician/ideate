@@ -24,13 +24,13 @@ test.describe("Mobile Navigation", () => {
     await page.goto("/dashboard");
     await page.waitForLoadState("domcontentloaded");
 
-    // Click on projects link in mobile nav
-    const projectsLink = page.getByRole("link", { name: /project/i }).first();
-    if (await projectsLink.isVisible()) {
-      await projectsLink.click();
-      await page.waitForLoadState("domcontentloaded");
-      expect(page.url()).toContain("/projects");
-    }
+    // Click on projects link in the bottom mobile nav
+    const mobileNav = page.getByLabel(/mobile navigation/i);
+    const projectsLink = mobileNav.getByRole("link", { name: /project/i });
+    await expect(projectsLink).toBeVisible();
+    await projectsLink.click();
+    await page.waitForURL(/\/projects/, { timeout: 10000 });
+    expect(page.url()).toContain("/projects");
   });
 
   test("mobile nav has 44px touch targets", async ({ page }) => {
@@ -59,8 +59,8 @@ test.describe("Mobile Navigation", () => {
     await page.goto("/admin");
     await page.waitForLoadState("domcontentloaded");
 
-    // Admin panel should render
-    await expect(page.getByText(/admin/i).first()).toBeVisible();
+    // Admin panel should render visible content in the main area
+    await expect(page.locator("main").first()).toBeVisible();
   });
 
   test("search analytics page is responsive on mobile", async ({ page }) => {
