@@ -175,28 +175,32 @@ function rebuildFtsIndexes(): void {
   logger.info("FTS indexes rebuilt");
 }
 
-const MAX_RETRIES = 3;
-for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
-  try {
-    applyMigrations();
-    rebuildFtsIndexes();
-    break;
-  } catch (error) {
-    const isBusy = error instanceof Error &&
-      error.message.includes("SQLITE_BUSY");
-    if (isBusy && attempt < MAX_RETRIES) {
-      logger.info({ attempt }, "Migration locked, retrying...");
-      Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0,
-        1000 * attempt);
-      continue;
+// During `next build` (SKIP_DB_INIT=1), skip migrations/FTS/pool to avoid
+// SQLITE_BUSY when multiple build workers import this module simultaneously.
+if (!process.env.SKIP_DB_INIT) {
+  const MAX_RETRIES = 3;
+  for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
+    try {
+      applyMigrations();
+      rebuildFtsIndexes();
+      break;
+    } catch (error) {
+      const isBusy = error instanceof Error &&
+        error.message.includes("SQLITE_BUSY");
+      if (isBusy && attempt < MAX_RETRIES) {
+        logger.info({ attempt }, "Migration locked, retrying...");
+        Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0,
+          1000 * attempt);
+        continue;
+      }
+      logger.fatal({ err: error }, "Migration failed — aborting startup");
+      process.exit(1);
     }
-    logger.fatal({ err: error }, "Migration failed — aborting startup");
-    process.exit(1);
   }
-}
 
-// Initialize read pool after migrations are applied
-initReadPool();
+  // Initialize read pool after migrations are applied
+  initReadPool();
+}
 
 export const db = drizzle(sqlite, { schema });
 export type DB = typeof db;

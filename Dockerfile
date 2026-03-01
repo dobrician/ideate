@@ -12,7 +12,9 @@ WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
-RUN mkdir -p data && npm run build
+# SKIP_DB_INIT prevents module-level migrations/FTS/pool init during build,
+# avoiding SQLITE_BUSY when multiple Next.js workers import src/db/index.ts
+RUN mkdir -p data && SKIP_DB_INIT=1 npm run build
 
 # ─── Stage 3: Production ─────────────────────────────────────────────────────
 FROM node:22-alpine AS runner

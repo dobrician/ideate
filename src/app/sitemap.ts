@@ -2,6 +2,8 @@ import type { MetadataRoute } from "next";
 import { db } from "@/db";
 import { projects } from "@/db/schema";
 
+export const dynamic = "force-dynamic";
+
 const APP_URL = process.env.APP_URL || "https://idea.surmont.co";
 
 /**
