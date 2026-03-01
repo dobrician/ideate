@@ -4,6 +4,18 @@ Reverse chronological. Click each sprint for full details.
 
 ---
 
+### Docker Build Incident — 2026-03-01 (Sprint 69 post-release SQLITE_BUSY)
+
+| Field | Detail |
+|-------|--------|
+| **Symptom** | `docker compose up -d --build` intermittently failed with SQLITE_BUSY during Next.js page-data collection (`/api/admin/invite`). Local lint/tsc/test/build all pass. |
+| **Root cause** | During `next build`, multiple build workers import `src/db/index.ts` simultaneously. Each triggers module-level `BEGIN IMMEDIATE` for migrations, FTS5 rebuild, and 4 read pool connections. Under Docker overlay FS, this race reliably produces SQLITE_BUSY despite 15s busy_timeout and 3-attempt retry. Secondary: `sitemap.xml` was statically pre-rendered, querying the projects table which doesn't exist when migrations are skipped. |
+| **Fix** | 1. Dockerfile: `SKIP_DB_INIT=1 npm run build` skips migrations/FTS/pool during build. 2. `src/db/index.ts`: guard init behind `!process.env.SKIP_DB_INIT`. 3. `src/app/sitemap.ts`: `export const dynamic = "force-dynamic"`. Commit: `b4bc891`. |
+| **Verification** | Clean Docker build (`--no-cache`), `docker compose up -d --build` succeeds, 30/32 smoke pass (2 Gmail integration pre-existing), health endpoint green, https://idea.surmont.co returns 200. |
+| **Preventive rule** | Module-level DB side effects must be guarded during build phase. Any route that queries the database at build time must use `export const dynamic = "force-dynamic"` or handle missing tables gracefully. |
+
+---
+
 ### CI Incident Audit — 2026-02-27 (Sprint 69 post-release E2E failures)
 
 | Field | Detail |

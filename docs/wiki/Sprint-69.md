@@ -109,6 +109,21 @@ Fixed in 4 commits (`83883a0`, `5abf80d`, `329af08`, `d120bf8`). Also improved h
 
 See Sprint-Log.md for full incident audit and preventive rules.
 
+## Post-Release Docker Build Incident (2026-03-01)
+
+Docker staging build (`docker compose up -d --build`) intermittently failed with **SQLITE_BUSY** during Next.js page-data collection:
+
+**Root cause:** During `next build`, multiple build workers import `src/db/index.ts` simultaneously. Each triggers module-level side effects: `BEGIN IMMEDIATE` transaction for migrations, FTS5 rebuild, and read pool initialization (4 connections). Under Docker's overlay filesystem, this race condition reliably produces SQLITE_BUSY despite the 15s busy_timeout and 3-attempt retry.
+
+**Fix (commit `b4bc891`):**
+1. **Dockerfile** — Set `SKIP_DB_INIT=1` during the build step so build workers skip migrations/FTS/pool init
+2. **src/db/index.ts** — Guard migrations, FTS rebuild, and read pool init behind `!process.env.SKIP_DB_INIT`
+3. **src/app/sitemap.ts** — Added `export const dynamic = "force-dynamic"` since sitemap queries the projects table and cannot be statically pre-rendered without a database
+
+At runtime (container startup), `SKIP_DB_INIT` is unset, so migrations and FTS rebuild proceed normally.
+
+**Verification:** Clean Docker build (`--no-cache`), `docker compose up -d --build`, 30/32 smoke tests pass (2 Gmail integration failures are pre-existing), health endpoint green, site responds 200.
+
 ## Next Priorities
 
 - Interactive CSV/PDF export with date range filters
