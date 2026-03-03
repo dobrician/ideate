@@ -188,16 +188,11 @@ export async function getSession(): Promise<SessionPayload | null> {
     return null;
   }
 
-  // Automatic token rotation: if token expires in less than 3 days, rotate it
-  if (payload.exp) {
-    const now = Math.floor(Date.now() / 1000);
-    const timeRemaining = payload.exp - now;
-
-    if (timeRemaining < SESSION_ROTATION_THRESHOLD && timeRemaining > 0) {
-      // Rotate token silently in the background
-      await setSessionCookie(payload.userId, payload.email);
-    }
-  }
+  // NOTE: Do NOT rotate cookies from read paths.
+  // getSession() is called from Server Components where mutating cookies is forbidden
+  // in Next.js 16 and throws:
+  // "Cookies can only be modified in a Server Action or Route Handler".
+  // Rotation must happen only inside Route Handlers/Server Actions.
 
   return payload;
 }
