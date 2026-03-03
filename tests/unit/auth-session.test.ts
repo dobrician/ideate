@@ -129,7 +129,7 @@ describe("Auth Session Functions", () => {
       expect(mockCookies.set).not.toHaveBeenCalled();
     });
 
-    it("should rotate token when expiry is within 3 days", async () => {
+    it("should return session without rotating token when expiry is within 3 days", async () => {
       const jwt = await import("jsonwebtoken");
       const secret = process.env.JWT_SECRET!;
       const token = jwt.default.sign(
@@ -143,7 +143,7 @@ describe("Auth Session Functions", () => {
       const { getSession } = await import("@/lib/auth");
       const session = await getSession();
       expect(session?.userId).toBe("user-123");
-      expect(mockCookies.set).toHaveBeenCalledTimes(2);
+      expect(mockCookies.set).not.toHaveBeenCalled();
     });
   });
 
