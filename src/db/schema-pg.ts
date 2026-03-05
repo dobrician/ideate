@@ -534,3 +534,17 @@ export const ciBuilds = pgTable("ci_builds", {
   runId: text("run_id"),
   createdAt: ts(),
 });
+
+// ─── Embedding Quality Snapshots ────────────────────────────────────────
+
+export const embeddingQualitySnapshots = pgTable("embedding_quality_snapshots", {
+  id: pk(),
+  overallScore: integer("overall_score").notNull(),
+  selfSimilarity: integer("self_similarity").notNull(),
+  crossSimilarity: integer("cross_similarity").notNull(),
+  separation: integer("separation").notNull(),
+  sampleSize: integer("sample_size").notNull(),
+  grade: text("grade", { enum: ["good", "fair", "poor"] }).notNull().default("poor"),
+  byModel: text("by_model"),
+  createdAt: ts(),
+});

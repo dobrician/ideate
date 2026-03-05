@@ -4,6 +4,7 @@ import { process as processJobs } from "@/lib/queue";
 import { registerEmbeddingHandlers, enqueueStaleRefresh } from "@/lib/embeddings/jobs";
 import { pruneCiBuilds, checkCiBuildAlerts } from "@/lib/ci-builds";
 import { dispatchToIntegrations } from "@/lib/integrations";
+import { takeQualitySnapshot } from "@/lib/embeddings/quality-trends";
 
 // Register handlers on module load so they're available when processJobs() runs
 registerEmbeddingHandlers();
@@ -43,6 +44,9 @@ export async function POST(request: NextRequest) {
 
   // Enqueue stale embedding refresh (processed in next run)
   await enqueueStaleRefresh().catch(() => {});
+
+  // Take embedding quality snapshot (daily trend tracking)
+  await takeQualitySnapshot().catch(() => null);
 
   // Check for CI build alerts and dispatch notifications
   const ciAlert = await checkCiBuildAlerts().catch(() => ({ alert: false, message: null }));

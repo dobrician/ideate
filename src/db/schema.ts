@@ -524,3 +524,17 @@ export const ciBuilds = sqliteTable("ci_builds", {
   runId: text("run_id"),
   createdAt: ts(),
 });
+
+// ─── Embedding Quality Snapshots ────────────────────────────────────────
+
+export const embeddingQualitySnapshots = sqliteTable("embedding_quality_snapshots", {
+  id: pk(),
+  overallScore: integer("overall_score").notNull(),
+  selfSimilarity: integer("self_similarity", { mode: "number" }).notNull(),
+  crossSimilarity: integer("cross_similarity", { mode: "number" }).notNull(),
+  separation: integer("separation", { mode: "number" }).notNull(),
+  sampleSize: integer("sample_size").notNull(),
+  grade: text("grade", { enum: ["good", "fair", "poor"] }).notNull().default("poor"),
+  byModel: text("by_model"), // JSON
+  createdAt: ts(),
+});
