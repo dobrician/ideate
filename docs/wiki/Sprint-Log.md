@@ -4,6 +4,20 @@ Reverse chronological. Click each sprint for full details.
 
 ---
 
+### [Sprint 70](Sprint-70.md) — 2026-03-05
+
+| Field | Detail |
+|-------|--------|
+| **Focus** | Export Filters, Quality Trends, Regression Alerts, E2E Coverage, Notification Delivery |
+| **Goals** | 5/5 complete |
+| **Unit tests** | 2825 (+36 new) |
+| **E2E tests** | 201 (+18 new) |
+| **Commits** | 5 (a57239a, fc09180, 0ac20db, 45f1c45, c8ce4a4) |
+| **New tables** | `embedding_quality_snapshots` (migration 0037), `ci_regression_alerts` (migration 0038) |
+| **Key changes** | Date-range/mode/branch filters for CSV exports; embedding quality trend snapshots with cron; CI regression detection engine (duration, size, failure streak) with persisted alerts; 18 E2E tests for admin pages; admin alert delivery via in-app + email honoring per-user preferences |
+
+---
+
 ### Docker Build Incident — 2026-03-01 (Sprint 69 post-release SQLITE_BUSY)
 
 | Field | Detail |

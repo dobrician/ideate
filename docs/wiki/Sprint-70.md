@@ -20,7 +20,7 @@
 | `fc09180` | Goal 2 — Embedding quality trend tracking (snapshots, trend API, cron) |
 | `0ac20db` | Goal 3 — CI regression alerts engine (detection, persistence, API) |
 | `45f1c45` | Goal 4 — E2E coverage for new admin pages (18 tests) |
-| `TBD` | Goal 5 — Notification delivery wiring (in-app + email, cron integration) |
+| `c8ce4a4` | Goal 5 — Notification delivery wiring (in-app + email, cron integration) |
 
 ## New Files
 
@@ -47,7 +47,7 @@
 | E2E tests | 201 (+18) |
 | Lint | Pass |
 | TypeScript | Pass (0 errors) |
-| Build | TBD |
+| Build | Pass |
 
 ## Risks
 
