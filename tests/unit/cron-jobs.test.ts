@@ -24,6 +24,19 @@ vi.mock("@/lib/integrations", () => ({
   dispatchToIntegrations: vi.fn().mockResolvedValue({ sent: 0, failed: 0 }),
 }));
 
+vi.mock("@/lib/embeddings/quality-trends", () => ({
+  takeQualitySnapshot: vi.fn().mockResolvedValue(null),
+}));
+
+vi.mock("@/lib/ci-regression-alerts", () => ({
+  detectAndPersistRegressions: vi.fn().mockResolvedValue([]),
+}));
+
+vi.mock("@/lib/admin-alert-delivery", () => ({
+  deliverAdminAlert: vi.fn().mockResolvedValue({ inApp: 0, email: 0, skipped: 0, errors: 0 }),
+  getAlertActionUrl: vi.fn().mockReturnValue("http://localhost/admin"),
+}));
+
 import { POST } from "@/app/api/cron/jobs/route";
 import { NextRequest } from "next/server";
 
@@ -65,7 +78,7 @@ describe("POST /api/cron/jobs", () => {
     const res = await POST(makeRequest({ authorization: "Bearer test-cron-secret" }));
     expect(res.status).toBe(200);
     const body = await res.json();
-    expect(body).toEqual({ processed: 3, succeeded: 2, failed: 1, ciBuildsDeleted: 0, ciAlert: false });
+    expect(body).toEqual({ processed: 3, succeeded: 2, failed: 1, ciBuildsDeleted: 0, ciAlert: false, regressionAlerts: 0 });
     expect(mockProcess).toHaveBeenCalledTimes(1);
   });
 

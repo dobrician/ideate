@@ -6,6 +6,7 @@ import { pruneCiBuilds, checkCiBuildAlerts } from "@/lib/ci-builds";
 import { dispatchToIntegrations } from "@/lib/integrations";
 import { takeQualitySnapshot } from "@/lib/embeddings/quality-trends";
 import { detectAndPersistRegressions } from "@/lib/ci-regression-alerts";
+import { deliverAdminAlert, getAlertActionUrl } from "@/lib/admin-alert-delivery";
 
 // Register handlers on module load so they're available when processJobs() runs
 registerEmbeddingHandlers();
@@ -52,14 +53,32 @@ export async function POST(request: NextRequest) {
   // Check for CI build alerts and dispatch notifications
   const ciAlert = await checkCiBuildAlerts().catch(() => ({ alert: false, message: null }));
   if (ciAlert.alert && ciAlert.message) {
-    await dispatchToIntegrations("build.completed" as never, {
-      alert: true,
-      message: ciAlert.message,
-    }).catch(() => {});
+    await Promise.all([
+      dispatchToIntegrations("build.completed" as never, {
+        alert: true,
+        message: ciAlert.message,
+      }).catch(() => {}),
+      deliverAdminAlert({
+        category: "ci_alerts",
+        title: "CI Build Alert",
+        message: ciAlert.message,
+        severity: "warning",
+        actionUrl: getAlertActionUrl("ci_alerts"),
+      }).catch(() => {}),
+    ]);
   }
 
-  // Run CI regression detection engine (persists alerts)
+  // Run CI regression detection engine (persists alerts + deliver notifications)
   const regressionAlerts = await detectAndPersistRegressions().catch(() => []);
+  for (const alert of regressionAlerts) {
+    await deliverAdminAlert({
+      category: "ci_alerts",
+      title: `CI Regression: ${alert.alertType.replace(/_/g, " ")}`,
+      message: alert.message,
+      severity: alert.severity as "warning" | "critical",
+      actionUrl: getAlertActionUrl("ci_alerts"),
+    }).catch(() => {});
+  }
 
   return NextResponse.json({
     ...result,
