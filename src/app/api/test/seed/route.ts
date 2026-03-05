@@ -3,7 +3,6 @@ import { db } from "@/db";
 import { users, projects, proposals, votes } from "@/db/schema";
 import { hashPassword } from "@/lib/password";
 import { resetRateLimits } from "@/lib/rate-limit";
-import { eq } from "drizzle-orm";
 import { randomUUID } from "crypto";
 
 const E2E_TEST_SECRET = process.env.E2E_TEST_SECRET;
@@ -24,35 +23,20 @@ export async function POST(request: NextRequest) {
   }
 
   const role = body.role || "admin";
-  const emailSuffix = role === "admin" ? "" : `-${role}`;
-  const email = `e2e-test${emailSuffix}@ideate.local`;
+  const uniqueId = randomUUID().slice(0, 8);
+  const email = `e2e-${uniqueId}@ideate.local`;
   const password = "TestPass123";
   const passwordHash = await hashPassword(password);
 
-  // Upsert test user (verified)
-  const existing = await db
-    .select()
-    .from(users)
-    .where(eq(users.email, email))
-    .limit(1);
-
-  let userId: string;
-  if (existing.length > 0) {
-    userId = existing[0].id;
-    await db
-      .update(users)
-      .set({ passwordHash, emailVerified: true, role })
-      .where(eq(users.id, userId));
-  } else {
-    userId = randomUUID();
-    await db.insert(users).values({
-      id: userId,
-      email,
-      passwordHash,
-      emailVerified: true,
-      role,
-    });
-  }
+  const userId = randomUUID();
+  await db.insert(users).values({
+    id: userId,
+    email,
+    passwordHash,
+    emailVerified: true,
+    role,
+    onboardingCompleted: true,
+  });
 
   // Create test project (deadline 30 days from now)
   const projectId = randomUUID();

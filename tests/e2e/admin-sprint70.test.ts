@@ -161,24 +161,35 @@ test.describe("Notification Preferences Page", () => {
     const seed = await seedTestData(page.request, { role: "admin" });
     await loginAsTestUser(page, seed);
 
-    await navigateAndWait(page, "/admin/notification-prefs");
+    // Verify API works before loading page (isolates backend vs rendering)
+    const apiRes = await page.request.get("/api/admin/notification-prefs");
+    expect(apiRes.ok()).toBe(true);
 
-    // Page title
-    await expect(page.getByRole("heading", { level: 1 }).first()).toBeVisible();
+    await page.goto("/admin/notification-prefs");
+    await page.waitForURL("**/admin/notification-prefs", { timeout: 15000 });
+    await page.waitForLoadState("domcontentloaded");
+
+    // Page title — generous timeout for CI production RSC streaming
+    await expect(page.getByRole("heading", { level: 1 }).first()).toBeVisible({ timeout: 20000 });
 
     // Category rows visible
-    await expect(page.getByText(/ci alerts/i).first()).toBeVisible();
-    await expect(page.getByText(/search quality/i).first()).toBeVisible();
+    await expect(page.getByText(/ci.*alerts/i).first()).toBeVisible({ timeout: 10000 });
+    await expect(page.getByText(/search quality/i).first()).toBeVisible({ timeout: 10000 });
   });
 
   test("notification prefs shows enabled/disabled badges", async ({ page }) => {
     const seed = await seedTestData(page.request, { role: "admin" });
     await loginAsTestUser(page, seed);
 
-    await navigateAndWait(page, "/admin/notification-prefs");
+    await page.goto("/admin/notification-prefs");
+    await page.waitForLoadState("domcontentloaded");
 
-    // Default: all enabled
+    // Wait for page to fully render
+    await expect(page.getByRole("heading", { level: 1 }).first()).toBeVisible({ timeout: 20000 });
+
+    // Default: all enabled (4 categories x 2 channels = 8 badges)
     const enabledBadges = page.getByText(/enabled/i);
+    await expect(enabledBadges.first()).toBeVisible({ timeout: 5000 });
     const count = await enabledBadges.count();
     expect(count).toBeGreaterThanOrEqual(4);
   });

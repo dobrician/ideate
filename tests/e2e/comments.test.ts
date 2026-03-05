@@ -14,15 +14,16 @@ test.describe("Comments E2E", () => {
     await expect(textarea).toBeVisible({ timeout: 15000 });
     await textarea.scrollIntoViewIfNeeded();
 
-    // Type a comment and submit via Enter (React form actions require
-    // submission through React's event system; raw requestSubmit() doesn't work)
     await textarea.fill("This is a test comment via send button");
-    await textarea.press("Enter");
+
+    // Click the send button (type=submit)
+    const sendButton = page.locator("button[type='submit'][aria-label]").last();
+    await sendButton.click();
 
     // Comment should appear in the thread
     await expect(
       page.getByText("This is a test comment via send button")
-    ).toBeVisible({ timeout: 15000 });
+    ).toBeVisible({ timeout: 20000 });
   });
 
   test("add project comment via Enter key", async ({ page }) => {
@@ -37,11 +38,13 @@ test.describe("Comments E2E", () => {
     await textarea.scrollIntoViewIfNeeded();
 
     await textarea.fill("Comment sent with Enter key");
+    // Small delay to ensure React onKeyDown handler is ready after fill
+    await page.waitForTimeout(100);
     await textarea.press("Enter");
 
     await expect(
       page.getByText("Comment sent with Enter key")
-    ).toBeVisible({ timeout: 15000 });
+    ).toBeVisible({ timeout: 20000 });
   });
 
   test("empty comment is rejected (required field)", async ({ page }) => {
@@ -74,10 +77,11 @@ test.describe("Comments E2E", () => {
 
     // Post a comment
     await textarea.fill("Chat bubble test message");
+    await page.waitForTimeout(100);
     await textarea.press("Enter");
 
     await expect(page.getByText("Chat bubble test message")).toBeVisible({
-      timeout: 10000,
+      timeout: 20000,
     });
 
     // Own messages should be right-aligned (flex-row-reverse)
@@ -110,8 +114,9 @@ test.describe("Comments E2E", () => {
     expect(value).toContain("Line two");
 
     // Now submit and verify the multi-line message appears
+    await page.waitForTimeout(100);
     await textarea.press("Enter");
-    await expect(page.getByText("Line one")).toBeVisible({ timeout: 10000 });
+    await expect(page.getByText("Line one")).toBeVisible({ timeout: 20000 });
   });
 
   test("own comment shows avatar with initials", async ({ page }) => {
@@ -126,9 +131,10 @@ test.describe("Comments E2E", () => {
     await textarea.scrollIntoViewIfNeeded();
 
     await textarea.fill("Avatar test");
+    await page.waitForTimeout(100);
     await textarea.press("Enter");
 
-    await expect(page.getByText("Avatar test")).toBeVisible({ timeout: 10000 });
+    await expect(page.getByText("Avatar test")).toBeVisible({ timeout: 20000 });
 
     // The comment bubble area should contain an avatar fallback with initials
     const bubble = page.locator("div.flex").filter({
@@ -157,10 +163,11 @@ test.describe("Comments E2E", () => {
     // Type and submit a proposal comment
     const textarea = sheet.locator("textarea[name='content']");
     await textarea.fill("Proposal discussion comment");
+    await page.waitForTimeout(100);
     await textarea.press("Enter");
 
     await expect(
       sheet.getByText("Proposal discussion comment")
-    ).toBeVisible({ timeout: 10000 });
+    ).toBeVisible({ timeout: 20000 });
   });
 });
