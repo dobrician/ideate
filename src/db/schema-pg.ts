@@ -548,3 +548,21 @@ export const embeddingQualitySnapshots = pgTable("embedding_quality_snapshots", 
   byModel: text("by_model"),
   createdAt: ts(),
 });
+
+// ─── CI Regression Alerts ───────────────────────────────────────────────
+
+export const ciRegressionAlerts = pgTable("ci_regression_alerts", {
+  id: pk(),
+  alertType: text("alert_type", { enum: ["regression", "failure_streak", "size_regression"] }).notNull().default("regression"),
+  severity: text("severity", { enum: ["warning", "critical"] }).notNull().default("warning"),
+  message: text("message").notNull(),
+  branch: text("branch"),
+  avgRecentMs: integer("avg_recent_ms"),
+  avgBaselineMs: integer("avg_baseline_ms"),
+  regressionPct: integer("regression_pct"),
+  failureCount: integer("failure_count"),
+  threshold: integer("threshold").notNull(),
+  resolved: integer("resolved").notNull().default(0),
+  resolvedAt: ts(),
+  createdAt: ts(),
+});

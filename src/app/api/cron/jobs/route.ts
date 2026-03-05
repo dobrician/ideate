@@ -5,6 +5,7 @@ import { registerEmbeddingHandlers, enqueueStaleRefresh } from "@/lib/embeddings
 import { pruneCiBuilds, checkCiBuildAlerts } from "@/lib/ci-builds";
 import { dispatchToIntegrations } from "@/lib/integrations";
 import { takeQualitySnapshot } from "@/lib/embeddings/quality-trends";
+import { detectAndPersistRegressions } from "@/lib/ci-regression-alerts";
 
 // Register handlers on module load so they're available when processJobs() runs
 registerEmbeddingHandlers();
@@ -57,5 +58,13 @@ export async function POST(request: NextRequest) {
     }).catch(() => {});
   }
 
-  return NextResponse.json({ ...result, ciBuildsDeleted: ciPruned, ciAlert: ciAlert.alert });
+  // Run CI regression detection engine (persists alerts)
+  const regressionAlerts = await detectAndPersistRegressions().catch(() => []);
+
+  return NextResponse.json({
+    ...result,
+    ciBuildsDeleted: ciPruned,
+    ciAlert: ciAlert.alert,
+    regressionAlerts: regressionAlerts.length,
+  });
 }

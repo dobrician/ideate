@@ -7,8 +7,8 @@
 ## Goals
 
 - [x] **Goal 1: Interactive Analytics Export Filters** — Date-range (startDate/endDate) and model/branch filters for CSV export endpoints and admin pages
-- [ ] **Goal 2: Embedding Quality Trend Tracking** — Periodic quality snapshots, trend API, admin UI chart/cards showing quality over time
-- [ ] **Goal 3: CI Regression Alerts Engine** — Detect regressions (duration, size, failure rate) between branches/runs, threshold config, persisted alerts
+- [x] **Goal 2: Embedding Quality Trend Tracking** — Periodic quality snapshots, trend API, admin UI chart/cards showing quality over time
+- [x] **Goal 3: CI Regression Alerts Engine** — Detect regressions (duration, size, failure rate) between branches/runs, threshold config, persisted alerts
 - [ ] **Goal 4: E2E Coverage for New Admin Pages** — Stable selectors and robust assertions for export, embedding quality, CI comparison, notification prefs pages
 - [ ] **Goal 5: Notification Delivery Wiring** — Connect notification preferences to real in-app and email delivery paths, honoring per-user category/channel toggles
 
@@ -17,6 +17,8 @@
 | Hash | Description |
 |------|-------------|
 | `a57239a` | Goal 1 — Interactive analytics export filters (date-range, mode, branch) |
+| `fc09180` | Goal 2 — Embedding quality trend tracking (snapshots, trend API, cron) |
+| `TBD` | Goal 3 — CI regression alerts engine (detection, persistence, API) |
 
 ## New Files
 
@@ -27,8 +29,8 @@
 
 | Metric | Value |
 |--------|-------|
-| Goals completed | 1/5 |
-| Unit tests | 2795 (+6) |
+| Goals completed | 3/5 |
+| Unit tests | 2817 (+28) |
 | E2E tests | 183 |
 | Lint | TBD |
 | TypeScript | TBD |

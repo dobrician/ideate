@@ -267,6 +267,13 @@
       "when": 1771284000000,
       "tag": "0037_sprint70_quality_snapshots",
       "breakpoints": true
+    },
+    {
+      "idx": 38,
+      "version": "6",
+      "when": 1771284400000,
+      "tag": "0038_sprint70_ci_regression_alerts",
+      "breakpoints": true
     }
   ]
 }
