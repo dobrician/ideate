@@ -34,12 +34,46 @@ function buildCsv(headers: string[], rows: string[][]): string {
   return [headerLine, ...dataLines].join("\n");
 }
 
+export interface SearchExportFilters {
+  daysBack?: number;
+  startDate?: string; // ISO date string (YYYY-MM-DD)
+  endDate?: string;   // ISO date string (YYYY-MM-DD)
+  mode?: string;      // search mode filter (fts, semantic, hybrid)
+}
+
+export interface CiExportFilters {
+  limit?: number;
+  startDate?: string;
+  endDate?: string;
+  branch?: string;
+}
+
+/** Resolve date filters to a daysBack value. startDate/endDate take precedence. */
+function resolveDaysBack(filters: { daysBack?: number; startDate?: string; endDate?: string }): number {
+  if (filters.startDate) {
+    const start = new Date(filters.startDate);
+    const end = filters.endDate ? new Date(filters.endDate) : new Date();
+    return Math.max(1, Math.ceil((end.getTime() - start.getTime()) / 86400_000));
+  }
+  return filters.daysBack ?? 30;
+}
+
 /**
  * Export search analytics as CSV.
  * Includes: stats summary, popular searches, zero-result searches,
  * quality feedback by mode, daily feedback trend, low-rated results.
+ * Supports date-range filters (startDate/endDate) and search mode filter.
  */
-export async function exportSearchAnalyticsCsv(daysBack = 30): Promise<string> {
+export async function exportSearchAnalyticsCsv(
+  daysBackOrFilters: number | SearchExportFilters = 30
+): Promise<string> {
+  const filters: SearchExportFilters =
+    typeof daysBackOrFilters === "number"
+      ? { daysBack: daysBackOrFilters }
+      : daysBackOrFilters;
+
+  const daysBack = resolveDaysBack(filters);
+
   const [stats, popular, zeroResult, quality, trend, lowRated] =
     await Promise.all([
       getSearchStats(daysBack),
@@ -52,8 +86,16 @@ export async function exportSearchAnalyticsCsv(daysBack = 30): Promise<string> {
 
   const sections: string[] = [];
 
+  // Section 0: Filter info
+  const filterLines: string[][] = [["Days Back", String(daysBack)]];
+  if (filters.startDate) filterLines.push(["Start Date", filters.startDate]);
+  if (filters.endDate) filterLines.push(["End Date", filters.endDate]);
+  if (filters.mode) filterLines.push(["Mode Filter", filters.mode]);
+  sections.push("# Export Filters");
+  sections.push(buildCsv(["Filter", "Value"], filterLines));
+
   // Section 1: Summary
-  sections.push("# Search Analytics Summary");
+  sections.push("\n# Search Analytics Summary");
   sections.push(
     buildCsv(
       ["Metric", "Value"],
@@ -63,10 +105,12 @@ export async function exportSearchAnalyticsCsv(daysBack = 30): Promise<string> {
         ["Avg Response Time (ms)", String(stats.avgResponseTime)],
         ["Zero Result Rate (%)", stats.zeroResultRate.toFixed(1)],
         ["Click-Through Rate (%)", stats.clickThroughRate.toFixed(1)],
-        ...Object.entries(stats.searchesByMode).map(([mode, count]) => [
-          `Searches (${mode})`,
-          String(count),
-        ]),
+        ...Object.entries(stats.searchesByMode)
+          .filter(([mode]) => !filters.mode || mode === filters.mode)
+          .map(([mode, count]) => [
+            `Searches (${mode})`,
+            String(count),
+          ]),
       ]
     )
   );
@@ -94,7 +138,9 @@ export async function exportSearchAnalyticsCsv(daysBack = 30): Promise<string> {
   sections.push(
     buildCsv(
       ["Mode", "Positive", "Negative", "Total", "Positive Rate (%)"],
-      Object.entries(quality.byMode).map(([mode, data]) => [
+      Object.entries(quality.byMode)
+        .filter(([mode]) => !filters.mode || mode === filters.mode)
+        .map(([mode, data]) => [
         mode,
         String(data.positive),
         String(data.negative),
@@ -135,25 +181,57 @@ export async function exportSearchAnalyticsCsv(daysBack = 30): Promise<string> {
     )
   );
 
-  log.info({ daysBack, sections: sections.length }, "Search analytics CSV exported");
+  log.info({ daysBack, mode: filters.mode ?? "all", sections: sections.length }, "Search analytics CSV exported");
   return sections.join("\n");
 }
 
 /**
  * Export CI build trends as CSV.
  * Includes: build stats summary, recent builds list, bundle analytics.
+ * Supports date-range filters (startDate/endDate) and branch filter.
  */
-export async function exportCiBuildsCsv(limit = 50): Promise<string> {
-  const [builds, stats, bundle] = await Promise.all([
+export async function exportCiBuildsCsv(
+  limitOrFilters: number | CiExportFilters = 50
+): Promise<string> {
+  const filters: CiExportFilters =
+    typeof limitOrFilters === "number"
+      ? { limit: limitOrFilters }
+      : limitOrFilters;
+
+  const limit = filters.limit ?? 50;
+
+  const [allBuilds, stats, bundle] = await Promise.all([
     getRecentCiBuilds(limit),
     getCiBuildStats(limit),
     getBundleSizeAnalytics(),
   ]);
 
+  // Apply filters
+  let builds = allBuilds;
+  if (filters.branch) {
+    builds = builds.filter((b) => b.branch === filters.branch);
+  }
+  if (filters.startDate) {
+    const start = new Date(filters.startDate).getTime();
+    builds = builds.filter((b) => b.createdAt && new Date(b.createdAt).getTime() >= start);
+  }
+  if (filters.endDate) {
+    const end = new Date(filters.endDate).getTime() + 86400_000; // inclusive end-of-day
+    builds = builds.filter((b) => b.createdAt && new Date(b.createdAt).getTime() < end);
+  }
+
   const sections: string[] = [];
 
+  // Section 0: Filter info
+  const filterLines: string[][] = [["Limit", String(limit)]];
+  if (filters.branch) filterLines.push(["Branch", filters.branch]);
+  if (filters.startDate) filterLines.push(["Start Date", filters.startDate]);
+  if (filters.endDate) filterLines.push(["End Date", filters.endDate]);
+  sections.push("# Export Filters");
+  sections.push(buildCsv(["Filter", "Value"], filterLines));
+
   // Section 1: Stats Summary
-  sections.push("# CI Build Stats Summary");
+  sections.push("\n# CI Build Stats Summary");
   sections.push(
     buildCsv(
       ["Metric", "Value"],
@@ -206,6 +284,6 @@ export async function exportCiBuildsCsv(limit = 50): Promise<string> {
     )
   );
 
-  log.info({ limit, buildCount: builds.length }, "CI builds CSV exported");
+  log.info({ limit, branch: filters.branch ?? "all", buildCount: builds.length }, "CI builds CSV exported");
   return sections.join("\n");
 }

@@ -152,6 +152,74 @@ describe("analytics-export", () => {
       expect(getSearchFeedbackTrend).toHaveBeenCalledWith(60);
       expect(getLowRatedResults).toHaveBeenCalledWith(50, 60);
     });
+
+    it("includes export filter section in CSV", async () => {
+      vi.mocked(getSearchStats).mockResolvedValue({
+        totalSearches: 10, uniqueQueries: 5, avgResponseTime: 20,
+        zeroResultRate: 0, clickThroughRate: 50, searchesByMode: { fts: 10 },
+      });
+      vi.mocked(getPopularSearches).mockResolvedValue([]);
+      vi.mocked(getZeroResultSearches).mockResolvedValue([]);
+      vi.mocked(getSearchQualityStats).mockResolvedValue({ totalFeedback: 0, positiveRate: 0, byMode: {} });
+      vi.mocked(getSearchFeedbackTrend).mockResolvedValue([]);
+      vi.mocked(getLowRatedResults).mockResolvedValue([]);
+
+      const csv = await exportSearchAnalyticsCsv({
+        startDate: "2026-03-01",
+        endDate: "2026-03-05",
+        mode: "fts",
+      });
+
+      expect(csv).toContain("# Export Filters");
+      expect(csv).toContain("Start Date,2026-03-01");
+      expect(csv).toContain("End Date,2026-03-05");
+      expect(csv).toContain("Mode Filter,fts");
+    });
+
+    it("computes daysBack from startDate/endDate", async () => {
+      vi.mocked(getSearchStats).mockResolvedValue({
+        totalSearches: 0, uniqueQueries: 0, avgResponseTime: 0,
+        zeroResultRate: 0, clickThroughRate: 0, searchesByMode: {},
+      });
+      vi.mocked(getPopularSearches).mockResolvedValue([]);
+      vi.mocked(getZeroResultSearches).mockResolvedValue([]);
+      vi.mocked(getSearchQualityStats).mockResolvedValue({ totalFeedback: 0, positiveRate: 0, byMode: {} });
+      vi.mocked(getSearchFeedbackTrend).mockResolvedValue([]);
+      vi.mocked(getLowRatedResults).mockResolvedValue([]);
+
+      await exportSearchAnalyticsCsv({
+        startDate: "2026-02-25",
+        endDate: "2026-03-05",
+      });
+
+      // 8 days between start and end
+      expect(getSearchStats).toHaveBeenCalledWith(8);
+    });
+
+    it("filters searchesByMode when mode filter is set", async () => {
+      vi.mocked(getSearchStats).mockResolvedValue({
+        totalSearches: 200, uniqueQueries: 100, avgResponseTime: 30,
+        zeroResultRate: 2, clickThroughRate: 40,
+        searchesByMode: { fts: 100, semantic: 80, hybrid: 20 },
+      });
+      vi.mocked(getPopularSearches).mockResolvedValue([]);
+      vi.mocked(getZeroResultSearches).mockResolvedValue([]);
+      vi.mocked(getSearchQualityStats).mockResolvedValue({
+        totalFeedback: 10, positiveRate: 80,
+        byMode: { fts: { positive: 5, negative: 1, total: 6 }, semantic: { positive: 3, negative: 1, total: 4 } },
+      });
+      vi.mocked(getSearchFeedbackTrend).mockResolvedValue([]);
+      vi.mocked(getLowRatedResults).mockResolvedValue([]);
+
+      const csv = await exportSearchAnalyticsCsv({ mode: "fts" });
+
+      expect(csv).toContain("Searches (fts),100");
+      expect(csv).not.toContain("Searches (semantic)");
+      expect(csv).not.toContain("Searches (hybrid)");
+      // Quality section should also be filtered
+      expect(csv).toContain("fts,5,1,6");
+      expect(csv).not.toContain("semantic,3,1,4");
+    });
   });
 
   describe("exportCiBuildsCsv", () => {
@@ -257,6 +325,53 @@ describe("analytics-export", () => {
 
       expect(csv).toContain("def456,feature,30000");
       expect(csv).toContain("Current Bundle Size (MB),N/A");
+    });
+
+    it("filters builds by branch", async () => {
+      vi.mocked(getRecentCiBuilds).mockResolvedValue([
+        { id: "1", commitHash: "a1", branch: "main", durationMs: 50000, buildSizeBytes: null, status: "success", runId: null, createdAt: new Date("2026-03-01") },
+        { id: "2", commitHash: "b2", branch: "feature", durationMs: 40000, buildSizeBytes: null, status: "success", runId: null, createdAt: new Date("2026-03-02") },
+        { id: "3", commitHash: "c3", branch: "main", durationMs: 55000, buildSizeBytes: null, status: "failure", runId: null, createdAt: new Date("2026-03-03") },
+      ]);
+      vi.mocked(getCiBuildStats).mockResolvedValue({ count: 3, avgDurationMs: 48333, minDurationMs: 40000, maxDurationMs: 55000, latestDurationMs: 55000, trend: "stable" });
+      vi.mocked(getBundleSizeAnalytics).mockResolvedValue({ current: null, trend: "stable" as const, avgSizeBytes: null, minSizeBytes: null, maxSizeBytes: null, budgetStatus: "ok" as const, recentEntries: [] });
+
+      const csv = await exportCiBuildsCsv({ branch: "main" });
+
+      expect(csv).toContain("Branch,main");
+      expect(csv).toContain("a1,main,50000");
+      expect(csv).toContain("c3,main,55000");
+      expect(csv).not.toContain("b2,feature");
+    });
+
+    it("filters builds by date range", async () => {
+      vi.mocked(getRecentCiBuilds).mockResolvedValue([
+        { id: "1", commitHash: "a1", branch: "main", durationMs: 50000, buildSizeBytes: null, status: "success", runId: null, createdAt: new Date("2026-02-28") },
+        { id: "2", commitHash: "b2", branch: "main", durationMs: 40000, buildSizeBytes: null, status: "success", runId: null, createdAt: new Date("2026-03-02") },
+        { id: "3", commitHash: "c3", branch: "main", durationMs: 55000, buildSizeBytes: null, status: "success", runId: null, createdAt: new Date("2026-03-04") },
+      ]);
+      vi.mocked(getCiBuildStats).mockResolvedValue({ count: 3, avgDurationMs: 48333, minDurationMs: 40000, maxDurationMs: 55000, latestDurationMs: 55000, trend: "stable" });
+      vi.mocked(getBundleSizeAnalytics).mockResolvedValue({ current: null, trend: "stable" as const, avgSizeBytes: null, minSizeBytes: null, maxSizeBytes: null, budgetStatus: "ok" as const, recentEntries: [] });
+
+      const csv = await exportCiBuildsCsv({ startDate: "2026-03-01", endDate: "2026-03-03" });
+
+      expect(csv).toContain("Start Date,2026-03-01");
+      expect(csv).toContain("End Date,2026-03-03");
+      expect(csv).toContain("b2,main,40000");
+      expect(csv).not.toContain("a1,main,50000"); // before startDate
+      expect(csv).not.toContain("c3,main,55000"); // after endDate
+    });
+
+    it("includes filter section in CSV output", async () => {
+      vi.mocked(getRecentCiBuilds).mockResolvedValue([]);
+      vi.mocked(getCiBuildStats).mockResolvedValue({ count: 0, avgDurationMs: 0, minDurationMs: 0, maxDurationMs: 0, latestDurationMs: null, trend: "insufficient" });
+      vi.mocked(getBundleSizeAnalytics).mockResolvedValue({ current: null, trend: "stable" as const, avgSizeBytes: null, minSizeBytes: null, maxSizeBytes: null, budgetStatus: "ok" as const, recentEntries: [] });
+
+      const csv = await exportCiBuildsCsv({ limit: 100, branch: "develop" });
+
+      expect(csv).toContain("# Export Filters");
+      expect(csv).toContain("Limit,100");
+      expect(csv).toContain("Branch,develop");
     });
   });
 });
