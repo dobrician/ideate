@@ -32,6 +32,10 @@ jobs:
 
       - name: Create backup
         run: |
+          if [ ! -f data/ideate.db ]; then
+            echo "::warning::Database file not found — skipping backup (configure BACKUP_SSH_* secrets to enable remote backup)"
+            exit 0
+          fi
           chmod +x scripts/backup-db.sh
           ./scripts/backup-db.sh ./backups data/ideate.db
 
