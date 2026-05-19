@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback } from "react";
-import { Search, FileText, Lightbulb, MessageSquare, Filter, TrendingUp, Tag, Sparkles, Clock, Zap } from "lucide-react";
+import { Search, FileText, Lightbulb, MessageSquare, Filter, TrendingUp, Tag, Sparkles, Clock, Zap, Type } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { useLocale } from "@/lib/use-locale";
 import { sanitizeSnippet } from "@/lib/sanitize";
@@ -314,8 +314,16 @@ export function SearchBar() {
     }
   }, [activeIndex]);
 
+  const modeIcon = (m: SearchMode) => {
+    switch (m) {
+      case "fts": return <Type className="h-3.5 w-3.5" aria-hidden="true" />;
+      case "semantic": return <Sparkles className="h-3.5 w-3.5" aria-hidden="true" />;
+      case "hybrid": return <Zap className="h-3.5 w-3.5" aria-hidden="true" />;
+    }
+  };
+
   return (
-    <div ref={containerRef} className="relative w-full max-w-sm" role="combobox" aria-expanded={isOpen} aria-controls="search-results-listbox" aria-haspopup="listbox">
+    <div ref={containerRef} className="relative w-full max-w-sm md:max-w-md" role="combobox" aria-expanded={isOpen} aria-controls="search-results-listbox" aria-haspopup="listbox">
       <div className="relative">
         <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" aria-hidden="true" />
         <Input
@@ -333,7 +341,7 @@ export function SearchBar() {
           onKeyDown={handleKeyDown}
           className="pl-8 pr-32 h-9"
         />
-        <div className="absolute right-2 top-1 flex items-center gap-1">
+        <div className="absolute right-1.5 top-1 flex items-center gap-1">
           <button
             type="button"
             onClick={() => setShowFilters(!showFilters)}
@@ -348,7 +356,7 @@ export function SearchBar() {
             <Filter className="h-3.5 w-3.5" />
           </button>
           <div
-            className="flex h-7 rounded-md border bg-muted text-[10px] font-medium"
+            className="flex h-7 rounded-md border bg-muted"
             role="radiogroup"
             aria-label={t("search.modeTooltip")}
           >
@@ -358,15 +366,16 @@ export function SearchBar() {
                 type="button"
                 role="radio"
                 aria-checked={mode === m}
-                title={modeDescs[m]}
+                aria-label={`${modeLabels[m]} — ${modeDescs[m]}`}
+                title={`${modeLabels[m]} — ${modeDescs[m]}`}
                 onClick={() => handleModeChange(m)}
-                className={`px-1.5 rounded-md transition-colors ${
+                className={`flex h-7 w-7 items-center justify-center rounded-md transition-colors ${
                   mode === m
                     ? "bg-background text-foreground shadow-sm"
                     : "text-muted-foreground hover:text-foreground"
                 }`}
               >
-                {modeLabels[m]}
+                {modeIcon(m)}
               </button>
             ))}
           </div>
