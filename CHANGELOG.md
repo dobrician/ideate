@@ -1,4 +1,44 @@
 # Changelog
+
+## [1.3.0] — 2026-05-19
+
+### Sprint 71 — LLM provider migration, project sharing, dynamic OG images
+
+#### LLM provider
+- Replace Gemini + OpenAI fallback with **Anthropic Claude Haiku 4.5** as the sole LLM provider
+- Direct REST call to Anthropic Messages API; throttling, hourly request/token caps and cost tracking preserved
+- Health endpoint feature flag renamed `aiGemini`/`aiOpenAI` → `aiAnthropic`
+
+#### Project sharing
+- New `projects.share_token` column with unique nullable index (migration `0039_sprint71_share_token`)
+- `generateShareToken` + `revokeShareToken` server actions, rate-limited and gated by `canManageResource`; draft projects refused
+- New public read-only route `/p/[token]` — no login required to view
+- Vote and comment controls on shared pages redirect unauthenticated visitors to `/auth/login?redirect=/p/<token>`, returning them to the shared page after magic-link auth
+- Share dialog on canonical project page with Generate / Copy / Revoke / Rotate
+- `noindex/nofollow` robots metadata on shared routes
+- `project_share` audit log entries for generate/revoke (token value never logged)
+
+#### Dynamic OG images
+- New `/api/og/project/[id]` route renders a 1200×630 social card with project title, status, top 5 proposals (vote bars), and aggregate totals
+- Built with `next/og` (ImageResponse + Satori); exempted from auth proxy so social-media scrapers can fetch
+- Wired into `openGraph` + `twitter` metadata for both `/projects/[id]` and `/p/[token]`
+- Cache-bust query param derived from `project.updated_at`; vote and proposal actions now bump that timestamp so the OG URL changes whenever activity changes
+
+#### UX polish
+- `/projects` listing hides archived projects by default; new "All (incl. archived)" status option lets users opt in
+- Header search bar mode toggle switched to icon-only buttons (Type / Sparkles / Zap) — long Romanian labels no longer cover the placeholder
+- Filter chips + results merged into a single absolute-positioned dropdown — toggling filters no longer grows the header
+- "Clear filters" button now has visible background and border
+
+#### Internals
+- `getProjectProposals` accepts `currentUserId: string | null` and skips the user-vote subquery for guests
+- `VoteButtons`, `ProposalList`, `ProposalItem`, `CommentThread`, `ProjectComments` gain optional `guestRedirect` prop
+- `project_share` added to `AuditEntity` union
+- `/api/og/` added to public path prefix in auth proxy
+
+#### Fixes
+- Post-commit git hook no longer crashes on sprint files with zero unchecked items (`grep -c` exit-1 + `|| echo 0` produced multiline output that `[ -gt 0 ]` rejected)
+
 ## [Unreleased]
 
 ### Sprint 60 — Performance & Scale: Advanced Caching & Optimization
