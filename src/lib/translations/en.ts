@@ -92,7 +92,8 @@ export const en: Record<string, string> = {
   "projects.sortName": "Name (A-Z)",
   "projects.sortNameDesc": "Name (Z-A)",
   "projects.filterStatus": "Status",
-  "projects.allStatuses": "All statuses",
+  "projects.allStatuses": "Active & drafts",
+  "projects.allStatusesWithArchived": "All (incl. archived)",
 
   // Project form
   "projectForm.createTitle": "Create New Project",

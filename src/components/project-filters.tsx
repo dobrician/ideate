@@ -90,6 +90,7 @@ export function ProjectFilters({ tags = [] }: ProjectFiltersProps) {
             {t(`projects.status.${s}`)}
           </option>
         ))}
+        <option value="all-with-archived">{t("projects.allStatusesWithArchived")}</option>
       </select>
       {tags.length > 0 && (
         <select

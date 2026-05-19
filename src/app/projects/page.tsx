@@ -53,8 +53,13 @@ export default async function ProjectsPage({ searchParams }: ProjectsPageProps) 
   if (searchQuery) {
     conditions.push(like(projects.title, `%${searchQuery}%`));
   }
-  if (statusFilter !== "all") {
+  if (statusFilter === "all-with-archived") {
+    // explicit opt-in: no status filter, include archived
+  } else if (statusFilter !== "all") {
     conditions.push(eq(projects.status, statusFilter as "active" | "archived" | "draft"));
+  } else {
+    // default "all" hides archived
+    conditions.push(sql`${projects.status} != 'archived'`);
   }
   if (tagFilter !== "all") {
     const taggedProjectIds = db

@@ -92,7 +92,8 @@ export const ro: Record<string, string> = {
   "projects.sortName": "Nume (A-Z)",
   "projects.sortNameDesc": "Nume (Z-A)",
   "projects.filterStatus": "Stare",
-  "projects.allStatuses": "Toate stările",
+  "projects.allStatuses": "Active și draft",
+  "projects.allStatusesWithArchived": "Toate (incl. arhivate)",
 
   // Project form
   "projectForm.createTitle": "Creează Proiect Nou",
