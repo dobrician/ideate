@@ -18,9 +18,11 @@ interface CommentThreadProps {
   comments: Comment[];
   hiddenFields: Record<string, string>;
   currentUserId?: string;
+  /** When set, the comment input is replaced with a "sign in to comment" prompt that links here. */
+  guestRedirect?: string;
 }
 
-export function CommentThread({ comments, hiddenFields, currentUserId }: CommentThreadProps) {
+export function CommentThread({ comments, hiddenFields, currentUserId, guestRedirect }: CommentThreadProps) {
   const { t } = useLocale();
   const router = useRouter();
   const [state, baseFormAction, isPending] = useActionState(addComment, null);
@@ -172,50 +174,61 @@ export function CommentThread({ comments, hiddenFields, currentUserId }: Comment
             </button>
           </div>
         )}
-        <form ref={formRef} action={formAction} noValidate>
-          {Object.entries(hiddenFields).map(([name, value]) => (
-            <input key={name} type="hidden" name={name} value={value} />
-          ))}
-          <input type="hidden" name="csrfToken" value={getCsrfTokenClient()} />
-          {replyToId && (
-            <input type="hidden" name="parentId" value={replyToId} />
-          )}
-          <div className="flex items-end gap-2">
-            <Textarea
-              ref={textareaRef}
-              name="content"
-              placeholder={replyToId ? t("comments.replyPlaceholder") : t("comments.placeholder")}
-              rows={1}
-              maxLength={2000}
-              disabled={isPending}
-              onKeyDown={handleKeyDown}
-              onInput={handleInput}
-              className="min-h-[44px] max-h-[120px] resize-none"
-            />
-            <Button
-              type="submit"
-              size="icon"
-              disabled={isPending}
-              aria-label={t("comments.submit")}
-              className="shrink-0"
-            >
-              <Send className="h-4 w-4" />
+        {guestRedirect ? (
+          <div className="rounded-md border border-dashed bg-muted/30 p-3 text-center">
+            <p className="mb-2 text-sm text-muted-foreground">{t("project.share.guestCommentPrompt")}</p>
+            <Button asChild size="sm">
+              <a href={`/auth/login?redirect=${encodeURIComponent(guestRedirect)}`}>
+                {t("project.share.signInToComment")}
+              </a>
             </Button>
           </div>
-          {charCount >= 1800 && (
-            <p
-              data-testid="char-count"
-              className={`mt-1 text-right text-xs ${
-                charCount >= 2000 ? "text-destructive font-medium" : "text-muted-foreground"
-              }`}
-            >
-              {charCount}/2000
-            </p>
-          )}
-          {state?.error && (
-            <p className="mt-1 text-xs text-red-700 dark:text-red-400" role="alert">{state.error}</p>
-          )}
-        </form>
+        ) : (
+          <form ref={formRef} action={formAction} noValidate>
+            {Object.entries(hiddenFields).map(([name, value]) => (
+              <input key={name} type="hidden" name={name} value={value} />
+            ))}
+            <input type="hidden" name="csrfToken" value={getCsrfTokenClient()} />
+            {replyToId && (
+              <input type="hidden" name="parentId" value={replyToId} />
+            )}
+            <div className="flex items-end gap-2">
+              <Textarea
+                ref={textareaRef}
+                name="content"
+                placeholder={replyToId ? t("comments.replyPlaceholder") : t("comments.placeholder")}
+                rows={1}
+                maxLength={2000}
+                disabled={isPending}
+                onKeyDown={handleKeyDown}
+                onInput={handleInput}
+                className="min-h-[44px] max-h-[120px] resize-none"
+              />
+              <Button
+                type="submit"
+                size="icon"
+                disabled={isPending}
+                aria-label={t("comments.submit")}
+                className="shrink-0"
+              >
+                <Send className="h-4 w-4" />
+              </Button>
+            </div>
+            {charCount >= 1800 && (
+              <p
+                data-testid="char-count"
+                className={`mt-1 text-right text-xs ${
+                  charCount >= 2000 ? "text-destructive font-medium" : "text-muted-foreground"
+                }`}
+              >
+                {charCount}/2000
+              </p>
+            )}
+            {state?.error && (
+              <p className="mt-1 text-xs text-red-700 dark:text-red-400" role="alert">{state.error}</p>
+            )}
+          </form>
+        )}
       </div>
     </div>
   );

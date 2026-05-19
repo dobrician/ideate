@@ -15,6 +15,8 @@ interface VoteButtonsProps {
   upvotes: number;
   downvotes: number;
   userVote: number | null;
+  /** When set, clicking a vote button redirects an unauthenticated user to login instead of calling the action. */
+  guestRedirect?: string;
 }
 
 interface VoteState {
@@ -33,6 +35,7 @@ export function VoteButtons({
   upvotes,
   downvotes,
   userVote,
+  guestRedirect,
 }: VoteButtonsProps) {
   const [isPending, startTransition] = useTransition();
   const { t } = useLocale();
@@ -58,6 +61,10 @@ export function VoteButtons({
   );
 
   function handleVote(value: number) {
+    if (guestRedirect) {
+      window.location.href = `/auth/login?redirect=${encodeURIComponent(guestRedirect)}`;
+      return;
+    }
     startTransition(async () => {
       setOptimistic(value);
       const token = getCsrfTokenClient();

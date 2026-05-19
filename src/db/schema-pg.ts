@@ -46,6 +46,7 @@ export const projects = pgTable("projects", {
   status: text("status", { enum: ["active", "archived", "draft"] }).notNull().default("active"),
   userId: text("user_id").references(() => users.id, { onDelete: "set null" }),
   teamId: text("team_id"),
+  shareToken: text("share_token").unique(),
   createdAt: ts(), updatedAt: tsUp(),
 });
 

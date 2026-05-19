@@ -9,7 +9,7 @@ import { canManageResource } from "@/lib/rbac";
 import type { Role } from "@/lib/rbac";
 import { logger } from "@/lib/logger";
 import { eq } from "drizzle-orm";
-import { randomUUID } from "crypto";
+import { randomUUID, randomBytes } from "crypto";
 import { logAudit } from "@/lib/audit";
 import { fireWebhookEvent } from "@/lib/webhooks";
 import { emitProjectEvent } from "@/lib/project-events";
@@ -264,5 +264,93 @@ export async function deleteProject(projectId: string, csrfToken: string) {
 
     revalidatePath("/projects");
     redirect("/projects");
+  });
+}
+
+/**
+ * Generate (or rotate) a share token for a project.
+ * Anyone with the resulting token can view the project read-only at /p/<token>.
+ * Owner or admin only. Refuses draft projects.
+ */
+export async function generateShareToken(projectId: string, csrfToken: string) {
+  return withActionAuth(csrfToken, {
+    rateLimitKey: "project:share:generate",
+    rateLimitMax: 10,
+  }, async (user) => {
+    const existing = await db
+      .select()
+      .from(projects)
+      .where(eq(projects.id, projectId))
+      .limit(1);
+
+    if (existing.length === 0) {
+      return { error: "Project not found" };
+    }
+
+    if (!canManageResource(user.role as Role, existing[0].userId, user.id)) {
+      return { error: "You don't have permission to share this project" };
+    }
+
+    if (existing[0].status === "draft") {
+      return { error: "error.shareDraft" };
+    }
+
+    const token = randomBytes(24).toString("base64url");
+
+    await db
+      .update(projects)
+      .set({ shareToken: token, updatedAt: new Date() })
+      .where(eq(projects.id, projectId));
+
+    await logAudit({
+      userId: user.id,
+      action: "create",
+      entity: "project_share",
+      entityId: projectId,
+    });
+
+    revalidatePath(`/projects/${projectId}`);
+
+    return { success: true, token };
+  });
+}
+
+/**
+ * Revoke an existing share token, immediately invalidating the public link.
+ */
+export async function revokeShareToken(projectId: string, csrfToken: string) {
+  return withActionAuth(csrfToken, {
+    rateLimitKey: "project:share:revoke",
+    rateLimitMax: 20,
+  }, async (user) => {
+    const existing = await db
+      .select()
+      .from(projects)
+      .where(eq(projects.id, projectId))
+      .limit(1);
+
+    if (existing.length === 0) {
+      return { error: "Project not found" };
+    }
+
+    if (!canManageResource(user.role as Role, existing[0].userId, user.id)) {
+      return { error: "You don't have permission to revoke this project's share link" };
+    }
+
+    await db
+      .update(projects)
+      .set({ shareToken: null, updatedAt: new Date() })
+      .where(eq(projects.id, projectId));
+
+    await logAudit({
+      userId: user.id,
+      action: "delete",
+      entity: "project_share",
+      entityId: projectId,
+    });
+
+    revalidatePath(`/projects/${projectId}`);
+
+    return { success: true };
   });
 }

@@ -75,6 +75,7 @@ export function ProposalItem({
   liveUpvotes,
   liveDownvotes,
   maxTotalVotes,
+  guestRedirect,
 }: {
   proposal: ProposalWithStats;
   projectId: string;
@@ -83,6 +84,7 @@ export function ProposalItem({
   liveUpvotes?: number;
   liveDownvotes?: number;
   maxTotalVotes: number;
+  guestRedirect?: string;
 }) {
   const { t, locale } = useLocale();
   const [showFull, setShowFull] = useState(false);
@@ -161,6 +163,7 @@ export function ProposalItem({
                       upvotes={upvotes}
                       downvotes={downvotes}
                       userVote={proposal.userVote}
+                      guestRedirect={guestRedirect}
                     />
                   </div>
                 </TooltipTrigger>

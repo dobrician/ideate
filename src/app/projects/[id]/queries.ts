@@ -51,7 +51,7 @@ export function isValidSort(s: string): s is ProposalSort {
 
 export async function getProjectProposals(
   projectId: string,
-  currentUserId: string,
+  currentUserId: string | null,
   limit = PROPOSALS_PAGE_SIZE,
   offset = 0,
   sort: ProposalSort = "votes",
@@ -118,10 +118,12 @@ export async function getProjectProposals(
 
   const total = totalResult[0]?.total ?? 0;
 
-  const userVoteRows = await db
-    .select({ proposalId: votes.proposalId, value: votes.value })
-    .from(votes)
-    .where(eq(votes.userId, currentUserId));
+  const userVoteRows = currentUserId
+    ? await db
+        .select({ proposalId: votes.proposalId, value: votes.value })
+        .from(votes)
+        .where(eq(votes.userId, currentUserId))
+    : [];
   const voteMap = new Map(userVoteRows.map((v) => [v.proposalId, v.value]));
 
   const proposalIds = proposalRows.map((p) => p.id);

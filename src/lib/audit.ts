@@ -66,7 +66,8 @@ type AuditEntity =
   | "ai_feedback"
   | "ai_model"
   | "ai_insight"
-  | "notification_preference";
+  | "notification_preference"
+  | "project_share";
 
 interface AuditEntry {
   userId: string | null;
