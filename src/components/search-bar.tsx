@@ -382,45 +382,51 @@ export function SearchBar() {
         </div>
       </div>
 
-      {/* Entity type filters */}
-      {showFilters && (
-        <div className="flex items-center gap-1.5 mt-1.5 px-0.5" role="group" aria-label={t("search.filterByType")}>
-          {(["project", "proposal", "comment"] as const).map((type) => {
-            const active = entityFilter.includes(type);
-            return (
-              <button
-                key={type}
-                type="button"
-                aria-pressed={active}
-                onClick={() => handleEntityToggle(type)}
-                className={`flex items-center gap-1 px-2 py-1 text-xs rounded-full border transition-colors ${
-                  active
-                    ? "bg-primary text-primary-foreground border-primary"
-                    : "bg-muted text-muted-foreground border-transparent hover:border-border"
-                }`}
-              >
-                {typeIcon(type)}
-                <span>{typeLabel(type)}</span>
-              </button>
-            );
-          })}
-          {entityFilter.length > 0 && (
-            <button
-              type="button"
-              onClick={() => {
-                setEntityFilter([]);
-                if (query.length >= 2) doSearch(query, mode, []);
-              }}
-              className="text-xs text-muted-foreground hover:text-foreground px-1.5"
+      {(showFilters || isOpen) && (
+        <div className="absolute top-full left-0 right-0 z-50 mt-1 bg-popover border rounded-md shadow-lg max-h-[80vh] overflow-hidden flex flex-col animate-in fade-in-0 slide-in-from-top-1 duration-150">
+          {/* Entity type filters */}
+          {showFilters && (
+            <div
+              className="flex flex-wrap items-center gap-1.5 border-b bg-muted/30 p-2"
+              role="group"
+              aria-label={t("search.filterByType")}
             >
-              {t("search.clearFilters")}
-            </button>
+              {(["project", "proposal", "comment"] as const).map((type) => {
+                const active = entityFilter.includes(type);
+                return (
+                  <button
+                    key={type}
+                    type="button"
+                    aria-pressed={active}
+                    onClick={() => handleEntityToggle(type)}
+                    className={`flex items-center gap-1 px-2 py-1 text-xs rounded-full border transition-colors ${
+                      active
+                        ? "bg-primary text-primary-foreground border-primary"
+                        : "bg-background text-muted-foreground border-border hover:border-foreground/30 hover:text-foreground"
+                    }`}
+                  >
+                    {typeIcon(type)}
+                    <span>{typeLabel(type)}</span>
+                  </button>
+                );
+              })}
+              {entityFilter.length > 0 && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setEntityFilter([]);
+                    if (query.length >= 2) doSearch(query, mode, []);
+                  }}
+                  className="ml-auto rounded-md border border-border bg-background px-2 py-1 text-xs text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+                >
+                  {t("search.clearFilters")}
+                </button>
+              )}
+            </div>
           )}
-        </div>
-      )}
 
-      {isOpen && (
-        <div id="search-results-listbox" role="listbox" aria-label={t("search.ariaResults")} className="absolute top-full left-0 right-0 z-50 mt-1 bg-popover border rounded-md shadow-lg max-h-80 overflow-y-auto animate-in fade-in-0 slide-in-from-top-1 duration-150">
+          {isOpen && (
+            <div id="search-results-listbox" role="listbox" aria-label={t("search.ariaResults")} className="flex-1 overflow-y-auto max-h-80">
           {loading && (
             <div className="p-3 text-sm text-muted-foreground" role="status" aria-live="polite">
               {t("search.searching")}
@@ -580,6 +586,8 @@ export function SearchBar() {
               </>
             );
           })()}
+            </div>
+          )}
         </div>
       )}
     </div>
