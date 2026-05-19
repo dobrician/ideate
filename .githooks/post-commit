@@ -25,7 +25,8 @@ done
 
 # If nothing matched by issue number, warn
 if [ "$CHANGED" = false ]; then
-  UNCHECKED=$(grep -c "\- \[ \]" "$SPRINT_FILE" 2>/dev/null || echo 0)
+  UNCHECKED=$(grep -c "\- \[ \]" "$SPRINT_FILE" 2>/dev/null)
+  UNCHECKED=${UNCHECKED:-0}
   if [ "$UNCHECKED" -gt 0 ]; then
     echo ""
     echo "⚠️  $UNCHECKED unchecked goals in $SPRINT_FILE. No issue # matched in commit message."
