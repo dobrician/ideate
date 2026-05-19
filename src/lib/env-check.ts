@@ -25,8 +25,7 @@ const OPTIONAL_FEATURE_VARS = [
   { key: "REDIS_URL", feature: "L2 cache (Redis)" },
   { key: "VAPID_PUBLIC_KEY", feature: "push notifications" },
   { key: "VAPID_PRIVATE_KEY", feature: "push notifications" },
-  { key: "OPENAI_API_KEY", feature: "AI features (OpenAI)" },
-  { key: "GEMINI_API_KEY", feature: "AI features (Gemini)" },
+  { key: "ANTHROPIC_API_KEY", feature: "AI features (Anthropic)" },
   { key: "SENTRY_DSN", feature: "error tracking (Sentry)" },
 ] as const;
 
@@ -93,8 +92,7 @@ export function getFeatureStatus(): Record<string, boolean> {
     email: !!(process.env.SMTP_HOST && process.env.SMTP_FROM),
     redis: !!process.env.REDIS_URL,
     pushNotifications: !!(process.env.VAPID_PUBLIC_KEY && process.env.VAPID_PRIVATE_KEY),
-    aiOpenAI: !!process.env.OPENAI_API_KEY,
-    aiGemini: !!process.env.GEMINI_API_KEY,
+    aiAnthropic: !!process.env.ANTHROPIC_API_KEY,
     sentry: !!process.env.SENTRY_DSN,
     postgresql: process.env.DATABASE_DRIVER === "postgresql",
   };

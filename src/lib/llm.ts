@@ -1,7 +1,7 @@
 /**
- * LLM provider abstraction with Gemini primary + OpenAI fallback.
+ * LLM provider abstraction (Anthropic only).
  * Uses direct REST API calls (no SDK dependency).
- * Per-provider throttling for 15 min on 429 responses.
+ * Throttling for 15 min on 429 responses.
  * Token/request rate limiting and cost tracking (fixes #4).
  * Structured pino logging for every LLM call (#46).
  */
@@ -11,13 +11,10 @@ import { getCachedResponse, setCachedResponse } from "@/lib/llm-cache";
 
 const llmLog = logger.child({ module: "llm" });
 
-const GEMINI_MODEL = process.env.GEMINI_MODEL || "gemini-2.5-flash-lite";
-const GEMINI_ENDPOINT = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent`;
-const GEMINI_KEY = process.env.GEMINI_API_KEY;
-
-const OPENAI_MODEL = process.env.OPENAI_MODEL || "gpt-4o-mini";
-const OPENAI_KEY = process.env.OPENAI_API_KEY;
-const OPENAI_ENDPOINT = "https://api.openai.com/v1/chat/completions";
+const ANTHROPIC_MODEL = process.env.ANTHROPIC_MODEL || "claude-haiku-4-5-20251001";
+const ANTHROPIC_KEY = process.env.ANTHROPIC_API_KEY;
+const ANTHROPIC_ENDPOINT = "https://api.anthropic.com/v1/messages";
+const ANTHROPIC_VERSION = "2023-06-01";
 
 /** Max AI requests per hour (configurable via env) */
 const MAX_REQUESTS_PER_HOUR = parseInt(
@@ -44,10 +41,9 @@ interface LLMResult {
   tokensUsed: number;
 }
 
-/** Cost per 1K tokens (approximate, in USD) */
+/** Cost per 1K tokens (approximate, in USD) — Claude Haiku 4.5 */
 const COST_PER_1K: Record<string, { input: number; output: number }> = {
-  gemini: { input: 0.000075, output: 0.0003 },
-  openai: { input: 0.00015, output: 0.0006 },
+  anthropic: { input: 0.001, output: 0.005 },
 };
 
 interface UsageWindow {
@@ -88,7 +84,7 @@ function isRateLimited(): boolean {
 
 /** Check if any AI API key is configured. */
 export function isAiConfigured(): boolean {
-  return !!(GEMINI_KEY || OPENAI_KEY);
+  return !!ANTHROPIC_KEY;
 }
 
 /** Check if AI requests are currently rate-limited. */
@@ -96,7 +92,7 @@ export function isAiRateLimited(): boolean {
   return isRateLimited();
 }
 
-function trackUsage(provider: "gemini" | "openai", tokensUsed: number): void {
+function trackUsage(provider: "anthropic", tokensUsed: number): void {
   resetWindowIfStale();
   usage.requests += 1;
   usage.tokens += tokensUsed;
@@ -113,123 +109,71 @@ function throttle(modelKey: string): void {
 }
 
 /**
- * Call Gemini API directly via REST
+ * Call Anthropic Messages API directly via REST
  */
-async function callGemini(
+async function callAnthropic(
   prompt: string,
   opts: LLMOptions
 ): Promise<LLMResult> {
-  if (isThrottled("gemini")) {
-    llmLog.warn({ provider: "gemini", reason: "throttled" }, "LLM skipped (throttled)");
+  if (isThrottled("anthropic")) {
+    llmLog.warn({ provider: "anthropic", reason: "throttled" }, "LLM skipped (throttled)");
     return { text: null, status: 429, tokensUsed: 0 };
   }
 
   const start = Date.now();
   try {
-    const response = await fetch(GEMINI_ENDPOINT, {
+    const response = await fetch(ANTHROPIC_ENDPOINT, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "x-goog-api-key": GEMINI_KEY!,
+        "x-api-key": ANTHROPIC_KEY!,
+        "anthropic-version": ANTHROPIC_VERSION,
       },
       body: JSON.stringify({
-        contents: [{ parts: [{ text: prompt }] }],
-        generationConfig: {
-          maxOutputTokens: opts.maxTokens ?? 320,
-          temperature: opts.temperature ?? 0.4,
-          topP: opts.topP ?? 0.9,
-        },
+        model: ANTHROPIC_MODEL,
+        max_tokens: opts.maxTokens ?? 320,
+        temperature: opts.temperature ?? 0.4,
+        top_p: opts.topP ?? 0.9,
+        messages: [{ role: "user", content: prompt }],
       }),
     });
 
     const latencyMs = Date.now() - start;
 
     if (!response.ok) {
-      if (response.status === 429) throttle("gemini");
-      llmLog.error({ provider: "gemini", model: GEMINI_MODEL, status: response.status, latencyMs }, "LLM request failed");
+      if (response.status === 429) throttle("anthropic");
+      llmLog.error({ provider: "anthropic", model: ANTHROPIC_MODEL, status: response.status, latencyMs }, "LLM request failed");
       return { text: null, status: response.status, tokensUsed: 0 };
     }
 
     const data = await response.json();
     const text =
-      data?.candidates?.[0]?.content?.parts
-        ?.map((p: { text?: string }) => p.text ?? "")
-        .join("")
-        ?.trim() ?? null;
+      Array.isArray(data?.content)
+        ? data.content
+            .filter((b: { type?: string }) => b.type === "text")
+            .map((b: { text?: string }) => b.text ?? "")
+            .join("")
+            .trim() || null
+        : null;
+    const inputTokens = data?.usage?.input_tokens ?? 0;
+    const outputTokens = data?.usage?.output_tokens ?? 0;
     const tokensUsed =
-      data?.usageMetadata?.totalTokenCount ??
-      data?.usageMetadata?.candidatesTokenCount ??
-      (text ? Math.ceil(text.length / 4) : 0);
+      inputTokens + outputTokens || (text ? Math.ceil(text.length / 4) : 0);
     llmLog.info({
-      provider: "gemini", model: GEMINI_MODEL, latencyMs,
+      provider: "anthropic", model: ANTHROPIC_MODEL, latencyMs,
       promptLen: prompt.length, responseLen: text?.length ?? 0,
-      tokensUsed, costUsd: (tokensUsed / 1000) * COST_PER_1K.gemini.output,
+      tokensUsed, costUsd: (tokensUsed / 1000) * COST_PER_1K.anthropic.output,
     }, "LLM request completed");
     return { text, tokensUsed };
   } catch (error) {
     const latencyMs = Date.now() - start;
-    llmLog.error({ provider: "gemini", model: GEMINI_MODEL, latencyMs, err: error }, "LLM request error");
+    llmLog.error({ provider: "anthropic", model: ANTHROPIC_MODEL, latencyMs, err: error }, "LLM request error");
     return { text: null, error, tokensUsed: 0 };
   }
 }
 
 /**
- * Call OpenAI API directly via REST
- */
-async function callOpenAI(
-  prompt: string,
-  opts: LLMOptions
-): Promise<LLMResult> {
-  if (isThrottled("openai")) {
-    llmLog.warn({ provider: "openai", reason: "throttled" }, "LLM skipped (throttled)");
-    return { text: null, status: 429, tokensUsed: 0 };
-  }
-
-  const start = Date.now();
-  try {
-    const response = await fetch(OPENAI_ENDPOINT, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${OPENAI_KEY}`,
-      },
-      body: JSON.stringify({
-        model: OPENAI_MODEL,
-        messages: [{ role: "user", content: prompt }],
-        max_tokens: opts.maxTokens ?? 320,
-        temperature: opts.temperature ?? 0.4,
-        top_p: opts.topP ?? 0.9,
-      }),
-    });
-
-    const latencyMs = Date.now() - start;
-
-    if (!response.ok) {
-      if (response.status === 429) throttle("openai");
-      llmLog.error({ provider: "openai", model: OPENAI_MODEL, status: response.status, latencyMs }, "LLM request failed");
-      return { text: null, status: response.status, tokensUsed: 0 };
-    }
-
-    const data = await response.json();
-    const text = data?.choices?.[0]?.message?.content?.trim() ?? null;
-    const tokensUsed =
-      data?.usage?.total_tokens ??
-      (text ? Math.ceil(text.length / 4) : 0);
-    llmLog.info({
-      provider: "openai", model: OPENAI_MODEL, latencyMs,
-      promptLen: prompt.length, responseLen: text?.length ?? 0,
-      tokensUsed, costUsd: (tokensUsed / 1000) * COST_PER_1K.openai.output,
-    }, "LLM request completed");
-    return { text, tokensUsed };
-  } catch (error) {
-    const latencyMs = Date.now() - start;
-    llmLog.error({ provider: "openai", model: OPENAI_MODEL, latencyMs, err: error }, "LLM request error");
-    return { text: null, error, tokensUsed: 0 };
-  }
-}
-
-/**
- * Try Gemini first, fall back to OpenAI. Both throttled on 429 for 15 min.
+ * Call Anthropic. Throttled on 429 for 15 min.
  * Enforces per-hour rate limits on requests and tokens (fixes #4).
  */
 export async function completeWithFallback(
@@ -251,25 +195,19 @@ export async function completeWithFallback(
     return { text: null, modelUsed: null };
   }
 
-  const candidates = ([
-    { key: "gemini" as const, fn: callGemini },
-    { key: "openai" as const, fn: callOpenAI },
-  ] as const).filter((c) => (c.key === "gemini" ? !!GEMINI_KEY : !!OPENAI_KEY));
-
-  for (const candidate of candidates) {
-    const result = await candidate.fn(prompt, opts);
-    if (result.status === 429) continue;
-    if (result.text) {
-      trackUsage(candidate.key, result.tokensUsed);
-      // Cache the successful response (fire-and-forget)
-      setCachedResponse(prompt, result.text, candidate.key).catch(() => {});
-      return { text: result.text, modelUsed: candidate.key };
-    }
-    if (candidate.key !== candidates[candidates.length - 1]?.key) {
-      llmLog.warn({ failed: candidate.key }, "LLM primary failed, falling back");
-    }
+  if (!ANTHROPIC_KEY) {
+    llmLog.error({ provider: "anthropic" }, "LLM provider not configured");
+    return { text: null, modelUsed: null };
   }
 
-  llmLog.error({ providers: candidates.map((c) => c.key) }, "All LLM providers failed");
+  const result = await callAnthropic(prompt, opts);
+  if (result.text) {
+    trackUsage("anthropic", result.tokensUsed);
+    // Cache the successful response (fire-and-forget)
+    setCachedResponse(prompt, result.text, "anthropic").catch(() => {});
+    return { text: result.text, modelUsed: "anthropic" };
+  }
+
+  llmLog.error({ provider: "anthropic" }, "LLM request failed");
   return { text: null, modelUsed: null };
 }
