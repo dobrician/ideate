@@ -39,7 +39,7 @@ export async function generateMetadata({
 }: SharedProjectPageProps): Promise<Metadata> {
   const { token } = await params;
   const rows = await db
-    .select({ title: projects.title, description: projects.description })
+    .select({ id: projects.id, title: projects.title, description: projects.description, updatedAt: projects.updatedAt })
     .from(projects)
     .where(eq(projects.shareToken, token))
     .limit(1);
@@ -52,6 +52,12 @@ export async function generateMetadata({
     ? rows[0].description.substring(0, 160)
     : "View this shared project";
 
+  const appUrl = process.env.APP_URL || process.env.NEXT_PUBLIC_APP_URL || "";
+  const cacheBust = rows[0].updatedAt
+    ? Math.floor(new Date(rows[0].updatedAt).getTime() / 1000)
+    : Date.now();
+  const ogImage = `${appUrl}/api/og/project/${rows[0].id}?v=${cacheBust}`;
+
   return {
     title: rows[0].title,
     description: desc,
@@ -60,6 +66,13 @@ export async function generateMetadata({
       title: rows[0].title,
       description: desc,
       type: "article",
+      images: [{ url: ogImage, width: 1200, height: 630, alt: rows[0].title }],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: rows[0].title,
+      description: desc,
+      images: [ogImage],
     },
   };
 }

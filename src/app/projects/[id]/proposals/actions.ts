@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { db } from "@/db";
-import { proposals, votes, proposalTags } from "@/db/schema";
+import { proposals, projects, votes, proposalTags } from "@/db/schema";
 import { canManageResource } from "@/lib/rbac";
 import type { Role } from "@/lib/rbac";
 import { logger } from "@/lib/logger";
@@ -28,6 +28,17 @@ async function resolveProposalProject(
     .where(eq(proposals.id, proposalId))
     .limit(1);
   return row[0]?.projectId ?? null;
+}
+
+/**
+ * Bump project.updatedAt so the dynamic OG image cache-bust hash changes
+ * whenever a vote is cast/removed or a proposal is added/deleted.
+ */
+async function bumpProjectActivity(projectId: string): Promise<void> {
+  await db
+    .update(projects)
+    .set({ updatedAt: new Date() })
+    .where(eq(projects.id, projectId));
 }
 
 const proposalSchema = z.object({
@@ -116,6 +127,7 @@ export async function createProposal(
       userName: user.email,
     });
 
+    await bumpProjectActivity(projectId);
     revalidatePath(`/projects/${projectId}`);
     return { success: true };
   });
@@ -164,6 +176,7 @@ export async function deleteProposal(
       userName: user.email,
     });
 
+    await bumpProjectActivity(projectId);
     revalidatePath(`/projects/${projectId}`);
     return { success: true };
   });
@@ -226,6 +239,7 @@ export async function castVote(
       userName: user.email,
     });
 
+    await bumpProjectActivity(projectId);
     revalidatePath(`/projects/${projectId}`);
     return { success: true };
   });
@@ -269,6 +283,7 @@ export async function removeVote(
     });
 
     await emitVoteUpdate(proposalId, projectId);
+    await bumpProjectActivity(projectId);
     revalidatePath(`/projects/${projectId}`);
     return { success: true };
   });

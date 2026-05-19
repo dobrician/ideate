@@ -52,7 +52,7 @@ export async function generateMetadata({
 }: ProjectPageProps): Promise<Metadata> {
   const { id } = await params;
   const project = await db
-    .select({ title: projects.title, description: projects.description })
+    .select({ title: projects.title, description: projects.description, updatedAt: projects.updatedAt })
     .from(projects)
     .where(eq(projects.id, id))
     .limit(1);
@@ -65,6 +65,12 @@ export async function generateMetadata({
     ? project[0].description.substring(0, 160)
     : "View proposals, vote, and discuss ideas";
 
+  const appUrl = process.env.APP_URL || process.env.NEXT_PUBLIC_APP_URL || "";
+  const cacheBust = project[0].updatedAt
+    ? Math.floor(new Date(project[0].updatedAt).getTime() / 1000)
+    : Date.now();
+  const ogImage = `${appUrl}/api/og/project/${id}?v=${cacheBust}`;
+
   return {
     title: project[0].title,
     description: desc,
@@ -72,6 +78,13 @@ export async function generateMetadata({
       title: project[0].title,
       description: desc,
       type: "article",
+      images: [{ url: ogImage, width: 1200, height: 630, alt: project[0].title }],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: project[0].title,
+      description: desc,
+      images: [ogImage],
     },
   };
 }

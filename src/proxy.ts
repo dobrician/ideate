@@ -97,6 +97,10 @@ function isPublicPath(pathname: string): boolean {
   ) {
     return true;
   }
+  // Dynamic OG image endpoint must be reachable by social-media scrapers.
+  if (pathname.startsWith("/api/og/")) {
+    return true;
+  }
   return false;
 }
 
