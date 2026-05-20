@@ -1,5 +1,34 @@
 # Changelog
 
+## [1.4.0] — 2026-05-20
+
+### Sprint 72 — LLM reliability + submit-time duplicate detection
+
+#### LLM provider hardening
+- Anthropic request body no longer sends `top_p` alongside `temperature` — Claude Haiku 4.5 rejected combined requests with `400 invalid_request_error`. Default `temperature` is the sole sampling knob; `LLMOptions.topP` removed from the public type and callers cleaned up
+- Retry-with-backoff on transient Anthropic errors (408, 425, 500, 502, 503, 504, **529 overloaded**): up to 2 retries with exponential delay (500 ms → 1500 ms). 529s are now invisible to users instead of bubbling up as "AI temporar indisponibil"
+- 4xx/5xx logs now include the first 500 chars of the response body so future API issues surface immediately instead of as opaque `status:400`
+
+#### Submit-time duplicate detection (the headline feature)
+- New three-state modal (`validating` → `matches` / `saving` → `closed`) that takes over when the user submits a proposal:
+  - **validating** — spinner + "Validăm propunerea ta…" placeholder, shown the instant the user clicks Submit (drawer closes immediately)
+  - **matches** — cards with a green similarity bar (linear gradient ending at the LLM-rated percentage) + LLM explanation + hover-revealed Pro/Contra buttons that let the user vote on an existing proposal without leaving the modal; footer: Renunță / Adaugă cu vot Contra / Adaugă cu vot Pro
+  - **saving** — spinner + "Salvăm propunerea ta…" until the server action completes, covering the brief loading-skeleton flicker from `revalidatePath`
+- `useProposalForm` rewritten: similarity check happens on submit (not on typing). `flushSync` forces the modal to mount before the LLM fetch begins
+- Form uses `onSubmit + preventDefault` instead of `<form action>` to avoid React 19's form-action transition batching state updates until the async function resolved — that batching was making the modal appear only after the LLM call finished
+- Stale-state guard: a ref tracks which `useActionState` result we've already handled, so a previous `state.success = true` can no longer close the modal the moment a new submit transitions modalState to "validating" (this was the "modalul nu mai apare la a doua încercare" bug)
+- LLM prompt rewritten to return only matched proposals (`{matches: [...]}`) instead of a full ID→score map; previous prompt + `maxTokens: 320` were truncating the JSON response on projects with 15+ proposals, so almost everything fell back to Jaccard which couldn't see "let's work from home" ≈ "Go fully remote". maxTokens raised to 2048; client threshold lowered 50 → 40
+- New parser accepts both new `{matches: [...]}` shape and legacy `{id: {...}}` for robustness
+
+#### Live-updates WebSocket
+- `NEXT_PUBLIC_WS_ENABLED` env flag gates the project-live-panel WS client. Default off — `next start` can't perform WS upgrades without a custom Node server, and the infinite reconnect loop was flooding the console with `NS_ERROR_WEBSOCKET_CONNECTION_REFUSED`. Polling-only mode is now the default; flip the flag when a custom server is in place
+
+#### i18n
+- New keys: `duplicateModal.{title,description,validating,validatingHint,saving,cancel,submitAnyway,submitWithPro,submitWithContra}`, `vote.{proCast,contraCast,failed}` in both en + ro
+
+#### UX
+- "Submit Proposal" / "Depune Propunerea" button reskinned (`bg-green-600`, `font-semibold`, `size="default"`, embedded spinner during pending) so it reads as clearly active
+
 ## [1.3.0] — 2026-05-19
 
 ### Sprint 71 — LLM provider migration, project sharing, dynamic OG images

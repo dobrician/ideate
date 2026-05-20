@@ -1,6 +1,7 @@
 "use client";
 
-import { useActionState, useState, useRef, useCallback, useEffect } from "react";
+import { useActionState, useState, useCallback, useMemo, useEffect, useRef } from "react";
+import { flushSync } from "react-dom";
 import { createProposal } from "@/app/projects/[id]/proposals/actions";
 import { useLocale } from "@/lib/use-locale";
 
@@ -25,6 +26,11 @@ export interface ProposalFormProps {
   availableTags?: { id: string; name: string }[];
 }
 
+/** Matches at or above this percentage trigger the duplicate-confirmation modal. */
+const DUPLICATE_THRESHOLD = 40;
+
+export type DuplicateModalState = "closed" | "validating" | "matches" | "saving";
+
 export function useProposalForm({
   projectId,
   projectTitle,
@@ -38,17 +44,58 @@ export function useProposalForm({
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [selectedTagIds, setSelectedTagIds] = useState<string[]>([]);
-  const [similarMatches, setSimilarMatches] = useState<SimilarityMatch[]>([]);
-  const [checkingSimilarity, setCheckingSimilarity] = useState(false);
-  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [modalState, setModalState] = useState<DuplicateModalState>("closed");
+  const [duplicateMatches, setDuplicateMatches] = useState<SimilarityMatch[]>([]);
+  const [pendingFormData, setPendingFormData] = useState<FormData | null>(null);
 
-  const checkSimilarity = useCallback(
-    async (t: string, d: string) => {
-      if (!existingProposals?.length || !projectTitle || t.length < 5) {
-        setSimilarMatches([]);
+  const existingById = useMemo(() => {
+    const m = new Map<string, ExistingProposal>();
+    for (const p of existingProposals || []) m.set(p.id, p);
+    return m;
+  }, [existingProposals]);
+
+  // Track the last action-state we've reacted to. Without this, a stale
+  // `state.success = true` from a previous submit would close the modal
+  // the moment a new submit transitions modalState to "validating".
+  const lastHandledStateRef = useRef<typeof state>(null);
+
+  useEffect(() => {
+    if (!state) return;
+    if (state === lastHandledStateRef.current) return;
+    lastHandledStateRef.current = state;
+
+    if (state.success) {
+      setModalState("closed");
+      setDuplicateMatches([]);
+      setPendingFormData(null);
+    } else if (state.error) {
+      // Server-action failed: keep matches view if we had any, otherwise close.
+      setModalState(duplicateMatches.length > 0 ? "matches" : "closed");
+    }
+  }, [state, duplicateMatches.length]);
+
+  /**
+   * Submit pipeline. Designed for instant feedback:
+   *   1. flushSync sets modalState="validating" → drawer closes, modal mounts
+   *      with spinner in the same DOM commit. THEN the LLM fetch begins.
+   *   2. Matches ≥ threshold → "matches" state.
+   *      No matches / API error → "saving" state, submit immediately.
+   *   3. Server-action success → effect above closes modal + toast fires.
+   */
+  const submitWithDuplicateCheck = useCallback(
+    async (formData: FormData) => {
+      if (!existingProposals?.length || !projectTitle) {
+        flushSync(() => {
+          setModalState("saving");
+          setPendingFormData(formData);
+        });
+        formAction(formData);
         return;
       }
-      setCheckingSimilarity(true);
+      flushSync(() => {
+        setModalState("validating");
+        setPendingFormData(formData);
+      });
       try {
         const res = await fetch("/api/proposals/similarity", {
           method: "POST",
@@ -56,50 +103,67 @@ export function useProposalForm({
           body: JSON.stringify({
             project: { title: projectTitle, description: projectDescription || "" },
             existing: existingProposals,
-            proposal: { title: t, description: d },
+            proposal: { title, description },
           }),
         });
+        if (!res.ok) {
+          // Don't block on infra failure — submit anyway, keep modal in "saving"
+          setModalState("saving");
+          formAction(formData);
+          return;
+        }
         const data = await res.json();
-        const filtered = (data.matches || []).filter(
-          (m: SimilarityMatch) => m.similarity > 40
-        );
-        setSimilarMatches(filtered);
+        const matches: SimilarityMatch[] = (data.matches || [])
+          .filter((m: SimilarityMatch) => m.similarity >= DUPLICATE_THRESHOLD)
+          .sort((a: SimilarityMatch, b: SimilarityMatch) => b.similarity - a.similarity);
+        if (matches.length === 0) {
+          setModalState("saving");
+          formAction(formData);
+          return;
+        }
+        setDuplicateMatches(matches);
+        setModalState("matches");
       } catch {
-        setSimilarMatches([]);
-      } finally {
-        setCheckingSimilarity(false);
+        setModalState("saving");
+        formAction(formData);
       }
     },
-    [existingProposals, projectTitle, projectDescription]
+    [existingProposals, projectTitle, projectDescription, title, description, formAction]
   );
 
-  function handleFieldChange(newTitle: string, newDesc: string) {
-    if (timerRef.current) clearTimeout(timerRef.current);
-    timerRef.current = setTimeout(() => {
-      checkSimilarity(newTitle, newDesc);
-    }, 800);
-  }
+  /**
+   * Submit the proposal with the chosen vote, overriding any earlier
+   * initialVote from the drawer. Transitions modal to "saving"; the
+   * success effect closes it once createProposal finishes.
+   */
+  const confirmSubmitWithVote = useCallback(
+    (vote: "1" | "-1") => {
+      if (!pendingFormData) return;
+      pendingFormData.set("initialVote", vote);
+      setModalState("saving");
+      formAction(pendingFormData);
+    },
+    [pendingFormData, formAction]
+  );
+
+  const cancelDuplicateModal = useCallback(() => {
+    setModalState("closed");
+    setDuplicateMatches([]);
+    setPendingFormData(null);
+  }, []);
 
   const resetForm = useCallback(() => {
     setTitle("");
     setDescription("");
-    setSimilarMatches([]);
     setSelectedTagIds([]);
+    setModalState("closed");
+    setDuplicateMatches([]);
+    setPendingFormData(null);
   }, []);
-
-  // Clear debounce timer on unmount to prevent leaked setTimeout
-  useEffect(() => {
-    return () => {
-      if (timerRef.current) clearTimeout(timerRef.current);
-    };
-  }, []);
-
-  const warnings = similarMatches;
 
   return {
     t,
     state,
-    formAction,
     isPending,
     initialVote,
     setInitialVote,
@@ -107,13 +171,18 @@ export function useProposalForm({
     setTitle,
     description,
     setDescription,
-    checkingSimilarity,
-    warnings,
-    handleFieldChange,
+    submitWithDuplicateCheck,
     resetForm,
     projectId,
     availableTags: availableTags || [],
     selectedTagIds,
     setSelectedTagIds,
+    // Duplicate-detection modal
+    modalState,
+    modalOpen: modalState !== "closed",
+    duplicateMatches,
+    confirmSubmitWithVote,
+    cancelDuplicateModal,
+    existingById,
   };
 }

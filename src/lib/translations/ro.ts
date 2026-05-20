@@ -179,6 +179,9 @@ export const ro: Record<string, string> = {
   "vote.contra": "Contra",
   "vote.remove": "Șterge vot",
   "vote.loading": "Se votează...",
+  "vote.proCast": "Vot Pro înregistrat",
+  "vote.contraCast": "Vot Contra înregistrat",
+  "vote.failed": "Votul a eșuat — încearcă din nou",
 
   // Comments / Discussion
   "comments.title": "Discuție",
@@ -710,6 +713,17 @@ export const ro: Record<string, string> = {
   "similarity.score": "{score}% similar",
   "similarity.explanation": "{explanation}",
   "similarity.highOverlap": "Suprapunere ridicată detectată — verifică propunerile existente",
+
+  // Modal de detecție duplicate (afișat la submit în timpul validării sau când există suprapunere mare)
+  "duplicateModal.title": "Propunerea ta seamănă cu altele existente",
+  "duplicateModal.description": "Am găsit propuneri pe acest proiect foarte apropiate de ce ai scris. Verifică-le înainte să adaugi una nouă.",
+  "duplicateModal.validating": "Validăm propunerea ta…",
+  "duplicateModal.validatingHint": "Verificăm dacă există propuneri similare pe acest proiect",
+  "duplicateModal.saving": "Salvăm propunerea ta…",
+  "duplicateModal.cancel": "Renunță",
+  "duplicateModal.submitAnyway": "Adaugă totuși propunerea mea",
+  "duplicateModal.submitWithPro": "Adaugă totuși cu vot Pro",
+  "duplicateModal.submitWithContra": "Adaugă totuși cu vot Contra",
 
   // Accessibility
   "a11y.skipToMain": "Sari la conținutul principal",

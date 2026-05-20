@@ -31,7 +31,6 @@ const MAX_TOKENS_PER_HOUR = parseInt(
 interface LLMOptions {
   maxTokens?: number;
   temperature?: number;
-  topP?: number;
 }
 
 interface LLMResult {
@@ -108,8 +107,19 @@ function throttle(modelKey: string): void {
   throttleUntil[modelKey] = Date.now() + FIFTEEN_MIN_MS;
 }
 
+/** Retryable statuses (transient errors per Anthropic docs). */
+const RETRYABLE_STATUSES = new Set([408, 425, 500, 502, 503, 504, 529]);
+const MAX_RETRIES = 2;
+const BASE_RETRY_DELAY_MS = 500;
+
+function sleep(ms: number): Promise<void> {
+  return new Promise((r) => setTimeout(r, ms));
+}
+
 /**
- * Call Anthropic Messages API directly via REST
+ * Call Anthropic Messages API directly via REST.
+ * Retries up to MAX_RETRIES times on transient errors (529 overloaded, 5xx, etc.)
+ * with exponential backoff.
  */
 async function callAnthropic(
   prompt: string,
@@ -120,56 +130,86 @@ async function callAnthropic(
     return { text: null, status: 429, tokensUsed: 0 };
   }
 
-  const start = Date.now();
-  try {
-    const response = await fetch(ANTHROPIC_ENDPOINT, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "x-api-key": ANTHROPIC_KEY!,
-        "anthropic-version": ANTHROPIC_VERSION,
-      },
-      body: JSON.stringify({
-        model: ANTHROPIC_MODEL,
-        max_tokens: opts.maxTokens ?? 320,
-        temperature: opts.temperature ?? 0.4,
-        top_p: opts.topP ?? 0.9,
-        messages: [{ role: "user", content: prompt }],
-      }),
-    });
+  // Claude Haiku 4.5 rejects requests specifying both temperature and top_p,
+  // so the body only carries temperature.
+  const body = {
+    model: ANTHROPIC_MODEL,
+    max_tokens: opts.maxTokens ?? 320,
+    temperature: opts.temperature ?? 0.4,
+    messages: [{ role: "user", content: prompt }],
+  };
 
-    const latencyMs = Date.now() - start;
+  let lastStatus: number | undefined;
+  for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
+    const start = Date.now();
+    try {
+      const response = await fetch(ANTHROPIC_ENDPOINT, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-api-key": ANTHROPIC_KEY!,
+          "anthropic-version": ANTHROPIC_VERSION,
+        },
+        body: JSON.stringify(body),
+      });
 
-    if (!response.ok) {
-      if (response.status === 429) throttle("anthropic");
-      llmLog.error({ provider: "anthropic", model: ANTHROPIC_MODEL, status: response.status, latencyMs }, "LLM request failed");
-      return { text: null, status: response.status, tokensUsed: 0 };
+      const latencyMs = Date.now() - start;
+
+      if (!response.ok) {
+        lastStatus = response.status;
+        if (response.status === 429) throttle("anthropic");
+        const errorBody = await response.text().catch(() => "");
+        llmLog.error(
+          {
+            provider: "anthropic",
+            model: ANTHROPIC_MODEL,
+            status: response.status,
+            latencyMs,
+            attempt,
+            body: errorBody.slice(0, 500),
+          },
+          "LLM request failed"
+        );
+
+        // Retry on transient errors (especially 529 overloaded)
+        if (RETRYABLE_STATUSES.has(response.status) && attempt < MAX_RETRIES) {
+          const delay = BASE_RETRY_DELAY_MS * Math.pow(3, attempt);
+          await sleep(delay);
+          continue;
+        }
+        return { text: null, status: response.status, tokensUsed: 0 };
+      }
+
+      const data = await response.json();
+      const text =
+        Array.isArray(data?.content)
+          ? data.content
+              .filter((b: { type?: string }) => b.type === "text")
+              .map((b: { text?: string }) => b.text ?? "")
+              .join("")
+              .trim() || null
+          : null;
+      const inputTokens = data?.usage?.input_tokens ?? 0;
+      const outputTokens = data?.usage?.output_tokens ?? 0;
+      const tokensUsed =
+        inputTokens + outputTokens || (text ? Math.ceil(text.length / 4) : 0);
+      llmLog.info({
+        provider: "anthropic", model: ANTHROPIC_MODEL, latencyMs, attempt,
+        promptLen: prompt.length, responseLen: text?.length ?? 0,
+        tokensUsed, costUsd: (tokensUsed / 1000) * COST_PER_1K.anthropic.output,
+      }, "LLM request completed");
+      return { text, tokensUsed };
+    } catch (error) {
+      const latencyMs = Date.now() - start;
+      llmLog.error({ provider: "anthropic", model: ANTHROPIC_MODEL, latencyMs, attempt, err: error }, "LLM request error");
+      if (attempt < MAX_RETRIES) {
+        await sleep(BASE_RETRY_DELAY_MS * Math.pow(3, attempt));
+        continue;
+      }
+      return { text: null, error, tokensUsed: 0 };
     }
-
-    const data = await response.json();
-    const text =
-      Array.isArray(data?.content)
-        ? data.content
-            .filter((b: { type?: string }) => b.type === "text")
-            .map((b: { text?: string }) => b.text ?? "")
-            .join("")
-            .trim() || null
-        : null;
-    const inputTokens = data?.usage?.input_tokens ?? 0;
-    const outputTokens = data?.usage?.output_tokens ?? 0;
-    const tokensUsed =
-      inputTokens + outputTokens || (text ? Math.ceil(text.length / 4) : 0);
-    llmLog.info({
-      provider: "anthropic", model: ANTHROPIC_MODEL, latencyMs,
-      promptLen: prompt.length, responseLen: text?.length ?? 0,
-      tokensUsed, costUsd: (tokensUsed / 1000) * COST_PER_1K.anthropic.output,
-    }, "LLM request completed");
-    return { text, tokensUsed };
-  } catch (error) {
-    const latencyMs = Date.now() - start;
-    llmLog.error({ provider: "anthropic", model: ANTHROPIC_MODEL, latencyMs, err: error }, "LLM request error");
-    return { text: null, error, tokensUsed: 0 };
   }
+  return { text: null, status: lastStatus, tokensUsed: 0 };
 }
 
 /**

@@ -9,13 +9,13 @@ import {
   Sheet, SheetContent, SheetHeader, SheetTitle,
   SheetTrigger, SheetClose,
 } from "@/components/ui/sheet";
-import { ThumbsUp, ThumbsDown, AlertTriangle, Loader2, Eye, Pencil, X } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
+import { ThumbsUp, ThumbsDown, Loader2, Eye, Pencil, X } from "lucide-react";
 import { toast } from "sonner";
 import { getCsrfTokenClient } from "@/lib/csrf-client";
 import { useProposalForm } from "@/lib/use-proposal-form";
 import type { ProposalFormProps } from "@/lib/use-proposal-form";
 import { MarkdownRenderer } from "./markdown-renderer";
+import { castVote } from "@/app/projects/[id]/proposals/actions";
 
 function ProposalFormFields({
   form,
@@ -27,9 +27,9 @@ function ProposalFormFields({
   onCancel?: React.ReactNode;
 }) {
   const {
-    t, formAction, isPending, initialVote, setInitialVote,
+    t, isPending, initialVote, setInitialVote,
     title, setTitle, description, setDescription,
-    checkingSimilarity, warnings, handleFieldChange, state, projectId,
+    submitWithDuplicateCheck, state, projectId,
     availableTags, selectedTagIds, setSelectedTagIds,
   } = form;
   const [titleTouched, setTitleTouched] = useState(false);
@@ -41,16 +41,28 @@ function ProposalFormFields({
     ? t("projectForm.proposalTitleRequired")
     : undefined;
 
+  /**
+   * onSubmit (not <form action>) avoids React 19's form-action transition
+   * which batches state updates until the async function resolves — that
+   * delay was making the duplicate modal feel unresponsive. With onSubmit
+   * + preventDefault, setModalState("validating") inside the hook commits
+   * to the DOM before the LLM fetch begins, so the modal opens instantly.
+   */
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (isPending) return;
+    if (!title.trim() || title.trim().length < 5) {
+      setTitleTouched(true);
+      return;
+    }
+    const formData = new FormData(e.currentTarget);
+    submitWithDuplicateCheck(formData);
+  };
+
   return (
     <form
       ref={formRef}
-      action={(formData) => {
-        if (!title.trim() || title.trim().length < 5) {
-          setTitleTouched(true);
-          return;
-        }
-        return formAction(formData);
-      }}
+      onSubmit={handleSubmit}
       className="space-y-4"
       noValidate
     >
@@ -66,7 +78,7 @@ function ProposalFormFields({
           placeholder={t("proposalForm.titlePlaceholder")}
           maxLength={200} disabled={isPending}
           value={title}
-          onChange={(e) => { setTitle(e.target.value); handleFieldChange(e.target.value, description); }}
+          onChange={(e) => setTitle(e.target.value)}
           onBlur={() => setTitleTouched(true)}
           aria-invalid={!!titleError}
           aria-describedby={titleError ? "proposal-title-error" : undefined}
@@ -112,35 +124,13 @@ function ProposalFormFields({
             placeholder={t("proposalForm.descriptionPlaceholder")}
             rows={3} maxLength={5000} disabled={isPending}
             value={description}
-            onChange={(e) => { setDescription(e.target.value); handleFieldChange(title, e.target.value); }}
+            onChange={(e) => setDescription(e.target.value)}
             aria-describedby={`proposal-description-hint${state?.error ? " proposal-form-error" : ""}`}
           />
         )}
         <p id="proposal-description-hint" className="break-words text-xs text-muted-foreground">{t("proposalForm.markdownHint")}</p>
         {showPreview && <input type="hidden" name="description" value={description} />}
       </div>
-
-      {checkingSimilarity && (
-        <div className="flex items-center gap-2 text-sm text-muted-foreground">
-          <Loader2 className="h-3 w-3 animate-spin" /> {t("similarity.checking")}
-        </div>
-      )}
-
-      {warnings.length > 0 && (
-        <div className="space-y-2" role="alert" aria-live="polite">
-          {warnings.map((m) => (
-            <div key={m.id} className="flex items-start gap-2 rounded-md border border-amber-300 bg-amber-50 p-3 dark:border-amber-700 dark:bg-amber-950">
-              <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-amber-600 dark:text-amber-400" />
-              <div className="text-sm">
-                <p className="font-medium text-amber-800 dark:text-amber-200">
-                  {t("similarity.score", { score: m.similarity })}
-                </p>
-                {m.explanation && <p className="text-amber-700 dark:text-amber-300">{m.explanation}</p>}
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
 
       <div className="space-y-1.5">
         <Label>{t("proposalForm.initialVote")}</Label>
@@ -202,8 +192,20 @@ function ProposalFormFields({
 
       <div className={showCancel ? "flex justify-end gap-2" : ""}>
         {showCancel && onCancel}
-        <Button type="submit" size="sm" className={showCancel ? "" : "w-full"} disabled={isPending}>
-          {isPending ? t("proposalForm.submitting") : t("proposalForm.submit")}
+        <Button
+          type="submit"
+          size="default"
+          className={`${showCancel ? "" : "w-full"} bg-green-600 font-semibold text-white shadow-sm hover:bg-green-700 dark:bg-green-600 dark:hover:bg-green-700`}
+          disabled={isPending}
+        >
+          {isPending ? (
+            <>
+              <Loader2 className="mr-1.5 h-4 w-4 animate-spin" />
+              {t("proposalForm.submitting")}
+            </>
+          ) : (
+            t("proposalForm.submit")
+          )}
         </Button>
       </div>
     </form>
@@ -211,12 +213,218 @@ function ProposalFormFields({
 }
 
 /**
+ * Modal shown during submit:
+ *  - "validating" state: spinner placeholder while the LLM checks similarity.
+ *  - "matches" state: green similarity bars + hover-revealed Pro/Contra votes
+ *    on existing proposals + footer with cancel + "add with Pro" / "add with Contra".
+ */
+function DuplicateMatchesModal({
+  form,
+  projectId,
+}: {
+  form: ReturnType<typeof useProposalForm>;
+  projectId: string;
+}) {
+  const {
+    t, modalState, modalOpen, duplicateMatches,
+    confirmSubmitWithVote, cancelDuplicateModal, existingById,
+  } = form;
+  const [voting, setVoting] = useState<string | null>(null);
+  const [votedIds, setVotedIds] = useState<Set<string>>(new Set());
+
+  useEffect(() => {
+    if (!modalOpen) {
+      setVotedIds(new Set());
+      setVoting(null);
+    }
+  }, [modalOpen]);
+
+  async function handleVote(proposalId: string, value: 1 | -1) {
+    setVoting(`${proposalId}:${value}`);
+    try {
+      const result = await castVote(proposalId, value, projectId, getCsrfTokenClient());
+      if (result?.error) {
+        toast.error(result.error);
+      } else {
+        toast.success(value === 1 ? t("vote.proCast") : t("vote.contraCast"));
+        setVotedIds((prev) => new Set(prev).add(proposalId));
+      }
+    } catch {
+      toast.error(t("vote.failed"));
+    } finally {
+      setVoting(null);
+    }
+  }
+
+  if (!modalOpen) return null;
+
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center p-4"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="duplicate-modal-title"
+    >
+      <button
+        type="button"
+        className="absolute inset-0 bg-black/50"
+        aria-label={t("duplicateModal.cancel")}
+        onClick={modalState === "saving" ? undefined : cancelDuplicateModal}
+        tabIndex={-1}
+        disabled={modalState === "saving"}
+      />
+
+      <div className="relative z-30 w-[min(90vw,720px)] space-y-4 rounded-2xl border border-border bg-card p-6 shadow-xl">
+        {modalState === "validating" ? (
+          <div className="flex flex-col items-center justify-center gap-3 py-10">
+            <Loader2 className="h-8 w-8 animate-spin text-primary" aria-hidden="true" />
+            <p className="text-sm font-medium" id="duplicate-modal-title">
+              {t("duplicateModal.validating")}
+            </p>
+            <p className="text-xs text-muted-foreground">
+              {t("duplicateModal.validatingHint")}
+            </p>
+          </div>
+        ) : modalState === "saving" ? (
+          <div className="flex flex-col items-center justify-center gap-3 py-10">
+            <Loader2 className="h-8 w-8 animate-spin text-green-600" aria-hidden="true" />
+            <p className="text-sm font-medium" id="duplicate-modal-title">
+              {t("duplicateModal.saving")}
+            </p>
+          </div>
+        ) : (
+          <>
+            <div className="space-y-2">
+              <h3 id="duplicate-modal-title" className="text-lg font-semibold">
+                {t("duplicateModal.title")}
+              </h3>
+              <p className="text-sm text-muted-foreground">
+                {t("duplicateModal.description")}
+              </p>
+            </div>
+
+            <div className="max-h-[320px] space-y-4 overflow-y-auto pr-2" role="list">
+              {duplicateMatches.map((m) => {
+                const existing = existingById.get(m.id);
+                if (!existing) return null;
+                const pct = Math.max(0, Math.min(100, m.similarity));
+                const gradient = `linear-gradient(90deg, rgba(16, 185, 129, 0.2) 0%, rgba(16, 185, 129, 0.25) ${pct}%, transparent ${pct}%)`;
+                const voted = votedIds.has(m.id);
+                return (
+                  <div
+                    key={m.id}
+                    role="listitem"
+                    className="group relative overflow-hidden rounded-lg border border-border/70 bg-muted/40 p-3 transition hover:border-primary/60 hover:bg-primary/5"
+                  >
+                    <div
+                      className="pointer-events-none absolute inset-0 opacity-30"
+                      aria-hidden="true"
+                      style={{ background: gradient }}
+                    />
+                    <div className="relative flex items-start gap-3">
+                      <div className="flex-1 space-y-1 pr-24">
+                        <div className="text-sm font-semibold">
+                          <a
+                            href={`/projects/${projectId}#proposal-${m.id}`}
+                            className="hover:underline"
+                            onClick={cancelDuplicateModal}
+                          >
+                            {existing.title}
+                          </a>
+                        </div>
+                        <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+                          {m.explanation && (
+                            <span className="leading-relaxed">{m.explanation}</span>
+                          )}
+                          <span className="rounded-full bg-emerald-100 px-1.5 py-0.5 text-[10px] font-medium text-emerald-900 dark:bg-emerald-900/30 dark:text-emerald-200">
+                            {t("similarity.score", { score: pct })}
+                          </span>
+                        </div>
+                      </div>
+                      <div
+                        className={`absolute right-2 top-2 flex overflow-hidden rounded-md border border-border/70 bg-secondary shadow-sm transition-opacity ${
+                          voted ? "opacity-100" : "opacity-0 group-hover:opacity-100 focus-within:opacity-100"
+                        }`}
+                      >
+                        <button
+                          type="button"
+                          aria-label={t("vote.pro")}
+                          disabled={voting !== null}
+                          onClick={() => handleVote(m.id, 1)}
+                          className="inline-flex h-9 cursor-pointer items-center justify-center gap-2 whitespace-nowrap rounded-none border-r border-border/60 bg-secondary px-3 text-xs font-medium text-secondary-foreground shadow-sm transition-colors hover:bg-green-50 hover:text-green-700 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 dark:hover:bg-green-950"
+                        >
+                          {voting === `${m.id}:1` ? (
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                          ) : (
+                            <ThumbsUp className="h-4 w-4" aria-hidden="true" />
+                          )}
+                        </button>
+                        <button
+                          type="button"
+                          aria-label={t("vote.contra")}
+                          disabled={voting !== null}
+                          onClick={() => handleVote(m.id, -1)}
+                          className="inline-flex h-9 cursor-pointer items-center justify-center gap-2 whitespace-nowrap rounded-none bg-secondary px-3 text-xs font-medium text-secondary-foreground shadow-sm transition-colors hover:bg-rose-50 hover:text-rose-700 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 dark:hover:bg-rose-950"
+                        >
+                          {voting === `${m.id}:-1` ? (
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                          ) : (
+                            <ThumbsDown className="h-4 w-4" aria-hidden="true" />
+                          )}
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            <div className="flex flex-wrap justify-end gap-2">
+              <button
+                type="button"
+                onClick={cancelDuplicateModal}
+                className="inline-flex h-9 items-center justify-center gap-2 whitespace-nowrap rounded-md px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+              >
+                {t("duplicateModal.cancel")}
+              </button>
+              <button
+                type="button"
+                onClick={() => confirmSubmitWithVote("-1")}
+                className="inline-flex h-9 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border border-rose-300 bg-card px-4 py-2 text-sm font-medium text-rose-700 shadow-sm transition-colors hover:bg-rose-50 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring dark:border-rose-800 dark:text-rose-300 dark:hover:bg-rose-950"
+              >
+                <ThumbsDown className="h-4 w-4" aria-hidden="true" />
+                {t("duplicateModal.submitWithContra")}
+              </button>
+              <button
+                type="button"
+                onClick={() => confirmSubmitWithVote("1")}
+                className="inline-flex h-9 items-center justify-center gap-1.5 whitespace-nowrap rounded-md bg-green-600 px-4 py-2 text-sm font-medium text-white shadow transition-colors hover:bg-green-700 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+              >
+                <ThumbsUp className="h-4 w-4" aria-hidden="true" />
+                {t("duplicateModal.submitWithPro")}
+              </button>
+            </div>
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
+
+/**
  * Sheet drawer (side="left") for the proposal form — works on mobile and desktop.
+ * Drawer auto-closes the moment validation begins, so the duplicate-detection
+ * modal becomes the primary surface during/after the similarity check.
  */
 export function ProposalForm(props: ProposalFormProps) {
   const form = useProposalForm(props);
   const [open, setOpen] = useState(false);
-  const { state, t, resetForm } = form;
+  const { state, t, resetForm, modalOpen } = form;
+
+  // Close drawer as soon as the validation/matches modal takes over.
+  useEffect(() => {
+    if (modalOpen) setOpen(false);
+  }, [modalOpen]);
 
   useEffect(() => {
     if (!state) return;
@@ -229,27 +437,30 @@ export function ProposalForm(props: ProposalFormProps) {
   }, [state, t, resetForm]);
 
   return (
-    <Sheet open={open} onOpenChange={setOpen}>
-      <SheetTrigger asChild>
-        <Button size="sm">
-          <span className="sm:hidden">{form.t("proposalForm.newProposalShort")}</span>
-          <span className="hidden sm:inline">{form.t("proposalForm.newProposal")}</span>
-        </Button>
-      </SheetTrigger>
-      <SheetContent side="left" className="flex w-full flex-col overflow-y-auto sm:max-w-lg">
-        <SheetHeader className="shrink-0">
-          <SheetTitle>{form.t("proposalForm.title")}</SheetTitle>
-        </SheetHeader>
-        <div className="flex-1 px-4 pb-4">
-          <ProposalFormFields form={form} showCancel onCancel={
-            <SheetClose asChild>
-              <Button type="button" variant="outline" size="sm" disabled={form.isPending}>
-                {form.t("common.cancel")}
-              </Button>
-            </SheetClose>
-          } />
-        </div>
-      </SheetContent>
-    </Sheet>
+    <>
+      <Sheet open={open} onOpenChange={setOpen}>
+        <SheetTrigger asChild>
+          <Button size="sm">
+            <span className="sm:hidden">{form.t("proposalForm.newProposalShort")}</span>
+            <span className="hidden sm:inline">{form.t("proposalForm.newProposal")}</span>
+          </Button>
+        </SheetTrigger>
+        <SheetContent side="left" className="flex w-full flex-col overflow-y-auto sm:max-w-lg">
+          <SheetHeader className="shrink-0">
+            <SheetTitle>{form.t("proposalForm.title")}</SheetTitle>
+          </SheetHeader>
+          <div className="flex-1 px-4 pb-4">
+            <ProposalFormFields form={form} showCancel onCancel={
+              <SheetClose asChild>
+                <Button type="button" variant="outline" size="sm" disabled={form.isPending}>
+                  {form.t("common.cancel")}
+                </Button>
+              </SheetClose>
+            } />
+          </div>
+        </SheetContent>
+      </Sheet>
+      <DuplicateMatchesModal form={form} projectId={form.projectId} />
+    </>
   );
 }

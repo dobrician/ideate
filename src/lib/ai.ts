@@ -37,7 +37,6 @@ export async function generateSummaryFromText(
     const { text } = await completeWithFallback(prompt, {
       maxTokens: 180,
       temperature: 0.4,
-      topP: 0.9,
     });
     if (!text) return null;
     return maxChars ? text.slice(0, maxChars) : text.slice(0, 480);

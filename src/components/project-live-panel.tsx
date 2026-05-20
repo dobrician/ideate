@@ -19,6 +19,13 @@ import { Activity, WifiOff } from "lucide-react";
 const POLLING_INTERVAL_MS = 15_000;
 const FALLBACK_THRESHOLD_MS = 10_000;
 
+/**
+ * WebSocket upgrades require a custom Node server integration; the default
+ * `next start` runtime can't handle the upgrade. When NEXT_PUBLIC_WS_ENABLED
+ * is not "true" we skip the WS client entirely and rely on polling.
+ */
+const WS_ENABLED = process.env.NEXT_PUBLIC_WS_ENABLED === "true";
+
 interface ProjectLivePanelProps {
   projectId: string;
   sessionToken: string;
@@ -55,6 +62,12 @@ export function ProjectLivePanel({ projectId, sessionToken }: ProjectLivePanelPr
   }, []);
 
   useEffect(() => {
+    if (!WS_ENABLED) {
+      // No custom Node server in this deployment — go straight to polling.
+      startPolling();
+      return () => stopPolling();
+    }
+
     const unsub = client.onStateChange((state: WsConnectionState) => {
       setConnectionState(state);
 

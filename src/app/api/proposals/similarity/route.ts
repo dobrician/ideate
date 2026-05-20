@@ -80,32 +80,9 @@ function fallbackSimilarities(
 }
 
 /**
- * Extract JSON from LLM output — handles malformed/truncated output.
- */
-function extractJson(text: string): Record<string, { similarity: number; explanation: string }> | null {
-  // Strip code fences
-  let cleaned = text.replace(/```(?:json)?\s*/gi, "").replace(/```/g, "").trim();
-
-  // Try direct parse
-  try {
-    const parsed = JSON.parse(cleaned);
-    if (typeof parsed === "object" && parsed !== null) return parsed;
-  } catch {
-    // Try regex extraction
-    const match = cleaned.match(/\{[\s\S]*\}/);
-    if (match) {
-      try {
-        return JSON.parse(match[0]);
-      } catch {
-        return null;
-      }
-    }
-  }
-  return null;
-}
-
-/**
- * Build the similarity check prompt — verbatim from ideator.
+ * Build the similarity check prompt.
+ * Asks the LLM to return ONLY the proposals it considers similar — keeps the
+ * response small even when there are many existing proposals on the project.
  */
 function buildPrompt(req: SimilarityRequest): string {
   const locale = req.locale || LOCALE;
@@ -115,11 +92,11 @@ function buildPrompt(req: SimilarityRequest): string {
   }
 
   return [
-    `We have a project and a list of existing proposals for it.`,
-    `Return a JSON object where each key is an existing proposal ID and value is { "similarity": 0-100, "explanation": "<human, concise reason in ${locale}>" }.`,
-    `Compare each existing proposal one-to-one against the NEW proposal provided.`,
-    `Use the project context to understand intent and avoid keyword-only reasoning.`,
-    `Be specific (e.g., overlapping KPIs, duplicate features, same outcomes).`,
+    `Identify which of the EXISTING proposals are semantically similar to the NEW proposal on this project.`,
+    `Return a JSON object: { "matches": [{ "id": "<existing-id>", "similarity": <0-100>, "explanation": "<concise human reason in ${locale}>" }] }.`,
+    `Include an entry ONLY when similarity >= 30. Omit unrelated proposals entirely.`,
+    `Compare intent and outcomes, not just keywords. Two proposals with overlapping goals (e.g. both advocate working from home) should score high (70+).`,
+    `If nothing is similar, return { "matches": [] }.`,
     `Respond ONLY with valid JSON, no prose, no code fences.`,
     ``,
     `Project:`,
@@ -131,6 +108,55 @@ function buildPrompt(req: SimilarityRequest): string {
     `New proposal:`,
     JSON.stringify({ title: req.proposal.title, description: req.proposal.description }),
   ].join("\n");
+}
+
+/**
+ * Parse the new-format LLM response: { matches: [{ id, similarity, explanation }] }
+ * Falls back to legacy map-keyed-by-id format for robustness.
+ */
+function parseLlmMatches(text: string): Map<string, { similarity: number; explanation: string }> | null {
+  const cleaned = text.replace(/```(?:json)?\s*/gi, "").replace(/```/g, "").trim();
+  let raw: unknown;
+  try {
+    raw = JSON.parse(cleaned);
+  } catch {
+    const m = cleaned.match(/\{[\s\S]*\}/);
+    if (!m) return null;
+    try { raw = JSON.parse(m[0]); } catch { return null; }
+  }
+  if (!raw || typeof raw !== "object") return null;
+  const out = new Map<string, { similarity: number; explanation: string }>();
+
+  // New format: { matches: [...] }
+  const matchesArr = (raw as { matches?: unknown }).matches;
+  if (Array.isArray(matchesArr)) {
+    for (const m of matchesArr) {
+      if (m && typeof m === "object" && "id" in m && "similarity" in m) {
+        const entry = m as { id: unknown; similarity: unknown; explanation?: unknown };
+        if (typeof entry.id === "string" && typeof entry.similarity === "number") {
+          out.set(entry.id, {
+            similarity: entry.similarity,
+            explanation: typeof entry.explanation === "string" ? entry.explanation : "",
+          });
+        }
+      }
+    }
+    return out;
+  }
+
+  // Legacy format: { "<id>": { similarity, explanation } }
+  for (const [id, val] of Object.entries(raw as Record<string, unknown>)) {
+    if (val && typeof val === "object" && "similarity" in val) {
+      const entry = val as { similarity: unknown; explanation?: unknown };
+      if (typeof entry.similarity === "number") {
+        out.set(id, {
+          similarity: entry.similarity,
+          explanation: typeof entry.explanation === "string" ? entry.explanation : "",
+        });
+      }
+    }
+  }
+  return out;
 }
 
 /**
@@ -195,46 +221,37 @@ export async function POST(request: Request) {
     }
 
     const prompt = buildPrompt(body);
+    // Each match entry is ~80-120 tokens (id + similarity + explanation).
+    // Budget for ~20 returned matches with a comfortable headroom.
     const { text } = await completeWithFallback(prompt, {
-      maxTokens: 320,
+      maxTokens: 2048,
       temperature: 0.2,
-      topP: 0.8,
     });
 
     if (!text) {
-      // Fallback to Jaccard
       return NextResponse.json({
         matches: fallbackSimilarities(body.existing, body.proposal),
       });
     }
 
-    const parsed = extractJson(text);
+    const parsed = parseLlmMatches(text);
     if (!parsed) {
       return NextResponse.json({
         matches: fallbackSimilarities(body.existing, body.proposal),
       });
     }
 
-    // Map parsed results, filling gaps with 0
-    const matches: SimilarityMatch[] = body.existing.map((p) => {
-      const entry = parsed[p.id];
-      if (entry && typeof entry.similarity === "number") {
-        return {
-          id: p.id,
-          similarity: Math.min(100, Math.max(0, Math.round(entry.similarity))),
-          explanation: entry.explanation || "",
-        };
-      }
-      // Fill gap with Jaccard fallback for this specific proposal
-      return {
-        id: p.id,
-        similarity: simpleSimilarity(
-          `${p.title} ${p.description || ""}`,
-          `${body.proposal.title} ${body.proposal.description || ""}`
-        ),
-        explanation: "",
-      };
-    });
+    // Build output. Only include proposals the LLM flagged (similarity >= 30).
+    // Other proposals are intentionally omitted — no need to send 17 entries
+    // back when only 3 are similar.
+    const allowedIds = new Set(body.existing.map((p) => p.id));
+    const matches: SimilarityMatch[] = [];
+    for (const [id, entry] of parsed) {
+      if (!allowedIds.has(id)) continue;
+      const sim = Math.min(100, Math.max(0, Math.round(entry.similarity)));
+      if (sim < 30) continue;
+      matches.push({ id, similarity: sim, explanation: entry.explanation });
+    }
 
     return NextResponse.json({ matches });
   } catch {

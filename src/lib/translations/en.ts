@@ -173,6 +173,9 @@ export const en: Record<string, string> = {
   "vote.contra": "Contra",
   "vote.remove": "Remove vote",
   "vote.loading": "Voting...",
+  "vote.proCast": "Pro vote recorded",
+  "vote.contraCast": "Contra vote recorded",
+  "vote.failed": "Vote failed — please try again",
 
   // Comments / Discussion
   "comments.title": "Discussion",
@@ -691,6 +694,17 @@ export const en: Record<string, string> = {
   "similarity.score": "{score}% similar",
   "similarity.explanation": "{explanation}",
   "similarity.highOverlap": "High overlap detected — consider reviewing existing proposals",
+
+  // Duplicate-detection modal (shown at submit while we validate / when overlap is high)
+  "duplicateModal.title": "Your proposal looks similar to existing ones",
+  "duplicateModal.description": "We found proposals on this project that closely match what you wrote. Review them before adding a new one.",
+  "duplicateModal.validating": "Validating your proposal…",
+  "duplicateModal.validatingHint": "Checking against existing proposals on this project",
+  "duplicateModal.saving": "Saving your proposal…",
+  "duplicateModal.cancel": "Cancel",
+  "duplicateModal.submitAnyway": "Add my proposal anyway",
+  "duplicateModal.submitWithPro": "Add anyway with Pro vote",
+  "duplicateModal.submitWithContra": "Add anyway with Contra vote",
 
   // Accessibility
   "a11y.skipToMain": "Skip to main content",
