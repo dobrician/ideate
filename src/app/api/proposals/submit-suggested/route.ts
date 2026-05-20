@@ -4,8 +4,8 @@ import { requireAuth } from "@/lib/auth";
 import { requireCsrfToken } from "@/lib/csrf";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { getClientIp } from "@/lib/request-utils";
-import { hasPermission } from "@/lib/rbac";
 import type { Role } from "@/lib/rbac";
+import { canActOnProject } from "@/lib/project-members";
 import { db } from "@/db";
 import { projects, proposals, votes } from "@/db/schema";
 import { eq } from "drizzle-orm";
@@ -48,9 +48,6 @@ export async function POST(request: Request) {
   }
 
   const role = user.role as Role;
-  if (!hasPermission(role, "proposal:create")) {
-    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-  }
 
   try {
     const body = (await request.json()) as SubmitRequest;
@@ -62,6 +59,10 @@ export async function POST(request: Request) {
         { error: "projectId and proposals array are required" },
         { status: 400 }
       );
+    }
+
+    if (!(await canActOnProject(role, user.id, body.projectId, "proposal:create"))) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
     const project = await db

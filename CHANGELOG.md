@@ -1,5 +1,26 @@
 # Changelog
 
+## [1.5.0] — 2026-05-20
+
+### Sprint 73 — Project membership via share-link visit
+
+Before this change, share links (`/p/<token>`) were strictly read-only. A logged-in admin (or member) who followed an invite-style share link landed on the public guest view and saw none of the contribution UI — no "Add proposal", no "Suggest with AI" — because that page never rendered those controls. The only way to contribute was to know the canonical `/projects/<id>` URL, which the share-link recipient typically did not have.
+
+This sprint introduces **per-project membership**:
+
+- **New table `project_members(project_id, user_id, joined_via, joined_at)`** with composite PK. Mirrored in `schema-pg.ts`. Migration `0040_sprint73_project_members.sql`.
+- **`/p/<token>` auto-promotes any logged-in visitor** — `INSERT … ON CONFLICT DO NOTHING` into `project_members`, then 307 redirect to `/projects/<id>`. Guests still see the existing public read-only banner with sign-in CTA.
+- **Per-project permission helper** in `src/lib/project-members.ts`: `canActOnProject(role, userId, projectId, permission)` returns `true` if the user has the global permission OR is a member of that specific project. Restricted to the project-scoped permissions `proposal:create`, `vote:cast`, `comment:create` — global-only permissions (`user:manage`, `project:manage_all`, etc.) are unaffected.
+- **Server actions migrated off `withActionAuth`'s global `permission:` option** for proposal/vote/comment creation. They now resolve the relevant `projectId` (directly or via `resolveProposalProject`) and call `canActOnProject`. The `/api/proposals/submit-suggested` route is updated symmetrically. Deletion (`proposal:delete`) and admin-only paths remain global-role-only.
+- **`addComment` restructured**: zod validation moved ahead of DB lookups so input-validation errors short-circuit before any query — cleaner code and stable test mocks.
+- **Membership is persistent.** Even after the admin revokes the share token, a previously joined viewer keeps their write access to that project. Revoking is currently a manual DB delete from `project_members`; a dedicated UI to manage project members is out of scope for this patch.
+
+### Compatibility
+
+- Existing global roles continue to grant write access to all projects exactly as before — no behavior change for admin/manager/member users.
+- Only `viewer`-rolled accounts that follow a share link gain new access, and only to that project.
+- Schema is additive only; no destructive migrations.
+
 ## [1.4.2] — 2026-05-20
 
 ### AI summary prompt — silently ignore unfetchable URLs

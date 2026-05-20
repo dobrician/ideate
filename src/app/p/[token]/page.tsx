@@ -1,8 +1,9 @@
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import type { Metadata } from "next";
 import { db } from "@/db";
 import { comments, projects, users, tags, projectTags } from "@/db/schema";
 import { getCurrentUser } from "@/lib/auth";
+import { joinProjectAsMember } from "@/lib/project-members";
 import { eq, asc } from "drizzle-orm";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -97,6 +98,16 @@ export default async function SharedProjectPage({ params, searchParams }: Shared
 
   const projectData = project[0];
   const user = await getCurrentUser();
+
+  // A logged-in visitor following a share link gains persistent membership of
+  // the project (Sprint 73). They're then bounced to the canonical project
+  // page, where every contribution UI is already wired up. Guests stay on the
+  // public read-only view below.
+  if (user) {
+    await joinProjectAsMember(projectData.id, user.id, "share_link");
+    redirect(`/projects/${projectData.id}`);
+  }
+
   const { t, locale } = await getTranslations();
   const isArchived = projectData.status === "archived";
 
@@ -107,7 +118,7 @@ export default async function SharedProjectPage({ params, searchParams }: Shared
 
   const [{ proposals: proposalsWithStats, total: proposalTotal }, commentRows, projectTagRows, allTagRows] =
     await Promise.all([
-      getProjectProposals(projectData.id, user?.id ?? null, PROPOSALS_PAGE_SIZE, proposalOffset, proposalSort),
+      getProjectProposals(projectData.id, null, PROPOSALS_PAGE_SIZE, proposalOffset, proposalSort),
       db
         .select({
           id: comments.id,
@@ -234,9 +245,9 @@ export default async function SharedProjectPage({ params, searchParams }: Shared
               <ProposalList
                 proposals={proposalsWithStats}
                 projectId={projectData.id}
-                currentUserId={user?.id ?? ""}
+                currentUserId=""
                 isAdmin={false}
-                guestRedirect={user ? undefined : guestRedirect}
+                guestRedirect={guestRedirect}
               />
             </ClientOnly>
             {proposalTotalPages > 1 && (
@@ -250,8 +261,8 @@ export default async function SharedProjectPage({ params, searchParams }: Shared
             <ProjectComments
               projectId={projectData.id}
               comments={projectComments}
-              currentUserId={user?.id}
-              guestRedirect={user ? undefined : guestRedirect}
+              currentUserId={undefined}
+              guestRedirect={guestRedirect}
             />
           </ClientOnly>
         </CardContent>

@@ -550,6 +550,15 @@ export const embeddingQualitySnapshots = pgTable("embedding_quality_snapshots", 
   createdAt: ts(),
 });
 
+// ─── Project Members ────────────────────────────────────────────────────
+
+export const projectMembers = pgTable("project_members", {
+  projectId: text("project_id").notNull().references(() => projects.id, { onDelete: "cascade" }),
+  userId: text("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  joinedVia: text("joined_via", { enum: ["share_link", "manual"] }).notNull().default("share_link"),
+  joinedAt: timestamp("joined_at").notNull().defaultNow(),
+}, (table) => [primaryKey({ columns: [table.projectId, table.userId] })]);
+
 // ─── CI Regression Alerts ───────────────────────────────────────────────
 
 export const ciRegressionAlerts = pgTable("ci_regression_alerts", {

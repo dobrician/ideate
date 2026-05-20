@@ -540,6 +540,15 @@ export const embeddingQualitySnapshots = sqliteTable("embedding_quality_snapshot
   createdAt: ts(),
 });
 
+// ─── Project Members ────────────────────────────────────────────────────
+
+export const projectMembers = sqliteTable("project_members", {
+  projectId: text("project_id").notNull().references(() => projects.id, { onDelete: "cascade" }),
+  userId: text("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  joinedVia: text("joined_via", { enum: ["share_link", "manual"] }).notNull().default("share_link"),
+  joinedAt: integer("joined_at", { mode: "timestamp" }).notNull().$defaultFn(() => new Date()),
+}, (table) => [primaryKey({ columns: [table.projectId, table.userId] })]);
+
 // ─── CI Regression Alerts ───────────────────────────────────────────────
 
 export const ciRegressionAlerts = sqliteTable("ci_regression_alerts", {

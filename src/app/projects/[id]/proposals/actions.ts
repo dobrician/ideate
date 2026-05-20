@@ -5,6 +5,7 @@ import { z } from "zod";
 import { db } from "@/db";
 import { proposals, projects, votes, proposalTags } from "@/db/schema";
 import { canManageResource } from "@/lib/rbac";
+import { canActOnProject } from "@/lib/project-members";
 import type { Role } from "@/lib/rbac";
 import { logger } from "@/lib/logger";
 import { buildProposalSummary } from "@/lib/ai";
@@ -56,7 +57,6 @@ export async function createProposal(
   formData: FormData
 ): Promise<{ error?: string; success?: boolean }> {
   return withActionAuth(formData.get("csrfToken") as string, {
-    permission: "proposal:create",
     rateLimitKey: "proposal:create",
     rateLimitMax: 20,
   }, async (user) => {
@@ -73,6 +73,10 @@ export async function createProposal(
     }
 
     const { projectId, title, description, initialVote } = result.data;
+
+    if (!(await canActOnProject(user.role as Role, user.id, projectId, "proposal:create"))) {
+      return { error: "error.noPermission" };
+    }
 
     if (await isProjectArchived(projectId)) {
       return { error: "This project is archived and read-only" };
@@ -189,7 +193,6 @@ export async function castVote(
   csrfToken: string
 ) {
   return withActionAuth(csrfToken, {
-    permission: "vote:cast",
     rateLimitKey: "vote:cast",
     rateLimitMax: 60,
   }, async (user) => {
@@ -200,6 +203,10 @@ export async function castVote(
     const projectId = await resolveProposalProject(proposalId);
     if (!projectId) {
       return { error: "Proposal not found" };
+    }
+
+    if (!(await canActOnProject(user.role as Role, user.id, projectId, "vote:cast"))) {
+      return { error: "error.noPermission" };
     }
 
     if (await isProjectArchived(projectId)) {
@@ -251,13 +258,16 @@ export async function removeVote(
   csrfToken: string
 ) {
   return withActionAuth(csrfToken, {
-    permission: "vote:cast",
     rateLimitKey: "vote:remove",
     rateLimitMax: 60,
   }, async (user) => {
     const projectId = await resolveProposalProject(proposalId);
     if (!projectId) {
       return { error: "Proposal not found" };
+    }
+
+    if (!(await canActOnProject(user.role as Role, user.id, projectId, "vote:cast"))) {
+      return { error: "error.noPermission" };
     }
 
     if (await isProjectArchived(projectId)) {

@@ -5,6 +5,7 @@ import { db } from "@/db";
 import { comments, projects, users, tags, projectTags } from "@/db/schema";
 import { getCurrentUser } from "@/lib/auth";
 import { hasPermission, canManageResource } from "@/lib/rbac";
+import { canActOnProject } from "@/lib/project-members";
 import type { Role } from "@/lib/rbac";
 import { eq, asc } from "drizzle-orm";
 import { Badge } from "@/components/ui/badge";
@@ -119,7 +120,7 @@ export default async function ProjectPage({ params, searchParams }: ProjectPageP
   const projectData = project[0];
   const isArchived = projectData.status === "archived";
   const canEdit = !isArchived && canManageResource(role, projectData.userId, user.id);
-  const canCreateProposal = !isArchived && hasPermission(role, "proposal:create");
+  const canCreateProposal = !isArchived && (await canActOnProject(role, user.id, projectData.id, "proposal:create"));
   const isAdmin = hasPermission(role, "project:manage_all");
 
   const sp = await searchParams;

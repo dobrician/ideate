@@ -180,6 +180,8 @@ describe("castVote", () => {
 
   it("rejects viewers", async () => {
     mockRequireAuth.mockResolvedValue(makeUser({ role: "viewer" }));
+    // proposal → projectId; then isProjectMember returns no match
+    setSelectResults([{ projectId: "proj-1" }], []);
     const r = await castVote("prop-1", 1, "proj-1", "csrf");
     expect(r).toEqual({ error: "error.noPermission" });
   });
@@ -257,6 +259,7 @@ describe("removeVote", () => {
 
   it("rejects viewers", async () => {
     mockRequireAuth.mockResolvedValue(makeUser({ role: "viewer" }));
+    setSelectResults([{ projectId: "proj-1" }], []);
     const r = await removeVote("prop-1", "proj-1", "csrf");
     expect(r).toEqual({ error: "error.noPermission" });
   });

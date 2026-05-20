@@ -163,6 +163,8 @@ describe("castVote", () => {
   });
   it("rejects viewers", async () => {
     mockRequireAuth.mockResolvedValue(mkUser({ role: "viewer" }));
+    // proposal → projectId; then isProjectMember returns no match
+    mockSelLim.mockResolvedValueOnce([{ projectId: "pj1" }]).mockResolvedValueOnce([]);
     expect(await castVote("p1", 1, "pj1", "t")).toEqual({ error: "error.noPermission" });
   });
   it("rejects invalid value", async () => {
@@ -204,6 +206,7 @@ describe("removeVote", () => {
   });
   it("rejects viewers", async () => {
     mockRequireAuth.mockResolvedValue(mkUser({ role: "viewer" }));
+    mockSelLim.mockResolvedValueOnce([{ projectId: "pj1" }]).mockResolvedValueOnce([]);
     expect(await removeVote("p1", "pj1", "t")).toEqual({ error: "error.noPermission" });
   });
   it("rejects missing proposal", async () => {

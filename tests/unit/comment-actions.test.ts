@@ -95,6 +95,9 @@ describe("addComment", () => {
 
   it("rejects viewers", async () => {
     mockRequireAuth.mockResolvedValue(makeUser({ role: "viewer" }));
+    // proposal → projectId; then isProjectMember returns no match
+    mockSelectLimit.mockResolvedValueOnce([{ projectId: "proj-1" }]);
+    mockSelectLimit.mockResolvedValueOnce([]);
     const r = await addComment(null, proposalForm());
     expect(r).toEqual({ error: "error.noPermission" });
   });
@@ -128,6 +131,7 @@ describe("addComment", () => {
   });
 
   it("creates a proposal comment", async () => {
+    mockSelectLimit.mockResolvedValueOnce([{ projectId: "proj-1" }]);
     const r = await addComment(null, proposalForm());
     expect(r).toEqual({ success: true });
     const v = mockInsertValues.mock.calls[0][0] as CommentInsertValues;
@@ -152,6 +156,7 @@ describe("addComment", () => {
   });
 
   it("logs comment audit for proposal comments", async () => {
+    mockSelectLimit.mockResolvedValueOnce([{ projectId: "proj-1" }]);
     await addComment(null, proposalForm());
     const a = mockInsertValues.mock.calls[1][0] as { action: string };
     expect(a.action).toBe("comment");
@@ -221,6 +226,7 @@ describe("addComment", () => {
   });
 
   it("returns generic error on DB failure", async () => {
+    mockSelectLimit.mockResolvedValueOnce([{ projectId: "proj-1" }]);
     mockInsertValues.mockImplementation(() => {
       throw new Error("DB error");
     });
