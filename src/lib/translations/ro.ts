@@ -724,6 +724,16 @@ export const ro: Record<string, string> = {
   "duplicateModal.submitAnyway": "Adaugă totuși propunerea mea",
   "duplicateModal.submitWithPro": "Adaugă totuși cu vot Pro",
   "duplicateModal.submitWithContra": "Adaugă totuși cu vot Contra",
+  "duplicateModal.close": "Închide",
+  "duplicateModal.closeAfterVote": "Am votat, mulțumesc",
+  "duplicateModal.addAnywayPro": "Adaugă a mea (Pro)",
+  "duplicateModal.addAnywayContra": "Adaugă a mea (Contra)",
+  "duplicateModal.confirmAddTitle": "Niciuna nu se potrivește cu ideea ta?",
+  "duplicateModal.confirmAddBody": "Propunerea ta va fi adăugată cu vot {voteLabel}. Ești sigur că niciuna din propunerile similare de mai sus nu corespunde cu ce ai vrut să spui?",
+  "duplicateModal.confirmAddYes": "Da, adaugă",
+  "duplicateModal.confirmAddBack": "Înapoi",
+  "duplicateModal.votedProBadge": "Ai votat Pro",
+  "duplicateModal.votedContraBadge": "Ai votat Contra",
 
   // Accessibility
   "a11y.skipToMain": "Sari la conținutul principal",

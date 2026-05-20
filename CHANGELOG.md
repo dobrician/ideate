@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.4.1] — 2026-05-20
+
+### Sprint 72.1 — Duplicate-modal UX hardening
+
+Goal: make accidental duplicates harder to create. After voting on an existing similar proposal, users were likely to reflex-click the prominent green "Add anyway" button on the right, which still created a duplicate.
+
+- **Footer hierarchy inverted.** The primary green button on the right is now `Închide` (Close), and it becomes `✓ Am votat, mulțumesc` (Done — I voted) the moment the user casts a vote on any similar proposal in the modal. The drawer-closing path is the visually obvious one.
+- **`Add my own` actions demoted to ghost buttons on the left**, tinted amber (Pro) / rose (Contra). Clearly available, no longer the gravitational center.
+- **Inline confirmation step.** Clicking either "Add my own" no longer submits directly. The footer switches to an amber warning panel — *"None of the above matches your idea? Your proposal will be added with a Pro/Contra vote. Are you sure none of the existing similar proposals captures what you meant?"* — with `Înapoi` and `Da, adaugă` (amber, not green). Two intentional clicks required to create a duplicate.
+- **Vote badge on cards.** After voting on an existing proposal in the modal, the hover-revealed vote buttons are replaced by a fixed badge `[✓ Pro]` (emerald) or `[✓ Contra]` (rose). User gets immediate visual confirmation and can't accidentally re-vote.
+- New i18n keys: `duplicateModal.{close,closeAfterVote,addAnywayPro,addAnywayContra,confirmAddTitle,confirmAddBody,confirmAddYes,confirmAddBack,votedProBadge,votedContraBadge}`.
+
 ## [1.4.0] — 2026-05-20
 
 ### Sprint 72 — LLM reliability + submit-time duplicate detection

@@ -705,6 +705,16 @@ export const en: Record<string, string> = {
   "duplicateModal.submitAnyway": "Add my proposal anyway",
   "duplicateModal.submitWithPro": "Add anyway with Pro vote",
   "duplicateModal.submitWithContra": "Add anyway with Contra vote",
+  "duplicateModal.close": "Close",
+  "duplicateModal.closeAfterVote": "Done — I voted",
+  "duplicateModal.addAnywayPro": "Add my own (Pro)",
+  "duplicateModal.addAnywayContra": "Add my own (Contra)",
+  "duplicateModal.confirmAddTitle": "None of the above matches your idea?",
+  "duplicateModal.confirmAddBody": "Your proposal will be added with a {voteLabel} vote. Are you sure none of the existing similar proposals captures what you meant?",
+  "duplicateModal.confirmAddYes": "Yes, add it",
+  "duplicateModal.confirmAddBack": "Back",
+  "duplicateModal.votedProBadge": "You voted Pro",
+  "duplicateModal.votedContraBadge": "You voted Contra",
 
   // Accessibility
   "a11y.skipToMain": "Skip to main content",
