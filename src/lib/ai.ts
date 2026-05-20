@@ -18,6 +18,7 @@ function systemPrompt(maxWords: number, maxChars?: number): string {
     `Assume the reader already sees the title separately; do not repeat or rephrase it.`,
     `Write a single crisp sentence with no bullets or headings, removing redundancy and filler.`,
     `Keep it easy to read and remember.`,
+    `If the input contains URLs whose contents you cannot fetch, silently ignore those URLs and summarize only from the surrounding text. Never mention that you cannot access a link, cannot browse, or lack web access — produce a normal summary from whatever textual context is available, or fall back to describing the input at face value if there is nothing else.`,
     `Use at most ${maxWords} words${charConstraint}.`,
   ].join(" ");
 }

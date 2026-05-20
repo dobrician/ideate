@@ -1,5 +1,15 @@
 # Changelog
 
+## [1.4.2] — 2026-05-20
+
+### AI summary prompt — silently ignore unfetchable URLs
+
+When a proposal's description was (mostly) a URL — e.g. `www.war-zone.ro` for the Airsoft proposal on idea.sumont.co — Claude Haiku replied with a meta-disclaimer (*"I don't have access to external websites, so I cannot review the content at…"*) which was then persisted verbatim as the proposal's summary and shown to all users on the project page.
+
+- `systemPrompt()` in `src/lib/ai.ts` now instructs the model to silently ignore URLs whose contents it cannot fetch and to summarize only from the surrounding textual context — and never to mention that it cannot browse / access links. If no surrounding text exists, the model is told to fall back to describing the input at face value rather than refusing.
+- Single-line prompt change, applies to both `buildProposalSummary` and `generateProjectSummary` (both route through `generateSummaryFromText`).
+- Existing proposals with the bad meta-summary are not auto-regenerated; clearing `proposals.summary` for affected rows would trigger fresh generation on next read (out of scope for this patch).
+
 ## [1.4.1] — 2026-05-20
 
 ### Sprint 72.1 — Duplicate-modal UX hardening

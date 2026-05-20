@@ -1,6 +1,6 @@
 {
   "name": "ideate",
-  "version": "1.4.1",
+  "version": "1.4.2",
   "private": true,
   "description": "Enterprise-grade democratic idea prioritization platform",
   "scripts": {
