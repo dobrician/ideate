@@ -1,41 +1,36 @@
 /**
  * Unit tests for LLM structured logging (src/lib/llm.ts).
- * Verifies pino log calls for success, error, rate-limit, and fallback paths.
+ * Verifies pino log calls for success, error, rate-limit, and retry paths.
+ * Anthropic-only — no Gemini/OpenAI fallback chain.
  */
 
 import { describe, it, expect, vi, afterEach } from "vitest";
 import {
-  loadLLM, mockResponse, geminiResponse, openaiResponse, setupLLMTestEnv,
+  loadLLM, mockResponse, anthropicResponse, setupLLMTestEnv,
 } from "./llm-helpers";
 
 const env = setupLLMTestEnv();
 afterEach(() => env.cleanup());
 
 describe("LLM structured logging", () => {
-  it("should log info on successful Gemini call", async () => {
+  it("should log info on successful Anthropic call", async () => {
     const fetchMock = vi.fn<(input: string | URL | Request, init?: RequestInit) => Promise<Response>>();
-    fetchMock.mockResolvedValue(geminiResponse("logged", 42));
+    fetchMock.mockResolvedValue(anthropicResponse("logged", 42));
     globalThis.fetch = fetchMock;
 
-    const { completeWithFallback } = await loadLLM({
-      GEMINI_API_KEY: "test-key",
-      OPENAI_API_KEY: undefined,
-    });
+    const { completeWithFallback } = await loadLLM();
 
     const result = await completeWithFallback("test prompt");
     expect(result.text).toBe("logged");
-    expect(result.modelUsed).toBe("gemini");
+    expect(result.modelUsed).toBe("anthropic");
   });
 
   it("should log error when provider returns non-ok status", async () => {
     const fetchMock = vi.fn<(input: string | URL | Request, init?: RequestInit) => Promise<Response>>();
-    fetchMock.mockResolvedValue(mockResponse({ error: "bad" }, 500));
+    fetchMock.mockResolvedValue(mockResponse({ error: "bad" }, 400));
     globalThis.fetch = fetchMock;
 
-    const { completeWithFallback } = await loadLLM({
-      GEMINI_API_KEY: "test-key",
-      OPENAI_API_KEY: undefined,
-    });
+    const { completeWithFallback } = await loadLLM();
 
     const result = await completeWithFallback("test");
     expect(result.text).toBeNull();
@@ -43,12 +38,10 @@ describe("LLM structured logging", () => {
 
   it("should log warn when rate limited", async () => {
     const fetchMock = vi.fn<(input: string | URL | Request, init?: RequestInit) => Promise<Response>>();
-    fetchMock.mockResolvedValue(geminiResponse("ok", 10));
+    fetchMock.mockResolvedValue(anthropicResponse("ok", 10));
     globalThis.fetch = fetchMock;
 
     const { completeWithFallback } = await loadLLM({
-      GEMINI_API_KEY: "test-key",
-      OPENAI_API_KEY: undefined,
       AI_MAX_REQUESTS_PER_HOUR: "1",
       AI_MAX_TOKENS_PER_HOUR: "100000",
     });
@@ -59,159 +52,102 @@ describe("LLM structured logging", () => {
   });
 
   it("should log error on network failure", async () => {
+    vi.useFakeTimers();
     const fetchMock = vi.fn<(input: string | URL | Request, init?: RequestInit) => Promise<Response>>();
     fetchMock.mockRejectedValue(new Error("network"));
     globalThis.fetch = fetchMock;
 
-    const { completeWithFallback } = await loadLLM({
-      GEMINI_API_KEY: "test-key",
-      OPENAI_API_KEY: undefined,
-    });
+    const { completeWithFallback } = await loadLLM();
 
-    const result = await completeWithFallback("test");
+    const promise = completeWithFallback("test");
+    // Drive backoff timers forward for both retry attempts
+    await vi.advanceTimersByTimeAsync(10000);
+    const result = await promise;
     expect(result.text).toBeNull();
+    vi.useRealTimers();
   });
 
-  it("should log warn on fallback from Gemini to OpenAI", async () => {
+  it("should log warn when throttled after 429", async () => {
     const fetchMock = vi.fn<(input: string | URL | Request, init?: RequestInit) => Promise<Response>>();
-    fetchMock.mockResolvedValueOnce(mockResponse({ error: "err" }, 500));
-    fetchMock.mockResolvedValueOnce(openaiResponse("fallback"));
+    fetchMock.mockResolvedValueOnce(mockResponse({}, 429));
     globalThis.fetch = fetchMock;
 
-    const { completeWithFallback } = await loadLLM({
-      GEMINI_API_KEY: "test-key",
-      OPENAI_API_KEY: "test-oai",
-    });
+    const { completeWithFallback } = await loadLLM();
 
-    const result = await completeWithFallback("test");
-    expect(result.text).toBe("fallback");
-    expect(result.modelUsed).toBe("openai");
+    // First call triggers 429 and throttle
+    const r1 = await completeWithFallback("test1");
+    expect(r1.text).toBeNull();
+    // Second call is short-circuited by throttle — no second fetch
+    const r2 = await completeWithFallback("test2");
+    expect(r2.text).toBeNull();
+    expect(fetchMock).toHaveBeenCalledTimes(1);
   });
 
-  it("should log info on successful OpenAI call", async () => {
+  it("should return null when provider call fails non-retryably", async () => {
     const fetchMock = vi.fn<(input: string | URL | Request, init?: RequestInit) => Promise<Response>>();
-    fetchMock.mockResolvedValue(openaiResponse("oai response", 80));
+    fetchMock.mockResolvedValue(mockResponse({}, 400));
     globalThis.fetch = fetchMock;
 
-    const { completeWithFallback } = await loadLLM({
-      GEMINI_API_KEY: undefined,
-      OPENAI_API_KEY: "test-oai",
-    });
-
-    const result = await completeWithFallback("test");
-    expect(result.text).toBe("oai response");
-    expect(result.modelUsed).toBe("openai");
-  });
-
-  it("should log when both providers fail", async () => {
-    const fetchMock = vi.fn<(input: string | URL | Request, init?: RequestInit) => Promise<Response>>();
-    fetchMock.mockResolvedValueOnce(mockResponse({}, 500));
-    fetchMock.mockResolvedValueOnce(mockResponse({}, 500));
-    globalThis.fetch = fetchMock;
-
-    const { completeWithFallback } = await loadLLM({
-      GEMINI_API_KEY: "test-key",
-      OPENAI_API_KEY: "test-oai",
-    });
+    const { completeWithFallback } = await loadLLM();
 
     const result = await completeWithFallback("test");
     expect(result.text).toBeNull();
     expect(result.modelUsed).toBeNull();
   });
-
-  it("should handle OpenAI network error gracefully", async () => {
-    const fetchMock = vi.fn<(input: string | URL | Request, init?: RequestInit) => Promise<Response>>();
-    fetchMock.mockRejectedValue(new Error("connection refused"));
-    globalThis.fetch = fetchMock;
-
-    const { completeWithFallback } = await loadLLM({
-      GEMINI_API_KEY: undefined,
-      OPENAI_API_KEY: "test-oai",
-    });
-
-    const result = await completeWithFallback("test");
-    expect(result.text).toBeNull();
-  });
 });
 
 describe("LLM response parsing edge cases", () => {
-  it("should estimate tokens from text length when Gemini metadata missing", async () => {
+  it("should estimate tokens from text length when usage metadata is missing", async () => {
     const fetchMock = vi.fn<(input: string | URL | Request, init?: RequestInit) => Promise<Response>>();
     fetchMock.mockResolvedValue(mockResponse({
-      candidates: [{ content: { parts: [{ text: "hello world" }] } }],
-      usageMetadata: {},
-    }));
-    globalThis.fetch = fetchMock;
-
-    const { completeWithFallback } = await loadLLM({
-      GEMINI_API_KEY: "test-key",
-      OPENAI_API_KEY: undefined,
-    });
-
-    const result = await completeWithFallback("test");
-    expect(result.text).toBe("hello world");
-    expect(result.modelUsed).toBe("gemini");
-  });
-
-  it("should estimate tokens from text length when OpenAI usage missing", async () => {
-    const fetchMock = vi.fn<(input: string | URL | Request, init?: RequestInit) => Promise<Response>>();
-    fetchMock.mockResolvedValue(mockResponse({
-      choices: [{ message: { content: "openai text" } }],
+      content: [{ type: "text", text: "hello world" }],
       usage: {},
     }));
     globalThis.fetch = fetchMock;
 
-    const { completeWithFallback } = await loadLLM({
-      GEMINI_API_KEY: undefined,
-      OPENAI_API_KEY: "test-oai",
-    });
+    const { completeWithFallback } = await loadLLM();
 
     const result = await completeWithFallback("test");
-    expect(result.text).toBe("openai text");
-    expect(result.modelUsed).toBe("openai");
+    expect(result.text).toBe("hello world");
+    expect(result.modelUsed).toBe("anthropic");
   });
 
-  it("should handle Gemini response parts without text field", async () => {
+  it("should ignore non-text content blocks and concatenate text blocks", async () => {
     const fetchMock = vi.fn<(input: string | URL | Request, init?: RequestInit) => Promise<Response>>();
     fetchMock.mockResolvedValue(mockResponse({
-      candidates: [{ content: { parts: [{ text: "ok" }, {}] } }],
-      usageMetadata: { totalTokenCount: 5 },
+      content: [
+        { type: "text", text: "part one " },
+        { type: "tool_use", id: "x", input: {} },
+        { type: "text", text: "part two" },
+      ],
+      usage: { input_tokens: 2, output_tokens: 3 },
     }));
     globalThis.fetch = fetchMock;
 
-    const { completeWithFallback } = await loadLLM({
-      GEMINI_API_KEY: "test-key",
-      OPENAI_API_KEY: undefined,
-    });
+    const { completeWithFallback } = await loadLLM();
 
     const result = await completeWithFallback("test");
-    expect(result.text).toBe("ok");
-    expect(result.modelUsed).toBe("gemini");
+    expect(result.text).toBe("part one part two");
+    expect(result.modelUsed).toBe("anthropic");
   });
 
-  it("should handle Gemini response with no candidates gracefully", async () => {
+  it("should handle response with no content array gracefully", async () => {
     const fetchMock = vi.fn<(input: string | URL | Request, init?: RequestInit) => Promise<Response>>();
-    fetchMock.mockResolvedValue(mockResponse({ candidates: [] }));
+    fetchMock.mockResolvedValue(mockResponse({ usage: {} }));
     globalThis.fetch = fetchMock;
 
-    const { completeWithFallback } = await loadLLM({
-      GEMINI_API_KEY: "test-key",
-      OPENAI_API_KEY: undefined,
-    });
+    const { completeWithFallback } = await loadLLM();
 
     const result = await completeWithFallback("test");
     expect(result.text).toBeNull();
   });
 
-  it("should handle OpenAI response with no choices gracefully", async () => {
+  it("should handle empty content array gracefully", async () => {
     const fetchMock = vi.fn<(input: string | URL | Request, init?: RequestInit) => Promise<Response>>();
-    fetchMock.mockResolvedValue(mockResponse({ choices: [] }));
+    fetchMock.mockResolvedValue(mockResponse({ content: [], usage: {} }));
     globalThis.fetch = fetchMock;
 
-    const { completeWithFallback } = await loadLLM({
-      GEMINI_API_KEY: undefined,
-      OPENAI_API_KEY: "test-oai",
-    });
+    const { completeWithFallback } = await loadLLM();
 
     const result = await completeWithFallback("test");
     expect(result.text).toBeNull();
@@ -222,17 +158,14 @@ describe("LLM response parsing edge cases", () => {
     vi.mocked(getCachedResponse).mockRejectedValueOnce(new Error("db error"));
 
     const fetchMock = vi.fn<(input: string | URL | Request, init?: RequestInit) => Promise<Response>>();
-    fetchMock.mockResolvedValue(geminiResponse("fresh", 10));
+    fetchMock.mockResolvedValue(anthropicResponse("fresh", 10));
     globalThis.fetch = fetchMock;
 
-    const { completeWithFallback } = await loadLLM({
-      GEMINI_API_KEY: "test-key",
-      OPENAI_API_KEY: undefined,
-    });
+    const { completeWithFallback } = await loadLLM();
 
     const result = await completeWithFallback("test");
     expect(result.text).toBe("fresh");
-    expect(result.modelUsed).toBe("gemini");
+    expect(result.modelUsed).toBe("anthropic");
   });
 });
 
@@ -242,13 +175,10 @@ describe("setCachedResponse error handling", () => {
     vi.mocked(setCachedResponse).mockRejectedValueOnce(new Error("cache write fail"));
 
     const fetchMock = vi.fn<(input: string | URL | Request, init?: RequestInit) => Promise<Response>>();
-    fetchMock.mockResolvedValue(geminiResponse("ok", 10));
+    fetchMock.mockResolvedValue(anthropicResponse("ok", 10));
     globalThis.fetch = fetchMock;
 
-    const { completeWithFallback } = await loadLLM({
-      GEMINI_API_KEY: "test-key",
-      OPENAI_API_KEY: undefined,
-    });
+    const { completeWithFallback } = await loadLLM();
 
     const result = await completeWithFallback("test");
     expect(result.text).toBe("ok");
@@ -258,18 +188,13 @@ describe("setCachedResponse error handling", () => {
 });
 
 describe("isAiConfigured", () => {
-  it("returns true when GEMINI_API_KEY is set", async () => {
-    const { isAiConfigured } = await loadLLM({ GEMINI_API_KEY: "key", OPENAI_API_KEY: undefined });
+  it("returns true when ANTHROPIC_API_KEY is set", async () => {
+    const { isAiConfigured } = await loadLLM({ ANTHROPIC_API_KEY: "key" });
     expect(isAiConfigured()).toBe(true);
   });
 
-  it("returns true when OPENAI_API_KEY is set", async () => {
-    const { isAiConfigured } = await loadLLM({ GEMINI_API_KEY: undefined, OPENAI_API_KEY: "key" });
-    expect(isAiConfigured()).toBe(true);
-  });
-
-  it("returns false when no keys are set", async () => {
-    const { isAiConfigured } = await loadLLM({ GEMINI_API_KEY: undefined, OPENAI_API_KEY: undefined });
+  it("returns false when ANTHROPIC_API_KEY is not set", async () => {
+    const { isAiConfigured } = await loadLLM({ ANTHROPIC_API_KEY: undefined });
     expect(isAiConfigured()).toBe(false);
   });
 });
@@ -277,7 +202,6 @@ describe("isAiConfigured", () => {
 describe("isAiRateLimited", () => {
   it("returns false when under limits", async () => {
     const { isAiRateLimited } = await loadLLM({
-      GEMINI_API_KEY: "key",
       AI_MAX_REQUESTS_PER_HOUR: "60",
       AI_MAX_TOKENS_PER_HOUR: "100000",
     });
@@ -286,12 +210,10 @@ describe("isAiRateLimited", () => {
 
   it("returns true after exhausting request limit", async () => {
     const fetchMock = vi.fn<(input: string | URL | Request, init?: RequestInit) => Promise<Response>>();
-    fetchMock.mockResolvedValue(geminiResponse("ok", 10));
+    fetchMock.mockResolvedValue(anthropicResponse("ok", 10));
     globalThis.fetch = fetchMock;
 
     const { completeWithFallback, isAiRateLimited } = await loadLLM({
-      GEMINI_API_KEY: "key",
-      OPENAI_API_KEY: undefined,
       AI_MAX_REQUESTS_PER_HOUR: "1",
       AI_MAX_TOKENS_PER_HOUR: "100000",
     });

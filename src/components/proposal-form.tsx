@@ -500,6 +500,7 @@ export function ProposalForm(props: ProposalFormProps) {
 
   // Close drawer as soon as the validation/matches modal takes over.
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- syncing drawer visibility to modal state; can't be derived in render because Sheet is a controlled child.
     if (modalOpen) setOpen(false);
   }, [modalOpen]);
 

@@ -28,6 +28,7 @@ vi.mock("@/lib/vote-update", () => ({
 const mockInsertValues = vi.fn();
 const mockOnConflictDoUpdate = vi.fn();
 const mockDeleteWhere = vi.fn();
+const mockUpdateWhere = vi.fn();
 const mockSelectFrom = vi.fn();
 const mockSelectWhere = vi.fn();
 const mockSelectResults: Array<Promise<unknown[]>> = [];
@@ -56,6 +57,14 @@ vi.mock("@/db", () => ({
         mockDeleteWhere(...args);
         return Promise.resolve();
       },
+    }),
+    update: () => ({
+      set: () => ({
+        where: (...args: unknown[]) => {
+          mockUpdateWhere(...args);
+          return Promise.resolve();
+        },
+      }),
     }),
     select: () => ({
       from: (...args: unknown[]) => {
@@ -109,6 +118,7 @@ beforeEach(() => {
   mockInsertValues.mockReset();
   mockOnConflictDoUpdate.mockClear();
   mockDeleteWhere.mockReset();
+  mockUpdateWhere.mockClear();
   mockSelectFrom.mockClear();
   mockSelectWhere.mockClear();
   mockEmitVoteUpdate.mockClear();

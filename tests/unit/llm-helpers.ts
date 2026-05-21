@@ -1,6 +1,7 @@
 /**
  * Shared helpers for LLM test files.
  * Provides mock Response builders and module loading utilities.
+ * LLM module is Anthropic-only (no Gemini/OpenAI fallback chain).
  */
 
 import { vi } from "vitest";
@@ -24,7 +25,9 @@ vi.mock("@/lib/llm-cache", () => ({
  * Helper: set env vars, reset modules, dynamically import the real LLM module.
  */
 export async function loadLLM(envOverrides: Record<string, string | undefined> = {}) {
-  for (const [key, value] of Object.entries(envOverrides)) {
+  // Always supply a default key unless caller explicitly overrides
+  const merged = { ANTHROPIC_API_KEY: "test-anthropic-key", ...envOverrides };
+  for (const [key, value] of Object.entries(merged)) {
     if (value === undefined) {
       delete process.env[key];
     } else {
@@ -62,19 +65,13 @@ export function mockResponse(body: unknown, status = 200): Response {
   } as Response;
 }
 
-/** Helper to build a successful Gemini response. */
-export function geminiResponse(text: string, totalTokenCount = 50) {
+/** Helper to build a successful Anthropic Messages API response. */
+export function anthropicResponse(text: string, totalTokens = 50) {
+  // Split tokens roughly 50/50 between input/output for accounting purposes
+  const half = Math.floor(totalTokens / 2);
   return mockResponse({
-    candidates: [{ content: { parts: [{ text }] } }],
-    usageMetadata: { totalTokenCount },
-  });
-}
-
-/** Helper to build a successful OpenAI response. */
-export function openaiResponse(text: string, totalTokens = 50) {
-  return mockResponse({
-    choices: [{ message: { content: text } }],
-    usage: { total_tokens: totalTokens },
+    content: [{ type: "text", text }],
+    usage: { input_tokens: half, output_tokens: totalTokens - half },
   });
 }
 
@@ -86,10 +83,8 @@ export function setupLLMTestEnv() {
   return {
     cleanup() {
       globalThis.fetch = originalFetch;
-      process.env.GEMINI_API_KEY = originalEnv.GEMINI_API_KEY;
-      process.env.OPENAI_API_KEY = originalEnv.OPENAI_API_KEY;
-      process.env.GEMINI_MODEL = originalEnv.GEMINI_MODEL;
-      process.env.OPENAI_MODEL = originalEnv.OPENAI_MODEL;
+      process.env.ANTHROPIC_API_KEY = originalEnv.ANTHROPIC_API_KEY;
+      process.env.ANTHROPIC_MODEL = originalEnv.ANTHROPIC_MODEL;
       process.env.AI_MAX_REQUESTS_PER_HOUR = originalEnv.AI_MAX_REQUESTS_PER_HOUR;
       process.env.AI_MAX_TOKENS_PER_HOUR = originalEnv.AI_MAX_TOKENS_PER_HOUR;
       vi.restoreAllMocks();

@@ -219,7 +219,7 @@ describe("SearchBar keyboard navigation", () => {
   it("renders search mode toggle buttons", async () => {
     await renderSearchBar();
     expect(screen.getByRole("radiogroup", { name: "Search mode" })).toBeInTheDocument();
-    expect(screen.getByRole("radio", { name: /Keyword/i })).toBeInTheDocument();
+    expect(screen.getByRole("radio", { name: /^Keyword/i })).toBeInTheDocument();
     expect(screen.getByRole("radio", { name: /Semantic/i })).toBeInTheDocument();
     expect(screen.getByRole("radio", { name: /Smart/i })).toBeInTheDocument();
   });
@@ -272,12 +272,12 @@ describe("SearchBar keyboard navigation", () => {
 
   it("mode toggle buttons have title tooltips", async () => {
     await renderSearchBar();
-    const ftsBtn = screen.getByRole("radio", { name: /Keyword/i });
+    const ftsBtn = screen.getByRole("radio", { name: /^Keyword/i });
     const semanticBtn = screen.getByRole("radio", { name: /Semantic/i });
     const smartBtn = screen.getByRole("radio", { name: /Smart/i });
-    expect(ftsBtn).toHaveAttribute("title", "Exact keyword matching");
-    expect(semanticBtn).toHaveAttribute("title", "AI-powered meaning search");
-    expect(smartBtn).toHaveAttribute("title", "Combined keyword + AI");
+    expect(ftsBtn).toHaveAttribute("title", "Keyword — Exact keyword matching");
+    expect(semanticBtn).toHaveAttribute("title", "Semantic — AI-powered meaning search");
+    expect(smartBtn).toHaveAttribute("title", "Smart — Combined keyword + AI");
   });
 
   it("displays response time when returned by API", async () => {

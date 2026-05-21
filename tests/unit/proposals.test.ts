@@ -21,7 +21,7 @@ vi.mock("@/lib/webhooks", () => ({ fireWebhookEvent: (...a: unknown[]) => mockFi
 const mockEnqueueEmbedding = vi.fn().mockResolvedValue("job-1");
 vi.mock("@/lib/embeddings/jobs", () => ({ enqueueEmbedding: (...a: unknown[]) => mockEnqueueEmbedding(...a) }));
 
-const mockInsert = vi.fn(), mockSelLim = vi.fn(), mockDelWhere = vi.fn();
+const mockInsert = vi.fn(), mockSelLim = vi.fn(), mockDelWhere = vi.fn(), mockUpdWhere = vi.fn();
 vi.mock("@/db", () => ({
   db: {
     insert: () => ({ values: (...a: unknown[]) => {
@@ -31,6 +31,7 @@ vi.mock("@/db", () => ({
           Promise.resolve(undefined).then(res, rej) };
     } }),
     delete: () => ({ where: (...a: unknown[]) => { mockDelWhere(...a); return Promise.resolve(); } }),
+    update: () => ({ set: () => ({ where: (...a: unknown[]) => { mockUpdWhere(...a); return Promise.resolve(); } }) }),
     select: () => ({ from: () => ({ where: () => ({ limit: () => mockSelLim() }) }) }),
   },
 }));
@@ -53,7 +54,7 @@ const setupLive = () => { mockSelLim.mockResolvedValueOnce(future()).mockResolve
 import { createProposal, deleteProposal, castVote, removeVote } from "@/app/projects/[id]/proposals/actions";
 
 beforeEach(() => {
-  [mockRevalidatePath, mockInsert, mockSelLim, mockDelWhere, mockFireWebhook, mockEnqueueEmbedding].forEach(m => m.mockReset());
+  [mockRevalidatePath, mockInsert, mockSelLim, mockDelWhere, mockUpdWhere, mockFireWebhook, mockEnqueueEmbedding].forEach(m => m.mockReset());
   mockFireWebhook.mockResolvedValue(undefined);
   mockEnqueueEmbedding.mockResolvedValue("job-1");
   mockRequireAuth.mockReset().mockResolvedValue(mkUser());

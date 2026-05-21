@@ -65,6 +65,7 @@ export function useProposalForm({
     lastHandledStateRef.current = state;
 
     if (state.success) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- reacting to server-action result; modal cleanup must happen once per state transition.
       setModalState("closed");
       setDuplicateMatches([]);
       setPendingFormData(null);

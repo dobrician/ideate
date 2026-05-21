@@ -64,6 +64,7 @@ export function ProjectLivePanel({ projectId, sessionToken }: ProjectLivePanelPr
   useEffect(() => {
     if (!WS_ENABLED) {
       // No custom Node server in this deployment — go straight to polling.
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- mount-time setup; setIsPolling(true) inside startPolling is the only way to signal polling mode.
       startPolling();
       return () => stopPolling();
     }

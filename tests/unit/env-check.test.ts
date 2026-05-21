@@ -188,13 +188,18 @@ describe("Environment Check", () => {
       expect(features.pushNotifications).toBe(false);
     });
 
-    it("should report AI providers based on API keys", () => {
-      process.env.OPENAI_API_KEY = "sk-test";
-      delete process.env.GEMINI_API_KEY;
+    it("should report Anthropic enabled when ANTHROPIC_API_KEY is set", () => {
+      process.env.ANTHROPIC_API_KEY = "sk-ant-test";
 
       const features = getFeatureStatus();
-      expect(features.aiOpenAI).toBe(true);
-      expect(features.aiGemini).toBe(false);
+      expect(features.aiAnthropic).toBe(true);
+    });
+
+    it("should report Anthropic disabled when ANTHROPIC_API_KEY is missing", () => {
+      delete process.env.ANTHROPIC_API_KEY;
+
+      const features = getFeatureStatus();
+      expect(features.aiAnthropic).toBe(false);
     });
 
     it("should report sentry enabled when DSN is set", () => {
