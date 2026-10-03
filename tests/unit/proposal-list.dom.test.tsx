@@ -180,14 +180,19 @@ describe("ProposalList", () => {
     expect(widths).not.toContain("0%");
   });
 
-  it("shows author name for each proposal", () => {
+  it("should place the author below the compact header when expanded", async () => {
+    const user = userEvent.setup();
     const proposals = [
       makeProposal({ id: "p1", title: "X", authorName: "Alice" }),
     ];
     const { container } = render(
       <ProposalList proposals={proposals} projectId="proj1" currentUserId="u1" isAdmin={false} />
     );
-    expect(container.textContent).toContain("Alice");
+    const author = container.querySelector('[data-proposal-author]');
+    expect(author).toHaveTextContent("Alice");
+    expect(container.querySelector('[data-proposal-header]')?.contains(author)).toBe(false);
+    await user.click(screen.getByRole("button", { name: /X/ }));
+    expect(author?.closest('[data-slot="accordion-item"]')).toHaveAttribute("data-state", "open");
   });
 
   it("should use decorative card backgrounds and leave unvoted ideas unfilled", () => {

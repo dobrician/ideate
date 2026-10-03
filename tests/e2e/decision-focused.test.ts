@@ -117,9 +117,13 @@ test("should transfer the preview intentionally and retain it outside the list",
   await page.reload();
   await expect(ideas.first()).toHaveAttribute("data-preview-active", "true");
   const second = ideas.nth(1);
+  const chart = second.locator("[data-vote-chart]");
+  const compactHeight = (await chart.boundingBox())!.height;
   if (isMobile) await second.locator('[data-slot="accordion-trigger"]').focus();
   else await second.locator('[data-slot="accordion-trigger"]').hover();
   await expect(second).toHaveAttribute("data-preview-active", "true");
+  await expect.poll(async () => (await chart.boundingBox())!.height).toBe(compactHeight);
+  await expect.poll(() => chart.evaluate(el => getComputedStyle(el).maskImage)).toContain("linear-gradient");
   await expect(ideas.first()).toHaveAttribute("data-preview-active", "false");
   if (isMobile) await page.getByRole("button", { name: "More actions", exact: true }).focus();
   else await page.getByRole("heading", { level: 1 }).hover();

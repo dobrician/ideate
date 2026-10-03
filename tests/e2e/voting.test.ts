@@ -87,8 +87,11 @@ test.describe("Voting E2E", () => {
     expect(cornerRadius).not.toBe("0px");
     await expect(barContainer).toHaveCSS("border-top-left-radius", cornerRadius);
     await expect(barContainer).toHaveCSS("border-bottom-right-radius", cornerRadius);
-    const header = barContainer.locator("..");
+    const compactHeight = (await barContainer.boundingBox())!.height;
+    const header = idea.locator("[data-proposal-header]");
     await expect.poll(async () => (await barContainer.boundingBox())!.height).toBe((await header.boundingBox())!.height);
+    await idea.locator('[data-slot="accordion-trigger"]').hover();
+    await expect.poll(async () => (await barContainer.boundingBox())!.height).toBe(compactHeight);
     await expect(greenBar).toHaveAttribute("style", /width:\s*100%/);
     await expect(redBar).toHaveCount(0);
     await idea.getByRole("button", { name: /^Contra \(/ }).click();
@@ -98,7 +101,12 @@ test.describe("Voting E2E", () => {
     await idea.locator('[data-slot="accordion-trigger"]').click();
     await expect(idea).toHaveAttribute("data-state", "open");
     await expect.poll(() => barContainer.evaluate(el => getComputedStyle(el).maskImage)).toContain("linear-gradient");
-    await expect.poll(() => redBar.evaluate(el => getComputedStyle(el, "::after").filter)).toBe("blur(2px)");
+    await expect.poll(async () => (await barContainer.boundingBox())!.height).toBe(compactHeight);
+    await expect.poll(() => redBar.evaluate(el => getComputedStyle(el, "::after").filter)).toBe("none");
+    const author = idea.locator('[data-proposal-author]');
+    await expect(author).toBeVisible();
+    const controls = (await idea.locator('[data-proposal-controls]').boundingBox())!;
+    expect((await author.boundingBox())!.y).toBeGreaterThanOrEqual(controls.y + controls.height);
   });
 
   test("vote counts update after voting", async ({ page }) => {
