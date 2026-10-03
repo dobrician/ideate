@@ -13,6 +13,10 @@
 - Disabled the development status badge to keep local demo recordings focused on the application.
 - Development assets use `no-store`, preventing a year-long cache from showing an outdated interface during design review; production keeps immutable asset caching.
 
+### Fixed
+
+- Keep the projects filter panel inside the viewport on mobile, while retaining right alignment on desktop.
+
 ### Tests
 
 - Updated assertions that required always-visible exports, dashboard/admin links in primary navigation, author rows and vote gradients behind titles: those requirements were explicitly replaced by the decision-focused design requested on 2026-10-03. Existing functionality, RBAC and duplicate prevention remain under regression tests.
