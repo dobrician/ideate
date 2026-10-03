@@ -4,6 +4,8 @@
 
 ### Changed
 
+- Vertically center proposal summary previews with symmetric spacing. Refine the new-idea drawer with a fixed submission footer, scrollable fields, a roomier editor and quieter initial-vote controls.
+
 - Fix chat readability in both themes: dark text on green own messages, inherited Markdown colors, and a distinct gray background with a subtle border for received messages in light mode.
 
 - Replace separate proposal consensus lines with proportional green/red card backgrounds following rounded corners. Charts keep the compact header height during previews and expansion, using a smooth 16px gradient into the details; expanded authors sit below the controls. Voting scale and independent controls are preserved.

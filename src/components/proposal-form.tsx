@@ -42,14 +42,14 @@ export function ProposalForm(props: ProposalFormProps & { compact?: boolean }) {
             </>}
           </Button>
         </SheetTrigger>
-        <SheetContent side="left" className="flex w-full flex-col overflow-y-auto sm:max-w-lg">
-          <SheetHeader className="shrink-0">
-            <SheetTitle>{form.t("proposalForm.title")}</SheetTitle>
+        <SheetContent side="left" className="flex h-dvh w-full flex-col gap-0 overflow-hidden sm:max-w-[480px]">
+          <SheetHeader className="shrink-0 border-b px-5 py-5 pr-16">
+            <SheetTitle className="text-lg">{form.t("proposalForm.title")}</SheetTitle>
           </SheetHeader>
-          <div className="flex-1 px-4 pb-4">
+          <div className="flex min-h-0 flex-1 flex-col">
             <ProposalFormFields form={form} showCancel onCancel={
               <SheetClose asChild>
-                <Button type="button" variant="outline" size="sm" disabled={form.isPending}>
+                <Button type="button" variant="ghost" disabled={form.isPending}>
                   {form.t("common.cancel")}
                 </Button>
               </SheetClose>

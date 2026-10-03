@@ -69,6 +69,14 @@ test("should preserve the first preview outside the list and keep attachments in
   const idea = page.locator('[data-slot="accordion-item"]').first();
   const summary = idea.getByText("Test proposal for automated E2E tests");
   await expect(summary).toBeVisible();
+  const summaryOffset = await summary.evaluate(el => {
+    const range = document.createRange();
+    range.selectNodeContents(el);
+    const text = range.getBoundingClientRect();
+    const area = el.getBoundingClientRect();
+    return Math.abs((text.top + text.bottom - area.top - area.bottom) / 2);
+  });
+  expect(summaryOffset).toBeLessThanOrEqual(2);
   const initialHeight = (await idea.boundingBox())!.height;
   if (isMobile) await idea.getByRole("button", { name: /^Pro \(/ }).focus();
   else await page.getByRole("heading", { level: 1 }).hover();
@@ -145,4 +153,25 @@ test("should preserve closed-project results while hiding contribution controls"
   await expect(page.getByRole("button", { name: /^Pro \(/ })).toHaveCount(0);
   await expect(page.getByRole("button", { name: /New Proposal|Open discussion/ })).toHaveCount(0);
   await expect(page.locator('textarea[name="content"]')).toHaveCount(0);
+});
+
+
+test("should keep drawer actions visible while long content scrolls", async ({ page }) => {
+  const seed = await seedTestData(page.request);
+  await loginAsTestUser(page, seed);
+  await page.goto(`/projects/${seed.projectId}`);
+  await page.getByRole("button", { name: /New Proposal/ }).click();
+  const drawer = page.getByRole("dialog", { name: "New Proposal", exact: true });
+  await expect(drawer).toBeVisible();
+  await page.setViewportSize({ width: 390, height: 430 });
+  const footer = drawer.locator("[data-proposal-form-footer]");
+  const before = (await footer.boundingBox())!;
+  expect(before.y + before.height).toBeLessThanOrEqual(430);
+  const scroller = drawer.locator("form > div").first();
+  await scroller.evaluate(el => { el.scrollTop = el.scrollHeight; });
+  await expect(drawer.getByRole("button", { name: "Submit Proposal" })).toBeInViewport();
+  expect((await footer.boundingBox())!.y).toBe(before.y);
+  expect(await drawer.evaluate(el => el.scrollWidth <= el.clientWidth)).toBe(true);
+  await drawer.getByRole("button", { name: "Cancel", exact: true }).click();
+  await expect(drawer).not.toBeVisible();
 });

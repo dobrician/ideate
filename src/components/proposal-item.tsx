@@ -155,7 +155,7 @@ export function ProposalItem({
         <div data-proposal-author className="hidden px-4 pb-1 text-right text-xs text-muted-foreground group-data-[state=open]/proposal:block">{proposal.authorName}</div>
         {(proposal.summary || proposal.description) && (
           <div className={`grid transition-[grid-template-rows,opacity] duration-300 ease-[cubic-bezier(.22,1.15,.36,1)] group-data-[state=open]/proposal:hidden motion-reduce:transition-none ${isPreviewActive ? "visible grid-rows-[1fr] opacity-100" : "invisible grid-rows-[0fr] opacity-0"}`}>
-            <div className="overflow-hidden px-4"><p className="min-h-12 pb-3 text-sm leading-relaxed text-muted-foreground">{proposal.summary || proposal.description}</p></div>
+            <div className="overflow-hidden px-4"><p className="flex min-h-12 items-center py-1.5 text-sm leading-relaxed text-muted-foreground">{proposal.summary || proposal.description}</p></div>
           </div>
         )}
       </div>
