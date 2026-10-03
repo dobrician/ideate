@@ -124,9 +124,13 @@ export function ProposalItem({
       data-preview-active={isPreviewActive}
       onPointerMove={(event) => { if (event.pointerType === "mouse") onPreviewActivate?.(); }}
       onFocusCapture={() => onPreviewActivate?.()}
-      className="group/proposal relative rounded-lg border bg-transparent transition-shadow duration-200 data-[state=open]:shadow-md after:pointer-events-none after:absolute after:-inset-x-px after:top-full after:h-1 after:rounded-b-lg after:border after:border-t-0 after:border-border after:bg-background after:opacity-0 after:-translate-y-1 after:transition-[transform,opacity] after:duration-300 after:ease-[cubic-bezier(.22,1.15,.36,1)] has-[[data-slot=accordion-trigger]:hover]:after:opacity-100 has-[[data-slot=accordion-trigger]:hover]:after:translate-y-0 has-[[data-slot=accordion-trigger]:hover]:after:delay-500 data-[state=open]:after:hidden motion-reduce:after:transition-none"
+      className="group/proposal relative rounded-lg border last:border-b bg-transparent transition-shadow duration-200 data-[state=open]:shadow-md after:pointer-events-none after:absolute after:-inset-x-px after:top-full after:h-1 after:rounded-b-lg after:border after:border-t-0 after:border-border after:bg-background after:opacity-0 after:-translate-y-1 after:transition-[transform,opacity] after:duration-300 after:ease-[cubic-bezier(.22,1.15,.36,1)] has-[[data-slot=accordion-trigger]:hover]:after:opacity-100 has-[[data-slot=accordion-trigger]:hover]:after:translate-y-0 has-[[data-slot=accordion-trigger]:hover]:after:delay-500 data-[state=open]:after:hidden motion-reduce:after:transition-none"
     >
-      <div className="px-4 py-2">
+      <div className="relative isolate rounded-[inherit] px-4 py-2">
+        <div data-vote-chart aria-hidden="true" className="pointer-events-none absolute inset-0 -z-10 overflow-hidden rounded-[inherit] group-data-[state=open]/proposal:-bottom-3 group-data-[state=open]/proposal:[mask-image:linear-gradient(to_bottom,black_calc(100%_-_12px),transparent)]">
+          {greenWidth > 0 && <div className="absolute inset-y-0 left-0 bg-emerald-500/15 transition-[width] duration-300 group-data-[state=open]/proposal:bottom-3 after:absolute after:inset-x-0 after:top-full after:hidden after:h-3 after:bg-inherit after:blur-[2px] group-data-[state=open]/proposal:after:block motion-reduce:transition-none" style={{ width: `${greenWidth}%` }} />}
+          {redWidth > 0 && <div className="absolute inset-y-0 right-0 bg-rose-400/15 transition-[width] duration-300 group-data-[state=open]/proposal:bottom-3 after:absolute after:inset-x-0 after:top-full after:hidden after:h-3 after:bg-inherit after:blur-[2px] group-data-[state=open]/proposal:after:block motion-reduce:transition-none" style={{ width: `${redWidth}%` }} />}
+        </div>
         <div className="flex flex-col gap-1 sm:flex-row sm:items-start sm:gap-4">
           <div className="min-w-0 flex-1">
             <AccordionTrigger showIndicator={false} className="cursor-pointer min-h-11 items-center gap-3 py-0 hover:no-underline">
@@ -152,13 +156,9 @@ export function ProposalItem({
             <div className="overflow-hidden"><p className="min-h-12 pb-1 text-sm leading-relaxed text-muted-foreground">{proposal.summary || proposal.description}</p></div>
           </div>
         )}
-        <div className="relative mt-1 h-1 overflow-hidden rounded-full bg-muted" aria-hidden="true">
-          {greenWidth > 0 && <div className="absolute inset-y-0 left-0 rounded-full bg-emerald-500/70 transition-all duration-300" style={{ width: `${greenWidth}%` }} />}
-          {redWidth > 0 && <div className="absolute inset-y-0 right-0 rounded-full bg-rose-400/70 transition-all duration-300" style={{ width: `${redWidth}%` }} />}
-        </div>
       </div>
       <AccordionContent>
-        <div className="space-y-2 border-t px-4 pt-3">
+        <div className="space-y-2 px-4 pt-3">
           {(proposal.tags.length > 0 || proposal.workflowState) && (
             <div className="flex flex-wrap items-center gap-1">
               {proposal.workflowState && <Badge variant="outline">{proposal.workflowState.currentStageName} ({proposal.workflowState.stageIndex + 1}/{proposal.workflowState.totalStages})</Badge>}

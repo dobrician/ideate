@@ -270,23 +270,6 @@ describe("statusLabel edge cases", () => {
 });
 
 // ============================================================
-// #58 — Vote bar gradient: verify /8 opacity (unit-level)
-// ============================================================
-
-describe("Vote bar gradient opacity (#58)", () => {
-  // Vote bars use inline rgba styles with low opacity for subtle gradients
-  it("vote bar is a thin separate indicator that leaves the summary readable", async () => {
-    const fs = await import("fs");
-    const src = fs.readFileSync("src/components/proposal-item.tsx", "utf-8");
-    expect(src).toContain("h-1 overflow-hidden rounded-full");
-    expect(src).toContain("bg-emerald-500/70");
-    expect(src).toContain("bg-rose-400/70");
-    expect(src).not.toContain("from-green-500/15");
-    expect(src).not.toContain("from-red-500/15");
-  });
-});
-
-// ============================================================
 // #52 — Proposal title overflow classes (unit-level)
 // ============================================================
 

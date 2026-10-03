@@ -2,6 +2,10 @@
 
 Reverse chronological. Click each sprint for full details.
 
+### Validated for release — Proposal card charts (2026-10-03)
+
+Follow-up to #71 and PR #73: replace the separate consensus line with subdued proportional pro/contra card backgrounds. The chart follows the card corners and fades through a blurred 12px edge into expanded details. Unvoted cards remain unfilled; vote scale, preview selection and independent controls are preserved. Browser selectors change to target the new background chart because the requested presentation changed. The obsolete source-string assertion for thin lines is replaced by DOM coverage for decorative/unvoted backgrounds and browser checks for full-height clipping, inherited corner radii, actual pro/contra widths and expansion mask/blur. All 2,862 unit tests across 208 files, TypeScript, ESLint and the production build pass. The focused chart checks pass on all three browsers (3 cases, 8.1 seconds), and all 621 production-image browser cases pass in one run (9.1 minutes). Visual checks cover both themes. Public deployment verification is pending.
+
 ### Deployed, awaiting review — Stable previews and compact context (2026-10-03)
 
 Follow-up requirements for #71 and draft PR #73: expanded context replaces the summary; dates and the visible proposal toolbar are removed. Solid project background separates it from idea cards; sorting and tags remain in project actions, with proposal creation in the header. The first summary remains selected until intentional mouse movement or keyboard focus selects another. Disclosure arrows are replaced by a hand cursor and delayed elastic 4px decorative peek, without list reflow. Keyboard activation and independent attachments remain available.

@@ -190,6 +190,14 @@ describe("ProposalList", () => {
     expect(container.textContent).toContain("Alice");
   });
 
+  it("should use decorative card backgrounds and leave unvoted ideas unfilled", () => {
+    const { container } = render(<ProposalList proposals={[makeProposal()]} projectId="proj1" currentUserId="u1" isAdmin={false} />);
+    const chart = container.querySelector('[data-vote-chart]');
+    expect(chart).toHaveAttribute("aria-hidden", "true");
+    expect(chart?.children).toHaveLength(0);
+    expect(container.querySelector('.h-1')).toBeNull();
+  });
+
   it("should show the first preview and reveal the original description on demand", async () => {
     const user = userEvent.setup();
     render(<ProposalList proposals={[makeProposal({ summary: "A concise decision summary.", description: "Original detailed proposal." })]}

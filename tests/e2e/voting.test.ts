@@ -77,16 +77,28 @@ test.describe("Voting E2E", () => {
 
     // Inspect the consensus bar, rather than an unrelated decorative trigger icon.
     const idea = page.locator("[data-slot='accordion-item']").first();
-    const barContainer = idea.locator('div[aria-hidden="true"].h-1');
+    const barContainer = idea.locator('[data-vote-chart]');
     const greenBar = barContainer.locator('[class*="bg-emerald-500"]');
     const redBar = barContainer.locator('[class*="bg-rose-400"]');
     await expect(barContainer).toBeVisible();
+    await expect(barContainer).toHaveCSS("pointer-events", "none");
+    await expect(barContainer).toHaveCSS("overflow", "hidden");
+    const cornerRadius = await idea.evaluate(el => getComputedStyle(el).borderTopLeftRadius);
+    expect(cornerRadius).not.toBe("0px");
+    await expect(barContainer).toHaveCSS("border-top-left-radius", cornerRadius);
+    await expect(barContainer).toHaveCSS("border-bottom-right-radius", cornerRadius);
+    const header = barContainer.locator("..");
+    await expect.poll(async () => (await barContainer.boundingBox())!.height).toBe((await header.boundingBox())!.height);
     await expect(greenBar).toHaveAttribute("style", /width:\s*100%/);
     await expect(redBar).toHaveCount(0);
     await idea.getByRole("button", { name: /^Contra \(/ }).click();
     await expect(redBar).toBeVisible();
     await expect(redBar).toHaveAttribute("style", /width:\s*100%/);
     await expect(greenBar).toHaveCount(0);
+    await idea.locator('[data-slot="accordion-trigger"]').click();
+    await expect(idea).toHaveAttribute("data-state", "open");
+    await expect.poll(() => barContainer.evaluate(el => getComputedStyle(el).maskImage)).toContain("linear-gradient");
+    await expect.poll(() => redBar.evaluate(el => getComputedStyle(el, "::after").filter)).toBe("blur(2px)");
   });
 
   test("vote counts update after voting", async ({ page }) => {

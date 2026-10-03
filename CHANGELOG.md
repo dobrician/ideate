@@ -4,6 +4,8 @@
 
 ### Changed
 
+- Replace separate proposal consensus lines with proportional green/red card backgrounds following rounded corners. Expanded cards fade the chart into the details through a blurred 12px edge; voting scale and independent controls are preserved.
+
 - Replace the project summary with context on expansion, remove creation/update dates, and keep a single aligned participation footer. Use a solid project background and remove the visible proposal toolbar; sorting/filtering move into project actions and creation becomes a compact header icon.
 - Keep the first proposal preview selected until mouse movement or keyboard focus selects another, retaining it outside the list. Remove disclosure arrows and add a hand cursor with a delayed elastic 4px decorative peek that does not reflow the list.
 
