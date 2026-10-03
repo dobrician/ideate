@@ -1,7 +1,7 @@
 import { test, expect } from "@playwright/test";
 
 test.describe("Navigation & Public Pages", () => {
-  test("homepage shows welcome content and feature cards", async ({ page }) => {
+  test("homepage introduces the three-step decision workflow", async ({ page }) => {
     await page.goto("/");
     await expect(page.getByText("Welcome to Ideate")).toBeVisible();
     // Use role-based selectors to avoid strict mode (nav/buttons also contain "Projects")
@@ -13,9 +13,7 @@ test.describe("Navigation & Public Pages", () => {
 
   test("homepage has navigation buttons", async ({ page }) => {
     await page.goto("/");
-    await expect(
-      page.getByRole("link", { name: /View Projects/i })
-    ).toBeVisible();
+    await expect(page.getByRole("link", { name: /View Projects/i })).toHaveCount(0);
     await expect(
       page.getByRole("link", { name: /Get Started/i })
     ).toBeVisible();

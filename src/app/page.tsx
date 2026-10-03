@@ -1,19 +1,6 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import {
-  Card,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import {
-  FolderOpen,
-  Lightbulb,
-  BarChart3,
-  Users,
-  LayoutDashboard,
-} from "lucide-react";
 import { getTranslations } from "@/lib/i18n-server";
 import { getCurrentUser } from "@/lib/auth";
 
@@ -28,20 +15,21 @@ const jsonLd = {
   url: "https://idea.surmont.co",
 };
 
+/** Introduce the three-step decision workflow and send members to projects. */
 export default async function HomePage() {
   const user = await getCurrentUser();
-  if (user) redirect("/dashboard");
+  if (user) redirect("/projects");
 
   const { t } = await getTranslations();
 
   return (
-    <main className="mx-auto max-w-4xl space-y-6 py-4 sm:space-y-8 sm:py-8" role="main">
+    <main className="mx-auto max-w-4xl space-y-8 py-8 sm:space-y-10 sm:py-16" role="main">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
-      <div className="text-center sm:text-left">
-        <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">
+      <div className="max-w-2xl">
+        <h1 className="text-4xl font-semibold leading-tight tracking-tight sm:text-5xl">
           {t("home.welcome")}
         </h1>
         <p className="mt-2 text-muted-foreground">
@@ -55,55 +43,18 @@ export default async function HomePage() {
             {t("home.getStarted")}
           </Link>
         </Button>
-        <Button asChild size="lg" variant="outline">
-          <Link href="/projects">
-            <FolderOpen className="mr-2 h-4 w-4" />
-            {t("home.viewProjects")}
-          </Link>
-        </Button>
+
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-2 lg:flex lg:flex-wrap lg:justify-center" role="region" aria-label={t("home.ariaFeatures")}>
-        <Card className="transition-shadow duration-200 hover:shadow-md lg:w-[calc(33.333%-0.667rem)]">
-          <CardHeader>
-            <FolderOpen className="mb-2 h-6 w-6 text-muted-foreground" aria-hidden="true" />
-            <CardTitle>{t("home.feature.projects")}</CardTitle>
-            <CardDescription>{t("home.feature.projectsDesc")}</CardDescription>
-          </CardHeader>
-        </Card>
-
-        <Card className="transition-shadow duration-200 hover:shadow-md lg:w-[calc(33.333%-0.667rem)]">
-          <CardHeader>
-            <Lightbulb className="mb-2 h-6 w-6 text-muted-foreground" aria-hidden="true" />
-            <CardTitle>{t("home.feature.proposals")}</CardTitle>
-            <CardDescription>{t("home.feature.proposalsDesc")}</CardDescription>
-          </CardHeader>
-        </Card>
-
-        <Card className="transition-shadow duration-200 hover:shadow-md lg:w-[calc(33.333%-0.667rem)]">
-          <CardHeader>
-            <BarChart3 className="mb-2 h-6 w-6 text-muted-foreground" aria-hidden="true" />
-            <CardTitle>{t("home.feature.consensus")}</CardTitle>
-            <CardDescription>{t("home.feature.consensusDesc")}</CardDescription>
-          </CardHeader>
-        </Card>
-
-        <Card className="transition-shadow duration-200 hover:shadow-md lg:w-[calc(33.333%-0.667rem)]">
-          <CardHeader>
-            <Users className="mb-2 h-6 w-6 text-muted-foreground" aria-hidden="true" />
-            <CardTitle>{t("home.feature.discussion")}</CardTitle>
-            <CardDescription>{t("home.feature.discussionDesc")}</CardDescription>
-          </CardHeader>
-        </Card>
-
-        <Card className="transition-shadow duration-200 hover:shadow-md lg:w-[calc(33.333%-0.667rem)]">
-          <CardHeader>
-            <LayoutDashboard className="mb-2 h-6 w-6 text-muted-foreground" aria-hidden="true" />
-            <CardTitle>{t("home.feature.dashboardTitle")}</CardTitle>
-            <CardDescription>{t("home.feature.dashboardDesc")}</CardDescription>
-          </CardHeader>
-        </Card>
-      </div>
+      <section className="grid gap-5 border-t pt-8 sm:grid-cols-3" aria-label={t("home.ariaFeatures")}>
+        {[["01", "home.feature.projects", "home.feature.projectsDesc"], ["02", "home.feature.proposals", "home.feature.proposalsDesc"], ["03", "home.feature.consensus", "home.feature.consensusDesc"]].map(([step, title, description]) => (
+          <div key={step}>
+            <span className="text-xs font-medium text-muted-foreground">{step}</span>
+            <h2 className="mt-2 text-base font-semibold">{t(title)}</h2>
+            <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{t(description)}</p>
+          </div>
+        ))}
+      </section>
     </main>
   );
 }

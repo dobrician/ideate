@@ -2,7 +2,6 @@
 
 import { usePathname } from "next/navigation";
 import { Header } from "@/components/header";
-import { useLocale } from "@/lib/use-locale";
 
 const AUTH_PATHS = ["/auth/login", "/auth/register", "/auth/forgot-password", "/auth/reset-password", "/auth/verify-email"];
 
@@ -12,7 +11,6 @@ function isAuthPath(pathname: string): boolean {
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  const { t } = useLocale();
 
   if (isAuthPath(pathname)) {
     return <>{children}</>;
@@ -20,14 +18,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="flex min-h-screen flex-col">
-      <a
-        href="#main-content"
-        className="sr-only focus:not-sr-only focus:fixed focus:left-2 focus:top-2 focus:z-[100] focus:rounded focus:bg-primary focus:px-4 focus:py-2 focus:text-primary-foreground focus:shadow-lg"
-      >
-        {t("a11y.skipToMain")}
-      </a>
       <Header />
-      <main id="main-content" className="min-w-0 flex-1 overflow-x-hidden p-4 lg:p-6">{children}</main>
+      <div className="min-w-0 flex-1 px-4 py-4 pb-24 md:pb-6 lg:px-6">{children}</div>
     </div>
   );
 }

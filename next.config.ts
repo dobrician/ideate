@@ -7,6 +7,7 @@ const withBundleAnalyzer = bundleAnalyzer({
 });
 
 const nextConfig: NextConfig = {
+  devIndicators: false,
   output: "standalone",
   images: {
     formats: ["image/avif", "image/webp"],
@@ -26,7 +27,7 @@ const nextConfig: NextConfig = {
     {
       source: "/_next/static/:path*",
       headers: [
-        { key: "Cache-Control", value: "public, max-age=31536000, immutable" },
+        { key: "Cache-Control", value: process.env.NODE_ENV === "production" ? "public, max-age=31536000, immutable" : "no-store" },
       ],
     },
     {

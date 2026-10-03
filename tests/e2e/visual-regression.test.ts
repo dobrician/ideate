@@ -1,6 +1,7 @@
 import { test, expect, devices } from "@playwright/test";
 
 const MIN_TAP = 44;
+const TEST_ORIGIN = process.env.PLAYWRIGHT_BASE_URL ?? "http://localhost:3000";
 
 // ============================================================
 // Mobile viewport — iPhone 13 (390px)
@@ -203,7 +204,7 @@ test.describe("Visual Regression — Romanian locale", () => {
       {
         name: "locale",
         value: "ro",
-        url: "http://localhost:3000",
+        url: TEST_ORIGIN,
       },
     ]);
     await page.goto("/");
@@ -221,7 +222,7 @@ test.describe("Visual Regression — Romanian locale", () => {
       {
         name: "locale",
         value: "ro",
-        url: "http://localhost:3000",
+        url: TEST_ORIGIN,
       },
     ]);
     await page.goto("/auth/login");
@@ -240,7 +241,7 @@ test.describe("Visual Regression — English locale", () => {
       {
         name: "locale",
         value: "en",
-        url: "http://localhost:3000",
+        url: TEST_ORIGIN,
       },
     ]);
     await page.goto("/auth/login");
@@ -263,7 +264,7 @@ test.describe("Visual Regression — Romanian + Mobile", () => {
       {
         name: "locale",
         value: "ro",
-        url: "http://localhost:3000",
+        url: TEST_ORIGIN,
       },
     ]);
     await page.goto("/auth/login");
@@ -280,7 +281,7 @@ test.describe("Visual Regression — Romanian + Mobile", () => {
       {
         name: "locale",
         value: "ro",
-        url: "http://localhost:3000",
+        url: TEST_ORIGIN,
       },
     ]);
     await page.goto("/auth/register");

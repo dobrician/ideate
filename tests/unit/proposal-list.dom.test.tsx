@@ -1,6 +1,7 @@
 // @vitest-environment jsdom
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom/vitest";
 
 // ── Mocks ──────────────────────────────────────────────────────
@@ -187,5 +188,28 @@ describe("ProposalList", () => {
       <ProposalList proposals={proposals} projectId="proj1" currentUserId="u1" isAdmin={false} />
     );
     expect(container.textContent).toContain("Alice");
+  });
+
+  it("should show the complete AI summary and reveal the original description on demand", async () => {
+    const user = userEvent.setup();
+    render(<ProposalList proposals={[makeProposal({ summary: "A concise decision summary.", description: "Original detailed proposal." })]}
+      projectId="proj1" currentUserId="u1" isAdmin={false} />);
+    expect(screen.getByText("A concise decision summary.")).toBeVisible();
+    expect(screen.queryByText("Original detailed proposal.")).not.toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: /Proposal A/ }));
+    expect(screen.getByText("Original detailed proposal.")).toBeVisible();
+  });
+
+  it("should keep voting and discussion buttons outside the details trigger", () => {
+    const { container } = render(<ProposalList proposals={[makeProposal()]} projectId="proj1" currentUserId="u1" isAdmin={false} />);
+    expect(container.querySelector("button button")).toBeNull();
+    expect(screen.getByRole("button", { name: "Pro (0)" })).toBeVisible();
+    expect(screen.getByRole("button", { name: "Contra (0)" })).toBeVisible();
+  });
+
+  it.each(["newest", "oldest", "comments", "controversy"] as const)("should preserve the server ordering when %s is selected", sort => {
+    const proposals = [makeProposal({ id: "low", title: "First idea", upvotes: 1 }), makeProposal({ id: "high", title: "Second idea", upvotes: 10 })];
+    render(<ProposalList proposals={proposals} projectId="proj1" currentUserId="u1" isAdmin={false} sort={sort} />);
+    expect(screen.getAllByText(/First idea|Second idea/).map(el => el.textContent)).toEqual(["First idea", "Second idea"]);
   });
 });

@@ -76,7 +76,7 @@ export async function GET(request: NextRequest) {
       ipAddress: request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || undefined,
     });
 
-    return NextResponse.redirect(new URL("/dashboard", request.url));
+    return NextResponse.redirect(new URL("/", request.url));
   } catch (err) {
     logger.error({ err }, "OIDC callback failed");
     return loginError("oidc_error");

@@ -15,14 +15,17 @@ interface ProposalListProps {
   isAdmin: boolean;
   /** When set, vote buttons + comment forms redirect unauth users to login pointing here. */
   guestRedirect?: string;
+  sort?: "votes" | "newest" | "oldest" | "comments" | "controversy";
 }
 
+/** Show vote-ranked ideas, preserving the selected server sort when requested. */
 export function ProposalList({
   proposals,
   projectId,
   currentUserId,
   isAdmin,
   guestRedirect,
+  sort = "votes",
 }: ProposalListProps) {
   const { t } = useLocale();
   const voteUpdates = useVoteStream(projectId);
@@ -38,6 +41,7 @@ export function ProposalList({
   }, [proposals, voteUpdates]);
 
   const sorted = useMemo(() => {
+    if (sort !== "votes") return proposals;
     return [...proposals].sort((a, b) => {
       const aLive = voteUpdates.get(a.id);
       const bLive = voteUpdates.get(b.id);
@@ -49,7 +53,7 @@ export function ProposalList({
       const bTime = b.createdAt ? new Date(b.createdAt).getTime() : 0;
       return bTime - aTime;
     });
-  }, [proposals, voteUpdates]);
+  }, [proposals, voteUpdates, sort]);
 
   if (proposals.length === 0) {
     return (

@@ -17,11 +17,13 @@ test.describe("AI Project Summary E2E", () => {
     await page.goto(`/projects/${seed.projectId}`);
     await page.waitForLoadState("domcontentloaded");
 
+    await page.getByRole("button", { name: "More actions", exact: true }).click();
+
     const regenBtn = page.locator("button").filter({ hasText: /Regenerate|Regenerează/i });
     if (await regenBtn.isVisible()) {
       await regenBtn.click();
       // Success toast should appear
-      await expect(page.getByText(/updated|actualizat/i)).toBeVisible({ timeout: 5000 });
+      await expect(page.getByText("Summary updated", { exact: true })).toBeVisible({ timeout: 5000 });
     }
   });
 
@@ -39,6 +41,8 @@ test.describe("AI Project Summary E2E", () => {
 
     await page.goto(`/projects/${seed.projectId}`);
     await page.waitForLoadState("domcontentloaded");
+
+    await page.getByRole("button", { name: "More actions", exact: true }).click();
 
     const regenBtn = page.locator("button").filter({ hasText: /Regenerate|Regenerează/i });
     if (await regenBtn.isVisible()) {
@@ -62,6 +66,8 @@ test.describe("AI Project Summary E2E", () => {
     await page.goto(`/projects/${seed.projectId}`);
     await page.waitForLoadState("domcontentloaded");
 
+    await page.getByRole("button", { name: "More actions", exact: true }).click();
+
     const regenBtn = page.locator("button").filter({ hasText: /Regenerate|Regenerează/i });
     if (await regenBtn.isVisible()) {
       await regenBtn.click();
@@ -83,6 +89,8 @@ test.describe("AI Project Summary E2E", () => {
 
     await page.goto(`/projects/${seed.projectId}`);
     await page.waitForLoadState("domcontentloaded");
+
+    await page.getByRole("button", { name: "More actions", exact: true }).click();
 
     const regenBtn = page.locator("button").filter({ hasText: /Regenerate|Regenerează/i });
     if (await regenBtn.isVisible()) {

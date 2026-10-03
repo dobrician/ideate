@@ -2,7 +2,7 @@
 
 import { usePathname } from "next/navigation";
 import Link from "next/link";
-import { Home, FolderKanban, LayoutDashboard, User, MoreHorizontal } from "lucide-react";
+import { FolderKanban, User } from "lucide-react";
 import { useLocale } from "@/lib/use-locale";
 
 interface NavItem {
@@ -13,9 +13,7 @@ interface NavItem {
 }
 
 const NAV_ITEMS: NavItem[] = [
-  { href: "/", labelKey: "mobile.nav.home", icon: Home, matchPath: "/" },
   { href: "/projects", labelKey: "mobile.nav.projects", icon: FolderKanban, matchPath: "/projects" },
-  { href: "/dashboard", labelKey: "mobile.nav.dashboard", icon: LayoutDashboard, matchPath: "/dashboard" },
   { href: "/profile", labelKey: "mobile.nav.profile", icon: User, matchPath: "/profile" },
 ];
 
@@ -27,6 +25,8 @@ const NAV_ITEMS: NavItem[] = [
 export function MobileNav() {
   const pathname = usePathname();
   const { t } = useLocale();
+
+  if (pathname.startsWith("/auth") || pathname === "/") return null;
 
   return (
     <nav

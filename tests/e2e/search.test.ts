@@ -7,6 +7,7 @@ test.describe("Search — Authenticated", () => {
   test.beforeEach(async ({ page }) => {
     seed = await seedTestData(page.request);
     await loginAsTestUser(page, seed);
+    await page.getByRole("button", { name: "Search projects & proposals...", exact: true }).click();
   });
 
   test("search bar is visible on dashboard", async ({ page }) => {
@@ -39,15 +40,15 @@ test.describe("Search — Authenticated", () => {
   test("mode toggle shows Keyword, Semantic, Smart buttons", async ({ page }) => {
     const radiogroup = page.locator('[role="radiogroup"]');
     await expect(radiogroup).toBeVisible();
-    await expect(page.getByRole("radio", { name: /Keyword/i })).toBeVisible();
-    await expect(page.getByRole("radio", { name: /Semantic/i })).toBeVisible();
-    await expect(page.getByRole("radio", { name: /Smart/i })).toBeVisible();
+    await expect(page.getByRole("radio", { name: /^Keyword/i })).toBeVisible();
+    await expect(page.getByRole("radio", { name: /^Semantic/i })).toBeVisible();
+    await expect(page.getByRole("radio", { name: /^Smart/i })).toBeVisible();
   });
 
   test("mode toggle buttons have title tooltips", async ({ page }) => {
-    const keyword = page.getByRole("radio", { name: /Keyword/i });
+    const keyword = page.getByRole("radio", { name: /^Keyword/i });
     await expect(keyword).toHaveAttribute("title");
-    const semantic = page.getByRole("radio", { name: /Semantic/i });
+    const semantic = page.getByRole("radio", { name: /^Semantic/i });
     await expect(semantic).toHaveAttribute("title");
   });
 

@@ -1,5 +1,28 @@
 # Changelog
 
+## [Unreleased]
+
+### Changed
+
+- Refocused the primary experience on projects, AI summaries and voting: signed-in home now opens projects and SSO returns to the same landing route; dashboard and administration move to the account menu; global search opens on demand, including Ctrl/Cmd+K.
+- Project cards show AI summaries and participation instead of creation dates and category lists. Project and shared-link pages show the decision summary and voting totals before proposals, with context and metadata behind an explicit disclosure.
+- Idea cards keep the complete AI summary visible and put votes outside the details trigger, avoiding nested interactive buttons. Authors, categories, attachments and full descriptions appear on expansion. Vote and discussion targets are at least 44px.
+- Export, editing and AI tools move into project actions; advanced filters and creation options are revealed intentionally. Reduced duplicate mobile navigation and nested main landmarks.
+- Preserved the selected proposal sort instead of always overriding it with net-vote ranking on the client.
+- Split the idea form into drawer, fields and duplicate-review components, each below 300 lines.
+- Disabled the development status badge to keep local demo recordings focused on the application.
+- Development assets use `no-store`, preventing a year-long cache from showing an outdated interface during design review; production keeps immutable asset caching.
+
+### Tests
+
+- Updated assertions that required always-visible exports, dashboard/admin links in primary navigation, author rows and vote gradients behind titles: those requirements were explicitly replaced by the decision-focused design requested on 2026-10-03. Existing functionality, RBAC and duplicate prevention remain under regression tests.
+- Added tests for AI-summary precedence, intentional disclosure, project participation, simplified navigation, independent vote controls, form validation and duplicate review; added browser checks for voting in the initial viewport and the signed-in landing destination.
+- Fixed the existing AI-detail test: the application already displayed details inside the suggestions dialog, while the test expected a separate dialog named after the idea. It now verifies the full content and return to the suggestion list.
+- AI suggestion tests identify the named dialog after opening project actions, rather than assuming the first dialog in the DOM is the suggestion form.
+- Made proposal-creation browser tests deterministic by mocking the similarity response: synthetic E2E titles were classified as duplicates by live or cached AI. Duplicate review retains separate coverage.
+- Locale/theme browser tests now set cookies for the configured test origin; hardcoded localhost cookies were ignored when testing a separate development port.
+- Fixed ambiguous search-test selectors: `/Keyword/i` also matched the description of the Smart option. The tests now match the start of each option name.
+
 ## [1.5.0] — 2026-05-20
 
 ### Sprint 73 — Project membership via share-link visit

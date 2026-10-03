@@ -1,24 +1,16 @@
 import Link from "next/link";
 import { db } from "@/db";
-import { projects, tags, projectTags } from "@/db/schema";
+import { projects, proposals, votes, tags, projectTags } from "@/db/schema";
 import { getCurrentUser } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
+import { ProjectCard } from "@/components/project-card";
 import { Pagination } from "@/components/pagination";
 import { ProjectFilters } from "@/components/project-filters";
-import { FolderOpen, Calendar, Clock } from "lucide-react";
+import { FolderOpen } from "lucide-react";
 import { desc, asc, count, like, eq, and, sql, inArray, type SQL } from "drizzle-orm";
 import { getTranslations } from "@/lib/i18n-server";
-import { statusBadgeClass, statusLabel } from "@/lib/status-utils";
-import { formatDate } from "@/lib/utils";
 
 const PAGE_SIZE = 12;
 
@@ -84,7 +76,7 @@ export default async function ProjectsPage({ searchParams }: ProjectsPageProps) 
     }
   })();
 
-  const [allProjects, totalResult, allTags, allProjectTags] = await Promise.all([
+  const [allProjects, totalResult, allTags] = await Promise.all([
     db
       .select()
       .from(projects)
@@ -94,28 +86,27 @@ export default async function ProjectsPage({ searchParams }: ProjectsPageProps) 
       .offset(offset),
     db.select({ total: count() }).from(projects).where(where),
     db.select({ id: tags.id, name: tags.name }).from(tags).orderBy(asc(tags.name)),
-    db.select({ projectId: projectTags.projectId, tagId: projectTags.tagId, tagName: tags.name })
-      .from(projectTags)
-      .innerJoin(tags, eq(projectTags.tagId, tags.id)),
   ]);
-
-  // Build a map of projectId -> tags
-  const projectTagsMap = new Map<string, { id: string; name: string }[]>();
-  for (const pt of allProjectTags) {
-    const arr = projectTagsMap.get(pt.projectId) || [];
-    arr.push({ id: pt.tagId, name: pt.tagName });
-    projectTagsMap.set(pt.projectId, arr);
-  }
+  const projectIds = allProjects.map(project => project.id);
+  const [proposalCounts, voteCounts] = await Promise.all([
+    db.select({ projectId: proposals.projectId, total: count() }).from(proposals)
+      .where(inArray(proposals.projectId, projectIds)).groupBy(proposals.projectId),
+    db.select({ projectId: proposals.projectId, total: count() }).from(votes)
+      .innerJoin(proposals, eq(votes.proposalId, proposals.id))
+      .where(inArray(proposals.projectId, projectIds)).groupBy(proposals.projectId),
+  ]);
+  const proposalCountsMap = new Map(proposalCounts.map(row => [row.projectId, row.total]));
+  const voteCountsMap = new Map(voteCounts.map(row => [row.projectId, row.total]));
 
   const total = totalResult[0]?.total ?? 0;
   const totalPages = Math.ceil(total / PAGE_SIZE);
   const hasFilters = !!searchQuery || statusFilter !== "all" || tagFilter !== "all";
 
   return (
-    <div className="mx-auto max-w-6xl py-4 sm:py-8">
+    <div className="mx-auto max-w-4xl py-4 sm:py-8">
       <div className="mb-4 flex flex-col gap-3 sm:mb-6 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold sm:text-3xl">{t("projects.title")}</h1>
+          <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">{t("projects.title")}</h1>
           <p className="text-muted-foreground">
             {t("projects.total", { count: total })}
           </p>
@@ -152,58 +143,11 @@ export default async function ProjectsPage({ searchParams }: ProjectsPageProps) 
         </div>
       ) : (
         <>
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {allProjects.map((project) => (
-              <Link key={project.id} href={`/projects/${project.id}`} className="no-underline hover:no-underline">
-                <Card className="h-full min-h-[180px] transition-all duration-200 hover:shadow-lg hover:border-primary/20">
-                  <CardHeader>
-                    <div className="flex items-start justify-between gap-2">
-                      <CardTitle className="line-clamp-2 text-base" title={project.title}>
-                        {project.title}
-                      </CardTitle>
-                      <Badge className={statusBadgeClass(project.status)}>
-                        {statusLabel(project.status, t)}
-                      </Badge>
-                    </div>
-                    {project.description && (
-                      <CardDescription className="line-clamp-3">
-                        {project.description}
-                      </CardDescription>
-                    )}
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-1.5 text-sm text-muted-foreground">
-                      <div className="flex items-center gap-1.5">
-                        <Calendar className="h-3.5 w-3.5" />
-                        <span>
-                          {t("projects.deadline")}:{" "}
-                          {project.deadline
-                            ? formatDate(project.deadline, locale, "short")
-                            : t("projects.deadlineNotSet")}
-                        </span>
-                      </div>
-                      <div className="flex items-center gap-1.5">
-                        <Clock className="h-3.5 w-3.5" />
-                        <span>
-                          {t("projects.created")}:{" "}
-                          {project.createdAt
-                            ? formatDate(project.createdAt, locale, "short")
-                            : t("projects.unknown")}
-                        </span>
-                      </div>
-                    </div>
-                    {(projectTagsMap.get(project.id) ?? []).length > 0 && (
-                      <div className="mt-2 flex flex-wrap gap-1">
-                        {projectTagsMap.get(project.id)!.map((tag) => (
-                          <Badge key={tag.id} variant="outline" className="text-xs">
-                            {tag.name}
-                          </Badge>
-                        ))}
-                      </div>
-                    )}
-                  </CardContent>
-                </Card>
-              </Link>
+          <div className="grid gap-4 sm:grid-cols-2">
+            {allProjects.map(project => (
+              <ProjectCard key={project.id} project={project}
+                proposalCount={proposalCountsMap.get(project.id) ?? 0}
+                voteCount={voteCountsMap.get(project.id) ?? 0} locale={locale} t={t} />
             ))}
           </div>
 

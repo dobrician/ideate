@@ -109,7 +109,8 @@ test.describe("Mobile Viewport", () => {
     const backLink = page.getByRole("link", { name: /back/i }).first();
     await expect(backLink).toBeVisible();
 
-    // Export buttons should still be reachable
+    // Secondary actions are intentionally revealed from the compact header.
+    await page.getByRole("button", { name: "More actions", exact: true }).click();
     const exportBtns = page.getByRole("button", { name: /pdf|csv/i }).first();
     await expect(exportBtns).toBeVisible();
   });

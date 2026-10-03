@@ -66,6 +66,9 @@ export function ProjectFilters({ tags = [] }: ProjectFiltersProps) {
           className="pl-9"
         />
       </div>
+      <details className="relative self-start sm:self-auto">
+        <summary className="flex min-h-10 cursor-pointer items-center rounded-lg px-3 text-sm text-muted-foreground">{t("projects.filters")}</summary>
+        <div className="absolute right-0 top-full z-20 mt-2 flex w-64 max-w-[calc(100vw-2rem)] flex-col gap-2 rounded-xl border bg-popover p-3 shadow-md">
       <select
         value={currentSort}
         onChange={(e) => updateParams({ sort: e.target.value })}
@@ -107,6 +110,8 @@ export function ProjectFilters({ tags = [] }: ProjectFiltersProps) {
           ))}
         </select>
       )}
+        </div>
+      </details>
     </div>
   );
 }

@@ -4,6 +4,12 @@ A platform for teams to create projects, submit proposals, vote (pro/contra), an
 
 🌐 **Staging:** [idea.surmont.co](https://idea.surmont.co)
 
+## Decision workflow
+
+Signed-in users start with projects. Each project card shows its AI summary, proposal count, votes and deadline. Inside a project, the decision summary and participation totals come first, followed by idea cards with their complete AI summaries and pro/contra votes. Open an idea for its original description, author, categories and attachments; open its discussion to read or add arguments.
+
+Context, timestamps, filters, export, editing and AI tools are revealed on request. The account menu provides access to the personal dashboard and administration; global search opens from the search icon or Ctrl/Cmd+K. Project creation starts with a title, context and deadline, with templates, status and categories under **More options**. Shared links use the same compact decision view.
+
 ## Tech Stack
 
 - **Framework:** Next.js 16 (App Router), TypeScript strict
@@ -58,6 +64,12 @@ docker compose build            # Rebuild images
 ```
 
 ## Testing
+
+Install the browser engines used by the desktop, Android and iOS projects before the first E2E run:
+
+```bash
+npx playwright install --with-deps chromium webkit
+```
 
 ```bash
 npm run test          # Vitest unit tests

@@ -1,4 +1,5 @@
 import { test, expect, devices } from "@playwright/test";
+import { seedTestData, loginAsTestUser } from "./helpers";
 
 const MIN_TAP = 44;
 
@@ -60,7 +61,9 @@ test.describe("Mobile — Touch Targets & Overflow (Sprint 28)", () => {
   });
 
   test("mobile nav bar does not overflow viewport", async ({ page }) => {
-    await page.goto("/");
+    const seed = await seedTestData(page.request);
+    await loginAsTestUser(page, seed);
+    await page.goto("/projects");
     const nav = page.getByLabel("Mobile navigation");
     await expect(nav).toBeVisible();
     const navBox = await nav.boundingBox();

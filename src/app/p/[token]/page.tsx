@@ -1,30 +1,19 @@
 import { notFound, redirect } from "next/navigation";
 import type { Metadata } from "next";
 import { db } from "@/db";
-import { comments, projects, users, tags, projectTags } from "@/db/schema";
+import { comments, projects, proposals, votes, users, tags, projectTags } from "@/db/schema";
 import { getCurrentUser } from "@/lib/auth";
 import { joinProjectAsMember } from "@/lib/project-members";
-import { eq, asc } from "drizzle-orm";
-import { Badge } from "@/components/ui/badge";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { eq, asc, count, countDistinct } from "drizzle-orm";
+import { ProjectOverview } from "@/components/project-overview";
 import Link from "next/link";
 import { ProposalList } from "@/components/proposal-list";
-import { DeadlineCountdown } from "@/components/deadline-countdown";
 import { getProjectProposals, PROPOSALS_PAGE_SIZE, isValidSort } from "../../projects/[id]/queries";
 import type { ProposalSort } from "../../projects/[id]/queries";
 import { ProposalSortSelector } from "@/components/proposal-sort-selector";
 import { Pagination } from "@/components/pagination";
 import { ProjectComments } from "@/components/project-comments";
 import { getTranslations } from "@/lib/i18n-server";
-import { statusBadgeClass, statusLabel } from "@/lib/status-utils";
-import { formatDate } from "@/lib/utils";
-import { MarkdownRenderer } from "@/components/markdown-renderer";
 import { ArchiveBanner } from "@/components/archive-banner";
 import { ClientOnly } from "@/components/client-only";
 import { Button } from "@/components/ui/button";
@@ -116,7 +105,7 @@ export default async function SharedProjectPage({ params, searchParams }: Shared
   const proposalSort: ProposalSort = isValidSort(sp.sort || "") ? (sp.sort as ProposalSort) : "votes";
   const proposalOffset = (proposalPage - 1) * PROPOSALS_PAGE_SIZE;
 
-  const [{ proposals: proposalsWithStats, total: proposalTotal }, commentRows, projectTagRows, allTagRows] =
+  const [{ proposals: proposalsWithStats, total: proposalTotal }, commentRows, projectTagRows, allTagRows, votingStats] =
     await Promise.all([
       getProjectProposals(projectData.id, null, PROPOSALS_PAGE_SIZE, proposalOffset, proposalSort),
       db
@@ -136,6 +125,8 @@ export default async function SharedProjectPage({ params, searchParams }: Shared
         .orderBy(comments.createdAt),
       db.select({ tagId: projectTags.tagId }).from(projectTags).where(eq(projectTags.projectId, projectData.id)),
       db.select({ id: tags.id, name: tags.name }).from(tags).orderBy(asc(tags.name)),
+      db.select({ votes: count(), voters: countDistinct(votes.userId) }).from(votes)
+        .innerJoin(proposals, eq(votes.proposalId, proposals.id)).where(eq(proposals.projectId, projectData.id)),
     ]);
 
   const projectComments = commentRows.map((r) => ({
@@ -168,67 +159,9 @@ export default async function SharedProjectPage({ params, searchParams }: Shared
 
       {isArchived && <ArchiveBanner projectId={projectData.id} isAdmin={false} />}
 
-      <Card>
-        <CardHeader>
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-            <div className="min-w-0 flex-1">
-              <CardTitle className="break-words text-2xl sm:text-3xl">
-                {projectData.title}
-              </CardTitle>
-              <CardDescription className="mt-2 flex flex-wrap items-center gap-2 sm:gap-4">
-                <Badge className={statusBadgeClass(projectData.status)}>
-                  {statusLabel(projectData.status, t)}
-                </Badge>
-                {projectData.deadline && (
-                  <DeadlineCountdown deadline={projectData.deadline} />
-                )}
-                {currentTagNames.map((tag) => (
-                  <Badge key={tag.id} variant="secondary">{tag.name}</Badge>
-                ))}
-              </CardDescription>
-            </div>
-          </div>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          {projectData.summary && (
-            <div className="rounded-md bg-muted/50 p-3">
-              <p className="text-sm italic text-muted-foreground">
-                {projectData.summary}
-              </p>
-            </div>
-          )}
-
-          {projectData.description && (
-            <div>
-              <h2 className="mb-2 text-lg font-semibold">{t("projects.description")}</h2>
-              <MarkdownRenderer content={projectData.description} className="text-muted-foreground" />
-            </div>
-          )}
-
-          <div className="grid gap-4 sm:grid-cols-2">
-            <div>
-              <h3 className="mb-1 text-sm font-medium text-muted-foreground">
-                {t("projects.created")}
-              </h3>
-              <p>
-                {projectData.createdAt
-                  ? formatDate(projectData.createdAt, locale)
-                  : t("projects.unknown")}
-              </p>
-            </div>
-            <div>
-              <h3 className="mb-1 text-sm font-medium text-muted-foreground">
-                {t("projects.lastUpdated")}
-              </h3>
-              <p>
-                {projectData.updatedAt
-                  ? formatDate(projectData.updatedAt, locale)
-                  : t("projects.never")}
-              </p>
-            </div>
-          </div>
-
-          <div className="border-t pt-6">
+      <ProjectOverview project={projectData} stats={votingStats[0] ?? { votes: 0, voters: 0 }}
+        tags={currentTagNames} locale={locale} t={t} tools={null} />
+          <div className="mt-6">
             <div className="mb-4 flex flex-wrap items-center gap-2">
               <h2 className="text-lg font-semibold">
                 {t("proposals.count", { count: proposalTotal })}
@@ -248,6 +181,7 @@ export default async function SharedProjectPage({ params, searchParams }: Shared
                 currentUserId=""
                 isAdmin={false}
                 guestRedirect={guestRedirect}
+                sort={proposalSort}
               />
             </ClientOnly>
             {proposalTotalPages > 1 && (
@@ -265,8 +199,6 @@ export default async function SharedProjectPage({ params, searchParams }: Shared
               guestRedirect={guestRedirect}
             />
           </ClientOnly>
-        </CardContent>
-      </Card>
     </div>
   );
 }

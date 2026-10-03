@@ -275,10 +275,12 @@ describe("statusLabel edge cases", () => {
 
 describe("Vote bar gradient opacity (#58)", () => {
   // Vote bars use inline rgba styles with low opacity for subtle gradients
-  it("vote bar uses low-opacity inline styles (verified via source)", async () => {
+  it("vote bar is a thin separate indicator that leaves the summary readable", async () => {
     const fs = await import("fs");
     const src = fs.readFileSync("src/components/proposal-item.tsx", "utf-8");
-    expect(src).toContain("rgba(120, 149, 100, 0.18)");
+    expect(src).toContain("h-1 overflow-hidden rounded-full");
+    expect(src).toContain("bg-emerald-500/70");
+    expect(src).toContain("bg-rose-400/70");
     expect(src).not.toContain("from-green-500/15");
     expect(src).not.toContain("from-red-500/15");
   });
@@ -296,11 +298,12 @@ describe("Proposal title overflow classes (#52)", () => {
     expect(src).toContain("line-clamp-2");
   });
 
-  it("author span has truncate", async () => {
+  it("author is secondary information in expanded details", async () => {
     const fs = await import("fs");
     const src = fs.readFileSync("src/components/proposal-item.tsx", "utf-8");
-    // The author line has class="block truncate ..."
-    expect(src).toMatch(/block\s+truncate/);
+    // Authorship is available to assistive technology and on expansion.
+    expect(src).toContain('className="sr-only"');
+    expect(src).toContain("proposals.by");
   });
 });
 
@@ -308,22 +311,13 @@ describe("Proposal title overflow classes (#52)", () => {
 // #69 — Details link styling (unit-level)
 // ============================================================
 
-describe("Details link prominence (#69)", () => {
-  it("uses text-xs font-medium text-primary instead of muted", async () => {
+describe("Intentional proposal disclosure", () => {
+  it("should expose the summary through an accordion trigger", async () => {
     const fs = await import("fs");
     const src = fs.readFileSync("src/components/proposal-item.tsx", "utf-8");
-    expect(src).toContain("text-primary/80");
-    expect(src).toContain("hover:text-primary");
-    expect(src).toContain("font-medium");
-    // The span element wrapping the Details text should have font-medium text-primary
-    const lines = src.split("\n");
-    const detailsIdx = lines.findIndex((l: string) => l.includes("proposals.details"));
-    expect(detailsIdx).toBeGreaterThan(0);
-    // The parent <span> element is on the line above
-    const spanLine = lines[detailsIdx - 1];
-    expect(spanLine).toContain("font-medium");
-    expect(spanLine).toContain("text-primary/80");
-    expect(spanLine).not.toContain("text-muted-foreground/50");
+    expect(src).toContain("AccordionTrigger");
+    expect(src).toContain("proposal.summary || proposal.description");
+    expect(src).not.toContain('t("proposals.details")');
   });
 });
 
@@ -494,13 +488,13 @@ describe("Comment section spacing (#66)", () => {
 describe("Romanian translation overflow (#67)", () => {
   it("proposal form description area has flex-wrap", async () => {
     const fs = await import("fs");
-    const src = fs.readFileSync("src/components/proposal-form.tsx", "utf-8");
+    const src = fs.readFileSync("src/components/proposal-form-fields.tsx", "utf-8");
     expect(src).toContain("flex flex-wrap");
   });
 
   it("Write/Preview buttons have shrink-0", async () => {
     const fs = await import("fs");
-    const src = fs.readFileSync("src/components/proposal-form.tsx", "utf-8");
+    const src = fs.readFileSync("src/components/proposal-form-fields.tsx", "utf-8");
     // Each button should have shrink-0
     const shrinkMatches = src.match(/shrink-0.*?items-center.*?gap-1.*?rounded/g);
     expect(shrinkMatches).toBeTruthy();
@@ -509,7 +503,7 @@ describe("Romanian translation overflow (#67)", () => {
 
   it("markdown hint has break-words", async () => {
     const fs = await import("fs");
-    const src = fs.readFileSync("src/components/proposal-form.tsx", "utf-8");
+    const src = fs.readFileSync("src/components/proposal-form-fields.tsx", "utf-8");
     expect(src).toContain("break-words text-xs text-muted-foreground");
   });
 });

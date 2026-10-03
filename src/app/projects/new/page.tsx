@@ -128,7 +128,7 @@ export default function NewProjectPage() {
   }
 
   return (
-    <div className="mx-auto max-w-2xl py-4 sm:py-8">
+    <div className="mx-auto max-w-xl py-4 sm:py-8">
       <Card className="dark:border-white/10">
         <CardHeader>
           <CardTitle>{t("projectForm.createTitle")}</CardTitle>
@@ -139,25 +139,6 @@ export default function NewProjectPage() {
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-6" noValidate>
             <input type="hidden" name="csrfToken" value={getCsrfTokenClient()} />
-
-            {templates.length > 0 && (
-              <div className="space-y-2">
-                <Label htmlFor="template">{t("templates.fromTemplate")}</Label>
-                <select
-                  id="template"
-                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-base text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring md:text-sm"
-                  defaultValue=""
-                  onChange={(e) => {
-                    if (e.target.value) applyTemplate(e.target.value);
-                  }}
-                >
-                  <option value="">{t("templates.selectTemplate")}</option>
-                  {templates.map((tpl) => (
-                    <option key={tpl.id} value={tpl.id}>{tpl.name}</option>
-                  ))}
-                </select>
-              </div>
-            )}
 
             <div className="space-y-2">
               <Label htmlFor="title">{t("projectForm.titleRequired")}</Label>
@@ -187,7 +168,7 @@ export default function NewProjectPage() {
                 id="description"
                 name="description"
                 placeholder={t("projectForm.descriptionPlaceholder")}
-                rows={6}
+                rows={4}
                 maxLength={5000}
                 disabled={isLoading}
               />
@@ -216,6 +197,28 @@ export default function NewProjectPage() {
                 </p>
               )}
             </div>
+
+            <details className="rounded-lg border p-3">
+              <summary className="cursor-pointer text-sm text-muted-foreground">{t("projects.options")}</summary>
+              <div className="mt-4 space-y-4">
+            {templates.length > 0 && (
+              <div className="space-y-2">
+                <Label htmlFor="template">{t("templates.fromTemplate")}</Label>
+                <select
+                  id="template"
+                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-base text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring md:text-sm"
+                  defaultValue=""
+                  onChange={(e) => {
+                    if (e.target.value) applyTemplate(e.target.value);
+                  }}
+                >
+                  <option value="">{t("templates.selectTemplate")}</option>
+                  {templates.map((tpl) => (
+                    <option key={tpl.id} value={tpl.id}>{tpl.name}</option>
+                  ))}
+                </select>
+              </div>
+            )}
 
             <div className="space-y-2">
               <Label htmlFor="status">{t("projectForm.status")}</Label>
@@ -249,6 +252,9 @@ export default function NewProjectPage() {
                 />
               </div>
             )}
+
+              </div>
+            </details>
 
             {error && (
               <div className="rounded-md bg-red-50 p-3 dark:bg-red-950" role="alert">

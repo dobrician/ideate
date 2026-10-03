@@ -2,6 +2,22 @@
 
 Reverse chronological. Click each sprint for full details.
 
+### In progress — Decision-focused Ideate (2026-10-03)
+
+**Goal:** simplify the primary experience around projects, AI summaries and votes, applying the clear action hierarchy of KeySlip. Backlog: [#71](https://github.com/dobrician/ideate/issues/71).
+
+- [x] Make projects the signed-in landing destination and simplify navigation.
+- [x] Put complete AI summaries and voting controls at the center of project and idea cards.
+- [x] Reuse the compact decision layout for shared links.
+- [x] Reveal metadata, export, editing, advanced filters and creation options on request.
+- [x] Preserve voting, discussions, RBAC and duplicate review; respect the selected proposal sort.
+- [x] Complete desktop/mobile regression verification.
+- [ ] Deploy staging and pass post-deployment smoke tests.
+
+**Verification:** 2,836 unit tests across 203 files pass, with TypeScript and ESLint checks clean. The first full browser run passed 568 of 606 checks; 38 failures exposed outdated selectors, test-origin cookies, an obsolete AI-detail expectation and one cold-compilation timeout. Corrected cases passed on rerun (35 checks, followed by 21 final checks covering the remaining three, shared-link guests and locale layouts). Together these verify all 609 current browser cases across Chromium, Android and WebKit. Desktop/mobile layouts were also reviewed visually in light and dark themes.
+
+**Outcome so far:** a reviewable implementation is running on the development instance. Existing data and authentication are preserved; the demo project has realistic fictional participants, ideas, votes and threaded discussions. Staging promotion remains pending verification.
+
 ---
 
 ### [Sprint 70](Sprint-70.md) — 2026-03-05

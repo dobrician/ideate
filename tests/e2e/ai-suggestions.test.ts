@@ -35,36 +35,30 @@ test.describe("AI Suggestions E2E", () => {
         body: JSON.stringify({ proposals: MOCK_SUGGESTIONS }),
       });
     });
-
     await page.goto(`/projects/${seed.projectId}`);
     await page.waitForLoadState("domcontentloaded");
 
+    await page.getByRole("button", { name: "More actions", exact: true }).click();
     const suggestBtn = page.locator("button").filter({ hasText: /Suggest|Sugestii/i });
     await expect(suggestBtn).toBeVisible();
     await suggestBtn.click();
-
     // Dialog should open with suggestions
-    const dialog = page.locator("[role='dialog']").first();
+    const dialog = page.getByRole("dialog", { name: "AI Suggestions", exact: true });
     await expect(dialog).toBeVisible({ timeout: 10000 });
-
     // Wait for suggestions to load (mocked, should be instant)
     await expect(dialog.getByText("Implement Dark Mode")).toBeVisible({ timeout: 5000 });
     await expect(dialog.getByText("Add Export to PDF")).toBeVisible();
     await expect(dialog.getByText("Real-time Notifications")).toBeVisible();
-
     // Thumbs up first suggestion
     const thumbsUpButtons = dialog.locator("button").filter({ has: page.locator("svg.lucide-thumbs-up") });
     await thumbsUpButtons.first().click();
-
     // Thumbs down second suggestion
     const thumbsDownButtons = dialog.locator("button").filter({ has: page.locator("svg.lucide-thumbs-down") });
     await thumbsDownButtons.nth(1).click();
-
     // Submit button should show count of voted suggestions
     const submitBtn = dialog.locator("button").filter({ hasText: /Add|Adaugă/i }).last();
     await expect(submitBtn).toBeEnabled();
     await expect(submitBtn).toContainText("2");
-
     // Mock the submit endpoint
     await page.route("**/api/proposals/submit-suggested", async (route) => {
       await route.fulfill({
@@ -75,7 +69,6 @@ test.describe("AI Suggestions E2E", () => {
     });
 
     await submitBtn.click();
-
     // Dialog should close after submission
     await expect(dialog).not.toBeVisible({ timeout: 10000 });
   });
@@ -83,7 +76,6 @@ test.describe("AI Suggestions E2E", () => {
   test("shows loading state while generating", async ({ page }) => {
     const seed = await seedTestData(page.request);
     await loginAsTestUser(page, seed);
-
     // Add a delay to the mock to test loading state
     await page.route("**/api/proposals/suggest", async (route) => {
       await new Promise((r) => setTimeout(r, 500));
@@ -93,14 +85,14 @@ test.describe("AI Suggestions E2E", () => {
         body: JSON.stringify({ proposals: MOCK_SUGGESTIONS }),
       });
     });
-
     await page.goto(`/projects/${seed.projectId}`);
     await page.waitForLoadState("domcontentloaded");
 
+    await page.getByRole("button", { name: "More actions", exact: true }).click();
     const suggestBtn = page.locator("button").filter({ hasText: /Suggest|Sugestii/i });
     await suggestBtn.click();
 
-    const dialog = page.locator("[role='dialog']").first();
+    const dialog = page.getByRole("dialog", { name: "AI Suggestions", exact: true });
     // Loading spinner should appear
     await expect(dialog.locator(".animate-spin")).toBeVisible();
     // Then suggestions should load
@@ -118,29 +110,27 @@ test.describe("AI Suggestions E2E", () => {
         body: JSON.stringify({ error: "LLM service unavailable" }),
       });
     });
-
     await page.goto(`/projects/${seed.projectId}`);
     await page.waitForLoadState("domcontentloaded");
 
+    await page.getByRole("button", { name: "More actions", exact: true }).click();
     const suggestBtn = page.locator("button").filter({ hasText: /Suggest|Sugestii/i });
     await expect(suggestBtn).toBeVisible({ timeout: 10000 });
-
     // Wait for the request to be intercepted after clicking
     const [response] = await Promise.all([
       page.waitForResponse("**/api/proposals/suggest"),
       suggestBtn.click(),
     ]);
     expect(response.status()).toBe(500);
-
     // After error, dialog should show with close button
-    const dialog = page.locator("[role='dialog']").first();
+    const dialog = page.getByRole("dialog", { name: "AI Suggestions", exact: true });
     await expect(dialog).toBeVisible({ timeout: 10000 });
     await expect(
       dialog.locator("button").filter({ hasText: /Close|Închide/i }).first()
     ).toBeVisible({ timeout: 10000 });
   });
 
-  test("view details opens detail dialog", async ({ page }) => {
+  test("view details shows the full idea in the suggestions dialog", async ({ page }) => {
     const seed = await seedTestData(page.request);
     await loginAsTestUser(page, seed);
 
@@ -151,25 +141,23 @@ test.describe("AI Suggestions E2E", () => {
         body: JSON.stringify({ proposals: MOCK_SUGGESTIONS }),
       });
     });
-
     await page.goto(`/projects/${seed.projectId}`);
     await page.waitForLoadState("domcontentloaded");
 
+    await page.getByRole("button", { name: "More actions", exact: true }).click();
     const suggestBtn = page.locator("button").filter({ hasText: /Suggest|Sugestii/i });
     await expect(suggestBtn).toBeVisible({ timeout: 10000 });
     await suggestBtn.click();
 
-    const dialog = page.locator("[role='dialog']").first();
+    const dialog = page.getByRole("dialog", { name: "AI Suggestions", exact: true });
     await expect(dialog.getByText("Implement Dark Mode")).toBeVisible({ timeout: 5000 });
-
     // Click "View details" on first suggestion
     const detailBtn = dialog.locator("button").filter({ hasText: /View|Detalii/i }).first();
     await detailBtn.click();
-
-    // Detail dialog should show the full details content (use aria-label for specificity)
-    const detailDialog = page.getByRole("dialog", { name: "Implement Dark Mode" });
-    await expect(detailDialog).toBeVisible({ timeout: 5000 });
-    await expect(detailDialog.getByText(/Add theme context/)).toBeVisible();
+    await expect(dialog.getByRole("heading", { name: "Implement Dark Mode", exact: true })).toBeVisible();
+    await expect(dialog.getByText(/Add theme context/)).toBeVisible();
+    await dialog.getByRole("button", { name: "Go Back", exact: true }).click();
+    await expect(dialog.getByText("Add Export to PDF")).toBeVisible();
   });
 
   test("shows rate limited message when API returns RATE_LIMITED", async ({ page }) => {
@@ -183,14 +171,14 @@ test.describe("AI Suggestions E2E", () => {
         body: JSON.stringify({ proposals: [], code: "RATE_LIMITED" }),
       });
     });
-
     await page.goto(`/projects/${seed.projectId}`);
     await page.waitForLoadState("domcontentloaded");
 
+    await page.getByRole("button", { name: "More actions", exact: true }).click();
     const suggestBtn = page.locator("button").filter({ hasText: /Suggest|Sugestii/i });
     await suggestBtn.click();
 
-    const dialog = page.locator("[role='dialog']").first();
+    const dialog = page.getByRole("dialog", { name: "AI Suggestions", exact: true });
     await expect(dialog).toBeVisible({ timeout: 10000 });
     await expect(dialog.getByText(/rate limit|limită/i)).toBeVisible({ timeout: 5000 });
   });
@@ -206,14 +194,14 @@ test.describe("AI Suggestions E2E", () => {
         body: JSON.stringify({ proposals: [], code: "NO_KEYS" }),
       });
     });
-
     await page.goto(`/projects/${seed.projectId}`);
     await page.waitForLoadState("domcontentloaded");
 
+    await page.getByRole("button", { name: "More actions", exact: true }).click();
     const suggestBtn = page.locator("button").filter({ hasText: /Suggest|Sugestii/i });
     await suggestBtn.click();
 
-    const dialog = page.locator("[role='dialog']").first();
+    const dialog = page.getByRole("dialog", { name: "AI Suggestions", exact: true });
     await expect(dialog).toBeVisible({ timeout: 10000 });
     await expect(dialog.getByText(/not configured|configurat/i)).toBeVisible({ timeout: 5000 });
   });
@@ -229,14 +217,14 @@ test.describe("AI Suggestions E2E", () => {
         body: JSON.stringify({ proposals: [], code: "AI_UNAVAILABLE" }),
       });
     });
-
     await page.goto(`/projects/${seed.projectId}`);
     await page.waitForLoadState("domcontentloaded");
 
+    await page.getByRole("button", { name: "More actions", exact: true }).click();
     const suggestBtn = page.locator("button").filter({ hasText: /Suggest|Sugestii/i });
     await suggestBtn.click();
 
-    const dialog = page.locator("[role='dialog']").first();
+    const dialog = page.getByRole("dialog", { name: "AI Suggestions", exact: true });
     await expect(dialog).toBeVisible({ timeout: 10000 });
     await expect(dialog.getByText(/unavailable|indisponibil/i)).toBeVisible({ timeout: 5000 });
   });
@@ -252,14 +240,14 @@ test.describe("AI Suggestions E2E", () => {
         body: JSON.stringify({ proposals: [] }),
       });
     });
-
     await page.goto(`/projects/${seed.projectId}`);
     await page.waitForLoadState("domcontentloaded");
 
+    await page.getByRole("button", { name: "More actions", exact: true }).click();
     const suggestBtn = page.locator("button").filter({ hasText: /Suggest|Sugestii/i });
     await suggestBtn.click();
 
-    const dialog = page.locator("[role='dialog']").first();
+    const dialog = page.getByRole("dialog", { name: "AI Suggestions", exact: true });
     await expect(dialog).toBeVisible({ timeout: 10000 });
     // Should show "no suggestions" or close button
     await expect(
@@ -278,23 +266,21 @@ test.describe("AI Suggestions E2E", () => {
         body: JSON.stringify({ proposals: [MOCK_SUGGESTIONS[0]] }),
       });
     });
-
     await page.goto(`/projects/${seed.projectId}`);
     await page.waitForLoadState("domcontentloaded");
 
+    await page.getByRole("button", { name: "More actions", exact: true }).click();
     const suggestBtn = page.locator("button").filter({ hasText: /Suggest|Sugestii/i });
     await suggestBtn.click();
 
-    const dialog = page.locator("[role='dialog']").first();
+    const dialog = page.getByRole("dialog", { name: "AI Suggestions", exact: true });
     await expect(dialog.getByText("Implement Dark Mode")).toBeVisible({ timeout: 5000 });
 
     const thumbsUp = dialog.locator("button").filter({ has: page.locator("svg.lucide-thumbs-up") }).first();
-
     // Vote thumbs up
     await thumbsUp.click();
     const submitBtn = dialog.locator("button").filter({ hasText: /Add|Adaugă/i }).last();
     await expect(submitBtn).toContainText("1");
-
     // Click again to remove vote
     await thumbsUp.click();
     // Submit button should now be disabled (0 votes)

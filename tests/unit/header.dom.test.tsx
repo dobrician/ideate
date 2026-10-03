@@ -71,7 +71,7 @@ describe("Header", () => {
   });
 
   describe("desktop nav links", () => {
-    it("renders Dashboard and Projects links", async () => {
+    it("keeps Projects as the sole primary destination", async () => {
       mockFetchResponse(null, false);
       await renderHeader();
 
@@ -80,7 +80,7 @@ describe("Header", () => {
 
       const dashLink = mainNav.querySelector('a[href="/dashboard"]');
       const projLink = mainNav.querySelector('a[href="/projects"]');
-      expect(dashLink).toHaveTextContent("Dashboard");
+      expect(dashLink).toBeNull();
       expect(projLink).toHaveTextContent("Projects");
     });
 
@@ -93,7 +93,7 @@ describe("Header", () => {
       const projLink = mainNav.querySelector('a[href="/projects"]');
       const dashLink = mainNav.querySelector('a[href="/dashboard"]');
       expect(projLink).toHaveAttribute("aria-current", "page");
-      expect(dashLink).not.toHaveAttribute("aria-current");
+      expect(dashLink).toBeNull();
     });
 
     it("shows Ideate logo image + text linking to /", async () => {
@@ -107,50 +107,22 @@ describe("Header", () => {
     });
   });
 
-  describe("mobile nav", () => {
-    it("renders mobile navigation with same links", async () => {
-      mockFetchResponse(null, false);
-      await renderHeader();
-
-      const mobileNav = screen.getByRole("navigation", { name: "Mobile page links" });
-      expect(mobileNav).toBeInTheDocument();
-
-      const dashLink = mobileNav.querySelector('a[href="/dashboard"]');
-      const projLink = mobileNav.querySelector('a[href="/projects"]');
-      expect(dashLink).toHaveTextContent("Dashboard");
-      expect(projLink).toHaveTextContent("Projects");
-    });
-
-    it("marks active link in mobile nav", async () => {
-      mockPathname = "/dashboard";
-      mockFetchResponse(null, false);
-      await renderHeader();
-
-      const mobileNav = screen.getByRole("navigation", { name: "Mobile page links" });
-      const dashLink = mobileNav.querySelector('a[href="/dashboard"]');
-      expect(dashLink).toHaveAttribute("aria-current", "page");
-    });
+  it("should avoid duplicating the mobile bottom navigation in the header", async () => {
+    mockFetchResponse(null, false);
+    await renderHeader();
+    expect(screen.queryByRole("navigation", { name: "Mobile page links" })).not.toBeInTheDocument();
   });
 
   describe("admin link", () => {
-    it("shows admin link in nav for admin users", async () => {
+    it("should keep dashboard and admin accessible through the account menu", async () => {
       mockFetchResponse({ role: "admin" });
       await renderHeader();
-
-      await waitFor(() => {
-        const mainNav = screen.getByRole("navigation", { name: "Main navigation" });
-        expect(mainNav.querySelector('a[href="/admin"]')).toBeInTheDocument();
-      });
-    });
-
-    it("shows admin link in mobile nav for admin users", async () => {
-      mockFetchResponse({ role: "admin" });
-      await renderHeader();
-
-      await waitFor(() => {
-        const mobileNav = screen.getByRole("navigation", { name: "Mobile page links" });
-        expect(mobileNav.querySelector('a[href="/admin"]')).toBeInTheDocument();
-      });
+      await waitFor(() => expect(global.fetch).toHaveBeenCalled());
+      const mainNav = screen.getByRole("navigation", { name: "Main navigation" });
+      expect(mainNav.querySelector('a[href="/admin"]')).toBeNull();
+      await userEvent.click(screen.getByTitle("Profile"));
+      expect(await screen.findByRole("menuitem", { name: "Admin" })).toBeVisible();
+      expect(screen.getByRole("menuitem", { name: "Dashboard" })).toBeVisible();
     });
 
     it("does NOT show admin link for regular users", async () => {

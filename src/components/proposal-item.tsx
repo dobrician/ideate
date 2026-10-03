@@ -18,12 +18,6 @@ import {
 } from "@/components/ui/dialog";
 import { VoteButtons } from "@/components/vote-buttons";
 import { DiscussionSheet } from "@/components/discussion-sheet";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 import { deleteProposal } from "@/app/projects/[id]/proposals/actions";
 import { Badge } from "@/components/ui/badge";
 import { Trash2, Paperclip } from "lucide-react";
@@ -67,6 +61,7 @@ export interface ProposalWithStats {
   workflowState?: ProposalWorkflowInfo | null;
 }
 
+/** Render a readable idea summary and independent voting controls. */
 export function ProposalItem({
   proposal,
   projectId,
@@ -87,7 +82,7 @@ export function ProposalItem({
   guestRedirect?: string;
 }) {
   const { t, locale } = useLocale();
-  const [showFull, setShowFull] = useState(false);
+  const [showFull, setShowFull] = useState(true);
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const canDelete = proposal.userId === currentUserId || isAdmin;
@@ -122,105 +117,43 @@ export function ProposalItem({
       value={proposal.id}
       className="overflow-hidden rounded-lg border bg-card transition-shadow duration-200 data-[state=open]:shadow-md"
     >
-      <AccordionTrigger className="py-3 hover:no-underline">
-        <div className="flex min-w-0 flex-1 flex-col gap-1 px-2 sm:px-4 sm:pr-2">
-          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-            <div className="relative min-w-0 flex-1 overflow-hidden rounded text-left">
-              {totalVotes > 0 && (
-                <div className="pointer-events-none absolute inset-0" aria-hidden="true">
-                  {greenWidth > 0 && (
-                    <div
-                      className="absolute left-0 top-0 h-full transition-all duration-300"
-                      style={{ width: `${greenWidth}%`, backgroundColor: "rgba(120, 149, 100, 0.18)" }}
-                    />
-                  )}
-                  {redWidth > 0 && (
-                    <div
-                      className="absolute right-0 top-0 h-full transition-all duration-300"
-                      style={{ width: `${redWidth}%`, backgroundColor: "rgba(180, 110, 85, 0.18)" }}
-                    />
-                  )}
-                </div>
-              )}
-              <div className="relative z-10 px-2 py-1">
-                <span className="line-clamp-2 break-words font-medium" title={proposal.title}>{proposal.title}</span>
-                <span className="block truncate text-xs text-muted-foreground" title={`${t("proposals.by")} ${proposal.authorName}`}>
-                  {t("proposals.by")} {proposal.authorName}
-                </span>
-              </div>
-            </div>
-          <div
-            className="flex shrink-0 items-center gap-2"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <div title={t("vote.approvalRatio")}>
-                    <VoteButtons
-                      proposalId={proposal.id}
-                      projectId={projectId}
-                      upvotes={upvotes}
-                      downvotes={downvotes}
-                      userVote={proposal.userVote}
-                      guestRedirect={guestRedirect}
-                    />
-                  </div>
-                </TooltipTrigger>
-                <TooltipContent side="bottom">{t("vote.approvalRatio")}</TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-            <DiscussionSheet
-              proposalId={proposal.id}
-              projectId={projectId}
-              proposalTitle={proposal.title}
-              comments={proposal.comments}
-              commentCount={proposal.commentCount}
-              currentUserId={currentUserId}
-            />
+      <div className="p-4">
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-5">
+          <div className="min-w-0 flex-1">
+            <AccordionTrigger className="items-center gap-3 py-0 hover:no-underline">
+              <span className="block min-w-0 break-words text-sm font-semibold leading-snug" title={proposal.title}>{proposal.title}</span>
+              <span className="sr-only">{t("proposals.by")} {proposal.authorName}</span>
+            </AccordionTrigger>
           </div>
+          <div className="flex shrink-0 items-center justify-end gap-1">
+            <VoteButtons proposalId={proposal.id} projectId={projectId}
+              upvotes={upvotes} downvotes={downvotes} userVote={proposal.userVote}
+              guestRedirect={guestRedirect} />
+            <DiscussionSheet proposalId={proposal.id} projectId={projectId}
+              proposalTitle={proposal.title} comments={proposal.comments}
+              commentCount={proposal.commentCount} currentUserId={currentUserId} />
           </div>
-          {(proposal.description || proposal.summary) && (
-            <p className="min-w-0 truncate text-left text-xs text-muted-foreground/70">
-              {proposal.summary || proposal.description}
-            </p>
-          )}
-          {proposal.attachments.length > 0 && (
-            <span className="inline-flex items-center gap-1 text-left text-[11px] text-muted-foreground/60">
-              <Paperclip className="h-3 w-3" />
-              {proposal.attachments.length}
-            </span>
-          )}
-          {(proposal.tags.length > 0 || proposal.workflowState) && (
-            <div className="flex flex-wrap gap-1 text-left">
-              {proposal.workflowState && (
-                <Badge
-                  variant="outline"
-                  className={`px-1.5 py-0 text-[10px] ${
-                    proposal.workflowState.status === "completed"
-                      ? "border-green-300 text-green-700 dark:border-green-700 dark:text-green-400"
-                      : proposal.workflowState.status === "rejected"
-                        ? "border-red-300 text-red-700 dark:border-red-700 dark:text-red-400"
-                        : "border-blue-300 text-blue-700 dark:border-blue-700 dark:text-blue-400"
-                  }`}
-                >
-                  {proposal.workflowState.currentStageName} ({proposal.workflowState.stageIndex + 1}/{proposal.workflowState.totalStages})
-                </Badge>
-              )}
-              {proposal.tags.map((tag) => (
-                <Badge key={tag.id} variant="secondary" className="px-1.5 py-0 text-[10px]">
-                  {tag.name}
-                </Badge>
-              ))}
-            </div>
-          )}
-          <span className="inline-flex items-center gap-1 text-left text-xs font-medium text-primary/80 hover:text-primary">
-            {t("proposals.details")} ↓
-          </span>
         </div>
-      </AccordionTrigger>
+        {(proposal.summary || proposal.description) && (
+          <p className={`mt-2 text-sm leading-relaxed text-muted-foreground ${proposal.summary ? "" : "line-clamp-2"}`}>
+            {proposal.summary || proposal.description}
+          </p>
+        )}
+        <div className="relative mt-3 h-1 overflow-hidden rounded-full bg-muted" aria-hidden="true">
+          {greenWidth > 0 && <div className="absolute inset-y-0 left-0 rounded-full bg-emerald-500/70 transition-all duration-300" style={{ width: `${greenWidth}%` }} />}
+          {redWidth > 0 && <div className="absolute inset-y-0 right-0 rounded-full bg-rose-400/70 transition-all duration-300" style={{ width: `${redWidth}%` }} />}
+        </div>
+      </div>
       <AccordionContent>
-        <div className="space-y-4 px-2 pb-2 sm:px-4">
+        <div className="space-y-4 border-t px-4 pt-4">
+          <p className="text-xs text-muted-foreground">{t("proposals.by")} {proposal.authorName}</p>
+          {(proposal.tags.length > 0 || proposal.workflowState || proposal.attachments.length > 0) && (
+            <div className="flex flex-wrap items-center gap-1">
+              {proposal.workflowState && <Badge variant="outline">{proposal.workflowState.currentStageName} ({proposal.workflowState.stageIndex + 1}/{proposal.workflowState.totalStages})</Badge>}
+              {proposal.tags.map(tag => <Badge key={tag.id} variant="secondary">{tag.name}</Badge>)}
+              {proposal.attachments.length > 0 && <span className="inline-flex items-center gap-1 text-xs text-muted-foreground"><Paperclip className="size-3" />{proposal.attachments.length}</span>}
+            </div>
+          )}
           {displayText && (
             <MarkdownRenderer content={displayText} className="text-sm text-muted-foreground" />
           )}
