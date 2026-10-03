@@ -2,7 +2,7 @@
 
 Reverse chronological. Click each sprint for full details.
 
-### In progress — Compact decision cards (2026-10-03)
+### Deployed, awaiting review — Compact decision cards (2026-10-03)
 
 **Goal:** reduce vertical space in the decision view without hiding the vote results. Follow-up to [#71](https://github.com/dobrician/ideate/issues/71), on the same sprint branch and PR #73.
 
@@ -13,7 +13,9 @@ Reverse chronological. Click each sprint for full details.
 - [x] Preserve existing project discussion and the guest proposal-discussion login destination.
 - [x] Pass 2,859 unit tests, focused component checks, TypeScript and ESLint.
 - [x] Complete production browser regression: 614/615 pass initially; the known rate-limit fixture race (#76) passes in isolation in 1.9 seconds.
-- [ ] Complete public post-deployment verification.
+- [x] Complete public post-deployment verification: all 32 live smoke tests pass (8.8 seconds).
+
+**Deployment:** commit `21af567` is deployed at [idea.surmont.co](https://idea.surmont.co), using production image `26a00329a6ce`. The demo share link remains public and its existing data is preserved. The previous SSO image is retained for rollback. PR #73 remains a draft awaiting review and merge to main.
 
 **Visual verification:** on a 1120 × 1310 desktop viewport, all ten demo ideas fit on the initial screen; closed cards measure 70px. Expanded descriptions use tighter paragraph/list spacing.
 
