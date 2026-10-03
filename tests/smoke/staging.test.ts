@@ -225,11 +225,8 @@ test.describe("Smoke Tests - i18n Locale", () => {
   test("locale switcher is accessible on the page", async ({ page }) => {
     await page.goto(APP_URL);
 
-    // The locale switcher button should be present (EN or RO text)
-    const bodyText = await page.textContent("body");
-    const hasLocaleSwitcher =
-      bodyText?.includes("EN") || bodyText?.includes("RO");
-    expect(hasLocaleSwitcher).toBeTruthy();
+    await page.getByRole("button", { name: "Profile", exact: true }).click();
+    await expect(page.getByRole("menuitem", { name: /Switch to Romanian|Switch to English/ })).toBeVisible();
   });
 });
 

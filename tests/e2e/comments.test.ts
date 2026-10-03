@@ -85,12 +85,12 @@ test.describe("Comments E2E", () => {
     });
 
     // Own messages should be right-aligned (flex-row-reverse)
-    const bubble = page.locator("div.flex").filter({
+    const bubble = page.locator("div.flex-row-reverse").filter({
       hasText: "Chat bubble test message",
-    }).first();
+    });
     await expect(bubble).toBeVisible();
     // The bubble should contain a rounded chat div
-    await expect(bubble.locator(".rounded-2xl")).toBeVisible();
+    await expect(bubble.locator("[data-chat-bubble][data-own=true]")).toHaveClass(/rounded-2xl/);
   });
 
   test("Shift+Enter inserts newline instead of submitting", async ({ page }) => {

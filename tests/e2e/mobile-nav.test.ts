@@ -14,7 +14,7 @@ test.describe("Mobile Navigation", () => {
     await page.waitForLoadState("domcontentloaded");
 
     // Mobile navigation should be visible
-    await expect(page.getByLabel(/mobile/i).first()).toBeVisible();
+    await expect(page.getByRole("navigation", { name: "Main navigation" })).toBeVisible();
   });
 
   test("mobile nav links navigate correctly", async ({ page }) => {
@@ -24,8 +24,8 @@ test.describe("Mobile Navigation", () => {
     await page.goto("/dashboard");
     await page.waitForLoadState("domcontentloaded");
 
-    // Click on projects link in the bottom mobile nav
-    const mobileNav = page.getByLabel(/mobile navigation/i);
+    // Click on projects link in the floating navigation
+    const mobileNav = page.getByLabel(/main navigation/i);
     const projectsLink = mobileNav.getByRole("link", { name: /project/i });
     await expect(projectsLink).toBeVisible();
     await projectsLink.click();
@@ -40,8 +40,8 @@ test.describe("Mobile Navigation", () => {
     await page.goto("/dashboard");
     await page.waitForLoadState("domcontentloaded");
 
-    // Check bottom nav links have at least 44px tap target
-    const navLinks = page.getByLabel(/mobile navigation/i).getByRole("link");
+    // Check main nav links have at least 44px tap target
+    const navLinks = page.getByLabel(/main navigation/i).getByRole("link");
     const count = await navLinks.count();
 
     for (let i = 0; i < Math.min(count, 5); i++) {

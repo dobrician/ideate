@@ -49,7 +49,7 @@ test.describe("Project Detail Page", () => {
     await page.goto(`/projects/${seed.projectId}`);
     await page.waitForLoadState("domcontentloaded");
 
-    const backLink = page.getByRole("link", { name: /back/i }).first();
+    const backLink = page.getByRole("navigation", { name: "Main navigation" }).getByRole("link", { name: "Projects", exact: true });
     await expect(backLink).toBeVisible();
   });
 });
@@ -107,7 +107,7 @@ test.describe("Mobile Viewport", () => {
     await page.goto(`/projects/${seed.projectId}`);
     await page.waitForLoadState("domcontentloaded");
 
-    const backLink = page.getByRole("link", { name: /back/i }).first();
+    const backLink = page.getByRole("navigation", { name: "Main navigation" }).getByRole("link", { name: "Projects", exact: true });
     await expect(backLink).toBeVisible();
 
     // Secondary actions are intentionally revealed from the compact header.

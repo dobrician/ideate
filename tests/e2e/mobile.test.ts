@@ -64,7 +64,7 @@ test.describe("Mobile — Touch Targets & Overflow (Sprint 28)", () => {
     const seed = await seedTestData(page.request);
     await loginAsTestUser(page, seed);
     await page.goto("/projects");
-    const nav = page.getByLabel("Mobile navigation");
+    const nav = page.getByLabel("Main navigation");
     await expect(nav).toBeVisible();
     const navBox = await nav.boundingBox();
     const viewport = page.viewportSize()!;

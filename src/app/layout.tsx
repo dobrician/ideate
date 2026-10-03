@@ -6,7 +6,6 @@ import { Toaster } from "@/components/ui/sonner";
 import { PwaInstall } from "@/components/pwa-install";
 import { ServiceWorkerRegistration } from "@/components/sw-register";
 import { OfflineIndicator } from "@/components/offline-indicator";
-import { MobileNav } from "@/components/mobile-nav";
 import { SkipNav } from "@/components/skip-nav";
 import { AppUpdate } from "@/components/app-update";
 import { getRequestLocale } from "@/lib/i18n-server";
@@ -52,7 +51,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#0070f3",
+  themeColor: "#00bc7d",
   width: "device-width",
   initialScale: 1,
   viewportFit: "cover",
@@ -78,7 +77,6 @@ export default async function RootLayout({
             </main>
             <OnboardingCheck />
           </AppShell>
-          <MobileNav />
           <Toaster richColors closeButton position="bottom-right" />
           <PwaInstall />
           <OfflineIndicator />

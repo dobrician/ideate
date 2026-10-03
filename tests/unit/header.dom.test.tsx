@@ -96,20 +96,21 @@ describe("Header", () => {
       expect(dashLink).toBeNull();
     });
 
-    it("shows Ideate logo image + text linking to /", async () => {
+    it("shows the Convergence vector and lowercase wordmark linking to /", async () => {
       mockFetchResponse(null, false);
       await renderHeader();
 
-      const logo = screen.getByText("Ideate");
+      const logo = screen.getByText("ideate");
       const link = logo.closest("a");
       expect(link).toHaveAttribute("href", "/");
-      expect(link?.querySelector("img")).toHaveAttribute("src", "/logo.png");
+      expect(link?.querySelector("[data-brand-mark]")).toHaveAttribute("viewBox", "0 0 42 42");
     });
   });
 
   it("should avoid duplicating the mobile bottom navigation in the header", async () => {
     mockFetchResponse(null, false);
     await renderHeader();
+    expect(screen.getByRole("navigation", { name: "Main navigation" })).toBeInTheDocument();
     expect(screen.queryByRole("navigation", { name: "Mobile page links" })).not.toBeInTheDocument();
   });
 
@@ -142,6 +143,17 @@ describe("Header", () => {
         expect(screen.queryByText("Admin")).not.toBeInTheDocument();
       });
     });
+  });
+
+  it("should show account initials and keep theme and language inside its menu", async () => {
+    mockFetchResponse({ role: "user", firstName: "Ciprian", lastName: "Dobrea", email: "ciprian@example.com" });
+    await renderHeader();
+    expect(await screen.findByText("CD")).toBeVisible();
+    expect(screen.queryByText("Switch to Romanian")).not.toBeInTheDocument();
+    await userEvent.click(screen.getByTitle("Profile"));
+    expect(screen.getByText("Ciprian Dobrea")).toBeVisible();
+    expect(screen.getByRole("menuitem", { name: /Switch to Romanian/ })).toBeVisible();
+    expect(screen.getByRole("menuitem", { name: /Toggle theme/ })).toBeVisible();
   });
 
   describe("sign out (auth-gated)", () => {

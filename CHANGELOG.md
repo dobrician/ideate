@@ -4,6 +4,8 @@
 
 ### Changed
 
+- Apply the selected Convergence identity with the Dialog floating menu: vector logo, lowercase wordmark, matching favicon/install icons, shared desktop/mobile navigation and theme/language controls in the account menu. Remove duplicate project-return and mobile bottom navigation. Remove the Live Activity/polling panel while retaining background project updates.
+
 - Vertically center proposal summary previews with symmetric spacing. Refine the new-idea drawer with a fixed submission footer, scrollable fields, a roomier editor and quieter initial-vote controls.
 
 - Fix chat readability in both themes: dark text on green own messages, inherited Markdown colors, and a distinct gray background with a subtle border for received messages in light mode.
@@ -29,6 +31,8 @@
 - Development assets use `no-store`, preventing a year-long cache from showing an outdated interface during design review; production keeps immutable asset caching.
 
 ### Fixed
+
+- Provide native SQLite compilation tools in the Docker dependency stage when prebuilt downloads are unavailable (#81). Target the actual own-message container in the chat layout browser assertion instead of the enclosing app shell (#82).
 
 - Correct the vote-bar browser test to inspect actual pro/contra widths instead of accidentally matching the disclosure icon (#77). Hold the AI loading mock until the spinner is asserted, removing a fixed-delay race (#78).
 

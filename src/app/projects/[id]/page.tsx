@@ -8,7 +8,6 @@ import { hasPermission, canManageResource } from "@/lib/rbac";
 import { canActOnProject } from "@/lib/project-members";
 import type { Role } from "@/lib/rbac";
 import { eq, asc, count, countDistinct } from "drizzle-orm";
-import Link from "next/link";
 import { DeleteProjectButton } from "./delete-button";
 import { EditProjectDialog } from "@/components/edit-project-dialog";
 import { ShareProjectDialog } from "@/components/share-project-dialog";
@@ -159,11 +158,7 @@ export default async function ProjectPage({ params, searchParams }: ProjectPageP
 
   return (
     <div className="mx-auto max-w-4xl py-4 sm:py-6">
-      <div className="mb-3">
-        <Link href="/projects" className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground transition-colors">
-          &larr; {t("projects.back")}
-        </Link>
-      </div>
+
 
       {isArchived && <ArchiveBanner projectId={id} isAdmin={isAdmin} />}
 
@@ -243,10 +238,7 @@ export default async function ProjectPage({ params, searchParams }: ProjectPageP
             )}
           </section>
 
-          <details className="mt-6 rounded-lg border p-3">
-            <summary className="cursor-pointer text-sm text-muted-foreground">{t("live.activityFeed")}</summary>
-            <ClientOnly><ProjectLivePanel projectId={id} sessionToken={sessionToken} /></ClientOnly>
-          </details>
+          <ClientOnly><ProjectLivePanel projectId={id} sessionToken={sessionToken} /></ClientOnly>
           <ClientOnly>
             <ProjectComments projectId={id} comments={projectComments} currentUserId={user.id} readOnly={readOnly} />
           </ClientOnly>
