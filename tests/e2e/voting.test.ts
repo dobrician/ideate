@@ -75,20 +75,18 @@ test.describe("Voting E2E", () => {
     await page.goto(`/projects/${seed.projectId}`);
     await page.waitForLoadState("domcontentloaded");
 
-    // The proposal trigger has background gradients for vote bars
-    const trigger = page.locator("[data-slot='accordion-trigger']").first();
-    await expect(trigger).toBeVisible();
-
-    // The vote bar container (absolute positioned overlay) should exist
-    const barContainer = trigger.locator(".pointer-events-none").first();
+    // Inspect the consensus bar, rather than an unrelated decorative trigger icon.
+    const idea = page.locator("[data-slot='accordion-item']").first();
+    const barContainer = idea.locator('div[aria-hidden="true"].h-1');
+    const greenBar = barContainer.locator('[class*="bg-emerald-500"]');
+    const redBar = barContainer.locator('[class*="bg-rose-400"]');
     await expect(barContainer).toBeVisible();
-
-    // At minimum, the green bar should be visible (1 upvote from seed)
-    const greenBar = barContainer.locator("div").filter({
-      has: page.locator("[class*='green']"),
-    });
-    // Either green bar exists or the total container exists
-    await expect(barContainer).toBeVisible();
+    await expect(greenBar).toHaveAttribute("style", /width:\s*100%/);
+    await expect(redBar).toHaveCount(0);
+    await idea.getByRole("button", { name: /^Contra \(/ }).click();
+    await expect(redBar).toBeVisible();
+    await expect(redBar).toHaveAttribute("style", /width:\s*100%/);
+    await expect(greenBar).toHaveCount(0);
   });
 
   test("vote counts update after voting", async ({ page }) => {

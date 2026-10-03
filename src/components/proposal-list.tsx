@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { Accordion } from "@/components/ui/accordion";
 import { useVoteStream } from "@/lib/use-vote-stream";
 import { Lightbulb } from "lucide-react";
@@ -30,6 +30,7 @@ export function ProposalList({
   readOnly = false,
 }: ProposalListProps) {
   const { t } = useLocale();
+  const [selectedPreviewId, setSelectedPreviewId] = useState<string | null>(null);
   const voteUpdates = useVoteStream(projectId);
 
   const maxTotalVotes = useMemo(() => {
@@ -57,6 +58,8 @@ export function ProposalList({
     });
   }, [proposals, voteUpdates, sort]);
 
+  const activePreviewId = sorted.some(p => p.id === selectedPreviewId) ? selectedPreviewId : sorted[0]?.id;
+
   if (proposals.length === 0) {
     return (
       <div className="flex flex-col items-center gap-3 py-8 text-center">
@@ -78,6 +81,8 @@ export function ProposalList({
           <ProposalItem
             key={proposal.id}
             proposal={proposal}
+            isPreviewActive={proposal.id === activePreviewId}
+            onPreviewActivate={() => setSelectedPreviewId(proposal.id)}
             projectId={projectId}
             currentUserId={currentUserId}
             isAdmin={isAdmin}

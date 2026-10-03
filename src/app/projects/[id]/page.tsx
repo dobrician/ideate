@@ -174,7 +174,24 @@ export default async function ProjectPage({ params, searchParams }: ProjectPageP
         locale={locale}
         t={t}
         tools={
+          <div className="flex items-center">
+            {canCreateProposal && (
+              <ProposalForm compact
+                    projectId={id}
+                    projectTitle={projectData.title}
+                    projectDescription={projectData.description || ""}
+                    existingProposals={proposalsWithStats.map((p) => ({
+                      id: p.id,
+                      title: p.title,
+                      description: p.description ?? undefined,
+                      summary: p.summary ?? undefined,
+                    }))}
+                    availableTags={allTags}
+              />
+            )}
           <ProjectTools>
+            <ProposalSortSelector currentSort={proposalSort} />
+            {allTags.length > 0 && <TagFilter tags={allTags} activeTagId={filterTag} />}
             <ExportButtons projectId={id} />
             {canCreateProposal && (
                   <SuggestProposalsButton
@@ -199,40 +216,10 @@ export default async function ProjectPage({ params, searchParams }: ProjectPageP
               </>
             )}
           </ProjectTools>
+          </div>
         }
       />
-          <section className={`mt-4 ${readOnly ? "opacity-65" : ""}`} aria-labelledby="proposals-heading">
-            <div className="mb-2 flex flex-wrap items-center gap-2">
-              <h2 id="proposals-heading" className="text-lg font-semibold">
-                {t("proposals.count", { count: proposalTotal })}
-              </h2>
-              <ProposalSortSelector currentSort={proposalSort} />
-              {allTags.length > 0 && (
-                <details className="relative">
-                  <summary className="cursor-pointer text-xs text-muted-foreground">{t("projects.filters")}</summary>
-                  <div className="absolute left-0 top-full z-20 mt-2 rounded-lg border bg-popover p-3 shadow-md">
-                    <TagFilter tags={allTags} activeTagId={filterTag} />
-                  </div>
-                </details>
-              )}
-              <div className="flex-1" />
-              {canCreateProposal && (
-                <div className="flex gap-2">
-                  <ProposalForm
-                    projectId={id}
-                    projectTitle={projectData.title}
-                    projectDescription={projectData.description || ""}
-                    existingProposals={proposalsWithStats.map((p) => ({
-                      id: p.id,
-                      title: p.title,
-                      description: p.description ?? undefined,
-                      summary: p.summary ?? undefined,
-                    }))}
-                    availableTags={allTags}
-                  />
-                </div>
-              )}
-            </div>
+          <section className={`mt-4 ${readOnly ? "opacity-65" : ""}`} aria-label={t("proposals.count", { count: proposalTotal })}>
             <ClientOnly fallback={
               <div className="space-y-2">
                 {proposalsWithStats.map((p) => (

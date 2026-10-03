@@ -4,15 +4,18 @@
 
 ### Changed
 
+- Replace the project summary with context on expansion, remove creation/update dates, and keep a single aligned participation footer. Use a solid project background and remove the visible proposal toolbar; sorting/filtering move into project actions and creation becomes a compact header icon.
+- Keep the first proposal preview selected until mouse movement or keyboard focus selects another, retaining it outside the list. Remove disclosure arrows and add a hand cursor with a delayed elastic 4px decorative peek that does not reflow the list.
+
 - Compact project deadlines into the participation footer and omit the active badge. Inactive or expired projects reduce contrast and hide voting, proposal creation and comment composition.
-- Collapsed ideas show titles and votes; summaries expand on hover or keyboard focus with reduced-motion support. Expanded ideas place authors at the top right and reveal files in an independent attachment sheet. Guest proposal discussions now preserve the sign-in destination.
+- Collapsed ideas show titles and votes, with a persistent selected summary preview and reduced-motion support. Expanded ideas place authors at the top right and reveal files in an independent attachment sheet. Guest proposal discussions now preserve the sign-in destination.
 
 - Connected the authentication flow to SurCod SSO: Authorization Code with PKCE S256, verified-email identity linking, shared-project return destinations and public-origin redirects behind the reverse proxy. Existing email/password and magic-link authentication remain available.
 - Added the public OIDC login build flag to container builds and an optional separate Next.js output directory for isolated test servers. Excluded SQLite files, backups and test build caches from the container build context.
 
 - Refocused the primary experience on projects, AI summaries and voting: signed-in home now opens projects and SSO returns to the same landing route; dashboard and administration move to the account menu; global search opens on demand, including Ctrl/Cmd+K.
-- Project cards show AI summaries and participation instead of creation dates and category lists. Project and shared-link pages show the decision summary and voting totals before proposals, with context and metadata behind an explicit disclosure.
-- Idea cards reveal the complete AI summary on hover or focus and put votes outside the details trigger, avoiding nested interactive buttons. Authors, categories and full descriptions appear on expansion; attachments open separately. Vote and discussion targets are at least 44px.
+- Project cards show AI summaries and participation instead of creation dates and category lists. Project and shared-link pages show the decision summary and voting totals before proposals, with context behind an explicit disclosure.
+- Idea cards reveal the complete selected AI summary and put votes outside the details trigger, avoiding nested interactive buttons. Authors, categories and full descriptions appear on expansion; attachments open separately. Vote and discussion targets are at least 44px.
 - Export, editing and AI tools move into project actions; advanced filters and creation options are revealed intentionally. Reduced duplicate mobile navigation and nested main landmarks.
 - Preserved the selected proposal sort instead of always overriding it with net-vote ranking on the client.
 - Split the idea form into drawer, fields and duplicate-review components, each below 300 lines.
@@ -20,6 +23,8 @@
 - Development assets use `no-store`, preventing a year-long cache from showing an outdated interface during design review; production keeps immutable asset caching.
 
 ### Fixed
+
+- Correct the vote-bar browser test to inspect actual pro/contra widths instead of accidentally matching the disclosure icon (#77). Hold the AI loading mock until the spinner is asserted, removing a fixed-delay race (#78).
 
 - Keep the projects filter panel inside the viewport on mobile, while retaining right alignment on desktop.
 

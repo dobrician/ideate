@@ -72,6 +72,8 @@ export function ProposalItem({
   maxTotalVotes,
   guestRedirect,
   readOnly = false,
+  isPreviewActive = false,
+  onPreviewActivate,
 }: {
   proposal: ProposalWithStats;
   projectId: string;
@@ -82,6 +84,8 @@ export function ProposalItem({
   maxTotalVotes: number;
   guestRedirect?: string;
   readOnly?: boolean;
+  isPreviewActive?: boolean;
+  onPreviewActivate?: () => void;
 }) {
   const { t, locale } = useLocale();
   const [showFull, setShowFull] = useState(true);
@@ -117,12 +121,15 @@ export function ProposalItem({
   return (
     <AccordionItem
       value={proposal.id}
-      className="group/proposal overflow-hidden rounded-lg border bg-card transition-shadow duration-200 data-[state=open]:shadow-md"
+      data-preview-active={isPreviewActive}
+      onPointerMove={(event) => { if (event.pointerType === "mouse") onPreviewActivate?.(); }}
+      onFocusCapture={() => onPreviewActivate?.()}
+      className="group/proposal relative rounded-lg border bg-transparent transition-shadow duration-200 data-[state=open]:shadow-md after:pointer-events-none after:absolute after:-inset-x-px after:top-full after:h-1 after:rounded-b-lg after:border after:border-t-0 after:border-border after:bg-background after:opacity-0 after:-translate-y-1 after:transition-[transform,opacity] after:duration-300 after:ease-[cubic-bezier(.22,1.15,.36,1)] has-[[data-slot=accordion-trigger]:hover]:after:opacity-100 has-[[data-slot=accordion-trigger]:hover]:after:translate-y-0 has-[[data-slot=accordion-trigger]:hover]:after:delay-500 data-[state=open]:after:hidden motion-reduce:after:transition-none"
     >
       <div className="px-4 py-2">
         <div className="flex flex-col gap-1 sm:flex-row sm:items-start sm:gap-4">
           <div className="min-w-0 flex-1">
-            <AccordionTrigger className="min-h-11 items-center gap-3 py-0 hover:no-underline">
+            <AccordionTrigger showIndicator={false} className="cursor-pointer min-h-11 items-center gap-3 py-0 hover:no-underline">
               <span className="block min-w-0 break-words line-clamp-2 text-sm font-semibold leading-snug" title={proposal.title}>{proposal.title}</span>
               <span className="sr-only">{t("proposals.by")} {proposal.authorName}</span>
             </AccordionTrigger>
@@ -141,8 +148,8 @@ export function ProposalItem({
           </div>
         </div>
         {(proposal.summary || proposal.description) && (
-          <div className="invisible grid grid-rows-[0fr] opacity-0 group-hover/proposal:visible group-focus-within/proposal:visible transition-[grid-template-rows,opacity] duration-300 ease-[cubic-bezier(.22,1.15,.36,1)] group-hover/proposal:grid-rows-[1fr] group-hover/proposal:opacity-100 group-focus-within/proposal:grid-rows-[1fr] group-focus-within/proposal:opacity-100 group-data-[state=open]/proposal:hidden motion-reduce:transition-none">
-            <div className="overflow-hidden"><p className="pb-1 text-sm leading-relaxed text-muted-foreground">{proposal.summary || proposal.description}</p></div>
+          <div className={`grid transition-[grid-template-rows,opacity] duration-300 ease-[cubic-bezier(.22,1.15,.36,1)] group-data-[state=open]/proposal:hidden motion-reduce:transition-none ${isPreviewActive ? "visible grid-rows-[1fr] opacity-100" : "invisible grid-rows-[0fr] opacity-0"}`}>
+            <div className="overflow-hidden"><p className="min-h-12 pb-1 text-sm leading-relaxed text-muted-foreground">{proposal.summary || proposal.description}</p></div>
           </div>
         )}
         <div className="relative mt-1 h-1 overflow-hidden rounded-full bg-muted" aria-hidden="true">

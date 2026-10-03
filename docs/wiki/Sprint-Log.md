@@ -2,6 +2,12 @@
 
 Reverse chronological. Click each sprint for full details.
 
+### Validated for release — Stable previews and compact context (2026-10-03)
+
+Follow-up requirements for #71 and draft PR #73: expanded context replaces the summary; dates and the visible proposal toolbar are removed. Solid project background separates it from idea cards; sorting and tags remain in project actions, with proposal creation in the header. The first summary remains selected until intentional mouse movement or keyboard focus selects another. Disclosure arrows are replaced by a hand cursor and delayed elastic 4px decorative peek, without list reflow. Keyboard activation and independent attachments remain available.
+
+Tests are updated because these interaction and layout requirements changed; the compact-form test also now matches the actual localized accessible label, including its existing + prefix. All 2,862 unit tests across 208 files, TypeScript, ESLint, the production build and 51 focused browser cases pass. The complete production-image run passed 616/621 initially (13.4 minutes); all five failures pass on isolated rerun (15.9 seconds). Three failures exposed the genuine vote-bar selector bug (#77), one the fixed-delay AI loading mock race (#78), and one the existing concurrent rate-limit reset race (#76). The first two tests now assert actual pro/contra widths and gate the AI response until loading is observed, without weakening production behavior. Public deployment verification is pending.
+
 ### Deployed, awaiting review — Compact decision cards (2026-10-03)
 
 **Goal:** reduce vertical space in the decision view without hiding the vote results. Follow-up to [#71](https://github.com/dobrician/ideate/issues/71), on the same sprint branch and PR #73.

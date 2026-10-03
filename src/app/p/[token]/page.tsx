@@ -11,7 +11,6 @@ import Link from "next/link";
 import { ProposalList } from "@/components/proposal-list";
 import { getProjectProposals, PROPOSALS_PAGE_SIZE, isValidSort } from "../../projects/[id]/queries";
 import type { ProposalSort } from "../../projects/[id]/queries";
-import { ProposalSortSelector } from "@/components/proposal-sort-selector";
 import { Pagination } from "@/components/pagination";
 import { ProjectComments } from "@/components/project-comments";
 import { getTranslations } from "@/lib/i18n-server";
@@ -164,12 +163,6 @@ export default async function SharedProjectPage({ params, searchParams }: Shared
       <ProjectOverview project={projectData} stats={votingStats[0] ?? { votes: 0, voters: 0 }}
         tags={currentTagNames} locale={locale} t={t} tools={null} />
           <div className={`mt-4 ${readOnly ? "opacity-65" : ""}`}>
-            <div className="mb-2 flex flex-wrap items-center gap-2">
-              <h2 className="text-lg font-semibold">
-                {t("proposals.count", { count: proposalTotal })}
-              </h2>
-              <ProposalSortSelector currentSort={proposalSort} />
-            </div>
             <ClientOnly fallback={
               <div className="space-y-2">
                 {proposalsWithStats.map((p) => (

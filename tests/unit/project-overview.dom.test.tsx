@@ -27,24 +27,25 @@ describe("ProjectOverview", () => {
     expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent(project.title);
     expect(screen.getByText(project.summary)).toBeVisible();
     expect(screen.getByLabelText("Voting so far")).toHaveTextContent("45 days left97 votes cast12 people voted");
-    expect(screen.getByText(project.description)).not.toBeVisible();
-    expect(screen.getByText("Created")).not.toBeVisible();
-    expect(screen.getByText("Last Updated")).not.toBeVisible();
-    expect(screen.getByText("Demo")).not.toBeVisible();
+    expect(screen.queryByText(project.description)).toBeNull();
+    expect(screen.queryByText("Created")).toBeNull();
+    expect(screen.queryByText("Last Updated")).toBeNull();
+    expect(screen.queryByText("Demo")).toBeNull();
   });
 
   it("should reveal the original context when the user opens details", () => {
     render(<ProjectOverview {...props} />);
     fireEvent.click(screen.getByText("Context & details"));
     expect(screen.getByText(project.description)).toBeVisible();
-    expect(screen.getByText("Created")).toBeVisible();
+    expect(screen.queryByText("Created")).toBeNull();
+    expect(screen.queryByText(project.summary)).toBeNull();
     expect(screen.getByText("Demo")).toBeVisible();
   });
 
   it("should use the first description paragraph when no AI summary exists", () => {
     render(<ProjectOverview {...props} project={{ ...project, summary: null, description: "First paragraph.\n\nLonger context." }} />);
     expect(screen.getAllByText("First paragraph.")[0]).toBeVisible();
-    expect(screen.getByText("Longer context.")).not.toBeVisible();
+    expect(screen.queryByText("Longer context.")).toBeNull();
   });
 
   it("should render zero participation and missing optional context in Romanian", () => {

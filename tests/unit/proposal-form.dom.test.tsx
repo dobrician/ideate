@@ -23,4 +23,10 @@ describe("ProposalForm", () => {
     await user.keyboard("{Escape}");
     expect(screen.queryByLabelText("Title")).not.toBeInTheDocument();
   });
+
+  it("should open the new proposal drawer from an accessible compact icon", async () => {
+    render(<ProposalForm projectId="demo" compact />);
+    await userEvent.click(screen.getByRole("button", { name: /New Proposal/ }));
+    expect(screen.getByLabelText("Title")).toBeVisible();
+  });
 });

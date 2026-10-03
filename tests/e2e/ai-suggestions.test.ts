@@ -76,9 +76,11 @@ test.describe("AI Suggestions E2E", () => {
   test("shows loading state while generating", async ({ page }) => {
     const seed = await seedTestData(page.request);
     await loginAsTestUser(page, seed);
-    // Add a delay to the mock to test loading state
+    // Hold the response until loading is observed, independent of browser speed.
+    let releaseResponse!: () => void;
+    const responseGate = new Promise<void>((resolve) => { releaseResponse = resolve; });
     await page.route("**/api/proposals/suggest", async (route) => {
-      await new Promise((r) => setTimeout(r, 500));
+      await responseGate;
       await route.fulfill({
         status: 200,
         contentType: "application/json",
@@ -94,7 +96,11 @@ test.describe("AI Suggestions E2E", () => {
 
     const dialog = page.getByRole("dialog", { name: "AI Suggestions", exact: true });
     // Loading spinner should appear
-    await expect(dialog.locator(".animate-spin")).toBeVisible();
+    try {
+      await expect(dialog.locator(".animate-spin")).toBeVisible();
+    } finally {
+      releaseResponse();
+    }
     // Then suggestions should load
     await expect(dialog.getByText("Implement Dark Mode")).toBeVisible({ timeout: 5000 });
   });

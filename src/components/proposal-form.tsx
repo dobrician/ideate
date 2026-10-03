@@ -1,5 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
+import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger, SheetClose } from "@/components/ui/sheet";
 import { toast } from "sonner";
@@ -9,7 +10,7 @@ import { ProposalFormFields } from "./proposal-form-fields";
 import { DuplicateMatchesModal } from "./duplicate-matches-modal";
 
 /** Open a new-idea drawer and hand off to duplicate review on submit. */
-export function ProposalForm(props: ProposalFormProps) {
+export function ProposalForm(props: ProposalFormProps & { compact?: boolean }) {
   const form = useProposalForm(props);
   const [open, setOpen] = useState(false);
   const { state, t, resetForm, modalOpen } = form;
@@ -34,9 +35,11 @@ export function ProposalForm(props: ProposalFormProps) {
     <>
       <Sheet open={open} onOpenChange={setOpen}>
         <SheetTrigger asChild>
-          <Button size="sm">
-            <span className="sm:hidden">{form.t("proposalForm.newProposalShort")}</span>
-            <span className="hidden sm:inline">{form.t("proposalForm.newProposal")}</span>
+          <Button size={props.compact ? "icon" : "sm"} variant={props.compact ? "ghost" : "default"} aria-label={props.compact ? form.t("proposalForm.newProposal") : undefined}>
+            {props.compact ? <Plus className="size-5" aria-hidden="true" /> : <>
+              <span className="sm:hidden">{form.t("proposalForm.newProposalShort")}</span>
+              <span className="hidden sm:inline">{form.t("proposalForm.newProposal")}</span>
+            </>}
           </Button>
         </SheetTrigger>
         <SheetContent side="left" className="flex w-full flex-col overflow-y-auto sm:max-w-lg">

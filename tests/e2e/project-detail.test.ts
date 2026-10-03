@@ -24,7 +24,7 @@ test.describe("Project Detail Page", () => {
     await page.goto(`/projects/${seed.projectId}`);
     await page.waitForLoadState("domcontentloaded");
 
-    await expect(page.getByText(/Proposals?\s*\(\d+\)/)).toBeVisible();
+    await expect(page.getByRole("region", { name: /Proposals?\s*\(\d+\)/ })).toBeVisible();
   });
 
   test("shows project comment section", async ({ page }) => {
@@ -128,7 +128,7 @@ test.describe("Mobile Viewport", () => {
 
     await expect(page.getByText("Active", { exact: true })).toHaveCount(0);
     await expect(page.getByLabel("Voting so far")).toContainText("days left");
-    await expect(page.getByText(/Proposals?\s*\(\d+\)/)).toBeVisible();
+    await expect(page.getByRole("region", { name: /Proposals?\s*\(\d+\)/ })).toBeVisible();
   });
 
   test("no horizontal overflow on mobile", async ({ page }) => {

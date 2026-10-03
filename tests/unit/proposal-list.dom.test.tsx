@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { render, screen, fireEvent } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom/vitest";
 
@@ -190,7 +190,7 @@ describe("ProposalList", () => {
     expect(container.textContent).toContain("Alice");
   });
 
-  it("should hide the collapsed summary and reveal the original description on demand", async () => {
+  it("should show the first preview and reveal the original description on demand", async () => {
     const user = userEvent.setup();
     render(<ProposalList proposals={[makeProposal({ summary: "A concise decision summary.", description: "Original detailed proposal." })]}
       projectId="proj1" currentUserId="u1" isAdmin={false} />);
@@ -225,5 +225,20 @@ describe("ProposalList inactive projects", () => {
     expect(screen.queryByRole("button", { name: "Open discussion" })).toBeNull();
     await user.click(screen.getByRole("button", { name: /Proposal A/ }));
     expect(screen.queryByRole("button", { name: "Delete" })).toBeNull();
+  });
+});
+
+
+describe("ProposalList persistent preview", () => {
+  it("should activate the first idea and keep a focused selection after leaving", () => {
+    const { container } = render(<ProposalList proposals={[makeProposal({ id: "first", title: "First", upvotes: 2 }), makeProposal({ id: "second", title: "Second" })]} projectId="proj1" currentUserId="u1" isAdmin={false} />);
+    const cards = container.querySelectorAll('[data-slot="accordion-item"]');
+    expect(cards[0]).toHaveAttribute("data-preview-active", "true");
+    expect(cards[1]).toHaveAttribute("data-preview-active", "false");
+    fireEvent.focus(screen.getByRole("button", { name: /Second/ }));
+    expect(cards[1]).toHaveAttribute("data-preview-active", "true");
+    fireEvent.blur(screen.getByRole("button", { name: /Second/ }));
+    expect(cards[1]).toHaveAttribute("data-preview-active", "true");
+    expect(cards[0]).toHaveAttribute("data-preview-active", "false");
   });
 });
