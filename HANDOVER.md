@@ -37,3 +37,7 @@ The shared browser tab is already at the reset project. Capture with a smooth cu
 The unchanged deployed source was verified with 2,864 unit tests, all 636 browser cases (one Safari fixed-delay SSE case passed unchanged in isolation, issue #83), TypeScript/ESLint/build, and 32 public smoke checks. This preparation additionally verifies actual live AI, authenticated UI voting, exactly two proposals, reset and unrelated-data preservation. No mocks or test selectors were changed for this task.
 
 Temporary preparation scripts/log copies: `/tmp/codex-ideate-surcod-demo-20261003`, registered through 2026-10-05; permanent requested handoff and proof copies remain under the private state directory. The session expiry is in the access file. Regenerable preparation scripts are removed after delivery; the guarded reset helper is retained for capture.
+
+## Final coordination check
+
+A final guard observed a further live request for this demo and a new actor +1 after the initial reset (22:30 UTC); its caller was not established. Preserve the initial proofs separately and perform the same guarded reset again. The second request logs 1457ms, 547 tokens and an application estimate 0.002735 USD. Both observed requests total an estimated 0.005630 USD, below the authorized ceiling. Final DB verification again confirms exactly two proposals, no actor vote and no cached demo prompt. Capture must start only after the ready signal to avoid concurrent state changes.
