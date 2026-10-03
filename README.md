@@ -169,6 +169,8 @@ Key endpoints:
 
 See [AGENTS.md](AGENTS.md) for development guidelines, architecture rules, and commit conventions.
 
+Operational continuity and the isolated SurCod holiday demo are documented in [HANDOVER.md](HANDOVER.md). Access credentials remain in private host state, outside the repository; demo resets never use the global seed.
+
 ## License
 
 Private — SurCod SRL

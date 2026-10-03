@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Documentation
+
+- Add the canonical handover for the isolated English family-holiday demo, including verified real AI duplicate detection, actor voting/reset evidence and private capture-access locations. No application code or deployment changes.
+
 ### Changed
 
 - Apply the selected Convergence identity with the Dialog floating menu: vector logo, lowercase wordmark, matching favicon/install icons, shared desktop/mobile navigation and theme/language controls in the account menu. Remove duplicate project-return and mobile bottom navigation. Remove the Live Activity/polling panel while retaining background project updates.
