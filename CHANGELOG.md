@@ -4,6 +4,8 @@
 
 ### Changed
 
+- Fix chat readability in both themes: dark text on green own messages, inherited Markdown colors, and a distinct gray background with a subtle border for received messages in light mode.
+
 - Replace separate proposal consensus lines with proportional green/red card backgrounds following rounded corners. Charts keep the compact header height during previews and expansion, using a smooth 16px gradient into the details; expanded authors sit below the controls. Voting scale and independent controls are preserved.
 
 - Replace the project summary with context on expansion, remove creation/update dates, and keep a single aligned participation footer. Use a solid project background and remove the visible proposal toolbar; sorting/filtering move into project actions and creation becomes a compact header icon.

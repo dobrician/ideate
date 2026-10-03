@@ -110,6 +110,7 @@ describe("CommentThread rendering", () => {
     );
     const bubble = container.querySelector(".flex-row-reverse");
     expect(bubble).toBeInTheDocument();
+    expect(bubble?.querySelector("[data-chat-bubble]")).toHaveClass("text-slate-950", "bg-primary");
   });
 
   it("renders other's message left-aligned (flex-row, no reverse)", () => {
@@ -124,6 +125,7 @@ describe("CommentThread rendering", () => {
     expect(bubbles.length).toBe(1);
     expect(bubbles[0].classList.contains("flex-row-reverse")).toBe(false);
     expect(bubbles[0].classList.contains("flex-row")).toBe(true);
+    expect(bubbles[0].querySelector("[data-chat-bubble]")).toHaveClass("bg-zinc-200", "border-border", "dark:bg-muted");
   });
 
   it("shows avatar on each root comment in threaded view", () => {
@@ -288,7 +290,7 @@ describe("CommentThread rendering", () => {
     expect(bubble).toBeInTheDocument();
   });
 
-  it("applies other-message bubble styling (bg-muted)", () => {
+  it("should distinguish received bubbles in light mode and retain muted dark styling", () => {
     const { container } = render(
       <CommentThread
         comments={[makeComment({ userId: "other" })]}
@@ -296,8 +298,9 @@ describe("CommentThread rendering", () => {
         currentUserId="me"
       />
     );
-    const bubble = container.querySelector(".bg-muted.rounded-2xl");
+    const bubble = container.querySelector('[data-chat-bubble][data-own="false"]');
     expect(bubble).toBeInTheDocument();
+    expect(bubble).toHaveClass("bg-zinc-200", "border-border", "dark:bg-muted");
   });
 });
 
