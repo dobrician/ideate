@@ -2,7 +2,7 @@
 
 Reverse chronological. Click each sprint for full details.
 
-### In progress — SurCod SSO and public project participation (2026-10-03)
+### Deployed, awaiting review — SurCod SSO and public project participation (2026-10-03)
 
 **Goal:** public project previews by share link, with SurCod SSO authentication for votes, proposals and comments. Backlog: [#74](https://github.com/dobrician/ideate/issues/74).
 
@@ -13,17 +13,19 @@ Reverse chronological. Click each sprint for full details.
 - [x] Use the configured public callback origin behind the reverse proxy.
 - [x] Verify the real development SSO flow and the demo account returned by Ideate.
 - [x] Complete unit/browser regression verification and container build.
-- [ ] Deploy the public runtime and pass live smoke tests and SSO verification.
+- [x] Deploy the public runtime and pass live smoke tests and SSO verification.
 
-**Verified development outcome:** real Authorization Code exchange with PKCE through `sso.surcod.ro`, session creation as `ciprian.dobrea@gmail.com` with the existing admin role, and return through the shared-project link to the canonical demo project. This was verified through HTTP/OIDC and the ZITADEL Session API; the Google UI flow has not been re-tested in this sprint.
+**Verified live outcome:** production at `https://idea.surmont.co` and development at `http://100.93.65.47:4101` both complete a real Authorization Code exchange with PKCE through `sso.surcod.ro`, session creation as `ciprian.dobrea@gmail.com` with the existing admin role, and return through the shared-project link to the canonical demo project. This was verified through HTTP/OIDC and the ZITADEL Session API; the Google UI flow has not been re-tested in this sprint.
 
 **Access policy:** anyone holding a share link can read the project. Authenticated visitors gain membership and can contribute. The SurCod registration policy is unchanged; existing email authentication remains available. The SSO identity emits `dc@surcod.ro` and is explicitly mapped to the existing demo owner, so no second Ideate account is created.
 
 **Regression verification:** all 2,853 unit tests pass across 206 files. The production container passed 608 of 609 browser cases on the initial HTTPS run; its sole Android rate-limit check passed when rerun in isolation. The shared-fixture reset race is tracked in [#76](https://github.com/dobrician/ideate/issues/76), without weakening assertions or production counters. The current login/redirect/PKCE tests also pass (46 focused checks). TypeScript, ESLint and the final production build pass. Production browser tests use an isolated database and a local TLS proxy because Safari correctly rejects Secure cookies over plain HTTP.
 
+**Deployment:** commit `00e0352` is running publicly; all 32 post-deployment smoke tests pass. The anonymous [demo share link](https://idea.surmont.co/p/694a9797-0a0a-441c-9aca-80513334e96f) returns HTTP 200. The requested login is saved as **Ideate — SurCod SSO** in the Surmont 1Password vault. The previous runtime image and a consistent pre-SSO database backup are retained for rollback. [PR #73](https://github.com/dobrician/ideate/pull/73) remains a draft on `sprint/2026-10-03-decision-focused-project`; merge to main and sprint closure remain pending review.
+
 **Independent backlog:** the unchanged dependency lockfile reported 58 audit findings during the container build; triage is tracked in [#75](https://github.com/dobrician/ideate/issues/75).
 
-### In progress — Decision-focused Ideate (2026-10-03)
+### Deployed, awaiting review — Decision-focused Ideate (2026-10-03)
 
 **Goal:** simplify the primary experience around projects, AI summaries and votes, applying the clear action hierarchy of KeySlip. Backlog: [#71](https://github.com/dobrician/ideate/issues/71).
 
@@ -33,11 +35,11 @@ Reverse chronological. Click each sprint for full details.
 - [x] Reveal metadata, export, editing, advanced filters and creation options on request.
 - [x] Preserve voting, discussions, RBAC and duplicate review; respect the selected proposal sort.
 - [x] Complete desktop/mobile regression verification.
-- [ ] Deploy staging and pass post-deployment smoke tests.
+- [x] Deploy staging and pass post-deployment smoke tests.
 
 **Verification:** 2,836 unit tests across 203 files pass, with TypeScript and ESLint checks clean. The first full browser run passed 568 of 606 checks; 38 failures exposed outdated selectors, test-origin cookies, an obsolete AI-detail expectation and one cold-compilation timeout. Corrected cases passed on rerun (35 checks, followed by 21 final checks covering the remaining three, shared-link guests and locale layouts). Together these verify all 609 current browser cases across Chromium, Android and WebKit. Desktop/mobile layouts were also reviewed visually in light and dark themes.
 
-**Outcome so far:** a reviewable implementation is running on the development instance. Existing data and authentication are preserved; the demo project has realistic fictional participants, ideas, votes and threaded discussions. Staging promotion remains pending verification.
+**Outcome:** the simplified experience is running on development and public staging. Existing data and authentication are preserved; the demo project has 13 participants, 10 realistic fictional ideas, 97 votes and 23 comments. Public staging passed all 32 smoke tests after deployment. The later SSO regression verification above covers the combined implementation. PR #73 remains open for review; the sprint has not been merged to main or declared complete.
 
 ---
 
