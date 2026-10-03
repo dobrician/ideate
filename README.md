@@ -6,7 +6,7 @@ A platform for teams to create projects, submit proposals, vote (pro/contra), an
 
 ## Decision workflow
 
-Signed-in users start with projects. Each project card shows its AI summary, proposal count, votes and deadline. Inside a project, the decision summary and participation totals come first, followed by idea cards with their complete AI summaries and pro/contra votes. Open an idea for its original description, author, categories and attachments; open its discussion to read or add arguments.
+Signed-in users start with projects. Each project card shows its AI summary, proposal count, votes and deadline. Inside a project, the decision summary and participation totals come first, followed by compact idea titles and pro/contra votes. Hover or focus an idea to reveal its AI summary with a short expansion animation; open it for the original description and categories. The author appears at the top right when expanded. Discussion and attachments open independently from the card controls. Inactive or expired projects use reduced contrast and show vote totals without contribution controls; existing project discussion remains readable.
 
 Context, timestamps, filters, export, editing and AI tools are revealed on request. The account menu provides access to the personal dashboard and administration; global search opens from the search icon or Ctrl/Cmd+K. Project creation starts with a title, context and deadline, with templates, status and categories under **More options**. Shared links use the same compact decision view.
 

@@ -16,6 +16,7 @@ interface DiscussionSheetProps {
   comments: Comment[];
   commentCount: number;
   currentUserId?: string;
+  guestRedirect?: string;
 }
 
 export function DiscussionSheet({
@@ -25,6 +26,7 @@ export function DiscussionSheet({
   comments,
   commentCount,
   currentUserId,
+  guestRedirect,
 }: DiscussionSheetProps) {
   const { t } = useLocale();
   const [open, setOpen] = useState(false);
@@ -52,6 +54,7 @@ export function DiscussionSheet({
             comments={comments}
             hiddenFields={{ proposalId }}
             currentUserId={currentUserId}
+            guestRedirect={guestRedirect}
           />
         </div>
       </SheetContent>

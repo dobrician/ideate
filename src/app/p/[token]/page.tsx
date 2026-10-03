@@ -5,6 +5,7 @@ import { comments, projects, proposals, votes, users, tags, projectTags } from "
 import { getCurrentUser } from "@/lib/auth";
 import { joinProjectAsMember } from "@/lib/project-members";
 import { eq, asc, count, countDistinct } from "drizzle-orm";
+import { isProjectOpen } from "@/lib/status-utils";
 import { ProjectOverview } from "@/components/project-overview";
 import Link from "next/link";
 import { ProposalList } from "@/components/proposal-list";
@@ -99,6 +100,7 @@ export default async function SharedProjectPage({ params, searchParams }: Shared
 
   const { t, locale } = await getTranslations();
   const isArchived = projectData.status === "archived";
+  const readOnly = !isProjectOpen(projectData);
 
   const sp = await searchParams;
   const proposalPage = Math.max(1, parseInt(sp.page || "1", 10) || 1);
@@ -145,7 +147,7 @@ export default async function SharedProjectPage({ params, searchParams }: Shared
 
   return (
     <div className="mx-auto max-w-4xl py-4 sm:py-6">
-      {!user && (
+      {!user && !readOnly && (
         <div className="mb-3 flex items-center justify-between rounded-md border border-dashed bg-muted/40 px-3 py-2 text-sm">
           <span className="text-muted-foreground">{t("project.share.guestBannerPrompt")}</span>
           <Button asChild size="sm" variant="secondary">
@@ -161,8 +163,8 @@ export default async function SharedProjectPage({ params, searchParams }: Shared
 
       <ProjectOverview project={projectData} stats={votingStats[0] ?? { votes: 0, voters: 0 }}
         tags={currentTagNames} locale={locale} t={t} tools={null} />
-          <div className="mt-6">
-            <div className="mb-4 flex flex-wrap items-center gap-2">
+          <div className={`mt-4 ${readOnly ? "opacity-65" : ""}`}>
+            <div className="mb-2 flex flex-wrap items-center gap-2">
               <h2 className="text-lg font-semibold">
                 {t("proposals.count", { count: proposalTotal })}
               </h2>
@@ -181,11 +183,12 @@ export default async function SharedProjectPage({ params, searchParams }: Shared
                 currentUserId=""
                 isAdmin={false}
                 guestRedirect={guestRedirect}
+                readOnly={readOnly}
                 sort={proposalSort}
               />
             </ClientOnly>
             {proposalTotalPages > 1 && (
-              <div className="mt-6">
+              <div className={`mt-4 ${readOnly ? "opacity-65" : ""}`}>
                 <Pagination currentPage={proposalPage} totalPages={proposalTotalPages} />
               </div>
             )}
@@ -197,6 +200,7 @@ export default async function SharedProjectPage({ params, searchParams }: Shared
               comments={projectComments}
               currentUserId={undefined}
               guestRedirect={guestRedirect}
+              readOnly={readOnly}
             />
           </ClientOnly>
     </div>

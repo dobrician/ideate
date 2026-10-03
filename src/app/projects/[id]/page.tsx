@@ -26,6 +26,7 @@ import { SuggestProposalsButton } from "@/components/suggest-proposals";
 import { ArchiveBanner } from "@/components/archive-banner";
 import { TagFilter } from "@/components/tag-filter";
 import { ClientOnly } from "@/components/client-only";
+import { isProjectOpen } from "@/lib/status-utils";
 import { ProjectOverview } from "@/components/project-overview";
 import { ProjectTools } from "@/components/project-tools";
 import { ProjectLivePanel } from "@/components/project-live-panel";
@@ -109,8 +110,9 @@ export default async function ProjectPage({ params, searchParams }: ProjectPageP
 
   const projectData = project[0];
   const isArchived = projectData.status === "archived";
+  const readOnly = !isProjectOpen(projectData);
   const canEdit = !isArchived && canManageResource(role, projectData.userId, user.id);
-  const canCreateProposal = !isArchived && (await canActOnProject(role, user.id, projectData.id, "proposal:create"));
+  const canCreateProposal = !readOnly && (await canActOnProject(role, user.id, projectData.id, "proposal:create"));
   const isAdmin = hasPermission(role, "project:manage_all");
 
   const sp = await searchParams;
@@ -199,8 +201,8 @@ export default async function ProjectPage({ params, searchParams }: ProjectPageP
           </ProjectTools>
         }
       />
-          <section className="mt-6" aria-labelledby="proposals-heading">
-            <div className="mb-4 flex flex-wrap items-center gap-2">
+          <section className={`mt-4 ${readOnly ? "opacity-65" : ""}`} aria-labelledby="proposals-heading">
+            <div className="mb-2 flex flex-wrap items-center gap-2">
               <h2 id="proposals-heading" className="text-lg font-semibold">
                 {t("proposals.count", { count: proposalTotal })}
               </h2>
@@ -243,11 +245,12 @@ export default async function ProjectPage({ params, searchParams }: ProjectPageP
                 projectId={id}
                 currentUserId={user.id}
                 isAdmin={isAdmin}
+                readOnly={readOnly}
                 sort={proposalSort}
               />
             </ClientOnly>
             {proposalTotalPages > 1 && (
-              <div className="mt-6">
+              <div className={`mt-4 ${readOnly ? "opacity-65" : ""}`}>
                 <Pagination currentPage={proposalPage} totalPages={proposalTotalPages} />
               </div>
             )}
@@ -258,7 +261,7 @@ export default async function ProjectPage({ params, searchParams }: ProjectPageP
             <ClientOnly><ProjectLivePanel projectId={id} sessionToken={sessionToken} /></ClientOnly>
           </details>
           <ClientOnly>
-            <ProjectComments projectId={id} comments={projectComments} currentUserId={user.id} />
+            <ProjectComments projectId={id} comments={projectComments} currentUserId={user.id} readOnly={readOnly} />
           </ClientOnly>
     </div>
   );

@@ -15,6 +15,7 @@ interface ProposalListProps {
   isAdmin: boolean;
   /** When set, vote buttons + comment forms redirect unauth users to login pointing here. */
   guestRedirect?: string;
+  readOnly?: boolean;
   sort?: "votes" | "newest" | "oldest" | "comments" | "controversy";
 }
 
@@ -26,6 +27,7 @@ export function ProposalList({
   isAdmin,
   guestRedirect,
   sort = "votes",
+  readOnly = false,
 }: ProposalListProps) {
   const { t } = useLocale();
   const voteUpdates = useVoteStream(projectId);
@@ -82,6 +84,7 @@ export function ProposalList({
             liveUpvotes={live?.upvotes}
             liveDownvotes={live?.downvotes}
             maxTotalVotes={maxTotalVotes}
+            readOnly={readOnly}
             guestRedirect={guestRedirect}
           />
         );

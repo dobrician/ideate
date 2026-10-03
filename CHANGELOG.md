@@ -4,12 +4,15 @@
 
 ### Changed
 
+- Compact project deadlines into the participation footer and omit the active badge. Inactive or expired projects reduce contrast and hide voting, proposal creation and comment composition.
+- Collapsed ideas show titles and votes; summaries expand on hover or keyboard focus with reduced-motion support. Expanded ideas place authors at the top right and reveal files in an independent attachment sheet. Guest proposal discussions now preserve the sign-in destination.
+
 - Connected the authentication flow to SurCod SSO: Authorization Code with PKCE S256, verified-email identity linking, shared-project return destinations and public-origin redirects behind the reverse proxy. Existing email/password and magic-link authentication remain available.
 - Added the public OIDC login build flag to container builds and an optional separate Next.js output directory for isolated test servers. Excluded SQLite files, backups and test build caches from the container build context.
 
 - Refocused the primary experience on projects, AI summaries and voting: signed-in home now opens projects and SSO returns to the same landing route; dashboard and administration move to the account menu; global search opens on demand, including Ctrl/Cmd+K.
 - Project cards show AI summaries and participation instead of creation dates and category lists. Project and shared-link pages show the decision summary and voting totals before proposals, with context and metadata behind an explicit disclosure.
-- Idea cards keep the complete AI summary visible and put votes outside the details trigger, avoiding nested interactive buttons. Authors, categories, attachments and full descriptions appear on expansion. Vote and discussion targets are at least 44px.
+- Idea cards reveal the complete AI summary on hover or focus and put votes outside the details trigger, avoiding nested interactive buttons. Authors, categories and full descriptions appear on expansion; attachments open separately. Vote and discussion targets are at least 44px.
 - Export, editing and AI tools move into project actions; advanced filters and creation options are revealed intentionally. Reduced duplicate mobile navigation and nested main landmarks.
 - Preserved the selected proposal sort instead of always overriding it with net-vote ranking on the client.
 - Split the idea form into drawer, fields and duplicate-review components, each below 300 lines.
@@ -21,6 +24,8 @@
 - Keep the projects filter panel inside the viewport on mobile, while retaining right alignment on desktop.
 
 ### Tests
+
+- Updated always-visible summary expectations to match the compact-card requirements requested on 2026-10-03. Added keyboard/hover expansion, independent attachment, inactive voting and compact metadata coverage.
 
 - Added an opt-in allowance for self-signed HTTPS certificates on isolated local browser test servers, so the production image can be tested with Secure cookies in Safari. Plain-HTTP production checks cannot authenticate Safari; assertions and production certificate verification remain unchanged.
 - Moved safe-redirect tests to the shared auth utility import: exporting a helper from an App Router page is rejected by Next.js generated page types. The existing redirect assertions remain intact.

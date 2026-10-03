@@ -101,7 +101,7 @@ export function ThreadedCommentNode({
   node: CommentNode;
   depth: number;
   currentUserId?: string;
-  onReply: (parentId: string) => void;
+  onReply?: (parentId: string) => void;
 }) {
   const { t } = useLocale();
   const [collapsed, setCollapsed] = useState(false);
@@ -116,7 +116,7 @@ export function ThreadedCommentNode({
           comment={node}
           isOwn={isOwn}
           showAvatar={true}
-          onReply={() => onReply(canNest ? node.id : (node.parentId || node.id))}
+          onReply={onReply ? () => onReply(canNest ? node.id : (node.parentId || node.id)) : undefined}
         />
       </div>
       {hasChildren && depth >= MAX_THREAD_DEPTH - 1 && !collapsed && (

@@ -20,12 +20,12 @@ import { VoteButtons } from "@/components/vote-buttons";
 import { DiscussionSheet } from "@/components/discussion-sheet";
 import { deleteProposal } from "@/app/projects/[id]/proposals/actions";
 import { Badge } from "@/components/ui/badge";
-import { Trash2, Paperclip } from "lucide-react";
+import { Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { useLocale } from "@/lib/use-locale";
 import { getCsrfTokenClient } from "@/lib/csrf-client";
 import { MarkdownRenderer } from "@/components/markdown-renderer";
-import { AttachmentUpload } from "@/components/attachment-upload";
+import { ProposalAttachments } from "@/components/proposal-attachments";
 import { formatDate } from "@/lib/utils";
 import type { Comment } from "@/lib/comment-utils";
 
@@ -71,6 +71,7 @@ export function ProposalItem({
   liveDownvotes,
   maxTotalVotes,
   guestRedirect,
+  readOnly = false,
 }: {
   proposal: ProposalWithStats;
   projectId: string;
@@ -80,12 +81,13 @@ export function ProposalItem({
   liveDownvotes?: number;
   maxTotalVotes: number;
   guestRedirect?: string;
+  readOnly?: boolean;
 }) {
   const { t, locale } = useLocale();
   const [showFull, setShowFull] = useState(true);
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
-  const canDelete = proposal.userId === currentUserId || isAdmin;
+  const canDelete = !readOnly && (proposal.userId === currentUserId || isAdmin);
 
   const upvotes = liveUpvotes ?? proposal.upvotes;
   const downvotes = liveDownvotes ?? proposal.downvotes;
@@ -115,47 +117,49 @@ export function ProposalItem({
   return (
     <AccordionItem
       value={proposal.id}
-      className="overflow-hidden rounded-lg border bg-card transition-shadow duration-200 data-[state=open]:shadow-md"
+      className="group/proposal overflow-hidden rounded-lg border bg-card transition-shadow duration-200 data-[state=open]:shadow-md"
     >
-      <div className="p-4">
-        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-5">
+      <div className="px-4 py-2">
+        <div className="flex flex-col gap-1 sm:flex-row sm:items-start sm:gap-4">
           <div className="min-w-0 flex-1">
-            <AccordionTrigger className="items-center gap-3 py-0 hover:no-underline">
-              <span className="block min-w-0 break-words text-sm font-semibold leading-snug" title={proposal.title}>{proposal.title}</span>
+            <AccordionTrigger className="min-h-11 items-center gap-3 py-0 hover:no-underline">
+              <span className="block min-w-0 break-words line-clamp-2 text-sm font-semibold leading-snug" title={proposal.title}>{proposal.title}</span>
               <span className="sr-only">{t("proposals.by")} {proposal.authorName}</span>
             </AccordionTrigger>
           </div>
-          <div className="flex shrink-0 items-center justify-end gap-1">
+          <div className="flex shrink-0 flex-col items-end">
+            <span className="hidden text-xs text-muted-foreground group-data-[state=open]/proposal:block">{proposal.authorName}</span>
+            <div className="flex items-center justify-end gap-1">
             <VoteButtons proposalId={proposal.id} projectId={projectId}
               upvotes={upvotes} downvotes={downvotes} userVote={proposal.userVote}
-              guestRedirect={guestRedirect} />
-            <DiscussionSheet proposalId={proposal.id} projectId={projectId}
+              guestRedirect={guestRedirect} readOnly={readOnly} />
+            {!readOnly && <DiscussionSheet proposalId={proposal.id} projectId={projectId}
               proposalTitle={proposal.title} comments={proposal.comments}
-              commentCount={proposal.commentCount} currentUserId={currentUserId} />
+              commentCount={proposal.commentCount} currentUserId={currentUserId} guestRedirect={guestRedirect} />}
+            {(proposal.attachments.length > 0 || canDelete) && <ProposalAttachments proposal={proposal} canEdit={canDelete} />}
+            </div>
           </div>
         </div>
         {(proposal.summary || proposal.description) && (
-          <p className={`mt-2 text-sm leading-relaxed text-muted-foreground ${proposal.summary ? "" : "line-clamp-2"}`}>
-            {proposal.summary || proposal.description}
-          </p>
+          <div className="invisible grid grid-rows-[0fr] opacity-0 group-hover/proposal:visible group-focus-within/proposal:visible transition-[grid-template-rows,opacity] duration-300 ease-[cubic-bezier(.22,1.15,.36,1)] group-hover/proposal:grid-rows-[1fr] group-hover/proposal:opacity-100 group-focus-within/proposal:grid-rows-[1fr] group-focus-within/proposal:opacity-100 group-data-[state=open]/proposal:hidden motion-reduce:transition-none">
+            <div className="overflow-hidden"><p className="pb-1 text-sm leading-relaxed text-muted-foreground">{proposal.summary || proposal.description}</p></div>
+          </div>
         )}
-        <div className="relative mt-3 h-1 overflow-hidden rounded-full bg-muted" aria-hidden="true">
+        <div className="relative mt-1 h-1 overflow-hidden rounded-full bg-muted" aria-hidden="true">
           {greenWidth > 0 && <div className="absolute inset-y-0 left-0 rounded-full bg-emerald-500/70 transition-all duration-300" style={{ width: `${greenWidth}%` }} />}
           {redWidth > 0 && <div className="absolute inset-y-0 right-0 rounded-full bg-rose-400/70 transition-all duration-300" style={{ width: `${redWidth}%` }} />}
         </div>
       </div>
       <AccordionContent>
-        <div className="space-y-4 border-t px-4 pt-4">
-          <p className="text-xs text-muted-foreground">{t("proposals.by")} {proposal.authorName}</p>
-          {(proposal.tags.length > 0 || proposal.workflowState || proposal.attachments.length > 0) && (
+        <div className="space-y-2 border-t px-4 pt-3">
+          {(proposal.tags.length > 0 || proposal.workflowState) && (
             <div className="flex flex-wrap items-center gap-1">
               {proposal.workflowState && <Badge variant="outline">{proposal.workflowState.currentStageName} ({proposal.workflowState.stageIndex + 1}/{proposal.workflowState.totalStages})</Badge>}
               {proposal.tags.map(tag => <Badge key={tag.id} variant="secondary">{tag.name}</Badge>)}
-              {proposal.attachments.length > 0 && <span className="inline-flex items-center gap-1 text-xs text-muted-foreground"><Paperclip className="size-3" />{proposal.attachments.length}</span>}
             </div>
           )}
           {displayText && (
-            <MarkdownRenderer content={displayText} className="text-sm text-muted-foreground" />
+            <MarkdownRenderer content={displayText} className="text-sm text-muted-foreground prose-p:my-2 prose-headings:mt-3 prose-headings:mb-1 prose-ul:my-2 prose-ol:my-2" />
           )}
 
           {proposal.summary &&
@@ -170,12 +174,6 @@ export function ProposalItem({
                 {showFull ? t("proposals.showSummary") : t("proposals.showFull")}
               </Button>
             )}
-
-          <AttachmentUpload
-            proposalId={proposal.id}
-            attachments={proposal.attachments}
-            canEdit={proposal.userId === currentUserId || isAdmin}
-          />
 
           <div className="flex items-center justify-between text-xs text-muted-foreground">
             <span>

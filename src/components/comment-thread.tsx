@@ -20,9 +20,10 @@ interface CommentThreadProps {
   currentUserId?: string;
   /** When set, the comment input is replaced with a "sign in to comment" prompt that links here. */
   guestRedirect?: string;
+  readOnly?: boolean;
 }
 
-export function CommentThread({ comments, hiddenFields, currentUserId, guestRedirect }: CommentThreadProps) {
+export function CommentThread({ comments, hiddenFields, currentUserId, guestRedirect, readOnly = false }: CommentThreadProps) {
   const { t } = useLocale();
   const router = useRouter();
   const [state, baseFormAction, isPending] = useActionState(addComment, null);
@@ -134,7 +135,7 @@ export function CommentThread({ comments, hiddenFields, currentUserId, guestRedi
                     node={node}
                     depth={0}
                     currentUserId={currentUserId}
-                    onReply={handleReply}
+                    onReply={readOnly ? undefined : handleReply}
                   />
                 </div>
               ))}
@@ -155,7 +156,7 @@ export function CommentThread({ comments, hiddenFields, currentUserId, guestRedi
           </button>
         )}
       </div>
-      <div className="border-t pt-2 pb-[max(env(safe-area-inset-bottom),0.5rem)] sm:pt-3">
+      {!readOnly && <div className="border-t pt-2 pb-[max(env(safe-area-inset-bottom),0.5rem)] sm:pt-3">
         {replyToComment && (
           <div className="flex items-center gap-2 mb-1.5 px-1 text-xs text-muted-foreground">
             <Reply className="h-3 w-3 shrink-0" />
@@ -229,7 +230,7 @@ export function CommentThread({ comments, hiddenFields, currentUserId, guestRedi
             )}
           </form>
         )}
-      </div>
+      </div>}
     </div>
   );
 }

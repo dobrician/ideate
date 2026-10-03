@@ -6,6 +6,7 @@ import { useLocale } from "@/lib/use-locale";
 
 interface DeadlineCountdownProps {
   deadline: Date | string;
+  compact?: boolean;
 }
 
 interface TimeLeft {
@@ -35,7 +36,7 @@ function calcTimeLeft(deadline: Date): TimeLeft {
  * Defers time computation to after mount to avoid hydration mismatch
  * (Date.now() differs between server and client rendering).
  */
-export function DeadlineCountdown({ deadline }: DeadlineCountdownProps) {
+export function DeadlineCountdown({ deadline, compact = false }: DeadlineCountdownProps) {
   const { t } = useLocale();
   const deadlineMs = new Date(deadline).getTime();
   // Start as null so server and client render the same placeholder
@@ -52,9 +53,11 @@ export function DeadlineCountdown({ deadline }: DeadlineCountdownProps) {
   }, [deadlineMs]);
   /* eslint-enable react-hooks/set-state-in-effect */
 
+  const compactClass = "inline-flex items-center gap-1.5 text-xs text-muted-foreground";
+
   if (timeLeft === null) {
     return (
-      <div className="flex items-center gap-2 rounded-md bg-blue-100 px-3 py-2 text-sm font-medium text-blue-800 dark:bg-blue-900 dark:text-blue-200">
+      <div className={compact ? compactClass : "flex items-center gap-2 rounded-md bg-blue-100 px-3 py-2 text-sm font-medium text-blue-800 dark:bg-blue-900 dark:text-blue-200"}>
         <Clock className="h-4 w-4" />
         <span>&hellip;</span>
       </div>
@@ -63,7 +66,7 @@ export function DeadlineCountdown({ deadline }: DeadlineCountdownProps) {
 
   if (timeLeft.expired) {
     return (
-      <div className="flex items-center gap-2 rounded-md bg-red-100 px-3 py-2 text-sm font-medium text-red-800 dark:bg-red-900 dark:text-red-200">
+      <div className={compact ? compactClass : "flex items-center gap-2 rounded-md bg-red-100 px-3 py-2 text-sm font-medium text-red-800 dark:bg-red-900 dark:text-red-200"}>
         <AlertTriangle className="h-4 w-4" />
         {t("deadline.closed")}
       </div>
@@ -74,7 +77,7 @@ export function DeadlineCountdown({ deadline }: DeadlineCountdownProps) {
 
   return (
     <div
-      className={`flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium ${
+      className={compact ? compactClass : `flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium ${
         isUrgent
           ? "bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200"
           : "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200"

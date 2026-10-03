@@ -190,11 +190,12 @@ describe("ProposalList", () => {
     expect(container.textContent).toContain("Alice");
   });
 
-  it("should show the complete AI summary and reveal the original description on demand", async () => {
+  it("should hide the collapsed summary and reveal the original description on demand", async () => {
     const user = userEvent.setup();
     render(<ProposalList proposals={[makeProposal({ summary: "A concise decision summary.", description: "Original detailed proposal." })]}
       projectId="proj1" currentUserId="u1" isAdmin={false} />);
-    expect(screen.getByText("A concise decision summary.")).toBeVisible();
+    // jsdom does not load Tailwind; hover visibility is verified in the browser suite.
+    expect(screen.getByText("A concise decision summary.")).toBeInTheDocument();
     expect(screen.queryByText("Original detailed proposal.")).not.toBeInTheDocument();
     await user.click(screen.getByRole("button", { name: /Proposal A/ }));
     expect(screen.getByText("Original detailed proposal.")).toBeVisible();
@@ -211,5 +212,18 @@ describe("ProposalList", () => {
     const proposals = [makeProposal({ id: "low", title: "First idea", upvotes: 1 }), makeProposal({ id: "high", title: "Second idea", upvotes: 10 })];
     render(<ProposalList proposals={proposals} projectId="proj1" currentUserId="u1" isAdmin={false} sort={sort} />);
     expect(screen.getAllByText(/First idea|Second idea/).map(el => el.textContent)).toEqual(["First idea", "Second idea"]);
+  });
+});
+
+
+describe("ProposalList inactive projects", () => {
+  it("should show vote totals without vote, discussion or delete buttons", async () => {
+    const user = userEvent.setup();
+    render(<ProposalList proposals={[makeProposal({ upvotes: 11, downvotes: 2 })]} projectId="proj1" currentUserId="u1" isAdmin readOnly />);
+    expect(screen.getByLabelText("Pro (11)")).toBeVisible();
+    expect(screen.queryByRole("button", { name: "Pro (11)" })).toBeNull();
+    expect(screen.queryByRole("button", { name: "Open discussion" })).toBeNull();
+    await user.click(screen.getByRole("button", { name: /Proposal A/ }));
+    expect(screen.queryByRole("button", { name: "Delete" })).toBeNull();
   });
 });

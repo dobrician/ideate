@@ -145,3 +145,14 @@ describe("status-utils", () => {
     });
   });
 });
+
+
+describe("isProjectOpen", () => {
+  it("should allow only active projects before their deadline", async () => {
+    const { isProjectOpen } = await import("@/lib/status-utils");
+    expect(isProjectOpen({ status: "active", deadline: new Date(Date.now() + 60000) })).toBe(true);
+    expect(isProjectOpen({ status: "draft", deadline: new Date(Date.now() + 60000) })).toBe(false);
+    expect(isProjectOpen({ status: "archived", deadline: new Date(Date.now() + 60000) })).toBe(false);
+    expect(isProjectOpen({ status: "active", deadline: new Date(Date.now() - 1) })).toBe(false);
+  });
+});

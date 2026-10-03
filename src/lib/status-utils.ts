@@ -68,3 +68,8 @@ export function deadlineBadge(
     className: "border-transparent bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-300",
   };
 }
+
+/** Whether a project currently accepts contributions, including its deadline. */
+export function isProjectOpen(project: { status: string; deadline: Date }): boolean {
+  return project.status === "active" && project.deadline.getTime() > Date.now();
+}

@@ -17,6 +17,7 @@ interface VoteButtonsProps {
   userVote: number | null;
   /** When set, clicking a vote button redirects an unauthenticated user to login instead of calling the action. */
   guestRedirect?: string;
+  readOnly?: boolean;
 }
 
 interface VoteState {
@@ -36,6 +37,7 @@ export function VoteButtons({
   downvotes,
   userVote,
   guestRedirect,
+  readOnly = false,
 }: VoteButtonsProps) {
   const [isPending, startTransition] = useTransition();
   const { t } = useLocale();
@@ -80,6 +82,13 @@ export function VoteButtons({
 
   const upTitle = optimistic.userVote === 1 ? t("vote.remove") : t("vote.pro");
   const downTitle = optimistic.userVote === -1 ? t("vote.remove") : t("vote.contra");
+
+  if (readOnly) {
+    return <div className="flex min-h-11 items-center gap-3 text-xs text-muted-foreground" aria-label={t("vote.ariaGroup")}>
+      <span className="inline-flex items-center gap-1" aria-label={`${t("vote.pro")} (${upvotes})`}><ThumbsUp className="size-4" />{upvotes}</span>
+      <span className="inline-flex items-center gap-1" aria-label={`${t("vote.contra")} (${downvotes})`}><ThumbsDown className="size-4" />{downvotes}</span>
+    </div>;
+  }
 
   return (
     <div className="flex items-center gap-1" role="group" aria-label={t("vote.ariaGroup")}>

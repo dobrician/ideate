@@ -11,9 +11,10 @@ interface ProjectCommentsProps {
   comments: Comment[];
   currentUserId?: string;
   guestRedirect?: string;
+  readOnly?: boolean;
 }
 
-export function ProjectComments({ projectId, comments, currentUserId, guestRedirect }: ProjectCommentsProps) {
+export function ProjectComments({ projectId, comments, currentUserId, guestRedirect, readOnly = false }: ProjectCommentsProps) {
   const { t } = useLocale();
   useCommentPoll();
 
@@ -32,6 +33,7 @@ export function ProjectComments({ projectId, comments, currentUserId, guestRedir
           hiddenFields={{ projectId }}
           currentUserId={currentUserId}
           guestRedirect={guestRedirect}
+          readOnly={readOnly}
         />
       </div>
     </div>

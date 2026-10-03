@@ -2,7 +2,7 @@ import { test, expect } from "@playwright/test";
 import { seedTestData, loginAsTestUser } from "./helpers";
 
 test.describe("Project Detail Page", () => {
-  test("displays project title and status badge", async ({ page }) => {
+  test("displays project title without a redundant active badge", async ({ page }) => {
     const seed = await seedTestData(page.request);
     await loginAsTestUser(page, seed);
 
@@ -12,8 +12,9 @@ test.describe("Project Detail Page", () => {
     // Title is in a CardTitle div
     await expect(page.getByText(/E2E Test Project/)).toBeVisible();
 
-    // Status badge shows "Active"
-    await expect(page.getByText("Active").first()).toBeVisible();
+    // Active is implicit; the deadline lives in the participation footer.
+    await expect(page.getByText("Active", { exact: true })).toHaveCount(0);
+    await expect(page.getByLabel("Voting so far")).toContainText("days left");
   });
 
   test("shows proposals section with count", async ({ page }) => {
@@ -115,7 +116,7 @@ test.describe("Mobile Viewport", () => {
     await expect(exportBtns).toBeVisible();
   });
 
-  test("proposals section and status badge render on mobile", async ({
+  test("proposals and the compact deadline render on mobile", async ({
     page,
   }) => {
     const seed = await seedTestData(page.request);
@@ -125,7 +126,8 @@ test.describe("Mobile Viewport", () => {
     await page.goto(`/projects/${seed.projectId}`);
     await page.waitForLoadState("domcontentloaded");
 
-    await expect(page.getByText("Active").first()).toBeVisible();
+    await expect(page.getByText("Active", { exact: true })).toHaveCount(0);
+    await expect(page.getByLabel("Voting so far")).toContainText("days left");
     await expect(page.getByText(/Proposals?\s*\(\d+\)/)).toBeVisible();
   });
 

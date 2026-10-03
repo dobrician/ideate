@@ -2,6 +2,23 @@
 
 Reverse chronological. Click each sprint for full details.
 
+### In progress — Compact decision cards (2026-10-03)
+
+**Goal:** reduce vertical space in the decision view without hiding the vote results. Follow-up to [#71](https://github.com/dobrician/ideate/issues/71), on the same sprint branch and PR #73.
+
+- [x] Move the deadline into the participation footer and remove the redundant Active badge.
+- [x] Show idea titles and votes by default; reveal summaries on hover or keyboard focus with reduced-motion support.
+- [x] Move the expanded author to the top-right controls and open attachments in an independent sheet.
+- [x] Reduce contrast for inactive/expired projects and hide vote, creation and comment-composition controls.
+- [x] Preserve existing project discussion and the guest proposal-discussion login destination.
+- [x] Pass 2,859 unit tests, focused component checks, TypeScript and ESLint.
+- [x] Complete production browser regression: 614/615 pass initially; the known rate-limit fixture race (#76) passes in isolation in 1.9 seconds.
+- [ ] Complete public post-deployment verification.
+
+**Visual verification:** on a 1120 × 1310 desktop viewport, all ten demo ideas fit on the initial screen; closed cards measure 70px. Expanded descriptions use tighter paragraph/list spacing.
+
+**Test changes:** the prior always-visible summary and Active-badge expectations were replaced because the requested requirements changed. Vote touch targets remain at least 44px. A browser preview exposed invalid nested HTML in the compact footer; this was corrected before deployment and rechecked by the component tests.
+
 ### Deployed, awaiting review — SurCod SSO and public project participation (2026-10-03)
 
 **Goal:** public project previews by share link, with SurCod SSO authentication for votes, proposals and comments. Backlog: [#74](https://github.com/dobrician/ideate/issues/74).

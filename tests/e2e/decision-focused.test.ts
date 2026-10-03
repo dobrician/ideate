@@ -17,7 +17,8 @@ test.describe("Decision-focused workflow", () => {
       const guest = await guestContext.newPage();
       await guest.goto(await link.inputValue());
       await expect(guest.getByLabel("Voting so far")).toContainText("1 vote cast");
-      await expect(guest.getByText("Test proposal for automated E2E tests")).toBeVisible();
+      await expect(guest.getByText("Initial Test Proposal")).toBeVisible();
+      await expect(guest.getByText("Test proposal for automated E2E tests")).not.toBeVisible();
       await expect(guest.getByRole("button", { name: /New Proposal/ })).toHaveCount(0);
       await guest.getByRole("button", { name: /^Pro \(/ }).click();
       await expect(guest).toHaveURL(/\/auth\/login/);
@@ -30,7 +31,8 @@ test.describe("Decision-focused workflow", () => {
     await loginAsTestUser(page, seed);
     await page.goto(`/projects/${seed.projectId}`);
     const idea = page.locator('[data-slot="accordion-item"]').first();
-    await expect(idea.getByText("Test proposal for automated E2E tests")).toBeVisible();
+    await expect(idea.getByText("Initial Test Proposal")).toBeVisible();
+    await expect(idea.getByText("Test proposal for automated E2E tests")).not.toBeVisible();
     const vote = idea.getByRole("button", { name: /^Pro \(/ });
     await expect(vote).toBeInViewport();
     await expect(page.getByRole("button", { name: /PDF|CSV/i })).toHaveCount(0);
@@ -51,4 +53,39 @@ test.describe("Decision-focused workflow", () => {
     await expect(project).toContainText("1 proposal");
     await expect(project).toContainText("1 vote cast");
   });
+});
+
+
+test("should expand the short summary intentionally and keep attachments independent", async ({ page, isMobile }) => {
+  const seed = await seedTestData(page.request);
+  await loginAsTestUser(page, seed);
+  await page.goto(`/projects/${seed.projectId}`);
+  const idea = page.locator('[data-slot="accordion-item"]').first();
+  const summary = idea.getByText("Test proposal for automated E2E tests");
+  const initialHeight = (await idea.boundingBox())!.height;
+  await expect(summary).not.toBeVisible();
+  if (isMobile) await idea.getByRole("button", { name: /^Pro \(/ }).focus();
+  else await idea.hover();
+  await expect(summary).toBeVisible();
+  await expect.poll(async () => (await idea.boundingBox())!.height).toBeGreaterThan(initialHeight);
+  await idea.getByRole("button", { name: "Attachments", exact: true }).click();
+  await expect(page.getByRole("dialog", { name: "Attachments", exact: true })).toBeVisible();
+  await expect(idea).toHaveAttribute("data-state", "closed");
+});
+
+
+test("should preserve closed-project results while hiding contribution controls", async ({ page }) => {
+  const seed = await seedTestData(page.request);
+  await loginAsTestUser(page, seed);
+  await page.goto(`/projects/${seed.projectId}`);
+  await page.getByRole("button", { name: "More actions", exact: true }).click();
+  await page.getByRole("button", { name: "Edit", exact: true }).click();
+  const edit = page.getByRole("dialog", { name: "Edit Project", exact: true });
+  await edit.locator('select[name="status"]').selectOption("archived");
+  await edit.getByRole("button", { name: "Save Changes", exact: true }).click();
+  await expect(edit).not.toBeVisible();
+  await expect(page.getByLabel("Voting so far")).toContainText("1 vote cast");
+  await expect(page.getByRole("button", { name: /^Pro \(/ })).toHaveCount(0);
+  await expect(page.getByRole("button", { name: /New Proposal|Open discussion/ })).toHaveCount(0);
+  await expect(page.locator('textarea[name="content"]')).toHaveCount(0);
 });
