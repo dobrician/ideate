@@ -14,7 +14,7 @@ Context, timestamps, filters, export, editing and AI tools are revealed on reque
 
 - **Framework:** Next.js 16 (App Router), TypeScript strict
 - **Database:** SQLite + Drizzle ORM (WAL mode, FTS5 search)
-- **Auth:** Email magic link + JWT sessions
+- **Auth:** SurCod SSO (OIDC + PKCE), email/password and magic-link fallback, JWT sessions
 - **UI:** Tailwind CSS 4 + shadcn/ui
 - **Testing:** Vitest (unit) + Playwright (E2E + smoke)
 - **AI:** Pluggable LLM (Gemini / OpenAI) for summarization
@@ -65,6 +65,10 @@ docker compose build            # Rebuild images
 
 ## Testing
 
+Use `NEXT_DIST_DIR=.next-e2e` for an additional development server running tests while a preview is open; each server also needs its own `DATABASE_URL` and port. Never enable `E2E_TEST_SECRET` on the public deployment or the demo preview.
+
+When testing a production image, use HTTPS: Safari correctly rejects production `Secure` session cookies over plain HTTP. `PLAYWRIGHT_IGNORE_HTTPS_ERRORS=true` is available only for an isolated local HTTPS test server with a self-signed certificate; certificate validation remains enabled by default and for live smoke tests.
+
 Install the browser engines used by the desktop, Android and iOS projects before the first E2E run:
 
 ```bash
@@ -89,6 +93,16 @@ Key ones:
 - `SMTP_*` — Email provider for magic links
 - `GEMINI_API_KEY` / `OPENAI_API_KEY` — AI summarization
 - `APP_URL` — Public URL (e.g., `https://idea.surmont.co`)
+
+### SurCod SSO and shared projects
+
+`/p/<share-token>` is publicly readable. Voting, proposals and comments require authentication; following the link after login grants membership of that project. The SSO flow preserves this destination and returns the participant to the project.
+
+Configure `OIDC_ISSUER=https://sso.surcod.ro`, `OIDC_CLIENT_ID`, `OIDC_CLIENT_SECRET` and an exact `OIDC_REDIRECT_URI=<APP_URL>/api/auth/oidc/callback` for a confidential web client using `client_secret_post`. Ideate uses Authorization Code with PKCE S256 and requires a verified email before creating or linking an identity. Roles remain managed by Ideate.
+
+Set `NEXT_PUBLIC_OIDC_ENABLED=true` for development. For containers, compile the public login button with `NEXT_PUBLIC_OIDC_ENABLED=true docker compose build staging`, or `podman build --build-arg NEXT_PUBLIC_OIDC_ENABLED=true -t ideate-staging .`. Client secrets are supplied only at runtime. Production and development use separate OIDC applications and credentials in **1Password → Surmont → SurCod — Ideate Web / Ideate Development — ZITADEL OIDC**. The user login is saved as **Ideate — SurCod SSO**.
+
+The existing SurCod identity `dc@surcod.ro` is explicitly linked to the demo owner `ciprian.dobrea@gmail.com`; its existing Google identity can also authenticate through SSO. Other participants need an account available in SurCod SSO, or may use Ideate's existing email authentication. This integration does not change the SSO registration policy.
 
 ## Project Structure
 

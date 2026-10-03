@@ -10,16 +10,9 @@ import { Label } from "@/components/ui/label";
 import { useLocale } from "@/lib/use-locale";
 import { useLoginForm } from "@/lib/use-login-form";
 import { Card, CardContent, CardDescription, CardHeader } from "@/components/ui/card";
+import { getSafeRedirect } from "@/lib/auth-redirect";
 
 const oidcEnabled = process.env.NEXT_PUBLIC_OIDC_ENABLED === "true";
-
-export function getSafeRedirect(value: string | null): string {
-  if (!value) return "/";
-  if (!value.startsWith("/")) return "/";
-  if (value.startsWith("//")) return "/";
-  if (value.includes("\\")) return "/";
-  return value;
-}
 
 function OrDivider({ label }: { label: string }) {
   return (
@@ -52,6 +45,7 @@ export default function LoginPage() {
       oidc_not_configured: t("auth.oidcError"),
       oidc_missing_params: t("auth.oidcError"),
       oidc_no_subject: t("auth.oidcError"),
+      oidc_unverified_email: t("auth.oidcError"),
     };
     if (oidcErrors[errorParam]) form.setError(oidcErrors[errorParam]);
     else if (errorParam) form.setError(errorParam);
@@ -126,7 +120,7 @@ export default function LoginPage() {
               </Button>
               <OrDivider label={t("auth.or")} />
               {oidcEnabled && (
-                <Button type="button" variant="outline" className="w-full" onClick={() => { window.location.href = "/api/auth/oidc"; }}>
+                <Button type="button" variant="outline" className="w-full" onClick={() => { window.location.href = `/api/auth/oidc?redirect=${encodeURIComponent(getSafeRedirect(searchParams.get("redirect")))}`; }}>
                   {t("auth.signInWithOidc")}
                 </Button>
               )}

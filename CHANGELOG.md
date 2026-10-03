@@ -4,6 +4,9 @@
 
 ### Changed
 
+- Connected the authentication flow to SurCod SSO: Authorization Code with PKCE S256, verified-email identity linking, shared-project return destinations and public-origin redirects behind the reverse proxy. Existing email/password and magic-link authentication remain available.
+- Added the public OIDC login build flag to container builds and an optional separate Next.js output directory for isolated test servers. Excluded SQLite files, backups and test build caches from the container build context.
+
 - Refocused the primary experience on projects, AI summaries and voting: signed-in home now opens projects and SSO returns to the same landing route; dashboard and administration move to the account menu; global search opens on demand, including Ctrl/Cmd+K.
 - Project cards show AI summaries and participation instead of creation dates and category lists. Project and shared-link pages show the decision summary and voting totals before proposals, with context and metadata behind an explicit disclosure.
 - Idea cards keep the complete AI summary visible and put votes outside the details trigger, avoiding nested interactive buttons. Authors, categories, attachments and full descriptions appear on expansion. Vote and discussion targets are at least 44px.
@@ -18,6 +21,9 @@
 - Keep the projects filter panel inside the viewport on mobile, while retaining right alignment on desktop.
 
 ### Tests
+
+- Added an opt-in allowance for self-signed HTTPS certificates on isolated local browser test servers, so the production image can be tested with Secure cookies in Safari. Plain-HTTP production checks cannot authenticate Safari; assertions and production certificate verification remain unchanged.
+- Moved safe-redirect tests to the shared auth utility import: exporting a helper from an App Router page is rejected by Next.js generated page types. The existing redirect assertions remain intact.
 
 - Updated assertions that required always-visible exports, dashboard/admin links in primary navigation, author rows and vote gradients behind titles: those requirements were explicitly replaced by the decision-focused design requested on 2026-10-03. Existing functionality, RBAC and duplicate prevention remain under regression tests.
 - Added tests for AI-summary precedence, intentional disclosure, project participation, simplified navigation, independent vote controls, form validation and duplicate review; added browser checks for voting in the initial viewport and the signed-in landing destination.

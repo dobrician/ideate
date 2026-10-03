@@ -1,7 +1,7 @@
 import { db } from "@/db";
 import { users, oauthAccounts } from "@/db/schema";
 import { eq, and } from "drizzle-orm";
-import { randomUUID, randomBytes } from "crypto";
+import { randomUUID, randomBytes, createHash } from "crypto";
 import { logger } from "@/lib/logger";
 
 export interface OidcConfig {
@@ -26,6 +26,7 @@ interface OidcTokenResponse {
 export interface OidcUserInfo {
   sub: string;
   email?: string;
+  email_verified?: boolean;
   name?: string;
   given_name?: string;
   family_name?: string;
@@ -74,10 +75,16 @@ export function generateState(): string {
   return randomBytes(32).toString("hex");
 }
 
+/** Generate the private verifier for a PKCE S256 authorization flow. */
+export function generateCodeVerifier(): string {
+  return randomBytes(32).toString("base64url");
+}
+
 export function buildAuthorizationUrl(
   discovery: OidcDiscovery,
   config: OidcConfig,
-  state: string
+  state: string,
+  codeVerifier?: string
 ): string {
   const params = new URLSearchParams({
     response_type: "code",
@@ -86,13 +93,18 @@ export function buildAuthorizationUrl(
     scope: "openid email profile",
     state,
   });
+  if (codeVerifier) {
+    params.set("code_challenge", createHash("sha256").update(codeVerifier).digest("base64url"));
+    params.set("code_challenge_method", "S256");
+  }
   return `${discovery.authorization_endpoint}?${params.toString()}`;
 }
 
 export async function exchangeCode(
   discovery: OidcDiscovery,
   config: OidcConfig,
-  code: string
+  code: string,
+  codeVerifier?: string
 ): Promise<OidcTokenResponse> {
   const body = new URLSearchParams({
     grant_type: "authorization_code",
@@ -102,6 +114,7 @@ export async function exchangeCode(
     client_secret: config.clientSecret,
   });
 
+  if (codeVerifier) body.set("code_verifier", codeVerifier);
   const res = await fetch(discovery.token_endpoint, {
     method: "POST",
     headers: { "Content-Type": "application/x-www-form-urlencoded" },
@@ -110,8 +123,7 @@ export async function exchangeCode(
   });
 
   if (!res.ok) {
-    const text = await res.text();
-    throw new Error(`Token exchange failed: ${res.status} ${text}`);
+    throw new Error(`Token exchange failed: ${res.status}`);
   }
 
   return res.json();

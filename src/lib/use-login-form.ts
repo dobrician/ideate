@@ -1,5 +1,5 @@
 import { useState, useCallback, FormEvent } from "react";
-import { getSafeRedirect } from "@/app/auth/login/page";
+import { getSafeRedirect } from "@/lib/auth-redirect";
 
 type AuthMode = "magic-link" | "password";
 

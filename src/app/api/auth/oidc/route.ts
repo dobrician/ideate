@@ -4,9 +4,11 @@ import {
   getOidcConfig,
   fetchDiscovery,
   generateState,
+  generateCodeVerifier,
   buildAuthorizationUrl,
 } from "@/lib/oidc";
 import { logger } from "@/lib/logger";
+import { getSafeRedirect } from "@/lib/auth-redirect";
 
 const STATE_COOKIE = "oidc_state";
 
@@ -26,17 +28,21 @@ export async function GET(request: NextRequest) {
 
     const discovery = await fetchDiscovery(config.issuer);
     const state = generateState();
+    const codeVerifier = generateCodeVerifier();
 
     const cookieStore = await cookies();
-    cookieStore.set(STATE_COOKIE, state, {
+    const options = {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
+      sameSite: "lax" as const,
       maxAge: 600, // 10 minutes
       path: "/",
-    });
+    };
+    cookieStore.set(STATE_COOKIE, state, options);
+    cookieStore.set("oidc_verifier", codeVerifier, options);
+    cookieStore.set("oidc_redirect", getSafeRedirect(request.nextUrl.searchParams.get("redirect")), options);
 
-    const authUrl = buildAuthorizationUrl(discovery, config, state);
+    const authUrl = buildAuthorizationUrl(discovery, config, state, codeVerifier);
     return NextResponse.redirect(authUrl);
   } catch (err) {
     logger.error({ err }, "OIDC initiation failed");

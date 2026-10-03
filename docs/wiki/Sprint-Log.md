@@ -2,6 +2,27 @@
 
 Reverse chronological. Click each sprint for full details.
 
+### In progress — SurCod SSO and public project participation (2026-10-03)
+
+**Goal:** public project previews by share link, with SurCod SSO authentication for votes, proposals and comments. Backlog: [#74](https://github.com/dobrician/ideate/issues/74).
+
+- [x] Register separate production and development confidential OIDC applications in SurCod SSO.
+- [x] Save the user login and client credentials in 1Password, vault Surmont.
+- [x] Link the existing SurCod identity to the demo owner without changing passwords or roles.
+- [x] Add PKCE S256, require verified email and preserve the shared-project login destination.
+- [x] Use the configured public callback origin behind the reverse proxy.
+- [x] Verify the real development SSO flow and the demo account returned by Ideate.
+- [x] Complete unit/browser regression verification and container build.
+- [ ] Deploy the public runtime and pass live smoke tests and SSO verification.
+
+**Verified development outcome:** real Authorization Code exchange with PKCE through `sso.surcod.ro`, session creation as `ciprian.dobrea@gmail.com` with the existing admin role, and return through the shared-project link to the canonical demo project. This was verified through HTTP/OIDC and the ZITADEL Session API; the Google UI flow has not been re-tested in this sprint.
+
+**Access policy:** anyone holding a share link can read the project. Authenticated visitors gain membership and can contribute. The SurCod registration policy is unchanged; existing email authentication remains available. The SSO identity emits `dc@surcod.ro` and is explicitly mapped to the existing demo owner, so no second Ideate account is created.
+
+**Regression verification:** all 2,853 unit tests pass across 206 files. The production container passed 608 of 609 browser cases on the initial HTTPS run; its sole Android rate-limit check passed when rerun in isolation. The shared-fixture reset race is tracked in [#76](https://github.com/dobrician/ideate/issues/76), without weakening assertions or production counters. The current login/redirect/PKCE tests also pass (46 focused checks). TypeScript, ESLint and the final production build pass. Production browser tests use an isolated database and a local TLS proxy because Safari correctly rejects Secure cookies over plain HTTP.
+
+**Independent backlog:** the unchanged dependency lockfile reported 58 audit findings during the container build; triage is tracked in [#75](https://github.com/dobrician/ideate/issues/75).
+
 ### In progress — Decision-focused Ideate (2026-10-03)
 
 **Goal:** simplify the primary experience around projects, AI summaries and votes, applying the clear action hierarchy of KeySlip. Backlog: [#71](https://github.com/dobrician/ideate/issues/71).

@@ -1,8 +1,11 @@
 node_modules
 .next
+.next-*
 .git
 *.db
 *.db-journal
+*.sqlite*
+*.bak*
 data/
 test-results/
 playwright-report/
