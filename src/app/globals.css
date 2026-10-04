@@ -1,58 +1,59 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
+@import "./decision-palette.css";
 @plugin "@tailwindcss/typography";
 
 @custom-variant dark (&:is(.dark *));
 
 :root {
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.696 0.17 162.48);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
+  --card: #FFFFFF;
+  --card-foreground: #202A24;
+  --popover: #FFFFFF;
+  --popover-foreground: #202A24;
+  --primary: #216F59;
+  --primary-foreground: #FFFFFF;
+  --secondary: #EAF0E9;
+  --secondary-foreground: #202A24;
+  --muted: #EAF0E9;
+  --muted-foreground: #58665C;
+  --accent: #EAF0E9;
+  --accent-foreground: #202A24;
   --destructive: oklch(0.577 0.245 27.325);
   --destructive-foreground: oklch(0.577 0.245 27.325);
-  --border: oklch(0.87 0 0);
-  --input: oklch(0.87 0 0);
-  --ring: oklch(0.696 0.17 162.48);
+  --border: #CFD8CF;
+  --input: #CFD8CF;
+  --ring: var(--primary);
   --radius: 0.625rem;
   --chart-1: oklch(0.646 0.222 41.116);
   --chart-2: oklch(0.6 0.118 184.704);
   --chart-3: oklch(0.398 0.07 227.392);
   --chart-4: oklch(0.828 0.189 84.429);
   --chart-5: oklch(0.769 0.188 70.08);
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
+  --background: #F6F8F5;
+  --foreground: #202A24;
 }
 
 .dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.696 0.17 162.48);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.78 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
+  --background: #121613;
+  --foreground: #E9EFE9;
+  --card: #202722;
+  --card-foreground: #E9EFE9;
+  --popover: #202722;
+  --popover-foreground: #E9EFE9;
+  --primary: #75B69A;
+  --primary-foreground: #102019;
+  --secondary: #2B352E;
+  --secondary-foreground: #E9EFE9;
+  --muted: #2B352E;
+  --muted-foreground: #B6C2B8;
+  --accent: #2B352E;
+  --accent-foreground: #E9EFE9;
   --destructive: oklch(0.704 0.191 22.216);
   --destructive-foreground: oklch(0.985 0 0);
-  --border: oklch(1 0 0 / 15%);
-  --input: oklch(1 0 0 / 20%);
-  --ring: oklch(0.696 0.17 162.48);
+  --border: #3B453E;
+  --input: #4D5A50;
+  --ring: var(--primary);
   --chart-1: oklch(0.488 0.243 264.376);
   --chart-2: oklch(0.696 0.17 162.48);
   --chart-3: oklch(0.769 0.188 70.08);
@@ -112,7 +113,7 @@
   }
   /* Dark mode stat cards: better contrast (#62) */
   .dark [data-slot="card"] {
-    border-color: oklch(1 0 0 / 12%);
+    border-color: var(--border);
     box-shadow: 0 0 0 1px oklch(1 0 0 / 6%);
   }
 }

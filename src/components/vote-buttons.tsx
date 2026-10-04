@@ -17,6 +17,7 @@ interface VoteButtonsProps {
   userVote: number | null;
   /** When set, clicking a vote button redirects an unauthenticated user to login instead of calling the action. */
   guestRedirect?: string;
+  readOnly?: boolean;
 }
 
 interface VoteState {
@@ -36,6 +37,7 @@ export function VoteButtons({
   downvotes,
   userVote,
   guestRedirect,
+  readOnly = false,
 }: VoteButtonsProps) {
   const [isPending, startTransition] = useTransition();
   const { t } = useLocale();
@@ -81,8 +83,15 @@ export function VoteButtons({
   const upTitle = optimistic.userVote === 1 ? t("vote.remove") : t("vote.pro");
   const downTitle = optimistic.userVote === -1 ? t("vote.remove") : t("vote.contra");
 
+  if (readOnly) {
+    return <div className="flex min-h-11 items-center gap-3 text-xs text-muted-foreground" aria-label={t("vote.ariaGroup")}>
+      <span className="inline-flex items-center gap-1" aria-label={`${t("vote.pro")} (${upvotes})`}><ThumbsUp className="size-4" />{upvotes}</span>
+      <span className="inline-flex items-center gap-1" aria-label={`${t("vote.contra")} (${downvotes})`}><ThumbsDown className="size-4" />{downvotes}</span>
+    </div>;
+  }
+
   return (
-    <div className="flex items-center gap-1" role="group" aria-label={t("vote.ariaGroup")}>
+    <div className="flex items-center gap-0 sm:gap-1" role="group" aria-label={t("vote.ariaGroup")}>
       <span className="sr-only" aria-live="polite" aria-atomic="true">
         {t("vote.pro")} {optimistic.upvotes}, {t("vote.contra")} {optimistic.downvotes}
       </span>
@@ -95,17 +104,17 @@ export function VoteButtons({
         aria-label={`${t("vote.pro")} (${optimistic.upvotes})${optimistic.userVote === 1 ? " - " + t("vote.remove") : ""}`}
         aria-pressed={optimistic.userVote === 1}
         className={cn(
-          "transition-all duration-150 active:scale-95",
+          "min-h-11 min-w-11 gap-1 px-1 has-[>svg]:px-1 sm:gap-1.5 sm:px-3 sm:has-[>svg]:px-2.5 transition-all duration-150 active:scale-95",
           optimistic.userVote === 1
-            ? "bg-emerald-100 text-emerald-700 hover:bg-emerald-200 dark:bg-emerald-900/50 dark:text-emerald-300 dark:hover:bg-emerald-900/70"
-            : "text-muted-foreground hover:text-emerald-600 dark:hover:text-emerald-400"
+            ? "bg-vote-pro text-vote-pro-foreground hover:bg-vote-pro hover:text-vote-pro-foreground dark:hover:bg-vote-pro"
+            : "text-muted-foreground hover:bg-vote-pro hover:text-vote-pro-foreground dark:hover:bg-vote-pro"
         )}
       >
         {isPending ? (
-          <Loader2 className="mr-1 h-4 w-4 animate-spin" aria-hidden="true" />
+          <Loader2 className="sm:mr-1 h-4 w-4 animate-spin" aria-hidden="true" />
         ) : (
           <ThumbsUp
-            className="mr-1 h-4 w-4"
+            className="sm:mr-1 h-4 w-4"
             aria-hidden="true"
             fill={optimistic.userVote === 1 ? "currentColor" : "none"}
           />
@@ -122,17 +131,17 @@ export function VoteButtons({
         aria-label={`${t("vote.contra")} (${optimistic.downvotes})${optimistic.userVote === -1 ? " - " + t("vote.remove") : ""}`}
         aria-pressed={optimistic.userVote === -1}
         className={cn(
-          "transition-all duration-150 active:scale-95",
+          "min-h-11 min-w-11 gap-1 px-1 has-[>svg]:px-1 sm:gap-1.5 sm:px-3 sm:has-[>svg]:px-2.5 transition-all duration-150 active:scale-95",
           optimistic.userVote === -1
-            ? "bg-red-100 text-red-700 hover:bg-red-200 dark:bg-red-900/50 dark:text-red-300 dark:hover:bg-red-900/70"
-            : "text-muted-foreground hover:text-red-600 dark:hover:text-red-400"
+            ? "bg-vote-contra text-vote-contra-foreground hover:bg-vote-contra hover:text-vote-contra-foreground dark:hover:bg-vote-contra"
+            : "text-muted-foreground hover:bg-vote-contra hover:text-vote-contra-foreground dark:hover:bg-vote-contra"
         )}
       >
         {isPending ? (
-          <Loader2 className="mr-1 h-4 w-4 animate-spin" aria-hidden="true" />
+          <Loader2 className="sm:mr-1 h-4 w-4 animate-spin" aria-hidden="true" />
         ) : (
           <ThumbsDown
-            className="mr-1 h-4 w-4"
+            className="sm:mr-1 h-4 w-4"
             aria-hidden="true"
             fill={optimistic.userVote === -1 ? "currentColor" : "none"}
           />

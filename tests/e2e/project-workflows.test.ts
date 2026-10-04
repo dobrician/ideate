@@ -9,6 +9,8 @@ test.describe("Project Detail Workflows", () => {
     await page.goto(`/projects/${seed.projectId}`);
     await page.waitForLoadState("domcontentloaded");
 
+    await page.getByRole("button", { name: "More actions", exact: true }).click();
+
     // Edit button should be visible for the project owner
     const editBtn = page.getByRole("button", { name: /edit/i }).first();
     await expect(editBtn).toBeVisible();
@@ -32,6 +34,7 @@ test.describe("Project Detail Workflows", () => {
     await page.goto(`/projects/${seed.projectId}`);
     await page.waitForLoadState("domcontentloaded");
 
+    await page.getByRole("button", { name: "More actions", exact: true }).click();
     const pdfBtn = page.getByRole("button", { name: /pdf/i }).first();
     await expect(pdfBtn).toBeVisible();
 
@@ -52,6 +55,7 @@ test.describe("Project Detail Workflows", () => {
     await page.goto(`/projects/${seed.projectId}`);
     await page.waitForLoadState("domcontentloaded");
 
+    await page.getByRole("button", { name: "More actions", exact: true }).click();
     const csvBtn = page.getByRole("button", { name: /csv/i }).first();
     await expect(csvBtn).toBeVisible();
   });

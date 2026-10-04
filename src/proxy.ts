@@ -19,12 +19,13 @@ function isValidSessionJwt(token: string): boolean {
     );
 
     // Must be a session token
-    if (payload.type !== "session") return false;
+    if (payload.type !== "session" || payload.authMethod !== "sso") return false;
 
     // Must have userId
     if (!payload.userId) return false;
 
     // Check expiry (with 30s tolerance matching auth.ts clockTolerance)
+    if (typeof payload.exp !== "number") return false;
     if (typeof payload.exp === "number") {
       const now = Math.floor(Date.now() / 1000);
       if (payload.exp + 30 < now) return false;
@@ -39,19 +40,7 @@ function isValidSessionJwt(token: string): boolean {
 const PUBLIC_PATHS = [
   "/",
   "/auth/login",
-  "/auth/verify",
-  "/auth/request",
   "/auth/logout",
-  "/auth/register",
-  "/auth/verify-email",
-  "/auth/forgot-password",
-  "/auth/reset-password",
-  "/api/auth/register",
-  "/api/auth/login-password",
-  "/api/auth/forgot-password",
-  "/api/auth/reset-password",
-  "/api/auth/resend-verification",
-  "/api/auth/verify-email",
   "/api/health",
   "/api/votes/stream",
   "/api/search",
@@ -176,6 +165,12 @@ export function proxy(request: NextRequest) {
   const start = Date.now();
   const { pathname } = request.nextUrl;
   const locale = request.cookies.get("locale")?.value || "en";
+
+  // Unknown/retired authentication endpoints must never redirect credential POSTs.
+  if ((pathname.startsWith("/api/auth/") && !PUBLIC_PATHS.includes(pathname)) ||
+      pathname === "/api/profile/confirm-email") {
+    return withPerfHeaders(addSecurityHeaders(NextResponse.json({ error: "Not found" }, { status: 404 })), request, start);
+  }
 
   // Public paths and unknown routes (will 404) pass through without auth
   if (isPublicPath(pathname) || !isProtectedPath(pathname)) {

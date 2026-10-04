@@ -35,16 +35,4 @@ test.describe("API Endpoints", () => {
     expect(body).toHaveProperty("version");
   });
 
-  test("auth request rate limits by IP", async ({ request }) => {
-    // Send multiple requests rapidly
-    const promises = Array.from({ length: 25 }, () =>
-      request.post("/auth/request", {
-        data: { email: `test-ratelimit-${Math.random()}@example.com` },
-      })
-    );
-    const responses = await Promise.all(promises);
-    const statuses = responses.map((r) => r.status());
-    // At least one should be 429 (rate limited)
-    expect(statuses.some((s) => s === 429)).toBe(true);
-  });
 });

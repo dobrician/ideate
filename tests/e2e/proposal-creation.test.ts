@@ -2,6 +2,15 @@ import { test, expect } from "@playwright/test";
 import { seedTestData, loginAsTestUser } from "./helpers";
 
 test.describe("Proposal Creation Flow", () => {
+  test.beforeEach(async ({ page }) => {
+    // Creation tests exercise saving; duplicate review has its own coverage.
+    // Avoid live/cached AI treating every synthetic E2E proposal as a duplicate.
+    await page.route("**/api/proposals/similarity", route => route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify({ matches: [] }),
+    }));
+  });
   test("full flow: login → navigate → open sheet → submit → proposal appears", async ({
     page,
   }) => {

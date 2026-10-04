@@ -16,6 +16,7 @@ interface DiscussionSheetProps {
   comments: Comment[];
   commentCount: number;
   currentUserId?: string;
+  guestRedirect?: string;
 }
 
 export function DiscussionSheet({
@@ -25,6 +26,7 @@ export function DiscussionSheet({
   comments,
   commentCount,
   currentUserId,
+  guestRedirect,
 }: DiscussionSheetProps) {
   const { t } = useLocale();
   const [open, setOpen] = useState(false);
@@ -33,9 +35,9 @@ export function DiscussionSheet({
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
-        <Button variant="ghost" size="sm" className="text-muted-foreground" aria-label={t("comments.open")}>
-          <MessageSquare className="mr-1 h-4 w-4" />
-          <span className="rounded-full bg-muted px-1.5 py-0.5 text-xs font-medium">{commentCount}</span>
+        <Button variant="ghost" size="sm" className="min-h-11 min-w-11 gap-1 px-1 has-[>svg]:px-1 sm:gap-1.5 sm:px-3 sm:has-[>svg]:px-2.5 text-muted-foreground" aria-label={t("comments.open")}>
+          <MessageSquare className="sm:mr-1 h-4 w-4" />
+          <span className="rounded-full bg-muted px-1 sm:px-1.5 py-0.5 text-xs font-medium">{commentCount}</span>
         </Button>
       </SheetTrigger>
       <SheetContent className="flex w-full flex-col sm:max-w-lg">
@@ -52,6 +54,7 @@ export function DiscussionSheet({
             comments={comments}
             hiddenFields={{ proposalId }}
             currentUserId={currentUserId}
+            guestRedirect={guestRedirect}
           />
         </div>
       </SheetContent>

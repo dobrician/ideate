@@ -1,6 +1,7 @@
 // @vitest-environment jsdom
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { render, screen, fireEvent } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom/vitest";
 
 // ── Mocks ──────────────────────────────────────────────────────
@@ -179,13 +180,78 @@ describe("ProposalList", () => {
     expect(widths).not.toContain("0%");
   });
 
-  it("shows author name for each proposal", () => {
+  it("should place the author below the compact header when expanded", async () => {
+    const user = userEvent.setup();
     const proposals = [
       makeProposal({ id: "p1", title: "X", authorName: "Alice" }),
     ];
     const { container } = render(
       <ProposalList proposals={proposals} projectId="proj1" currentUserId="u1" isAdmin={false} />
     );
-    expect(container.textContent).toContain("Alice");
+    const author = container.querySelector('[data-proposal-author]');
+    expect(author).toHaveTextContent("Alice");
+    expect(container.querySelector('[data-proposal-header]')?.contains(author)).toBe(false);
+    await user.click(screen.getByRole("button", { name: /X/ }));
+    expect(author?.closest('[data-slot="accordion-item"]')).toHaveAttribute("data-state", "open");
+  });
+
+  it("should use decorative card backgrounds and leave unvoted ideas unfilled", () => {
+    const { container } = render(<ProposalList proposals={[makeProposal()]} projectId="proj1" currentUserId="u1" isAdmin={false} />);
+    const chart = container.querySelector('[data-vote-chart]');
+    expect(chart).toHaveAttribute("aria-hidden", "true");
+    expect(chart?.children).toHaveLength(0);
+    expect(container.querySelector('.h-1')).toBeNull();
+  });
+
+  it("should show the first preview and reveal the original description on demand", async () => {
+    const user = userEvent.setup();
+    render(<ProposalList proposals={[makeProposal({ summary: "A concise decision summary.", description: "Original detailed proposal." })]}
+      projectId="proj1" currentUserId="u1" isAdmin={false} />);
+    // jsdom does not load Tailwind; hover visibility is verified in the browser suite.
+    expect(screen.getByText("A concise decision summary.")).toBeInTheDocument();
+    expect(screen.queryByText("Original detailed proposal.")).not.toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: /Proposal A/ }));
+    expect(screen.getByText("Original detailed proposal.")).toBeVisible();
+  });
+
+  it("should keep voting and discussion buttons outside the details trigger", () => {
+    const { container } = render(<ProposalList proposals={[makeProposal()]} projectId="proj1" currentUserId="u1" isAdmin={false} />);
+    expect(container.querySelector("button button")).toBeNull();
+    expect(screen.getByRole("button", { name: "Pro (0)" })).toBeVisible();
+    expect(screen.getByRole("button", { name: "Contra (0)" })).toBeVisible();
+  });
+
+  it.each(["newest", "oldest", "comments", "controversy"] as const)("should preserve the server ordering when %s is selected", sort => {
+    const proposals = [makeProposal({ id: "low", title: "First idea", upvotes: 1 }), makeProposal({ id: "high", title: "Second idea", upvotes: 10 })];
+    render(<ProposalList proposals={proposals} projectId="proj1" currentUserId="u1" isAdmin={false} sort={sort} />);
+    expect(screen.getAllByText(/First idea|Second idea/).map(el => el.textContent)).toEqual(["First idea", "Second idea"]);
+  });
+});
+
+
+describe("ProposalList inactive projects", () => {
+  it("should show vote totals without vote, discussion or delete buttons", async () => {
+    const user = userEvent.setup();
+    render(<ProposalList proposals={[makeProposal({ upvotes: 11, downvotes: 2 })]} projectId="proj1" currentUserId="u1" isAdmin readOnly />);
+    expect(screen.getByLabelText("Pro (11)")).toBeVisible();
+    expect(screen.queryByRole("button", { name: "Pro (11)" })).toBeNull();
+    expect(screen.queryByRole("button", { name: "Open discussion" })).toBeNull();
+    await user.click(screen.getByRole("button", { name: /Proposal A/ }));
+    expect(screen.queryByRole("button", { name: "Delete" })).toBeNull();
+  });
+});
+
+
+describe("ProposalList persistent preview", () => {
+  it("should activate the first idea and keep a focused selection after leaving", () => {
+    const { container } = render(<ProposalList proposals={[makeProposal({ id: "first", title: "First", upvotes: 2 }), makeProposal({ id: "second", title: "Second" })]} projectId="proj1" currentUserId="u1" isAdmin={false} />);
+    const cards = container.querySelectorAll('[data-slot="accordion-item"]');
+    expect(cards[0]).toHaveAttribute("data-preview-active", "true");
+    expect(cards[1]).toHaveAttribute("data-preview-active", "false");
+    fireEvent.focus(screen.getByRole("button", { name: /Second/ }));
+    expect(cards[1]).toHaveAttribute("data-preview-active", "true");
+    fireEvent.blur(screen.getByRole("button", { name: /Second/ }));
+    expect(cards[1]).toHaveAttribute("data-preview-active", "true");
+    expect(cards[0]).toHaveAttribute("data-preview-active", "false");
   });
 });

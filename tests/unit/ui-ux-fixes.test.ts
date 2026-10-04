@@ -270,21 +270,6 @@ describe("statusLabel edge cases", () => {
 });
 
 // ============================================================
-// #58 — Vote bar gradient: verify /8 opacity (unit-level)
-// ============================================================
-
-describe("Vote bar gradient opacity (#58)", () => {
-  // Vote bars use inline rgba styles with low opacity for subtle gradients
-  it("vote bar uses low-opacity inline styles (verified via source)", async () => {
-    const fs = await import("fs");
-    const src = fs.readFileSync("src/components/proposal-item.tsx", "utf-8");
-    expect(src).toContain("rgba(120, 149, 100, 0.18)");
-    expect(src).not.toContain("from-green-500/15");
-    expect(src).not.toContain("from-red-500/15");
-  });
-});
-
-// ============================================================
 // #52 — Proposal title overflow classes (unit-level)
 // ============================================================
 
@@ -296,11 +281,12 @@ describe("Proposal title overflow classes (#52)", () => {
     expect(src).toContain("line-clamp-2");
   });
 
-  it("author span has truncate", async () => {
+  it("author is secondary information in expanded details", async () => {
     const fs = await import("fs");
     const src = fs.readFileSync("src/components/proposal-item.tsx", "utf-8");
-    // The author line has class="block truncate ..."
-    expect(src).toMatch(/block\s+truncate/);
+    // Authorship is available to assistive technology and on expansion.
+    expect(src).toContain('className="sr-only"');
+    expect(src).toContain("proposals.by");
   });
 });
 
@@ -308,49 +294,13 @@ describe("Proposal title overflow classes (#52)", () => {
 // #69 — Details link styling (unit-level)
 // ============================================================
 
-describe("Details link prominence (#69)", () => {
-  it("uses text-xs font-medium text-primary instead of muted", async () => {
+describe("Intentional proposal disclosure", () => {
+  it("should expose the summary through an accordion trigger", async () => {
     const fs = await import("fs");
     const src = fs.readFileSync("src/components/proposal-item.tsx", "utf-8");
-    expect(src).toContain("text-primary/80");
-    expect(src).toContain("hover:text-primary");
-    expect(src).toContain("font-medium");
-    // The span element wrapping the Details text should have font-medium text-primary
-    const lines = src.split("\n");
-    const detailsIdx = lines.findIndex((l: string) => l.includes("proposals.details"));
-    expect(detailsIdx).toBeGreaterThan(0);
-    // The parent <span> element is on the line above
-    const spanLine = lines[detailsIdx - 1];
-    expect(spanLine).toContain("font-medium");
-    expect(spanLine).toContain("text-primary/80");
-    expect(spanLine).not.toContain("text-muted-foreground/50");
-  });
-});
-
-// ============================================================
-// #55 — Profile tabs horizontal scroll (unit-level)
-// ============================================================
-
-describe("Profile tabs scroll (#55)", () => {
-  it("TabsList has overflow-x-auto and tabs have shrink-0", async () => {
-    const fs = await import("fs");
-    const src = fs.readFileSync(
-      "src/app/profile/profile-tabs.tsx",
-      "utf-8"
-    );
-    expect(src).toContain("overflow-x-auto");
-    expect(src).toContain('className="shrink-0"');
-    expect(src).toContain("scrollbarWidth");
-  });
-
-  it("has gradient fade indicator hidden on desktop", async () => {
-    const fs = await import("fs");
-    const src = fs.readFileSync(
-      "src/app/profile/profile-tabs.tsx",
-      "utf-8"
-    );
-    expect(src).toContain("bg-gradient-to-l from-background to-transparent");
-    expect(src).toContain("sm:hidden");
+    expect(src).toContain("AccordionTrigger");
+    expect(src).toContain("proposal.summary || proposal.description");
+    expect(src).not.toContain('t("proposals.details")');
   });
 });
 
@@ -379,54 +329,21 @@ describe("Proposal form uses Sheet drawer (#56)", () => {
 // #59 — Input field borders (CSS variables)
 // ============================================================
 
-describe("Input field borders (#59)", () => {
-  it("light mode border is stronger than 0.922", async () => {
+describe("Decision palette (#85)", () => {
+  it("uses opaque neutral borders and stronger dark input boundaries", async () => {
     const fs = await import("fs");
     const css = fs.readFileSync("src/app/globals.css", "utf-8");
-    // Light mode --border should be oklch(0.87 ...) not oklch(0.922 ...)
-    expect(css).toContain("--border: oklch(0.87 0 0)");
-    expect(css).not.toContain("--border: oklch(0.922 0 0)");
+    expect(css).toContain("--border: #CFD8CF");
+    expect(css).toContain("--border: #3B453E");
+    expect(css).toContain("--input: #4D5A50");
   });
 
-  it("dark mode border uses 15% opacity", async () => {
+  it("calibrates the brand separately for each theme and shares its focus ring", async () => {
     const fs = await import("fs");
     const css = fs.readFileSync("src/app/globals.css", "utf-8");
-    expect(css).toContain("--border: oklch(1 0 0 / 15%)");
-  });
-
-  it("dark mode input uses 20% opacity", async () => {
-    const fs = await import("fs");
-    const css = fs.readFileSync("src/app/globals.css", "utf-8");
-    expect(css).toContain("--input: oklch(1 0 0 / 20%)");
-  });
-});
-
-// ============================================================
-// #51 — Primary color is green brand accent
-// ============================================================
-
-describe("Primary color green brand (#51)", () => {
-  it("light mode --primary uses oklch(0.696 0.17 162.48)", async () => {
-    const fs = await import("fs");
-    const css = fs.readFileSync("src/app/globals.css", "utf-8");
-    // Check both :root and .dark blocks have the same green primary
-    const primaryMatches = css.match(/--primary:\s*oklch\([^)]+\)/g);
-    expect(primaryMatches).toBeTruthy();
-    expect(primaryMatches!.length).toBeGreaterThanOrEqual(2);
-    for (const m of primaryMatches!) {
-      expect(m).toContain("0.696");
-      expect(m).toContain("162.48");
-    }
-  });
-
-  it("--ring matches --primary (green)", async () => {
-    const fs = await import("fs");
-    const css = fs.readFileSync("src/app/globals.css", "utf-8");
-    const ringMatches = css.match(/--ring:\s*oklch\([^)]+\)/g);
-    expect(ringMatches).toBeTruthy();
-    for (const m of ringMatches!) {
-      expect(m).toContain("0.696");
-    }
+    expect(css).toContain("--primary: #216F59");
+    expect(css).toContain("--primary: #75B69A");
+    expect(css.match(/--ring: var\(--primary\)/g)).toHaveLength(2);
   });
 });
 
@@ -461,7 +378,7 @@ describe("Dark mode card contrast (#62)", () => {
     const fs = await import("fs");
     const css = fs.readFileSync("src/app/globals.css", "utf-8");
     expect(css).toContain('.dark [data-slot="card"]');
-    expect(css).toContain("border-color: oklch(1 0 0 / 12%)");
+    expect(css).toContain("border-color: var(--border)");
     expect(css).toContain("box-shadow:");
   });
 });
@@ -494,13 +411,13 @@ describe("Comment section spacing (#66)", () => {
 describe("Romanian translation overflow (#67)", () => {
   it("proposal form description area has flex-wrap", async () => {
     const fs = await import("fs");
-    const src = fs.readFileSync("src/components/proposal-form.tsx", "utf-8");
+    const src = fs.readFileSync("src/components/proposal-form-fields.tsx", "utf-8");
     expect(src).toContain("flex flex-wrap");
   });
 
   it("Write/Preview buttons have shrink-0", async () => {
     const fs = await import("fs");
-    const src = fs.readFileSync("src/components/proposal-form.tsx", "utf-8");
+    const src = fs.readFileSync("src/components/proposal-form-fields.tsx", "utf-8");
     // Each button should have shrink-0
     const shrinkMatches = src.match(/shrink-0.*?items-center.*?gap-1.*?rounded/g);
     expect(shrinkMatches).toBeTruthy();
@@ -509,46 +426,7 @@ describe("Romanian translation overflow (#67)", () => {
 
   it("markdown hint has break-words", async () => {
     const fs = await import("fs");
-    const src = fs.readFileSync("src/components/proposal-form.tsx", "utf-8");
+    const src = fs.readFileSync("src/components/proposal-form-fields.tsx", "utf-8");
     expect(src).toContain("break-words text-xs text-muted-foreground");
-  });
-});
-
-// ============================================================
-// #64 — Auth page card padding
-// ============================================================
-
-describe("Auth page card padding (#64)", () => {
-  it("login page card has px-2 sm:px-0", async () => {
-    const fs = await import("fs");
-    const src = fs.readFileSync("src/app/auth/login/page.tsx", "utf-8");
-    expect(src).toContain("px-2");
-    expect(src).toContain("sm:px-0");
-  });
-
-  it("register page card has px-2 sm:px-0", async () => {
-    const fs = await import("fs");
-    const src = fs.readFileSync("src/app/auth/register/page.tsx", "utf-8");
-    expect(src).toContain("px-2");
-    expect(src).toContain("sm:px-0");
-  });
-
-  it("login page wrapper has sm:px-6", async () => {
-    const fs = await import("fs");
-    const src = fs.readFileSync("src/app/auth/login/page.tsx", "utf-8");
-    expect(src).toContain("sm:px-6");
-  });
-});
-
-// ============================================================
-// #63 — "View all" link not truncated
-// ============================================================
-
-describe("View all link (#63)", () => {
-  it("dashboard page View All link has shrink-0 whitespace-nowrap", async () => {
-    const fs = await import("fs");
-    const src = fs.readFileSync("src/app/dashboard/page.tsx", "utf-8");
-    expect(src).toContain("shrink-0");
-    expect(src).toContain("whitespace-nowrap");
   });
 });

@@ -1,4 +1,9 @@
 export const ro: Record<string, string> = {
+  "projects.archive": "Arhivă",
+  "projects.current": "Decizii curente",
+  'auth.otherSignInMethods': 'Alte metode de autentificare',
+  'auth.ssoSimpleDescription': 'Autentifică-te pentru a vota și a participa la discuție.',
+  'profile.ssoIdentity': 'Identitatea de autentificare este gestionată prin SurCod SSO.',
   // Navigation
   "nav.home": "Acasă",
   "nav.projects": "Proiecte",
@@ -63,6 +68,15 @@ export const ro: Record<string, string> = {
   "projects.lastUpdated": "Ultima actualizare",
   "projects.never": "Niciodată",
   "projects.unknown": "Necunoscut",
+  "projects.votesCast_one": "vot exprimat",
+  "projects.voters_one": "persoană a votat",
+  "projects.proposals_one": "propunere",
+  "projects.options": "Mai multe opțiuni",
+  "projects.context": "Context și detalii",
+  "projects.votesCast": "voturi exprimate",
+  "projects.voters": "persoane au votat",
+  "projects.votingSoFar": "Votarea până acum",
+  "projects.filters": "Filtre",
   // Project share
   "project.share.button": "Distribuie",
   "project.share.dialogTitle": "Distribuie acest proiect",
@@ -101,7 +115,7 @@ export const ro: Record<string, string> = {
     "Configurează un nou proiect de prioritizare a ideilor pentru echipa ta",
   "projectForm.editTitle": "Editează Proiect",
   "projectForm.editDesc": "Actualizează detaliile proiectului",
-  "projectForm.title": "Titlu Proiect",
+  "projectForm.title": "Ce vrem să decidem?",
   "projectForm.titleRequired": "Titlu Proiect *",
   "projectForm.titleHint":
     "Un titlu clar și descriptiv pentru proiectul tău",
@@ -124,7 +138,7 @@ export const ro: Record<string, string> = {
   "projectForm.loading": "Se încarcă proiectul...",
   "projectForm.goBack": "Înapoi",
   "projectForm.projectUpdated": "Proiect actualizat!",
-  "projectForm.titlePlaceholder": "Foaie de parcurs produse T1 2026",
+  "projectForm.titlePlaceholder": "Cum îmbunătățim experiența clienților noi?",
   "projectForm.loadError": "Nu s-a putut încărca proiectul",
   "projectForm.titleMinLength": "Titlul trebuie să aibă minim 3 caractere",
   "projectForm.titleRequiredError": "Titlul proiectului este obligatoriu",

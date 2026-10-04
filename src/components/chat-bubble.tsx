@@ -13,6 +13,7 @@ import {
 } from "@/lib/comment-utils";
 import type { Comment, CommentNode } from "@/lib/comment-utils";
 
+/** Render a message with readable Markdown on its own or received bubble. */
 export function ChatBubble({
   comment,
   isOwn,
@@ -59,13 +60,14 @@ export function ChatBubble({
           </div>
         )}
         <div
-          className={`overflow-hidden break-words rounded-2xl px-3 py-2 text-sm ${
+          data-chat-bubble data-own={isOwn}
+          className={`overflow-hidden break-words rounded-2xl border px-3 py-2 text-sm ${
             isOwn
-              ? "bg-primary text-primary-foreground rounded-tr-sm"
-              : "bg-muted text-foreground rounded-tl-sm"
+              ? "bg-chat-own text-chat-own-foreground border-transparent rounded-tr-sm"
+              : "bg-zinc-200 text-foreground border-border dark:bg-muted rounded-tl-sm"
           }`}
         >
-          <MarkdownRenderer content={comment.content} simple />
+          <MarkdownRenderer content={comment.content} simple className="text-inherit prose-p:text-inherit prose-strong:text-inherit prose-em:text-inherit prose-code:text-inherit prose-a:text-inherit prose-a:underline prose-del:text-inherit" />
         </div>
         <div className={`flex items-center gap-2 mt-0.5 ${isOwn ? "justify-end" : ""}`}>
           {!showAvatar && timeAgo && (
@@ -92,6 +94,7 @@ export function ChatBubble({
   );
 }
 
+/** Render threaded replies with bounded nesting and independent reply controls. */
 export function ThreadedCommentNode({
   node,
   depth,
@@ -101,7 +104,7 @@ export function ThreadedCommentNode({
   node: CommentNode;
   depth: number;
   currentUserId?: string;
-  onReply: (parentId: string) => void;
+  onReply?: (parentId: string) => void;
 }) {
   const { t } = useLocale();
   const [collapsed, setCollapsed] = useState(false);
@@ -116,7 +119,7 @@ export function ThreadedCommentNode({
           comment={node}
           isOwn={isOwn}
           showAvatar={true}
-          onReply={() => onReply(canNest ? node.id : (node.parentId || node.id))}
+          onReply={onReply ? () => onReply(canNest ? node.id : (node.parentId || node.id)) : undefined}
         />
       </div>
       {hasChildren && depth >= MAX_THREAD_DEPTH - 1 && !collapsed && (

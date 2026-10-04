@@ -25,7 +25,7 @@ describe("User factory", () => {
       expect(u.email).toContain("@");
       expect(u.firstName).toBeTruthy();
       expect(u.lastName).toBeTruthy();
-      expect(u.passwordHash).toBeTruthy();
+      expect(u).not.toHaveProperty("passwordHash");
       expect(u.emailVerified).toBe(true);
       expect(u.onboardingCompleted).toBe(true);
       expect(["admin", "manager", "member", "viewer"]).toContain(u.role);

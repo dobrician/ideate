@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, FormEvent } from "react";
+import { useState, FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -11,16 +11,6 @@ import { createProject } from "../actions";
 import { toast } from "sonner";
 import { useLocale } from "@/lib/use-locale";
 import { getCsrfTokenClient } from "@/lib/csrf-client";
-import { TagSelector } from "@/components/tag-selector";
-
-interface Template {
-  id: string;
-  name: string;
-  description: string | null;
-  titlePrefix: string | null;
-  deadlineOffset: number | null;
-  defaultTags: string[];
-}
 
 /**
  * New project page
@@ -33,50 +23,6 @@ export default function NewProjectPage() {
   const [error, setError] = useState("");
   const [fieldErrors, setFieldErrors] = useState<{ title?: string; deadline?: string }>({});
   const [touched, setTouched] = useState<Record<string, boolean>>({});
-  const [templates, setTemplates] = useState<Template[]>([]);
-  const [availableTags, setAvailableTags] = useState<{ id: string; name: string }[]>([]);
-  const [selectedTagIds, setSelectedTagIds] = useState<string[]>([]);
-
-  useEffect(() => {
-    fetch("/api/admin/templates")
-      .then((res) => res.ok ? res.json() : null)
-      .then((data) => {
-        if (data?.templates) setTemplates(data.templates);
-      })
-      .catch(() => {});
-    fetch("/api/tags")
-      .then((res) => res.ok ? res.json() : null)
-      .then((data) => {
-        if (data?.tags) setAvailableTags(data.tags);
-      })
-      .catch(() => {});
-  }, []);
-
-  function applyTemplate(templateId: string) {
-    const tpl = templates.find((t) => t.id === templateId);
-    if (!tpl) return;
-
-    const form = document.querySelector<HTMLFormElement>("form");
-    if (!form) return;
-
-    const titleInput = form.querySelector<HTMLInputElement>("#title");
-    const descInput = form.querySelector<HTMLTextAreaElement>("#description");
-    const deadlineInput = form.querySelector<HTMLInputElement>("#deadline");
-
-    if (titleInput && tpl.titlePrefix) {
-      titleInput.value = tpl.titlePrefix + " ";
-      titleInput.focus();
-    }
-    if (descInput && tpl.description) {
-      descInput.value = tpl.description;
-    }
-    if (deadlineInput && tpl.deadlineOffset) {
-      const deadline = new Date();
-      deadline.setDate(deadline.getDate() + tpl.deadlineOffset);
-      deadlineInput.value = deadline.toISOString().split("T")[0];
-    }
-  }
-
   function validateTitle(v: string) {
     if (!v.trim()) return t("projectForm.titleRequiredError");
     if (v.trim().length < 3) return t("projectForm.titleMinLength");
@@ -128,7 +74,7 @@ export default function NewProjectPage() {
   }
 
   return (
-    <div className="mx-auto max-w-2xl py-4 sm:py-8">
+    <div className="mx-auto max-w-xl py-4 sm:py-8">
       <Card className="dark:border-white/10">
         <CardHeader>
           <CardTitle>{t("projectForm.createTitle")}</CardTitle>
@@ -139,25 +85,6 @@ export default function NewProjectPage() {
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-6" noValidate>
             <input type="hidden" name="csrfToken" value={getCsrfTokenClient()} />
-
-            {templates.length > 0 && (
-              <div className="space-y-2">
-                <Label htmlFor="template">{t("templates.fromTemplate")}</Label>
-                <select
-                  id="template"
-                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-base text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring md:text-sm"
-                  defaultValue=""
-                  onChange={(e) => {
-                    if (e.target.value) applyTemplate(e.target.value);
-                  }}
-                >
-                  <option value="">{t("templates.selectTemplate")}</option>
-                  {templates.map((tpl) => (
-                    <option key={tpl.id} value={tpl.id}>{tpl.name}</option>
-                  ))}
-                </select>
-              </div>
-            )}
 
             <div className="space-y-2">
               <Label htmlFor="title">{t("projectForm.titleRequired")}</Label>
@@ -187,7 +114,7 @@ export default function NewProjectPage() {
                 id="description"
                 name="description"
                 placeholder={t("projectForm.descriptionPlaceholder")}
-                rows={6}
+                rows={4}
                 maxLength={5000}
                 disabled={isLoading}
               />
@@ -217,38 +144,7 @@ export default function NewProjectPage() {
               )}
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="status">{t("projectForm.status")}</Label>
-              <select
-                id="status"
-                name="status"
-                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-base text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
-                disabled={isLoading}
-                defaultValue="active"
-              >
-                <option value="active">{t("projects.status.active")}</option>
-                <option value="draft">{t("projects.status.draft")}</option>
-                <option value="archived">{t("projects.status.archived")}</option>
-              </select>
-              <p className="text-xs text-muted-foreground">
-                {t("projectForm.statusHint")}
-              </p>
-            </div>
-
-            {availableTags.length > 0 && (
-              <div className="space-y-2">
-                <Label>{t("tags.projectTags")}</Label>
-                {selectedTagIds.map((id) => (
-                  <input key={id} type="hidden" name="tagIds" value={id} />
-                ))}
-                <TagSelector
-                  availableTags={availableTags}
-                  selectedTagIds={selectedTagIds}
-                  onChange={setSelectedTagIds}
-                  disabled={isLoading}
-                />
-              </div>
-            )}
+            <input type="hidden" name="status" value="active" />
 
             {error && (
               <div className="rounded-md bg-red-50 p-3 dark:bg-red-950" role="alert">
@@ -263,7 +159,7 @@ export default function NewProjectPage() {
               <Button
                 type="button"
                 variant="outline"
-                onClick={() => router.back()}
+                onClick={() => router.push("/projects")}
                 disabled={isLoading}
               >
                 {t("common.cancel")}

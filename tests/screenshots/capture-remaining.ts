@@ -27,9 +27,7 @@ async function run() {
   console.log("Seeded:", seed.email);
 
   // Login
-  await page.request.post(`${BASE_URL}/api/auth/login-password`, {
-    data: { email: seed.email, password: seed.password },
-  });
+  await ctx.addCookies(seed.cookies);
 
   const pages: [string, string, boolean][] = [
     // ["new-project", "/projects/new", true], // already captured

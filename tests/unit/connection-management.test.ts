@@ -100,7 +100,7 @@ describe("connection-management", () => {
       expect(source).toContain("POLLING_INTERVAL_MS");
       expect(source).toContain("FALLBACK_THRESHOLD_MS");
       expect(source).toContain("router.refresh()");
-      expect(source).toContain("ws.fallbackPolling");
+      expect(source).not.toContain("ws.fallbackPolling");
     });
   });
 });

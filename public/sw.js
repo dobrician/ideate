@@ -1,6 +1,6 @@
 /// <reference lib="webworker" />
 
-const CACHE_VERSION = "ideate-v2";
+const CACHE_VERSION = "ideate-v3-convergence";
 const OFFLINE_URL = "/offline";
 
 // Cache names

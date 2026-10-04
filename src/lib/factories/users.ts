@@ -1,5 +1,4 @@
 import { randomUUID } from "crypto";
-import { hashSync } from "bcryptjs";
 
 export interface DemoUser {
   id: string;
@@ -7,16 +6,12 @@ export interface DemoUser {
   firstName: string;
   lastName: string;
   avatarUrl: string | null;
-  passwordHash: string;
   emailVerified: boolean;
   role: "admin" | "manager" | "member" | "viewer";
   onboardingCompleted: boolean;
 }
 
-/** Default password for all demo users: DemoPass1 */
-const DEMO_PASSWORD_HASH = hashSync("DemoPass1", 10);
-
-const PERSONAS: Omit<DemoUser, "id" | "passwordHash" | "emailVerified" | "onboardingCompleted">[] = [
+const PERSONAS: Omit<DemoUser, "id" | "emailVerified" | "onboardingCompleted">[] = [
   // Admins (2)
   {
     email: "adrian.marinescu@ideate.ro",
@@ -175,7 +170,6 @@ export function createUsers(count?: number): DemoUser[] {
   return personas.map((p) => ({
     id: randomUUID(),
     ...p,
-    passwordHash: DEMO_PASSWORD_HASH,
     emailVerified: true,
     onboardingCompleted: true,
   }));

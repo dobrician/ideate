@@ -2,42 +2,32 @@ import { cookies } from "next/headers";
 import { notFound, redirect } from "next/navigation";
 import type { Metadata } from "next";
 import { db } from "@/db";
-import { comments, projects, users, tags, projectTags } from "@/db/schema";
+import { comments, projects, proposals, votes, users, tags, projectTags } from "@/db/schema";
 import { getCurrentUser } from "@/lib/auth";
 import { hasPermission, canManageResource } from "@/lib/rbac";
 import { canActOnProject } from "@/lib/project-members";
 import type { Role } from "@/lib/rbac";
-import { eq, asc } from "drizzle-orm";
-import { Badge } from "@/components/ui/badge";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import Link from "next/link";
+import { eq, asc, count, countDistinct } from "drizzle-orm";
 import { DeleteProjectButton } from "./delete-button";
 import { EditProjectDialog } from "@/components/edit-project-dialog";
 import { ShareProjectDialog } from "@/components/share-project-dialog";
 import { ProposalForm } from "@/components/proposal-form";
 import { ProposalList } from "@/components/proposal-list";
 import { ExportButtons } from "@/components/export-buttons";
-import { DeadlineCountdown } from "@/components/deadline-countdown";
 import { getProjectProposals, PROPOSALS_PAGE_SIZE, isValidSort } from "./queries";
 import type { ProposalSort } from "./queries";
 import { ProposalSortSelector } from "@/components/proposal-sort-selector";
 import { Pagination } from "@/components/pagination";
 import { ProjectComments } from "@/components/project-comments";
 import { getTranslations } from "@/lib/i18n-server";
-import { statusBadgeClass, statusLabel } from "@/lib/status-utils";
-import { formatDate } from "@/lib/utils";
 import { RegenerateSummaryButton } from "@/components/regenerate-summary-button";
 import { SuggestProposalsButton } from "@/components/suggest-proposals";
-import { MarkdownRenderer } from "@/components/markdown-renderer";
 import { ArchiveBanner } from "@/components/archive-banner";
 import { TagFilter } from "@/components/tag-filter";
 import { ClientOnly } from "@/components/client-only";
+import { isProjectOpen } from "@/lib/status-utils";
+import { ProjectOverview } from "@/components/project-overview";
+import { ProjectTools } from "@/components/project-tools";
 import { ProjectLivePanel } from "@/components/project-live-panel";
 
 interface ProjectPageProps {
@@ -119,8 +109,9 @@ export default async function ProjectPage({ params, searchParams }: ProjectPageP
 
   const projectData = project[0];
   const isArchived = projectData.status === "archived";
+  const readOnly = !isProjectOpen(projectData);
   const canEdit = !isArchived && canManageResource(role, projectData.userId, user.id);
-  const canCreateProposal = !isArchived && (await canActOnProject(role, user.id, projectData.id, "proposal:create"));
+  const canCreateProposal = !readOnly && (await canActOnProject(role, user.id, projectData.id, "proposal:create"));
   const isAdmin = hasPermission(role, "project:manage_all");
 
   const sp = await searchParams;
@@ -128,7 +119,7 @@ export default async function ProjectPage({ params, searchParams }: ProjectPageP
   const proposalSort: ProposalSort = isValidSort(sp.sort || "") ? sp.sort as ProposalSort : "votes";
   const filterTag = sp.tag || undefined;
   const proposalOffset = (proposalPage - 1) * PROPOSALS_PAGE_SIZE;
-  const [{ proposals: proposalsWithStats, total: proposalTotal }, commentRows, allTags, projectTagRows] =
+  const [{ proposals: proposalsWithStats, total: proposalTotal }, commentRows, allTags, projectTagRows, votingStats] =
     await Promise.all([
       getProjectProposals(id, user.id, PROPOSALS_PAGE_SIZE, proposalOffset, proposalSort, filterTag),
       db
@@ -148,6 +139,8 @@ export default async function ProjectPage({ params, searchParams }: ProjectPageP
         .orderBy(comments.createdAt),
       db.select({ id: tags.id, name: tags.name }).from(tags).orderBy(asc(tags.name)),
       db.select({ tagId: projectTags.tagId }).from(projectTags).where(eq(projectTags.projectId, id)),
+      db.select({ votes: count(), voters: countDistinct(votes.userId) }).from(votes)
+        .innerJoin(proposals, eq(votes.proposalId, proposals.id)).where(eq(proposals.projectId, id)),
     ]);
   const projectComments = commentRows.map((r) => ({
     id: r.id,
@@ -165,123 +158,20 @@ export default async function ProjectPage({ params, searchParams }: ProjectPageP
 
   return (
     <div className="mx-auto max-w-4xl py-4 sm:py-6">
-      <div className="mb-3">
-        <Link href="/projects" className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground transition-colors">
-          &larr; {t("projects.back")}
-        </Link>
-      </div>
+
 
       {isArchived && <ArchiveBanner projectId={id} isAdmin={isAdmin} />}
 
-      <Card>
-        <CardHeader>
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-            <div className="min-w-0 flex-1">
-              <CardTitle className="break-words text-2xl sm:text-3xl">
-                {projectData.title}
-              </CardTitle>
-              <CardDescription className="mt-2 flex flex-wrap items-center gap-2 sm:gap-4">
-                <Badge className={statusBadgeClass(projectData.status)}>
-                  {statusLabel(projectData.status, t)}
-                </Badge>
-                {projectData.deadline && (
-                  <DeadlineCountdown deadline={projectData.deadline} />
-                )}
-                {currentTagNames.map((tag) => (
-                  <Badge key={tag.id} variant="secondary">{tag.name}</Badge>
-                ))}
-              </CardDescription>
-            </div>
-            <div className="flex flex-wrap items-center gap-1.5">
-              <ExportButtons projectId={id} />
-              {canEdit && (
-                <>
-                  <ShareProjectDialog
-                    projectId={id}
-                    initialToken={projectData.shareToken ?? null}
-                  />
-                  <EditProjectDialog
-                    projectId={id}
-                    title={projectData.title}
-                    description={projectData.description}
-                    deadline={projectData.deadline}
-                    status={projectData.status}
-                    availableTags={allTags}
-                    currentTagIds={currentTagIds}
-                  />
-                  <DeleteProjectButton projectId={id} />
-                </>
-              )}
-            </div>
-          </div>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          {projectData.summary && (
-            <div className="rounded-md bg-muted/50 p-3">
-              <div className="flex items-start justify-between gap-2">
-                <p className="text-sm italic text-muted-foreground">
-                  {projectData.summary}
-                </p>
-                {canEdit && <RegenerateSummaryButton projectId={id} />}
-              </div>
-            </div>
-          )}
-
-          {projectData.description && (
-            <div>
-              <h2 className="mb-2 text-lg font-semibold">{t("projects.description")}</h2>
-              <MarkdownRenderer content={projectData.description} className="text-muted-foreground" />
-            </div>
-          )}
-
-          <ClientOnly>
-            <ProjectLivePanel projectId={id} sessionToken={sessionToken} />
-          </ClientOnly>
-
-          <div className="grid gap-4 sm:grid-cols-2">
-            <div>
-              <h3 className="mb-1 text-sm font-medium text-muted-foreground">
-                {t("projects.created")}
-              </h3>
-              <p>
-                {projectData.createdAt
-                  ? formatDate(projectData.createdAt, locale)
-                  : t("projects.unknown")}
-              </p>
-            </div>
-            <div>
-              <h3 className="mb-1 text-sm font-medium text-muted-foreground">
-                {t("projects.lastUpdated")}
-              </h3>
-              <p>
-                {projectData.updatedAt
-                  ? formatDate(projectData.updatedAt, locale)
-                  : t("projects.never")}
-              </p>
-            </div>
-          </div>
-
-          <div className="border-t pt-6">
-            <div className="mb-4 flex flex-wrap items-center gap-2">
-              <h2 className="text-lg font-semibold">
-                {t("proposals.count", { count: proposalTotal })}
-              </h2>
-              <ProposalSortSelector currentSort={proposalSort} />
-              {allTags.length > 0 && <TagFilter tags={allTags} activeTagId={filterTag} />}
-              <div className="flex-1" />
-              {canCreateProposal && (
-                <div className="flex gap-2">
-                  <SuggestProposalsButton
-                    projectId={id}
-                    projectTitle={projectData.title}
-                    projectDescription={projectData.description || ""}
-                    existingProposals={proposalsWithStats.map((p) => ({
-                      title: p.title,
-                      description: p.description ?? undefined,
-                      summary: p.summary ?? undefined,
-                    }))}
-                  />
-                  <ProposalForm
+      <ProjectOverview
+        project={projectData}
+        stats={votingStats[0] ?? { votes: 0, voters: 0 }}
+        tags={currentTagNames}
+        locale={locale}
+        t={t}
+        tools={
+          <div className="flex items-center">
+            {canCreateProposal && (
+              <ProposalForm compact
                     projectId={id}
                     projectTitle={projectData.title}
                     projectDescription={projectData.description || ""}
@@ -292,10 +182,39 @@ export default async function ProjectPage({ params, searchParams }: ProjectPageP
                       summary: p.summary ?? undefined,
                     }))}
                     availableTags={allTags}
+              />
+            )}
+          <ProjectTools>
+            <ProposalSortSelector currentSort={proposalSort} />
+            {allTags.length > 0 && <TagFilter tags={allTags} activeTagId={filterTag} />}
+            <ExportButtons projectId={id} />
+            {canCreateProposal && (
+                  <SuggestProposalsButton
+                    projectId={id}
+                    projectTitle={projectData.title}
+                    projectDescription={projectData.description || ""}
+                    existingProposals={proposalsWithStats.map((p) => ({
+                      title: p.title,
+                      description: p.description ?? undefined,
+                      summary: p.summary ?? undefined,
+                    }))}
                   />
-                </div>
-              )}
-            </div>
+            )}
+            {canEdit && (
+              <>
+                <ShareProjectDialog projectId={id} initialToken={projectData.shareToken ?? null} />
+                <EditProjectDialog projectId={id} title={projectData.title}
+                  description={projectData.description} deadline={projectData.deadline}
+                  status={projectData.status} availableTags={allTags} currentTagIds={currentTagIds} />
+                <RegenerateSummaryButton projectId={id} />
+                <DeleteProjectButton projectId={id} />
+              </>
+            )}
+          </ProjectTools>
+          </div>
+        }
+      />
+          <section className={`mt-4 ${readOnly ? "opacity-65" : ""}`} aria-label={t("proposals.count", { count: proposalTotal })}>
             <ClientOnly fallback={
               <div className="space-y-2">
                 {proposalsWithStats.map((p) => (
@@ -308,20 +227,21 @@ export default async function ProjectPage({ params, searchParams }: ProjectPageP
                 projectId={id}
                 currentUserId={user.id}
                 isAdmin={isAdmin}
+                readOnly={readOnly}
+                sort={proposalSort}
               />
             </ClientOnly>
             {proposalTotalPages > 1 && (
-              <div className="mt-6">
+              <div className={`mt-4 ${readOnly ? "opacity-65" : ""}`}>
                 <Pagination currentPage={proposalPage} totalPages={proposalTotalPages} />
               </div>
             )}
-          </div>
+          </section>
 
+          <ClientOnly><ProjectLivePanel projectId={id} sessionToken={sessionToken} /></ClientOnly>
           <ClientOnly>
-            <ProjectComments projectId={id} comments={projectComments} currentUserId={user.id} />
+            <ProjectComments projectId={id} comments={projectComments} currentUserId={user.id} readOnly={readOnly} />
           </ClientOnly>
-        </CardContent>
-      </Card>
     </div>
   );
 }

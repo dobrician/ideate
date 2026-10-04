@@ -181,15 +181,6 @@ describe("profile actions rate limiting", () => {
     expect(await updateProfile(mkFD({ firstName: "Bob" }))).toEqual(RL_ERROR);
   });
 
-  it("changePassword rejects when rate-limited", async () => {
-    mockCheckRateLimit.mockReturnValueOnce(blocked);
-    const { changePassword } = await import("@/app/profile/actions");
-    const fd = mkFD({
-      currentPassword: "old", newPassword: "new", confirmPassword: "new",
-    });
-    expect(await changePassword(fd)).toEqual(RL_ERROR);
-  });
-
   it("updateNotificationPreferences rejects when rate-limited", async () => {
     mockCheckRateLimit.mockReturnValueOnce(blocked);
     const { updateNotificationPreferences } = await import(
@@ -198,11 +189,5 @@ describe("profile actions rate limiting", () => {
     expect(await updateNotificationPreferences(mkFD({}))).toEqual(RL_ERROR);
   });
 
-  it("requestEmailChange rejects when rate-limited", async () => {
-    mockCheckRateLimit.mockReturnValueOnce(blocked);
-    const { requestEmailChange } = await import("@/app/profile/actions");
-    expect(await requestEmailChange(mkFD({ newEmail: "b@t.com" }))).toEqual(
-      RL_ERROR
-    );
-  });
+
 });

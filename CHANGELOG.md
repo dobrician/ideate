@@ -1,5 +1,79 @@
 # Changelog
 
+## [Unreleased]
+
+### Documentation
+
+- Freeze the accepted project screen and its interactions; document a source review and phased simplification proposal for the remaining user experience, with shared-dependency boundaries and acceptance criteria (#71). No application changes or deployment.
+
+- Add the canonical handover for the isolated English family-holiday demo, including verified real AI duplicate detection, actor voting/reset evidence and private capture-access locations. No application code or deployment changes.
+
+### Changed
+
+- Polish only the essential preview after adversarial Opus 5.5 reviews: keyboard-safe logout, correct search autocomplete/Escape/stale-result handling, guest return context, bounded project summaries, recoverable account forms, predictable creation cancel and explicitly opted-in compact Projects pagination. Closed mobile charts no longer inherit desktop fades/hover hints. Production and project actions/data remain unchanged (#90).
+
+- Compact mobile proposal headers into one row, retaining 44px vote/discussion/file targets and fixed consensus-chart height. Touch descriptions open on demand; desktop persistent previews remain (#89). Existing summary browser expectations change only for the approved mobile requirement.
+
+- Retire local registration, passwords, magic links, verification/recovery, authentication emails and local credential settings. Sign-in enters SurCod SSO directly with a preserved project destination; existing accounts/roles/data remain and old sessions require one fresh SSO login (#87). Isolated test fixtures cannot run on public origins.
+
+- Implement the approved essential user experience only on the isolated test host: Projects replaces Dashboard, account preferences replace duplicate content lists, SurCod SSO leads login, search removes retrieval controls, and project creation asks only for decision/context/deadline. Retain deliberate fallback login, admin authorization and frozen project interactions (#71, #74).
+- Move production to `ideate.surcod.ro`, expose the separate synthetic test runtime at `test.ideate.surcod.ro`, and permanently redirect the legacy host preserving path/query. Existing production image and database are retained; SurCod portfolio links now target production directly.
+- Align structured data and sitemap origin with configured `APP_URL`; omit the retired dashboard from the test sitemap. Correct static-asset smoke to check CSS/JS responses directly instead of blocking on unrelated failed service-worker installation (#72).
+
+- Applied the approved forest/sage and clay decision palette across chart fills, vote controls, proposal creation, duplicate review and own chat messages. Shared light/dark tokens replace scattered green/red overrides; primary action text now follows the theme foreground (#85). Project surfaces and neutral borders integrate with the palette; chart geometry and error colors are preserved.
+
+- Restore the visible sun/moon control in the floating navigation, with manual theme persistence and 44px mobile targets. Language remains in the account menu; the narrowest layouts show the brand symbol to preserve space.
+- Add a light/dark palette review proposing calmer Pro/Contra fills, consistent semantic colors and readable primary-action text. DC approved the proposal, now implemented with shared theme-specific tokens.
+
+- Apply the selected Convergence identity with the Dialog floating menu: vector logo, lowercase wordmark, matching favicon/install icons, shared desktop/mobile navigation and theme/language controls in the account menu. Remove duplicate project-return and mobile bottom navigation. Remove the Live Activity/polling panel while retaining background project updates.
+
+- Vertically center proposal summary previews with symmetric spacing. Refine the new-idea drawer with a fixed submission footer, scrollable fields, a roomier editor and quieter initial-vote controls.
+
+- Fix chat readability in both themes: dark text on green own messages, inherited Markdown colors, and a distinct gray background with a subtle border for received messages in light mode.
+
+- Replace separate proposal consensus lines with proportional green/red card backgrounds following rounded corners. Charts keep the compact header height during previews and expansion, using a smooth 16px gradient into the details; expanded authors sit below the controls. Voting scale and independent controls are preserved.
+
+- Replace the project summary with context on expansion, remove creation/update dates, and keep a single aligned participation footer. Use a solid project background and remove the visible proposal toolbar; sorting/filtering move into project actions and creation becomes a compact header icon.
+- Keep the first proposal preview selected until mouse movement or keyboard focus selects another, retaining it outside the list. Remove disclosure arrows and add a hand cursor with a delayed elastic 4px decorative peek that does not reflow the list.
+
+- Compact project deadlines into the participation footer and omit the active badge. Inactive or expired projects reduce contrast and hide voting, proposal creation and comment composition.
+- Collapsed ideas show titles and votes, with a persistent selected summary preview and reduced-motion support. Expanded ideas place authors at the top right and reveal files in an independent attachment sheet. Guest proposal discussions now preserve the sign-in destination.
+
+- Connected the authentication flow to SurCod SSO: Authorization Code with PKCE S256, verified-email identity linking, shared-project return destinations and public-origin redirects behind the reverse proxy. Existing email/password and magic-link authentication remain available.
+- Added the public OIDC login build flag to container builds and an optional separate Next.js output directory for isolated test servers. Excluded SQLite files, backups and test build caches from the container build context.
+
+- Refocused the primary experience on projects, AI summaries and voting: signed-in home now opens projects and SSO returns to the same landing route; dashboard and administration move to the account menu; global search opens on demand, including Ctrl/Cmd+K.
+- Project cards show AI summaries and participation instead of creation dates and category lists. Project and shared-link pages show the decision summary and voting totals before proposals, with context behind an explicit disclosure.
+- Idea cards reveal the complete selected AI summary and put votes outside the details trigger, avoiding nested interactive buttons. Authors, categories and full descriptions appear on expansion; attachments open separately. Vote and discussion targets are at least 44px.
+- Export, editing and AI tools move into project actions; advanced filters and creation options are revealed intentionally. Reduced duplicate mobile navigation and nested main landmarks.
+- Preserved the selected proposal sort instead of always overriding it with net-vote ranking on the client.
+- Split the idea form into drawer, fields and duplicate-review components, each below 300 lines.
+- Disabled the development status badge to keep local demo recordings focused on the application.
+- Development assets use `no-store`, preventing a year-long cache from showing an outdated interface during design review; production keeps immutable asset caching.
+
+### Fixed
+
+- Provide native SQLite compilation tools in the Docker dependency stage when prebuilt downloads are unavailable (#81). Target the actual own-message container in the chat layout browser assertion instead of the enclosing app shell (#82).
+
+- Correct the vote-bar browser test to inspect actual pro/contra widths instead of accidentally matching the disclosure icon (#77). Hold the AI loading mock until the spinner is asserted, removing a fixed-delay race (#78).
+
+- Keep the projects filter panel inside the viewport on mobile, while retaining right alignment on desktop.
+
+### Tests
+
+- Updated always-visible summary expectations to match the compact-card requirements requested on 2026-10-03. Added keyboard/hover expansion, independent attachment, inactive voting and compact metadata coverage.
+
+- Added an opt-in allowance for self-signed HTTPS certificates on isolated local browser test servers, so the production image can be tested with Secure cookies in Safari. Plain-HTTP production checks cannot authenticate Safari; assertions and production certificate verification remain unchanged.
+- Moved safe-redirect tests to the shared auth utility import: exporting a helper from an App Router page is rejected by Next.js generated page types. The existing redirect assertions remain intact.
+
+- Updated assertions that required always-visible exports, dashboard/admin links in primary navigation, author rows and vote gradients behind titles: those requirements were explicitly replaced by the decision-focused design requested on 2026-10-03. Existing functionality, RBAC and duplicate prevention remain under regression tests.
+- Added tests for AI-summary precedence, intentional disclosure, project participation, simplified navigation, independent vote controls, form validation and duplicate review; added browser checks for voting in the initial viewport and the signed-in landing destination.
+- Fixed the existing AI-detail test: the application already displayed details inside the suggestions dialog, while the test expected a separate dialog named after the idea. It now verifies the full content and return to the suggestion list.
+- AI suggestion tests identify the named dialog after opening project actions, rather than assuming the first dialog in the DOM is the suggestion form.
+- Made proposal-creation browser tests deterministic by mocking the similarity response: synthetic E2E titles were classified as duplicates by live or cached AI. Duplicate review retains separate coverage.
+- Locale/theme browser tests now set cookies for the configured test origin; hardcoded localhost cookies were ignored when testing a separate development port.
+- Fixed ambiguous search-test selectors: `/Keyword/i` also matched the description of the Smart option. The tests now match the start of each option name.
+
 ## [1.5.0] — 2026-05-20
 
 ### Sprint 73 — Project membership via share-link visit

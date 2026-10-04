@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { getSafeRedirect } from "@/app/auth/login/page";
+import { getSafeRedirect } from "@/lib/auth-redirect";
 
 describe("getSafeRedirect", () => {
   it("returns / for null", () => {

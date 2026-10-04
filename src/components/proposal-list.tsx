@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { Accordion } from "@/components/ui/accordion";
 import { useVoteStream } from "@/lib/use-vote-stream";
 import { Lightbulb } from "lucide-react";
@@ -15,16 +15,22 @@ interface ProposalListProps {
   isAdmin: boolean;
   /** When set, vote buttons + comment forms redirect unauth users to login pointing here. */
   guestRedirect?: string;
+  readOnly?: boolean;
+  sort?: "votes" | "newest" | "oldest" | "comments" | "controversy";
 }
 
+/** Show vote-ranked ideas, preserving the selected server sort when requested. */
 export function ProposalList({
   proposals,
   projectId,
   currentUserId,
   isAdmin,
   guestRedirect,
+  sort = "votes",
+  readOnly = false,
 }: ProposalListProps) {
   const { t } = useLocale();
+  const [selectedPreviewId, setSelectedPreviewId] = useState<string | null>(null);
   const voteUpdates = useVoteStream(projectId);
 
   const maxTotalVotes = useMemo(() => {
@@ -38,6 +44,7 @@ export function ProposalList({
   }, [proposals, voteUpdates]);
 
   const sorted = useMemo(() => {
+    if (sort !== "votes") return proposals;
     return [...proposals].sort((a, b) => {
       const aLive = voteUpdates.get(a.id);
       const bLive = voteUpdates.get(b.id);
@@ -49,7 +56,9 @@ export function ProposalList({
       const bTime = b.createdAt ? new Date(b.createdAt).getTime() : 0;
       return bTime - aTime;
     });
-  }, [proposals, voteUpdates]);
+  }, [proposals, voteUpdates, sort]);
+
+  const activePreviewId = sorted.some(p => p.id === selectedPreviewId) ? selectedPreviewId : sorted[0]?.id;
 
   if (proposals.length === 0) {
     return (
@@ -72,12 +81,15 @@ export function ProposalList({
           <ProposalItem
             key={proposal.id}
             proposal={proposal}
+            isPreviewActive={proposal.id === activePreviewId}
+            onPreviewActivate={() => setSelectedPreviewId(proposal.id)}
             projectId={projectId}
             currentUserId={currentUserId}
             isAdmin={isAdmin}
             liveUpvotes={live?.upvotes}
             liveDownvotes={live?.downvotes}
             maxTotalVotes={maxTotalVotes}
+            readOnly={readOnly}
             guestRedirect={guestRedirect}
           />
         );

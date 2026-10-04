@@ -1,5 +1,9 @@
 import { test, expect } from "@playwright/test";
 
+test.beforeEach(async ({ page }) => {
+  await page.route("**/api/auth/oidc?**", route => route.fulfill({ body: "SSO entry captured" }));
+});
+
 test.describe("Security Headers", () => {
   test("homepage returns security headers", async ({ request }) => {
     const response = await request.get("/");
@@ -32,6 +36,6 @@ test.describe("Security Headers", () => {
   test("admin panel redirects non-admin users", async ({ page }) => {
     await page.goto("/admin");
     // Should redirect to login (not authenticated)
-    await expect(page).toHaveURL(/\/auth\/login/);
+    await expect(page).toHaveURL(/\/api\/auth\/oidc/);
   });
 });

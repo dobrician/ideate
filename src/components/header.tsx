@@ -1,200 +1,119 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useId } from "react";
 import Link from "next/link";
-import Image from "next/image";
 import { usePathname } from "next/navigation";
-import { User, LogOut, Shield, Search, Globe, Sun, Moon } from "lucide-react";
-import { cn } from "@/lib/utils";
-import { DarkModeToggle } from "@/components/dark-mode-toggle";
+import { User, LogOut, Shield, Search, Globe, X } from "lucide-react";
 import { SearchBar } from "@/components/search-bar";
-import { LocaleSwitcher } from "@/components/locale-switcher";
-import { useTheme } from "@/components/theme-provider";
+import { DarkModeToggle } from "@/components/dark-mode-toggle";
 import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { useLocale } from "@/lib/use-locale";
 
-const NAV_ITEMS = [
-  { href: "/dashboard", labelKey: "nav.dashboard" },
-  { href: "/projects", labelKey: "nav.projects" },
-];
+interface HeaderUser {
+  email?: string; firstName?: string | null; lastName?: string | null; role: string;
+}
 
+/** Present the Convergence brand in a floating, compact navigation bar. */
 export function Header() {
   const pathname = usePathname();
   const { t, locale } = useLocale();
-  const { theme, setTheme } = useTheme();
-  const [isAdmin, setIsAdmin] = useState(false);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
+  const [user, setUser] = useState<HeaderUser | null | undefined>(undefined);
+  const isLoggedIn = !!user;
+  const isAdmin = user?.role === "admin";
+  const name = [user?.firstName, user?.lastName].filter(Boolean).join(" ");
+  const initials = name ? `${user?.firstName?.[0] ?? ""}${user?.lastName?.[0] ?? ""}`.toUpperCase()
+    : user?.email?.slice(0, 2).toUpperCase();
+  const [searchOpen, setSearchOpen] = useState(false);
+  const searchToggle = useRef<HTMLButtonElement>(null);
+  const logoutFormId = useId();
+  const searchContainer = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    let active = true;
     fetch("/api/me")
-      .then((r) => (r.ok ? r.json() : null))
-      .then((data) => {
-        if (data) setIsLoggedIn(true);
-        if (data?.role === "admin") setIsAdmin(true);
-      })
-      .catch(() => {});
+      .then(r => r.ok ? r.json() as Promise<HeaderUser> : null)
+      .then(data => { if (active) setUser(data); })
+      .catch(() => { if (active) setUser(null); });
+    return () => { active = false; };
   }, []);
 
-  const allNavItems = [
-    ...NAV_ITEMS,
-    ...(isAdmin ? [{ href: "/admin", labelKey: "nav.admin" }] : []),
-  ];
+  useEffect(() => {
+    function handleKey(event: KeyboardEvent) {
+      if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "k") {
+        event.preventDefault();
+        setSearchOpen(true);
+      }
+      if (event.key === "Escape" && searchContainer.current?.contains(document.activeElement)) {
+        setSearchOpen(false);
+        searchToggle.current?.focus();
+      }
+    }
+    window.addEventListener("keydown", handleKey);
+    return () => window.removeEventListener("keydown", handleKey);
+  }, []);
+
+  useEffect(() => {
+    if (searchOpen) searchContainer.current?.querySelector("input")?.focus();
+  }, [searchOpen]);
 
   return (
-    <header role="banner" className="sticky top-0 z-50 border-b bg-background">
-      <div className="mx-auto flex h-14 max-w-7xl items-center gap-4 px-4 lg:px-6">
-        <Link href="/" className="flex items-center gap-2 hover:opacity-80">
-          <Image src="/logo.png" alt="" width={28} height={28} className="h-7 w-7" />
-          <span className="text-lg font-semibold">Ideate</span>
+    <header role="banner" className="sticky top-0 z-50 px-3 pt-3 sm:px-6">
+      <div className="mx-auto flex h-14 max-w-5xl items-center gap-3 rounded-2xl border border-border/70 bg-background/95 px-3 shadow-sm backdrop-blur sm:gap-6 sm:px-5">
+        <Link href="/" aria-label="Ideate" className="flex min-h-11 shrink-0 items-center gap-2 hover:opacity-80">
+          <svg data-brand-mark aria-hidden="true" viewBox="0 0 42 42" className="size-7 shrink-0">
+            <path d="M5 7h6c7 0 8 13 15 13h4M5 20h25M5 33h6c7 0 8-13 15-13h4" fill="none" stroke="currentColor" strokeWidth="4.5" strokeLinecap="round" />
+            <circle cx="32" cy="20" r="5" className="fill-primary" />
+          </svg>
+          <span className="hidden min-[360px]:inline text-[22px] font-semibold leading-none tracking-[-1px]">ideate</span>
         </Link>
-
-        <nav className="hidden items-center gap-1 md:flex" aria-label={t("nav.mainNavigation")}>
-          {allNavItems.map((item) => {
-            const isActive = pathname.startsWith(item.href);
-            return (
-              <Link
-                key={item.href}
-                href={item.href}
-                aria-current={isActive ? "page" : undefined}
-                className={cn(
-                  "rounded-md px-3 py-1.5 text-sm font-medium transition-colors duration-150",
-                  isActive
-                    ? "bg-accent text-accent-foreground"
-                    : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
-                )}
-              >
-                {t(item.labelKey)}
-              </Link>
-            );
-          })}
+        <nav className="flex min-w-0" aria-label={t("nav.mainNavigation")}>
+          <Link href="/projects" aria-current={pathname.startsWith("/projects") ? "page" : undefined}
+            className="inline-flex min-h-11 items-center text-xs text-muted-foreground transition-colors hover:text-foreground sm:text-sm">
+            {t("nav.projects")}
+          </Link>
         </nav>
-
-        {!pathname.startsWith("/admin") && (
-          <div className="hidden flex-1 justify-center md:flex">
-            <div className="w-full max-w-sm">
-              <SearchBar />
-            </div>
-          </div>
-        )}
-
-        <div className="ml-auto flex items-center gap-2 md:ml-0">
-          {!pathname.startsWith("/admin") && (
-            <Button
-              variant="ghost"
-              size="icon"
-              className="md:hidden"
-              aria-label={t("search.placeholder")}
-              onClick={() => setMobileSearchOpen((o) => !o)}
-            >
-              <Search className="h-4 w-4" />
-            </Button>
-          )}
-          <div className="hidden md:flex md:items-center md:gap-2">
-            <LocaleSwitcher />
-            <DarkModeToggle />
-          </div>
+        <div className="ml-auto flex items-center gap-1 sm:gap-2">
+          <Button ref={searchToggle} variant="ghost" size="icon" aria-label={t("search.placeholder")}
+            aria-expanded={searchOpen} aria-controls="app-search" onClick={() => setSearchOpen(!searchOpen)}>
+            {searchOpen ? <X className="size-4" /> : <Search className="size-4" />}
+          </Button>
+          <DarkModeToggle />
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" aria-label={t("nav.profile")} title={t("nav.profile")}>
-                <User className="h-4 w-4" />
-                <span className="sr-only">{t("nav.profile")}</span>
+              <Button variant="ghost" size="icon" className="rounded-full border border-border/60 bg-muted/60" aria-label={t("nav.profile")} title={t("nav.profile")}>
+                {initials ? <span className="text-xs font-semibold" aria-hidden="true">{initials}</span> : <User className="size-4" />}
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-48">
-              <DropdownMenuItem asChild>
-                <Link href="/profile" className="flex items-center gap-2">
-                  <User className="h-4 w-4" />
-                  {t("nav.profile")}
-                </Link>
-              </DropdownMenuItem>
-              {isAdmin && (
-                <DropdownMenuItem asChild className="md:hidden">
-                  <Link href="/admin" className="flex items-center gap-2">
-                    <Shield className="h-4 w-4" />
-                    {t("nav.admin")}
-                  </Link>
-                </DropdownMenuItem>
-              )}
-              <DropdownMenuSeparator className="md:hidden" />
-              <DropdownMenuItem
-                className="flex items-center gap-2 md:hidden"
-                onSelect={(e) => {
-                  e.preventDefault();
-                  const next = locale === "en" ? "ro" : "en";
-                  document.cookie = `locale=${next}; expires=${new Date(Date.now() + 365 * 864e5).toUTCString()}; path=/; SameSite=Lax`;
-                  window.location.reload();
-                }}
-              >
-                <Globe className="h-4 w-4" />
-                {t(locale === "ro" ? "locale.switchToEn" : "locale.switchToRo")}
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                className="flex items-center gap-2 md:hidden"
-                onSelect={(e) => {
-                  e.preventDefault();
-                  setTheme(theme === "dark" ? "light" : "dark");
-                }}
-              >
-                {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
-                {t("theme.toggle")}
-              </DropdownMenuItem>
-              {isLoggedIn && (
-                <>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem asChild>
-                    <form action="/auth/logout" method="POST">
-                      <button
-                        type="submit"
-                        className="flex w-full items-center gap-2"
-                      >
-                        <LogOut className="h-4 w-4" />
-                        {t("nav.signOut")}
-                      </button>
-                    </form>
-                  </DropdownMenuItem>
-                </>
-              )}
+            <DropdownMenuContent align="end" className="w-60 rounded-xl p-2">
+              {user?.email && <div className="border-b px-2 py-2.5 mb-1">
+                <p className="truncate text-sm font-medium">{name || user.email}</p>
+                {name && <p className="truncate text-xs text-muted-foreground">{user.email}</p>}
+              </div>}
+              {user === undefined ? <DropdownMenuItem disabled>{t("nav.profile")}</DropdownMenuItem> : isLoggedIn ?
+                <DropdownMenuItem asChild><Link href="/profile"><User className="size-4" />{t("nav.profile")}</Link></DropdownMenuItem> : !pathname.startsWith("/auth") &&
+                <DropdownMenuItem onSelect={() => {
+                  const destination = window.location.pathname + window.location.search;
+                  window.location.assign(`/auth/login?redirect=${encodeURIComponent(destination)}`);
+                }}><User className="size-4" />{t("project.share.signIn")}</DropdownMenuItem>}
+              {isAdmin && <DropdownMenuItem asChild><Link href="/admin"><Shield className="size-4" />{t("nav.admin")}</Link></DropdownMenuItem>}
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onSelect={event => {
+                event.preventDefault();
+                const next = locale === "en" ? "ro" : "en";
+                document.cookie = `locale=${next}; expires=${new Date(Date.now() + 365 * 864e5).toUTCString()}; path=/; SameSite=Lax`;
+                window.location.reload();
+              }}><Globe className="size-4" />{t(locale === "ro" ? "locale.switchToEn" : "locale.switchToRo")}<span className="ml-auto text-xs text-muted-foreground">{locale.toUpperCase()}</span></DropdownMenuItem>
+
+              {isLoggedIn && <><DropdownMenuSeparator /><DropdownMenuItem asChild onSelect={event => event.preventDefault()}>
+                <button type="submit" form={logoutFormId} className="flex w-full items-center gap-2"><LogOut className="size-4" />{t("nav.signOut")}</button>
+              </DropdownMenuItem></>}
             </DropdownMenuContent>
           </DropdownMenu>
+          {isLoggedIn && <form id={logoutFormId} action="/auth/logout" method="POST" hidden />}
         </div>
       </div>
-
-      <nav className="border-t md:hidden" aria-label={t("nav.mobilePageLinks")}>
-        <div className="mx-auto flex max-w-7xl items-center gap-1 overflow-x-auto px-4 py-1">
-          {allNavItems.map((item) => {
-            const isActive = pathname.startsWith(item.href);
-            return (
-              <Link
-                key={item.href}
-                href={item.href}
-                aria-current={isActive ? "page" : undefined}
-                className={cn(
-                  "shrink-0 whitespace-nowrap rounded-md px-3 py-3 text-sm font-medium transition-colors duration-150 min-h-[44px] flex items-center",
-                  isActive
-                    ? "bg-accent text-accent-foreground"
-                    : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
-                )}
-              >
-                {t(item.labelKey)}
-              </Link>
-            );
-          })}
-        </div>
-      </nav>
-
-      {mobileSearchOpen && (
-        <div className="border-t bg-background px-4 py-2 md:hidden">
-          <SearchBar />
-        </div>
-      )}
+      {searchOpen && <div id="app-search" ref={searchContainer} className="mx-auto mt-2 max-w-3xl rounded-xl border bg-background p-3 shadow-sm"><SearchBar /></div>}
     </header>
   );
 }

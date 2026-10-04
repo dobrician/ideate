@@ -75,20 +75,38 @@ test.describe("Voting E2E", () => {
     await page.goto(`/projects/${seed.projectId}`);
     await page.waitForLoadState("domcontentloaded");
 
-    // The proposal trigger has background gradients for vote bars
-    const trigger = page.locator("[data-slot='accordion-trigger']").first();
-    await expect(trigger).toBeVisible();
-
-    // The vote bar container (absolute positioned overlay) should exist
-    const barContainer = trigger.locator(".pointer-events-none").first();
+    // Inspect the consensus bar, rather than an unrelated decorative trigger icon.
+    const idea = page.locator("[data-slot='accordion-item']").first();
+    const barContainer = idea.locator('[data-vote-chart]');
+    const greenBar = barContainer.locator('.bg-vote-pro');
+    const redBar = barContainer.locator('.bg-vote-contra');
     await expect(barContainer).toBeVisible();
-
-    // At minimum, the green bar should be visible (1 upvote from seed)
-    const greenBar = barContainer.locator("div").filter({
-      has: page.locator("[class*='green']"),
-    });
-    // Either green bar exists or the total container exists
-    await expect(barContainer).toBeVisible();
+    await expect(barContainer).toHaveCSS("pointer-events", "none");
+    await expect(barContainer).toHaveCSS("overflow", "hidden");
+    const cornerRadius = await idea.evaluate(el => getComputedStyle(el).borderTopLeftRadius);
+    expect(cornerRadius).not.toBe("0px");
+    await expect(barContainer).toHaveCSS("border-top-left-radius", cornerRadius);
+    await expect(barContainer).toHaveCSS("border-bottom-right-radius", cornerRadius);
+    const compactHeight = (await barContainer.boundingBox())!.height;
+    const header = idea.locator("[data-proposal-header]");
+    await expect.poll(async () => (await barContainer.boundingBox())!.height).toBe((await header.boundingBox())!.height);
+    await idea.locator('[data-slot="accordion-trigger"]').hover();
+    await expect.poll(async () => (await barContainer.boundingBox())!.height).toBe(compactHeight);
+    await expect(greenBar).toHaveAttribute("style", /width:\s*100%/);
+    await expect(redBar).toHaveCount(0);
+    await idea.getByRole("button", { name: /^Contra \(/ }).click();
+    await expect(redBar).toBeVisible();
+    await expect(redBar).toHaveAttribute("style", /width:\s*100%/);
+    await expect(greenBar).toHaveCount(0);
+    await idea.locator('[data-slot="accordion-trigger"]').click();
+    await expect(idea).toHaveAttribute("data-state", "open");
+    await expect.poll(() => barContainer.evaluate(el => getComputedStyle(el).maskImage)).toContain("linear-gradient");
+    await expect.poll(async () => (await barContainer.boundingBox())!.height).toBe(compactHeight);
+    await expect.poll(() => redBar.evaluate(el => getComputedStyle(el, "::after").filter)).toBe("none");
+    const author = idea.locator('[data-proposal-author]');
+    await expect(author).toBeVisible();
+    const controls = (await idea.locator('[data-proposal-controls]').boundingBox())!;
+    expect((await author.boundingBox())!.y).toBeGreaterThanOrEqual(controls.y + controls.height);
   });
 
   test("vote counts update after voting", async ({ page }) => {

@@ -109,12 +109,12 @@ describe("Auth Session Functions", () => {
       expect(session?.email).toBe("test@example.com");
     });
 
-    it("should skip rotation when token has no exp field", async () => {
+    it("should reject an unbounded session with no exp field", async () => {
       const jwt = await import("jsonwebtoken");
       const secret = process.env.JWT_SECRET!;
       // Sign a token with no expiresIn so there is no `exp` claim
       const token = jwt.default.sign(
-        { userId: "user-no-exp", email: "noexp@example.com", type: "session", jti: "no-exp-jti" },
+        { userId: "user-no-exp", email: "noexp@example.com", type: "session", authMethod: "sso", jti: "no-exp-jti" },
         secret,
         { issuer: process.env.APP_URL, audience: process.env.APP_URL }
       );
@@ -123,8 +123,7 @@ describe("Auth Session Functions", () => {
 
       const { getSession } = await import("@/lib/auth");
       const session = await getSession();
-      expect(session).not.toBeNull();
-      expect(session?.userId).toBe("user-no-exp");
+      expect(session).toBeNull();
       // No rotation should occur — session cookie should NOT be re-set
       expect(mockCookies.set).not.toHaveBeenCalled();
     });
@@ -133,7 +132,7 @@ describe("Auth Session Functions", () => {
       const jwt = await import("jsonwebtoken");
       const secret = process.env.JWT_SECRET!;
       const token = jwt.default.sign(
-        { userId: "user-123", email: "test@example.com", type: "session", jti: "rot-jti" },
+        { userId: "user-123", email: "test@example.com", type: "session", authMethod: "sso", jti: "rot-jti" },
         secret,
         { expiresIn: 60 * 60 * 24 * 2, issuer: process.env.APP_URL, audience: process.env.APP_URL }
       );
@@ -282,32 +281,6 @@ describe("Auth Session Functions", () => {
     });
   });
 
-  describe("findOrCreateUser", () => {
-    it("should return existing user id", async () => {
-      mockDbLimit.mockResolvedValue([{ id: "existing-user-123" }]);
-      const { findOrCreateUser } = await import("@/lib/auth");
-      const userId = await findOrCreateUser("test@example.com");
-      expect(userId).toBe("existing-user-123");
-    });
-
-    it("should create new user if not found", async () => {
-      mockDbLimit.mockResolvedValue([]);
-      mockDbValues.mockResolvedValue(undefined);
-      const { findOrCreateUser } = await import("@/lib/auth");
-      const userId = await findOrCreateUser("new@example.com");
-      expect(typeof userId).toBe("string");
-      expect(userId.length).toBeGreaterThan(0);
-    });
-
-    it("should normalize email to lowercase", async () => {
-      mockDbLimit.mockResolvedValue([{ id: "user-123" }]);
-      const { findOrCreateUser } = await import("@/lib/auth");
-      await findOrCreateUser("  TEST@EXAMPLE.COM  ");
-      // If it finds the user, it means the email was normalized
-      expect(mockDbLimit).toHaveBeenCalled();
-    });
-  });
-
   describe("getJwtSecret validation", () => {
     it("should throw when JWT_SECRET is empty", async () => {
       const originalSecret = process.env.JWT_SECRET;
@@ -315,8 +288,8 @@ describe("Auth Session Functions", () => {
       vi.resetModules();
 
       try {
-        const { generateMagicLinkToken } = await import("@/lib/auth");
-        expect(() => generateMagicLinkToken("test@example.com")).toThrow();
+        const { createSessionToken } = await import("@/lib/auth");
+        expect(() => createSessionToken("u", "test@example.com")).toThrow();
       } finally {
         process.env.JWT_SECRET = originalSecret;
       }
@@ -328,8 +301,8 @@ describe("Auth Session Functions", () => {
       vi.resetModules();
 
       try {
-        const { generateMagicLinkToken } = await import("@/lib/auth");
-        expect(() => generateMagicLinkToken("test@example.com")).toThrow(
+        const { createSessionToken } = await import("@/lib/auth");
+        expect(() => createSessionToken("u", "test@example.com")).toThrow(
           "JWT_SECRET must be at least 32 characters"
         );
       } finally {
