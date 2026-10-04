@@ -56,7 +56,7 @@ projects ─┤── proposals ── votes
          │
     nginx proxy
          │
-  idea.surmont.co (HTTPS)
+  ideate.surcod.ro (HTTPS)
 ```
 
 ## SMTP Config
@@ -102,4 +102,4 @@ ideate/
 | 2026-02-15 | SQLite over Postgres | Portable, dockerizable, future D1 compat |
 | 2026-02-15 | Adversarial testing (Codex tests, Claude code) | Catches blind spots, higher quality |
 | 2026-02-15 | 300-line file limit | Context window sustainability |
-| 2026-02-15 | idea.surmont.co domain | Existing infra, nginx already configured |
+| 2026-02-15 | ideate.surcod.ro domain | Existing infra, nginx already configured |

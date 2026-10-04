@@ -1,5 +1,7 @@
 # User experience simplification review
 
+Implementation status, 4 October: DC approved the separate essential UX preview at https://test.ideate.surcod.ro. Production remains frozen at https://ideate.surcod.ro. This review records the original proposal; current scope, verification and rollback are in `HANDOVER.md` and `ops/README.md`.
+
 Status: reviewed from source on 4 October 2026; recommendations, not implemented.
 Owner decision: DC has frozen the accepted project screen and all its interactions.
 Backlog: [#71](https://github.com/dobrician/ideate/issues/71), SSO [#74](https://github.com/dobrician/ideate/issues/74).

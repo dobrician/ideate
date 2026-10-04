@@ -1,0 +1,38 @@
+# Migrat de la Docker pe 11 august 2026. Rootless.
+# REDIS_URL arata catre numele containerului, nu al serviciului compose:
+# Podman rezolva DNS dupa ContainerName, Docker Compose dupa numele serviciului.
+[Unit]
+Description=ideate — staging
+After=network-online.target ideate-redis.service
+Wants=network-online.target
+Requires=ideate-redis.service
+
+[Container]
+Image=docker.io/library/ideate-staging:latest
+ContainerName=ideate.surmont.co
+Network=ideate
+PublishPort=4100:3000
+Volume=ideate-data-staging:/app/data
+Volume=/tmp/ideate-logs:/tmp/ideate-logs
+EnvironmentFile=/home/dc/work/ideate/.env.local
+Environment=NODE_ENV=production
+Environment=APP_URL=https://ideate.surcod.ro
+Environment=OIDC_REDIRECT_URI=https://ideate.surcod.ro/api/auth/oidc/callback
+Environment=DATABASE_URL=/app/data/ideate.db
+Environment=MAIL_LOG_FILE=/tmp/ideate-logs/mail.log
+Environment=REDIS_URL=redis://ideate-redis:6379
+HealthCmd=wget -qO- http://127.0.0.1:3000/api/health
+HealthInterval=30s
+HealthTimeout=10s
+HealthRetries=3
+HealthStartPeriod=10s
+
+[Service]
+Restart=always
+# Podman NU creeaza directoarele lipsa pentru montari, spre deosebire de Docker.
+# /tmp se goleste la fiecare repornire, deci fara linia asta containerul esueaza
+# la boot cu "statfs /tmp/ideate-logs: no such file or directory".
+ExecStartPre=/usr/bin/mkdir -p /tmp/ideate-logs
+
+[Install]
+WantedBy=default.target

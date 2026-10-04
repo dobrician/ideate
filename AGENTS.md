@@ -45,7 +45,7 @@ Enterprise democratic idea prioritization platform. Teams create projects, submi
 1. User enters email → server generates JWT → sends magic link via SMTP
 2. User clicks link → validates token → creates session cookie (HTTP-only, secure)
 3. SMTP: configured SMTP provider (See .env.local), From: idea@surcod.ro
-4. APP_URL: https://idea.surmont.co
+4. APP_URL: https://ideate.surcod.ro (production); https://test.ideate.surcod.ro (isolated preview)
 
 ## Testing — MANDATORY
 - **Unit tests**: `tests/unit/` — Vitest, test every function and server action
@@ -56,13 +56,13 @@ Enterprise democratic idea prioritization platform. Teams create projects, submi
 
 ## Docker
 - Build: `docker compose build`
-- Staging: always up on :4100 (idea.surmont.co)
+- Staging: always up on :4100 (ideate.surcod.ro)
 - Dev: sprint work on :4101
 - Promote: when all tests pass, rebuild staging from main
 - **Post-deploy smoke tests**: After deploying to staging, ALWAYS run `npm run test:smoke` against the live container. Deploy is NOT done until smoke tests pass.
 
 ## Smoke Tests — Post-Deploy Verification
-Smoke tests live in `tests/smoke/` and run against the live staging URL (http://idea.surmont.co/).
+Smoke tests live in `tests/smoke/` and run against the live staging URL (https://ideate.surcod.ro/).
 They are NOT part of the unit/E2E suite — they test the real deployed container.
 
 **What they verify:**
@@ -74,7 +74,7 @@ They are NOT part of the unit/E2E suite — they test the real deployed containe
 - Environment variables loaded (no "missing config" errors)
 - Docker container is healthy (`docker inspect` health status)
 
-**Script**: `npm run test:smoke` — runs Playwright against `APP_URL` (defaults to http://idea.surmont.co/)
+**Script**: `npm run test:smoke` — runs Playwright against `APP_URL` (defaults to https://ideate.surcod.ro/)
 **When**: After every `docker compose up -d` on staging
 **Failure = rollback**: If smoke tests fail, the deploy is failed — rollback or fix before reporting success
 
@@ -131,3 +131,11 @@ Before declaring a sprint done:
 - Original ideator: `/home/dc/work/ideator` (read for feature reference, don't copy)
 - Wiki docs: `docs/wiki/` in this repo
 - GitHub issues: track risks and nice-to-haves
+
+
+## Live runtime continuity (4 October 2026)
+- Production Quadlet: `ideate-staging.service`, :4100, existing image/database retained.
+- Essential UX preview: `ideate-test.service`, :4104, separate synthetic database and Development OIDC.
+- Legacy `idea.surmont.co` is a permanent redirect; homelab owns DNS/NPM/TLS.
+- Frozen project routes/components/actions must remain unchanged. Preview user pages are not promoted without DC review.
+- Current deployment and rollback: `ops/README.md`; canonical continuity: `HANDOVER.md`.
