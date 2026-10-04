@@ -22,7 +22,7 @@ interface ProjectOverviewProps {
 export function ProjectOverview({ project, stats, tags, t, tools }: ProjectOverviewProps) {
   const preview = project.summary || project.description?.split(/\n\s*\n/)[0];
   return (
-    <section className={`rounded-xl border bg-muted p-4 sm:p-5 ${!isProjectOpen(project) ? "opacity-65" : ""}`} aria-labelledby="project-title">
+    <section className={`rounded-xl border bg-project-surface p-4 sm:p-5 ${!isProjectOpen(project) ? "opacity-65" : ""}`} aria-labelledby="project-title">
       <div className="flex items-start justify-between gap-3">
         <h1 id="project-title" className="min-w-0 text-xl font-semibold leading-tight tracking-tight sm:text-2xl">
           {project.title}

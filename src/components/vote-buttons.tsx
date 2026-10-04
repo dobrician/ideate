@@ -106,8 +106,8 @@ export function VoteButtons({
         className={cn(
           "min-h-11 min-w-11 transition-all duration-150 active:scale-95",
           optimistic.userVote === 1
-            ? "bg-emerald-100 text-emerald-700 hover:bg-emerald-200 dark:bg-emerald-900/50 dark:text-emerald-300 dark:hover:bg-emerald-900/70"
-            : "text-muted-foreground hover:text-emerald-600 dark:hover:text-emerald-400"
+            ? "bg-vote-pro text-vote-pro-foreground hover:bg-vote-pro hover:text-vote-pro-foreground dark:hover:bg-vote-pro"
+            : "text-muted-foreground hover:bg-vote-pro hover:text-vote-pro-foreground dark:hover:bg-vote-pro"
         )}
       >
         {isPending ? (
@@ -133,8 +133,8 @@ export function VoteButtons({
         className={cn(
           "min-h-11 min-w-11 transition-all duration-150 active:scale-95",
           optimistic.userVote === -1
-            ? "bg-red-100 text-red-700 hover:bg-red-200 dark:bg-red-900/50 dark:text-red-300 dark:hover:bg-red-900/70"
-            : "text-muted-foreground hover:text-red-600 dark:hover:text-red-400"
+            ? "bg-vote-contra text-vote-contra-foreground hover:bg-vote-contra hover:text-vote-contra-foreground dark:hover:bg-vote-contra"
+            : "text-muted-foreground hover:bg-vote-contra hover:text-vote-contra-foreground dark:hover:bg-vote-contra"
         )}
       >
         {isPending ? (

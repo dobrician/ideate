@@ -8,8 +8,10 @@
 
 ### Changed
 
+- Applied the approved forest/sage and clay decision palette across chart fills, vote controls, proposal creation, duplicate review and own chat messages. Shared light/dark tokens replace scattered green/red overrides; primary action text now follows the theme foreground (#85). Project surfaces and neutral borders integrate with the palette; chart geometry and error colors are preserved.
+
 - Restore the visible sun/moon control in the floating navigation, with manual theme persistence and 44px mobile targets. Language remains in the account menu; the narrowest layouts show the brand symbol to preserve space.
-- Add a light/dark palette review proposing calmer Pro/Contra fills, consistent semantic colors and readable primary-action text. Proposed colors are documented for review and are not applied to the product.
+- Add a light/dark palette review proposing calmer Pro/Contra fills, consistent semantic colors and readable primary-action text. DC approved the proposal, now implemented with shared theme-specific tokens.
 
 - Apply the selected Convergence identity with the Dialog floating menu: vector logo, lowercase wordmark, matching favicon/install icons, shared desktop/mobile navigation and theme/language controls in the account menu. Remove duplicate project-return and mobile bottom navigation. Remove the Live Activity/polling panel while retaining background project updates.
 

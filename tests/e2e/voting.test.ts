@@ -78,8 +78,8 @@ test.describe("Voting E2E", () => {
     // Inspect the consensus bar, rather than an unrelated decorative trigger icon.
     const idea = page.locator("[data-slot='accordion-item']").first();
     const barContainer = idea.locator('[data-vote-chart]');
-    const greenBar = barContainer.locator('[class*="bg-emerald-500"]');
-    const redBar = barContainer.locator('[class*="bg-rose-400"]');
+    const greenBar = barContainer.locator('.bg-vote-pro');
+    const redBar = barContainer.locator('.bg-vote-contra');
     await expect(barContainer).toBeVisible();
     await expect(barContainer).toHaveCSS("pointer-events", "none");
     await expect(barContainer).toHaveCSS("overflow", "hidden");

@@ -63,7 +63,7 @@ export function ChatBubble({
           data-chat-bubble data-own={isOwn}
           className={`overflow-hidden break-words rounded-2xl border px-3 py-2 text-sm ${
             isOwn
-              ? "bg-primary text-slate-950 border-transparent rounded-tr-sm"
+              ? "bg-chat-own text-chat-own-foreground border-transparent rounded-tr-sm"
               : "bg-zinc-200 text-foreground border-border dark:bg-muted rounded-tl-sm"
           }`}
         >

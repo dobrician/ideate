@@ -110,7 +110,7 @@ describe("CommentThread rendering", () => {
     );
     const bubble = container.querySelector(".flex-row-reverse");
     expect(bubble).toBeInTheDocument();
-    expect(bubble?.querySelector("[data-chat-bubble]")).toHaveClass("text-slate-950", "bg-primary");
+    expect(bubble?.querySelector("[data-chat-bubble]")).toHaveClass("text-chat-own-foreground", "bg-chat-own");
   });
 
   it("renders other's message left-aligned (flex-row, no reverse)", () => {
@@ -278,7 +278,7 @@ describe("CommentThread rendering", () => {
     expect(csrf.value).toBe("mock-csrf");
   });
 
-  it("applies own-message bubble styling (bg-primary)", () => {
+  it("applies own-message bubble styling (bg-chat-own)", () => {
     const { container } = render(
       <CommentThread
         comments={[makeComment({ userId: "me" })]}
@@ -286,7 +286,7 @@ describe("CommentThread rendering", () => {
         currentUserId="me"
       />
     );
-    const bubble = container.querySelector(".bg-primary.rounded-2xl");
+    const bubble = container.querySelector(".bg-chat-own.rounded-2xl");
     expect(bubble).toBeInTheDocument();
   });
 

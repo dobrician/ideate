@@ -1,0 +1,30 @@
+/* Semantic decision colors: opinion, action and conversation have distinct roles. */
+:root {
+  --project-surface: #EAF0E9;
+  --vote-pro: #E0ECE4;
+  --vote-pro-foreground: #246A50;
+  --vote-contra: #F1E4E0;
+  --vote-contra-foreground: #965447;
+  --chat-own: #DCEBE3;
+  --chat-own-foreground: #19382A;
+}
+
+.dark {
+  --project-surface: #202722;
+  --vote-pro: #1C3028;
+  --vote-pro-foreground: #94C9AD;
+  --vote-contra: #342626;
+  --vote-contra-foreground: #D7A59C;
+  --chat-own: #243D31;
+  --chat-own-foreground: #DAEBDD;
+}
+
+@theme inline {
+  --color-project-surface: var(--project-surface);
+  --color-vote-pro: var(--vote-pro);
+  --color-vote-pro-foreground: var(--vote-pro-foreground);
+  --color-vote-contra: var(--vote-contra);
+  --color-vote-contra-foreground: var(--vote-contra-foreground);
+  --color-chat-own: var(--chat-own);
+  --color-chat-own-foreground: var(--chat-own-foreground);
+}

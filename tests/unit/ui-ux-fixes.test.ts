@@ -356,54 +356,21 @@ describe("Proposal form uses Sheet drawer (#56)", () => {
 // #59 — Input field borders (CSS variables)
 // ============================================================
 
-describe("Input field borders (#59)", () => {
-  it("light mode border is stronger than 0.922", async () => {
+describe("Decision palette (#85)", () => {
+  it("uses opaque neutral borders and stronger dark input boundaries", async () => {
     const fs = await import("fs");
     const css = fs.readFileSync("src/app/globals.css", "utf-8");
-    // Light mode --border should be oklch(0.87 ...) not oklch(0.922 ...)
-    expect(css).toContain("--border: oklch(0.87 0 0)");
-    expect(css).not.toContain("--border: oklch(0.922 0 0)");
+    expect(css).toContain("--border: #CFD8CF");
+    expect(css).toContain("--border: #3B453E");
+    expect(css).toContain("--input: #4D5A50");
   });
 
-  it("dark mode border uses 15% opacity", async () => {
+  it("calibrates the brand separately for each theme and shares its focus ring", async () => {
     const fs = await import("fs");
     const css = fs.readFileSync("src/app/globals.css", "utf-8");
-    expect(css).toContain("--border: oklch(1 0 0 / 15%)");
-  });
-
-  it("dark mode input uses 20% opacity", async () => {
-    const fs = await import("fs");
-    const css = fs.readFileSync("src/app/globals.css", "utf-8");
-    expect(css).toContain("--input: oklch(1 0 0 / 20%)");
-  });
-});
-
-// ============================================================
-// #51 — Primary color is green brand accent
-// ============================================================
-
-describe("Primary color green brand (#51)", () => {
-  it("light mode --primary uses oklch(0.696 0.17 162.48)", async () => {
-    const fs = await import("fs");
-    const css = fs.readFileSync("src/app/globals.css", "utf-8");
-    // Check both :root and .dark blocks have the same green primary
-    const primaryMatches = css.match(/--primary:\s*oklch\([^)]+\)/g);
-    expect(primaryMatches).toBeTruthy();
-    expect(primaryMatches!.length).toBeGreaterThanOrEqual(2);
-    for (const m of primaryMatches!) {
-      expect(m).toContain("0.696");
-      expect(m).toContain("162.48");
-    }
-  });
-
-  it("--ring matches --primary (green)", async () => {
-    const fs = await import("fs");
-    const css = fs.readFileSync("src/app/globals.css", "utf-8");
-    const ringMatches = css.match(/--ring:\s*oklch\([^)]+\)/g);
-    expect(ringMatches).toBeTruthy();
-    for (const m of ringMatches!) {
-      expect(m).toContain("0.696");
-    }
+    expect(css).toContain("--primary: #216F59");
+    expect(css).toContain("--primary: #75B69A");
+    expect(css.match(/--ring: var\(--primary\)/g)).toHaveLength(2);
   });
 });
 
@@ -438,7 +405,7 @@ describe("Dark mode card contrast (#62)", () => {
     const fs = await import("fs");
     const css = fs.readFileSync("src/app/globals.css", "utf-8");
     expect(css).toContain('.dark [data-slot="card"]');
-    expect(css).toContain("border-color: oklch(1 0 0 / 12%)");
+    expect(css).toContain("border-color: var(--border)");
     expect(css).toContain("box-shadow:");
   });
 });

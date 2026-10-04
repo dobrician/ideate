@@ -129,8 +129,8 @@ export function ProposalItem({
       <div className="rounded-[inherit]">
         <div data-proposal-header className="relative isolate rounded-[inherit] px-4 py-2">
           <div data-vote-chart aria-hidden="true" className="pointer-events-none absolute inset-0 -z-10 overflow-hidden rounded-[inherit] group-data-[preview-active=true]/proposal:[mask-image:linear-gradient(to_bottom,black_calc(100%_-_16px),transparent)] group-data-[state=open]/proposal:[mask-image:linear-gradient(to_bottom,black_calc(100%_-_16px),transparent)]">
-            {greenWidth > 0 && <div className="absolute inset-y-0 left-0 bg-emerald-500/15 transition-[width] duration-300 motion-reduce:transition-none" style={{ width: `${greenWidth}%` }} />}
-            {redWidth > 0 && <div className="absolute inset-y-0 right-0 bg-rose-400/15 transition-[width] duration-300 motion-reduce:transition-none" style={{ width: `${redWidth}%` }} />}
+            {greenWidth > 0 && <div className="absolute inset-y-0 left-0 bg-vote-pro transition-[width] duration-300 motion-reduce:transition-none" style={{ width: `${greenWidth}%` }} />}
+            {redWidth > 0 && <div className="absolute inset-y-0 right-0 bg-vote-contra transition-[width] duration-300 motion-reduce:transition-none" style={{ width: `${redWidth}%` }} />}
           </div>
           <div className="flex flex-col gap-1 sm:flex-row sm:items-start sm:gap-4">
             <div className="min-w-0 flex-1">

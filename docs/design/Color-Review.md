@@ -1,6 +1,6 @@
 # Ideate — analiză cromatică, 4 octombrie 2026
 
-Propunere pentru review; paleta aplicației nu a fost schimbată. Urmărire: [#85](https://github.com/dobrician/ideate/issues/85). [Comparație vizuală light/dark](palette-review.html).
+Paletă aprobată de DC și implementată; verificarea și publicarea sunt consemnate în Sprint Log. Urmărire: [#85](https://github.com/dobrician/ideate/issues/85). [Comparație vizuală light/dark](palette-review.html).
 
 ## Ce nu funcționează bine acum
 
@@ -26,12 +26,16 @@ Păstrăm identitatea verde și charturile din carduri, cu suprafețe mai liniș
 
 Contrastul calculat pe combinațiile opace propuse: acțiuni 6,03:1 light / 7,17:1 dark; text Pro pe suprafața Pro 5,32:1 / 7,46:1; text Contra pe suprafața Contra 4,63:1 / 6,72:1. Acestea sunt măsurători ale perechilor propuse, nu o declarație că întregul produs este deja verificat după implementare.
 
-## Integrare, după alegerea paletei
+## Integrare aprobată
 
-Introducem tokenuri semantice separate pentru `brand`, `vote-pro`, `vote-contra`, suprafețele chart și chat. Migrarea include butoanele de vot, cardurile, drawerul, modalul de dubluri și mesajele; elimină override-urile dispersate care presupun că verdele principal cere întotdeauna text alb sau întotdeauna text închis. Culorile de eroare/ștergere rămân separate. Păstrăm lățimile și înălțimile charturilor, colțurile rotunjite și fade-ul actual. Verificăm apoi contrastele reale pe straturile compuse, selectarea/hover/focus, teme și mobil.
+Folosim tokenuri semantice separate pentru `brand`, `vote-pro`, `vote-contra`, suprafețele chart și chat. Migrarea include butoanele de vot, cardurile, drawerul, modalul de dubluri și mesajele; elimină override-urile dispersate care presupun că verdele principal cere întotdeauna text alb sau întotdeauna text închis. Culorile de eroare/ștergere rămân separate. Păstrăm lățimile și înălțimile charturilor, colțurile rotunjite și fade-ul actual. Verificăm apoi contrastele reale pe straturile compuse, selectarea/hover/focus, teme și mobil.
 
 Comparația HTML este schematică, cu aceeași structură și date fictive în ambele variante; nu este o captură a produsului și nu schimbă datele demo.
 
 ## Controlul temei
 
 Schimbarea manuală din meniul contului funcționează în producție, inclusiv trecerea din System/dark în Light. Problema reprodusă este descoperirea controlului după mutarea lui în cont. Fixul readuce butonul soare/lună direct în bara flotantă; limba rămâne în meniul contului. La lățimi sub 360px rămâne simbolul de brand, pentru a păstra trei controale de 44px și linkul Projects fără overflow. Preferința manuală se păstrează la reîncărcare.
+
+## Verificarea implementării
+
+Perechile semantice sunt definite în `src/app/decision-palette.css`; acțiunile și suprafețele neutre rămân în `globals.css`. Testul de browser măsoară culorile efective pentru Pro/Contra selectat și drawer în ambele teme, cu prag de 4,5:1, și păstrează verificarea înălțimii chartului la expandare. Hoverul dark al butonului generic este suprascris explicit pentru a nu transforma umplerea votului în gri semitransparent. Verificarea chatului păstrează testele existente pentru text Markdown și separarea mesajelor primite. Rezultatele regresiei și ale publicării sunt în Sprint Log.

@@ -132,14 +132,14 @@ export function ProposalFormFields({
               onClick={() => setInitialVote("1")}
               aria-pressed={initialVote === "1"}
               aria-label={t("vote.pro")}
-              className={initialVote === "1" ? "bg-emerald-500/15 text-emerald-900 hover:bg-emerald-500/20 dark:text-emerald-300" : ""}>
+              className={initialVote === "1" ? "bg-vote-pro text-vote-pro-foreground hover:bg-vote-pro hover:text-vote-pro-foreground dark:hover:bg-vote-pro" : ""}>
               <ThumbsUp className="mr-1 h-4 w-4" aria-hidden="true" /> {t("vote.pro")}
             </Button>
             <Button type="button" variant="ghost" size="sm"
               onClick={() => setInitialVote("-1")}
               aria-pressed={initialVote === "-1"}
               aria-label={t("vote.contra")}
-              className={initialVote === "-1" ? "bg-rose-500/15 text-rose-900 hover:bg-rose-500/20 dark:text-rose-300" : ""}>
+              className={initialVote === "-1" ? "bg-vote-contra text-vote-contra-foreground hover:bg-vote-contra hover:text-vote-contra-foreground dark:hover:bg-vote-contra" : ""}>
               <ThumbsDown className="mr-1 h-4 w-4" aria-hidden="true" /> {t("vote.contra")}
             </Button>
           </div>
@@ -189,7 +189,7 @@ export function ProposalFormFields({
         <Button
           type="submit"
           size="default"
-          className={`${showCancel ? "" : "w-full"} bg-primary font-semibold text-slate-950 shadow-none hover:bg-primary/90`}
+          className={`${showCancel ? "" : "w-full"} bg-primary font-semibold text-primary-foreground shadow-none hover:bg-primary/90`}
           disabled={isPending}
         >
           {isPending ? (

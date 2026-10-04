@@ -87,7 +87,7 @@ export function DuplicateMatchesModal({
           </div>
         ) : modalState === "saving" ? (
           <div className="flex flex-col items-center justify-center gap-3 py-10">
-            <Loader2 className="h-8 w-8 animate-spin text-green-600" aria-hidden="true" />
+            <Loader2 className="h-8 w-8 animate-spin text-primary" aria-hidden="true" />
             <p className="text-sm font-medium" id="duplicate-modal-title">
               {t("duplicateModal.saving")}
             </p>
@@ -137,7 +137,7 @@ export function DuplicateMatchesModal({
                           {m.explanation && (
                             <span className="leading-relaxed">{m.explanation}</span>
                           )}
-                          <span className="rounded-full bg-emerald-100 px-1.5 py-0.5 text-[10px] font-medium text-emerald-900 dark:bg-emerald-900/30 dark:text-emerald-200">
+                          <span className="rounded-full bg-secondary px-1.5 py-0.5 text-[10px] font-medium text-secondary-foreground">
                             {t("similarity.score", { score: pct })}
                           </span>
                         </div>
@@ -146,8 +146,8 @@ export function DuplicateMatchesModal({
                         <div
                           className={`absolute right-2 top-2 inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-semibold shadow-sm ${
                             votedValue === 1
-                              ? "bg-emerald-100 text-emerald-900 dark:bg-emerald-900/40 dark:text-emerald-200"
-                              : "bg-rose-100 text-rose-900 dark:bg-rose-900/40 dark:text-rose-200"
+                              ? "bg-vote-pro text-vote-pro-foreground"
+                              : "bg-vote-contra text-vote-contra-foreground"
                           }`}
                           aria-label={
                             votedValue === 1
@@ -165,7 +165,7 @@ export function DuplicateMatchesModal({
                             aria-label={t("vote.pro")}
                             disabled={voting !== null}
                             onClick={() => handleVote(m.id, 1)}
-                            className="inline-flex h-9 cursor-pointer items-center justify-center gap-2 whitespace-nowrap rounded-none border-r border-border/60 bg-secondary px-3 text-xs font-medium text-secondary-foreground shadow-sm transition-colors hover:bg-green-50 hover:text-green-700 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 dark:hover:bg-green-950"
+                            className="inline-flex h-9 cursor-pointer items-center justify-center gap-2 whitespace-nowrap rounded-none border-r border-border/60 bg-secondary px-3 text-xs font-medium text-secondary-foreground shadow-sm transition-colors hover:bg-vote-pro hover:text-vote-pro-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
                           >
                             {voting === `${m.id}:1` ? (
                               <Loader2 className="h-4 w-4 animate-spin" />
@@ -178,7 +178,7 @@ export function DuplicateMatchesModal({
                             aria-label={t("vote.contra")}
                             disabled={voting !== null}
                             onClick={() => handleVote(m.id, -1)}
-                            className="inline-flex h-9 cursor-pointer items-center justify-center gap-2 whitespace-nowrap rounded-none bg-secondary px-3 text-xs font-medium text-secondary-foreground shadow-sm transition-colors hover:bg-rose-50 hover:text-rose-700 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 dark:hover:bg-rose-950"
+                            className="inline-flex h-9 cursor-pointer items-center justify-center gap-2 whitespace-nowrap rounded-none bg-secondary px-3 text-xs font-medium text-secondary-foreground shadow-sm transition-colors hover:bg-vote-contra hover:text-vote-contra-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
                           >
                             {voting === `${m.id}:-1` ? (
                               <Loader2 className="h-4 w-4 animate-spin" />
@@ -239,7 +239,7 @@ export function DuplicateMatchesModal({
                   <button
                     type="button"
                     onClick={() => setPendingAddVote("-1")}
-                    className="inline-flex h-9 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border border-rose-200 bg-rose-50/50 px-3 py-2 text-xs font-medium text-rose-700 transition-colors hover:border-rose-300 hover:bg-rose-100/70 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring dark:border-rose-900 dark:bg-rose-950/30 dark:text-rose-300 dark:hover:bg-rose-950/60"
+                    className="inline-flex h-9 items-center justify-center gap-1.5 whitespace-nowrap rounded-md border border-border bg-vote-contra px-3 py-2 text-xs font-medium text-vote-contra-foreground transition-colors hover:border-vote-contra-foreground hover:bg-vote-contra focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
                   >
                     <ThumbsDown className="h-3.5 w-3.5" aria-hidden="true" />
                     {t("duplicateModal.addAnywayContra")}
@@ -256,7 +256,7 @@ export function DuplicateMatchesModal({
                 <button
                   type="button"
                   onClick={cancelDuplicateModal}
-                  className="inline-flex h-10 items-center justify-center gap-1.5 whitespace-nowrap rounded-md bg-green-600 px-5 py-2 text-sm font-semibold text-white shadow transition-colors hover:bg-green-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-500"
+                  className="inline-flex h-10 items-center justify-center gap-1.5 whitespace-nowrap rounded-md bg-primary px-5 py-2 text-sm font-semibold text-primary-foreground shadow transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                   autoFocus
                 >
                   {hasVoted ? (
