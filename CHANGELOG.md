@@ -10,6 +10,8 @@
 
 ### Changed
 
+- Promote the DC-approved essential user experience and Opus-reviewed mobile/keyboard refinements to production; preserve the existing SQLite volume and SSO settings. All 22 public smoke checks pass; retain the prior image for rollback (#71, #73, #86). Earlier preview-only entries record their original scope.
+
 - Polish only the essential preview after adversarial Opus 5.5 reviews: keyboard-safe logout, correct search autocomplete/Escape/stale-result handling, guest return context, bounded project summaries, recoverable account forms, predictable creation cancel and explicitly opted-in compact Projects pagination. Closed mobile charts no longer inherit desktop fades/hover hints. Production and project actions/data remain unchanged (#90).
 
 - Compact mobile proposal headers into one row, retaining 44px vote/discussion/file targets and fixed consensus-chart height. Touch descriptions open on demand; desktop persistent previews remain (#89). Existing summary browser expectations change only for the approved mobile requirement.

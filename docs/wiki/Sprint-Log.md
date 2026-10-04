@@ -1,5 +1,13 @@
 # Sprint Log
 
+## Approved production promotion — 4 October
+
+DC approved publishing the reviewed essential user experience. PR #86 was squash-merged into #73, then #73 into main (`160b646`); application/test source matches the reviewed `ecb537d`. Production now runs image `96d45a6855c4` (`localhost/ideate-essential:20261004-ecb537d`, also `docker.io/library/ideate-staging:latest`) through the unchanged `ideate-staging.service` on :4100. The existing production volume, environment, Redis and SurCod SSO credentials/origins are retained. Test remains on its independent `.next-opus-polish` runtime and synthetic database.
+
+Validation: the same source previously passed 2736 unit tests, lint/typecheck/build and 87 relevant E2E cases. The production container build and all 22 live public smoke tests now pass. Existing SSO sessions return `/api/me` 200 with the expected admin mapping on both hosts; OIDC authorization smoke verifies PKCE and production callback. Native browser at 390px confirms all three proposal headers are 60px tall, with no horizontal overflow. Google provider login was not repeated. No AI calls or outgoing email. Read-only Drizzle hashes of all projects (7), proposals (37), votes (187) and comments (44) match before/after. Current demo has three proposals and two actor votes, already present before this deploy; no reset or data edits were performed.
+
+Rollback: retag `localhost/ideate-rollback:pre-essential-20261004` (image `a20e131fbea0`) as `docker.io/library/ideate-staging:latest`, restart only `ideate-staging.service`, and rerun public smoke. Keep the same production volume. Consistent private SQLite backup, image-build/smoke logs and data proofs are under `/tmp/codex-ideate-promote-20261004` (0700, registered through 11 October). Durable nonsecret verification: `/home/dc/.local/state/surcod-demo/ideate-production-promotion-proof.json` (0600). Previous phase entries below describe their historical test-only scope.
+
 ## 4 October — Adversarial Opus 5.5 preview polish (#90)
 
 DC requested a real review/fix/re-review cycle. Existing Claude Code OAuth Max supplied Opus 5.5 read-only reviews, confirmed in response metadata. Four rounds produced findings, REQUEST_CHANGES, core PASS and scoped pagination PASS. Accepted corrections improve keyboard logout/search, guest return context, bounded project summaries, account request recovery, creation cancel and mobile chart/pagination presentation. Changes are preview-only; production and frozen backend/routes/data remain unchanged. Review decisions, test distinctions and deferred #91 items are in `docs/design/Adversarial-Preview-Review.md`; final evidence is in HANDOVER and private local operational proof.
