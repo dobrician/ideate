@@ -2,7 +2,7 @@ import { test, expect } from "@playwright/test";
 import { seedTestData, loginAsTestUser } from "./helpers";
 
 test.describe("Decision-focused workflow", () => {
-  test("should show summaries and voting totals to shared-link guests and require login to vote", async ({ page, browser }) => {
+  test("should show summaries and voting totals to shared-link guests and require login to vote", async ({ page, browser, isMobile }) => {
     const seed = await seedTestData(page.request);
     await loginAsTestUser(page, seed);
     await page.goto(`/projects/${seed.projectId}`);
@@ -18,7 +18,7 @@ test.describe("Decision-focused workflow", () => {
       await guest.goto(await link.inputValue());
       await expect(guest.getByLabel("Voting so far")).toContainText("1 vote cast");
       await expect(guest.getByText("Initial Test Proposal")).toBeVisible();
-      await expect(guest.getByText("Test proposal for automated E2E tests")).toBeVisible();
+      await expect(guest.getByText("Test proposal for automated E2E tests")).toBeVisible({ visible: !isMobile });
       await expect(guest.getByRole("button", { name: /New Proposal/ })).toHaveCount(0);
       await guest.route("**/api/auth/oidc?**", route => route.fulfill({ body: "SSO entry captured" }));
       await guest.getByRole("button", { name: /^Pro \(/ }).click();
@@ -27,13 +27,13 @@ test.describe("Decision-focused workflow", () => {
       await guestContext.close();
     }
   });
-  test("should put the first idea and vote controls in the initial viewport", async ({ page }) => {
+  test("should put the first idea and vote controls in the initial viewport", async ({ page, isMobile }) => {
     const seed = await seedTestData(page.request);
     await loginAsTestUser(page, seed);
     await page.goto(`/projects/${seed.projectId}`);
     const idea = page.locator('[data-slot="accordion-item"]').first();
     await expect(idea.getByText("Initial Test Proposal")).toBeVisible();
-    await expect(idea.getByText("Test proposal for automated E2E tests")).toBeVisible();
+    await expect(idea.getByText("Test proposal for automated E2E tests")).toBeVisible({ visible: !isMobile });
     const vote = idea.getByRole("button", { name: /^Pro \(/ });
     await expect(vote).toBeInViewport();
     await expect(page.getByRole("button", { name: /PDF|CSV/i })).toHaveCount(0);
@@ -69,19 +69,19 @@ test("should preserve the first preview outside the list and keep attachments in
   await page.goto(`/projects/${seed.projectId}`);
   const idea = page.locator('[data-slot="accordion-item"]').first();
   const summary = idea.getByText("Test proposal for automated E2E tests");
-  await expect(summary).toBeVisible();
-  const summaryOffset = await summary.evaluate(el => {
+  await expect(summary).toBeVisible({ visible: !isMobile });
+  const summaryOffset = !isMobile ? await summary.evaluate(el => {
     const range = document.createRange();
     range.selectNodeContents(el);
     const text = range.getBoundingClientRect();
     const area = el.getBoundingClientRect();
     return Math.abs((text.top + text.bottom - area.top - area.bottom) / 2);
-  });
+  }) : 0;
   expect(summaryOffset).toBeLessThanOrEqual(2);
   const initialHeight = (await idea.boundingBox())!.height;
   if (isMobile) await idea.getByRole("button", { name: /^Pro \(/ }).focus();
   else await page.getByRole("heading", { level: 1 }).hover();
-  await expect(summary).toBeVisible();
+  await expect(summary).toBeVisible({ visible: !isMobile });
   await expect.poll(async () => (await idea.boundingBox())!.height).toBe(initialHeight);
   await idea.getByRole("button", { name: "Attachments", exact: true }).click();
   await expect(page.getByRole("dialog", { name: "Attachments", exact: true })).toBeVisible();

@@ -3,7 +3,7 @@ Description=Ideate essential user experience test
 After=network-online.target
 Wants=network-online.target
 [Service]
-WorkingDirectory=/home/dc/work/ideate-test/.next-sso-only/standalone
+WorkingDirectory=/home/dc/work/ideate-test/.next-mobile-compact/standalone
 EnvironmentFile=/home/dc/.config/ideate/test.env
 ExecStart=/home/dc/.nvm/versions/node/v22.23.2/bin/node server.js
 Restart=on-failure

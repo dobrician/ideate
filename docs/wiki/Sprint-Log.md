@@ -1,5 +1,11 @@
 # Sprint Log
 
+## 4 October — Compact mobile proposals (#89)
+
+DC explicitly reopened mobile proposal layout after the test review: one header row for title and controls, 44px touch targets, stable consensus background, and touch descriptions opened deliberately. Desktop previews and independent voting/discussion/files remain. This change is deployed to the isolated preview for review; production and both project databases are preserved. Existing summary tests change only for the approved small-screen behavior. Validation outcomes are recorded in HANDOVER and the nonsecret mobile layout proof.
+
+Outcomes: Validation: 2729 unit tests per branch pass; lint/typecheck/build pass;45 targeted preview E2E cases pass across all three browser profiles,3 canonical geometry checks and22 live preview smoke checks pass. Native browser confirms60px headers at320/390px without overflow. Initial new-test failures were a summary-versus-description locator bug, corrected without weakening layout assertions; evidence retained. Demo state is identical before/after (two proposals,zero owner votes). Active build protected through3 November; logs through11 October.
+
 ## 4 October — SSO-only authentication (#87)
 
 DC authorized exclusive SurCod SSO on production and test. Local credential forms, APIs, registration/recovery, magic links and authentication emails are retired. Roles and identity mappings remain in Ideate, with no destructive database change. Existing application sessions need one SSO reconnection. The project screen remains frozen; unrelated essential preview UX stays on test. Application tests use loopback-only isolated fixtures; live provider verification is separate. Deployment/test evidence is recorded in the canonical HANDOVER and the private local operational proof, without credentials. Outcomes: exclusive SSO live on both public domains; account/role mappings preserved and real local OIDC verified;2729 units per branch,585/567 distinct browser cases with passing rechecks,45 final auth/chat/comment cases per branch and22 live smoke checks per host. Frozen project source remains unchanged. Existing proxy attribution risk tracked separately in #88; #76 remains open.

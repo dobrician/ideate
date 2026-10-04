@@ -28,9 +28,9 @@ SQLite binding in the current dependency installation. Build to a new owned,
 registered directory before switching the service:
 
 ```bash
-NEXT_DIST_DIR=.next-sso-only SKIP_DB_INIT=1 npm run build
-cp -al .next-sso-only/static .next-sso-only/standalone/.next-sso-only/static
-cp -al public .next-sso-only/standalone/public
+NEXT_DIST_DIR=.next-mobile-compact SKIP_DB_INIT=1 npm run build
+cp -al .next-mobile-compact/static .next-mobile-compact/standalone/.next-mobile-compact/static
+cp -al public .next-mobile-compact/standalone/public
 ```
 
 Do not overwrite an active build. Update the service WorkingDirectory only
@@ -71,3 +71,5 @@ under DC's no-email constraint. For production follow-up use read-only checks
 and the already verified local SSO session. Run email integration checks only
 against the isolated test runtime with SMTP disabled, unless DC explicitly
 authorizes production email delivery. No coordination notifications are allowed.
+
+The mobile proposal review (#89) now uses `.next-mobile-compact/standalone` on test only; `.next-sso-only` is its retained rollback. Production remains on `a20e131fbea0`. The authorized change reopens only responsive proposal presentation, with descriptions opened deliberately on touch.

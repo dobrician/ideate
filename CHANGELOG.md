@@ -10,6 +10,8 @@
 
 ### Changed
 
+- Compact mobile proposal headers into one row, retaining 44px vote/discussion/file targets and fixed consensus-chart height. Touch descriptions open on demand; desktop persistent previews remain (#89). Existing summary browser expectations change only for the approved mobile requirement.
+
 - Retire local registration, passwords, magic links, verification/recovery, authentication emails and local credential settings. Sign-in enters SurCod SSO directly with a preserved project destination; existing accounts/roles/data remain and old sessions require one fresh SSO login (#87). Isolated test fixtures cannot run on public origins.
 
 - Move the existing production runtime to `ideate.surcod.ro` with its image/database retained. Expose the independent synthetic preview at `test.ideate.surcod.ro`; legacy `idea.surmont.co` permanently redirects preserving path/query. Existing homelab and SurCod owners completed infrastructure and portfolio-link updates. Essential user-page changes remain confined to the test branch.
