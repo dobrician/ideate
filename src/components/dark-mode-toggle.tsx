@@ -53,6 +53,7 @@ function isDark(theme: string): boolean {
   return window.matchMedia("(prefers-color-scheme: dark)").matches;
 }
 
+/** Switch explicitly between light and dark from the primary navigation. */
 export function DarkModeToggle() {
   const { theme, setTheme } = useTheme();
   const { t } = useLocale();
@@ -64,9 +65,9 @@ export function DarkModeToggle() {
   }
 
   return (
-    <Button variant="ghost" size="icon" onClick={toggle} aria-label={t("theme.toggle")}>
-      <SunIcon className="h-5 w-5 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
-      <MoonIcon className="absolute h-5 w-5 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
+    <Button variant="ghost" size="icon" onClick={toggle} title={t("theme.toggle")} aria-label={t("theme.toggle")}>
+      <SunIcon className="h-5 w-5 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
+      <MoonIcon className="absolute h-5 w-5 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
       <span className="sr-only">{t("theme.toggle")}</span>
     </Button>
   );

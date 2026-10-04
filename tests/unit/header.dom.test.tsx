@@ -145,7 +145,7 @@ describe("Header", () => {
     });
   });
 
-  it("should show account initials and keep theme and language inside its menu", async () => {
+  it("should keep language in the account menu and theme switching in the header", async () => {
     mockFetchResponse({ role: "user", firstName: "Ciprian", lastName: "Dobrea", email: "ciprian@example.com" });
     await renderHeader();
     expect(await screen.findByText("CD")).toBeVisible();
@@ -153,7 +153,8 @@ describe("Header", () => {
     await userEvent.click(screen.getByTitle("Profile"));
     expect(screen.getByText("Ciprian Dobrea")).toBeVisible();
     expect(screen.getByRole("menuitem", { name: /Switch to Romanian/ })).toBeVisible();
-    expect(screen.getByRole("menuitem", { name: /Toggle theme/ })).toBeVisible();
+    expect(screen.getByTestId("dark-mode-toggle")).toBeVisible();
+    expect(screen.queryByRole("menuitem", { name: /Toggle theme/ })).not.toBeInTheDocument();
   });
 
   describe("sign out (auth-gated)", () => {

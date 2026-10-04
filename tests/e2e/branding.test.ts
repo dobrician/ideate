@@ -20,9 +20,15 @@ test("should keep the floating brand and account utilities usable on a narrow sc
   await expect(page.locator("html")).toHaveClass(/dark/);
   await header.getByRole("button", { name: "Profile", exact: true }).click();
   await expect(page.getByRole("menuitem", { name: /Switch to Romanian/ })).toBeVisible();
-  await page.getByRole("menuitem", { name: /Toggle theme/ }).click();
-  await expect(page.locator("html")).not.toHaveClass(/dark/);
   await page.keyboard.press("Escape");
+  const themeToggle = header.getByRole("button", { name: "Toggle theme", exact: true });
+  await expect(themeToggle).toBeVisible();
+  await themeToggle.click();
+  await expect(page.locator("html")).not.toHaveClass(/dark/);
+  await page.reload();
+  await expect(page.locator("html")).not.toHaveClass(/dark/);
+  await themeToggle.click();
+  await expect(page.locator("html")).toHaveClass(/dark/);
   await header.getByRole("button", { name: "Search projects & proposals...", exact: true }).click();
   await expect(header.locator("#app-search input").first()).toBeFocused();
 });

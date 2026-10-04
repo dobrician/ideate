@@ -4,7 +4,7 @@ A platform for teams to create projects, submit proposals, vote (pro/contra), an
 
 🌐 **Staging:** [idea.surmont.co](https://idea.surmont.co)
 
-Ideate uses the Convergence symbol with a lowercase wordmark and a floating navigation bar. Projects, search and account stay visible on desktop and mobile; theme and language controls live in the account menu. The project-return link is in this shared navigation, and the duplicated mobile bottom bar is no longer mounted. Favicons and install icons use the same identity. The Docker dependency stage includes native SQLite compilation tools when prebuilt binaries cannot be downloaded. Background project updates continue without a visible Live Activity or connection-status panel.
+Ideate uses the Convergence symbol with a lowercase wordmark and a floating navigation bar. Projects, search and account stay visible on desktop and mobile; the sun/moon theme control stays visible in the bar and language lives in the account menu. Below 360px only the brand symbol is shown, preserving 44px controls without overflow. The project-return link is in this shared navigation, and the duplicated mobile bottom bar is no longer mounted. Favicons and install icons use the same identity. The Docker dependency stage includes native SQLite compilation tools when prebuilt binaries cannot be downloaded. Background project updates continue without a visible Live Activity or connection-status panel.
 
 ## Decision workflow
 

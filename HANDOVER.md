@@ -41,3 +41,7 @@ Temporary preparation scripts/log copies: `/tmp/codex-ideate-surcod-demo-2026100
 ## Final coordination check
 
 A final guard observed a further live request for this demo and a new actor +1 after the initial reset (22:30 UTC); its caller was not established. Preserve the initial proofs separately and perform the same guarded reset again. The second request logs 1457ms, 547 tokens and an application estimate 0.002735 USD. Both observed requests total an estimated 0.005630 USD, below the authorized ceiling. Final DB verification again confirms exactly two proposals, no actor vote and no cached demo prompt. Capture must start only after the ready signal to avoid concurrent state changes.
+
+## Manual theme control and palette review — 4 October
+
+Restore a discoverable sun/moon control directly in the floating navigation (#84); language remains in the account menu. At widths below 360px use only the brand symbol to preserve Projects and three 44px controls. Real component tests cover system-dark override, keyboard switching and persistence; the browser assertion checks reload and both directions. The color analysis and schematic comparison are in `docs/design/Color-Review.md` and `docs/design/palette-review.html` (#85). Proposed colors are not applied. Do not change holiday-demo data or reset it for this UI task. Production deployment verification is pending.

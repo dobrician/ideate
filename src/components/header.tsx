@@ -3,9 +3,9 @@
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { User, LogOut, Shield, Search, Globe, Sun, Moon, LayoutDashboard, X } from "lucide-react";
+import { User, LogOut, Shield, Search, Globe, LayoutDashboard, X } from "lucide-react";
 import { SearchBar } from "@/components/search-bar";
-import { useTheme } from "@/components/theme-provider";
+import { DarkModeToggle } from "@/components/dark-mode-toggle";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { useLocale } from "@/lib/use-locale";
@@ -18,7 +18,6 @@ interface HeaderUser {
 export function Header() {
   const pathname = usePathname();
   const { t, locale } = useLocale();
-  const { theme, setTheme } = useTheme();
   const [user, setUser] = useState<HeaderUser | null>(null);
   const isLoggedIn = !!user;
   const isAdmin = user?.role === "admin";
@@ -61,7 +60,7 @@ export function Header() {
             <path d="M5 7h6c7 0 8 13 15 13h4M5 20h25M5 33h6c7 0 8-13 15-13h4" fill="none" stroke="currentColor" strokeWidth="4.5" strokeLinecap="round" />
             <circle cx="32" cy="20" r="5" className="fill-primary" />
           </svg>
-          <span className="text-[22px] font-semibold leading-none tracking-[-1px]">ideate</span>
+          <span className="hidden min-[360px]:inline text-[22px] font-semibold leading-none tracking-[-1px]">ideate</span>
         </Link>
         <nav className="flex min-w-0" aria-label={t("nav.mainNavigation")}>
           <Link href="/projects" aria-current={pathname.startsWith("/projects") ? "page" : undefined}
@@ -74,6 +73,7 @@ export function Header() {
             aria-expanded={searchOpen} aria-controls="app-search" onClick={() => setSearchOpen(!searchOpen)}>
             {searchOpen ? <X className="size-4" /> : <Search className="size-4" />}
           </Button>
+          <DarkModeToggle />
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="icon" className="rounded-full border border-border/60 bg-muted/60" aria-label={t("nav.profile")} title={t("nav.profile")}>
@@ -95,9 +95,7 @@ export function Header() {
                 document.cookie = `locale=${next}; expires=${new Date(Date.now() + 365 * 864e5).toUTCString()}; path=/; SameSite=Lax`;
                 window.location.reload();
               }}><Globe className="size-4" />{t(locale === "ro" ? "locale.switchToEn" : "locale.switchToRo")}<span className="ml-auto text-xs text-muted-foreground">{locale.toUpperCase()}</span></DropdownMenuItem>
-              <DropdownMenuItem onSelect={event => {
-                event.preventDefault(); setTheme(document.documentElement.classList.contains("dark") ? "light" : "dark");
-              }}>{theme === "dark" ? <Sun className="size-4" /> : <Moon className="size-4" />}{t("theme.toggle")}<span className="ml-auto text-xs text-muted-foreground">{t(`theme.${theme}`)}</span></DropdownMenuItem>
+
               {isLoggedIn && <><DropdownMenuSeparator /><DropdownMenuItem asChild>
                 <form action="/auth/logout" method="POST"><button type="submit" className="flex w-full items-center gap-2"><LogOut className="size-4" />{t("nav.signOut")}</button></form>
               </DropdownMenuItem></>}

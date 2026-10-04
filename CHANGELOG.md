@@ -8,6 +8,9 @@
 
 ### Changed
 
+- Restore the visible sun/moon control in the floating navigation, with manual theme persistence and 44px mobile targets. Language remains in the account menu; the narrowest layouts show the brand symbol to preserve space.
+- Add a light/dark palette review proposing calmer Pro/Contra fills, consistent semantic colors and readable primary-action text. Proposed colors are documented for review and are not applied to the product.
+
 - Apply the selected Convergence identity with the Dialog floating menu: vector logo, lowercase wordmark, matching favicon/install icons, shared desktop/mobile navigation and theme/language controls in the account menu. Remove duplicate project-return and mobile bottom navigation. Remove the Live Activity/polling panel while retaining background project updates.
 
 - Vertically center proposal summary previews with symmetric spacing. Refine the new-idea drawer with a fixed submission footer, scrollable fields, a roomier editor and quieter initial-vote controls.
