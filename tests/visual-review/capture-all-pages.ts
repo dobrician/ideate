@@ -9,7 +9,7 @@ const DESKTOP = { width: 1280, height: 900 };
 
 interface SeedData {
   email: string;
-  password: string;
+  cookies: import("../e2e/helpers").SeedData["cookies"];
   userId: string;
   projectId: string;
   proposalId: string;
@@ -26,14 +26,7 @@ async function seedTestData(page: Page): Promise<SeedData> {
 }
 
 async function loginAsTestUser(page: Page, seed: SeedData): Promise<void> {
-  const res = await page.request.post(`${BASE_URL}/api/auth/login-password`, {
-    data: { email: seed.email, password: seed.password },
-  });
-  if (!res.ok()) {
-    throw new Error(`Login failed: ${res.status()} ${await res.text()}`);
-  }
-  await page.goto("/dashboard");
-  await page.waitForLoadState("domcontentloaded");
+  await page.context().addCookies(seed.cookies);
 }
 
 async function setTheme(page: Page, theme: "light" | "dark"): Promise<void> {
@@ -107,7 +100,7 @@ test("capture all pages for visual review", async ({ page }) => {
   });
 
   // --- Login page (empty) ---
-  await page.goto("/auth/login");
+  await page.goto("/auth/login?error=oidc_error");
   await page.waitForLoadState("domcontentloaded");
   await setTheme(page, "light");
 
@@ -118,23 +111,8 @@ test("capture all pages for visual review", async ({ page }) => {
     await screenshot(page, `${num()}-login-empty-desktop-light`);
   });
 
-  // --- Login page with validation errors ---
-  await setTheme(page, "light");
-  await withViewport(page, DESKTOP, async () => {
-    // Submit with empty fields to trigger validation
-    const submitBtn = page.locator('button[type="submit"]').first();
-    if (await submitBtn.isVisible()) {
-      await submitBtn.click();
-      await page.waitForTimeout(500);
-    }
-    await screenshot(page, `${num()}-login-validation-desktop-light`);
-  });
-  await withViewport(page, MOBILE, async () => {
-    await screenshot(page, `${num()}-login-validation-mobile-light`);
-  });
-
   // --- Login page dark mode ---
-  await page.goto("/auth/login");
+  await page.goto("/auth/login?error=oidc_error");
   await page.waitForLoadState("domcontentloaded");
   await setTheme(page, "dark");
   await withViewport(page, DESKTOP, async () => {
@@ -142,43 +120,6 @@ test("capture all pages for visual review", async ({ page }) => {
   });
   await withViewport(page, MOBILE, async () => {
     await screenshot(page, `${num()}-login-mobile-dark`);
-  });
-
-  // --- Register page (empty) ---
-  await page.goto("/auth/register");
-  await page.waitForLoadState("domcontentloaded");
-  await setTheme(page, "light");
-
-  await withViewport(page, MOBILE, async () => {
-    await screenshot(page, `${num()}-register-empty-mobile-light`);
-  });
-  await withViewport(page, DESKTOP, async () => {
-    await screenshot(page, `${num()}-register-empty-desktop-light`);
-  });
-
-  // --- Register page with validation errors ---
-  await withViewport(page, DESKTOP, async () => {
-    const submitBtn = page.locator('button[type="submit"]').first();
-    if (await submitBtn.isVisible()) {
-      await submitBtn.click();
-      await page.waitForTimeout(500);
-    }
-    await screenshot(page, `${num()}-register-validation-desktop-light`);
-  });
-  await withViewport(page, MOBILE, async () => {
-    await screenshot(page, `${num()}-register-validation-mobile-light`);
-  });
-
-  // --- Forgot password page ---
-  await page.goto("/auth/forgot-password");
-  await page.waitForLoadState("domcontentloaded");
-  await setTheme(page, "light");
-
-  await withViewport(page, MOBILE, async () => {
-    await screenshot(page, `${num()}-forgot-password-mobile-light`);
-  });
-  await withViewport(page, DESKTOP, async () => {
-    await screenshot(page, `${num()}-forgot-password-desktop-light`);
   });
 
   // --- 404 page ---
@@ -455,32 +396,6 @@ test("capture all pages for visual review", async ({ page }) => {
 
   await withViewport(page, DESKTOP, async () => {
     await screenshot(page, `${num()}-create-project-desktop-dark`);
-  });
-
-  // --- Forgot password dark mode ---
-  // (need to log out first or just navigate — since the home page redirects when logged in,
-  //  we can still access /auth/forgot-password directly as it's a public route)
-  await page.goto("/auth/forgot-password");
-  await page.waitForLoadState("domcontentloaded");
-  await setTheme(page, "dark");
-
-  await withViewport(page, DESKTOP, async () => {
-    await screenshot(page, `${num()}-forgot-password-desktop-dark`);
-  });
-  await withViewport(page, MOBILE, async () => {
-    await screenshot(page, `${num()}-forgot-password-mobile-dark`);
-  });
-
-  // --- Register dark mode ---
-  await page.goto("/auth/register");
-  await page.waitForLoadState("domcontentloaded");
-  await setTheme(page, "dark");
-
-  await withViewport(page, DESKTOP, async () => {
-    await screenshot(page, `${num()}-register-desktop-dark`);
-  });
-  await withViewport(page, MOBILE, async () => {
-    await screenshot(page, `${num()}-register-mobile-dark`);
   });
 
   // --- 404 dark mode ---

@@ -459,32 +459,6 @@ describe("Romanian translation overflow (#67)", () => {
 });
 
 // ============================================================
-// #64 — Auth page card padding
-// ============================================================
-
-describe("Auth page card padding (#64)", () => {
-  it("login page card has px-2 sm:px-0", async () => {
-    const fs = await import("fs");
-    const src = fs.readFileSync("src/app/auth/login/page.tsx", "utf-8");
-    expect(src).toContain("px-2");
-    expect(src).toContain("sm:px-0");
-  });
-
-  it("register page card has px-2 sm:px-0", async () => {
-    const fs = await import("fs");
-    const src = fs.readFileSync("src/app/auth/register/page.tsx", "utf-8");
-    expect(src).toContain("px-2");
-    expect(src).toContain("sm:px-0");
-  });
-
-  it("login page wrapper has sm:px-6", async () => {
-    const fs = await import("fs");
-    const src = fs.readFileSync("src/app/auth/login/page.tsx", "utf-8");
-    expect(src).toContain("sm:px-6");
-  });
-});
-
-// ============================================================
 // #63 — "View all" link not truncated
 // ============================================================
 

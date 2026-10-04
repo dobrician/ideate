@@ -1,9 +1,9 @@
 import { db } from "@/db";
-import { users, projects, auditLogs, invitations, tags, webhooks, projectTemplates, teams, teamMembers, customRoles } from "@/db/schema";
+import { users, projects, auditLogs, tags, webhooks, projectTemplates, teams, teamMembers, customRoles } from "@/db/schema";
 import { desc, asc, eq, sql } from "drizzle-orm";
 
 export async function getAdminData() {
-  const [allUsers, stats, recentAudit, pendingInvitations, allProjects, allTags, allWebhooks, allTemplates, allTeamsRaw, allCustomRolesRaw] = await Promise.all([
+  const [allUsers, stats, recentAudit, allProjects, allTags, allWebhooks, allTemplates, allTeamsRaw, allCustomRolesRaw] = await Promise.all([
     db.select({
       id: users.id, email: users.email, firstName: users.firstName,
       lastName: users.lastName, role: users.role, createdAt: users.createdAt,
@@ -24,14 +24,6 @@ export async function getAdminData() {
     }).from(auditLogs)
       .leftJoin(users, sql`${auditLogs.userId} = ${users.id}`)
       .orderBy(desc(auditLogs.createdAt)).limit(20),
-
-    db.select({
-      id: invitations.id, email: invitations.email, status: invitations.status,
-      expiresAt: invitations.expiresAt, createdAt: invitations.createdAt,
-      inviterEmail: users.email,
-    }).from(invitations)
-      .leftJoin(users, eq(invitations.invitedBy, users.id))
-      .orderBy(desc(invitations.createdAt)),
 
     db.select({
       id: projects.id, title: projects.title, status: projects.status,
@@ -78,7 +70,7 @@ export async function getAdminData() {
   }));
 
   return {
-    allUsers, stats: stats[0], recentAudit, pendingInvitations,
+    allUsers, stats: stats[0], recentAudit,
     allProjects, allTags, allWebhooks, allTemplates,
     allTeams: Array.from(teamsMap.values()), allRoles,
   };

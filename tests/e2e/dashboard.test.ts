@@ -1,12 +1,17 @@
 import { test, expect, devices } from "@playwright/test";
 import { seedTestData, loginAsTestUser, type SeedData } from "./helpers";
 
+test.beforeEach(async ({ page }) => {
+  await page.route("**/api/auth/oidc?**", route => route.fulfill({ body: "SSO entry captured" }));
+});
+
 let seed: SeedData;
 
 test.describe("Dashboard — Authenticated", () => {
   test.beforeEach(async ({ page }) => {
     seed = await seedTestData(page.request);
     await loginAsTestUser(page, seed);
+    await page.goto("/dashboard");
   });
 
   test("dashboard loads with stat cards and content sections", async ({ page }) => {
@@ -56,7 +61,7 @@ test.describe("Dashboard — Authenticated", () => {
 test.describe("Dashboard — Empty state", () => {
   test("unauthenticated user is redirected to login", async ({ page }) => {
     await page.goto("/dashboard");
-    await expect(page).toHaveURL(/\/auth\/login/);
+    await expect(page).toHaveURL(/\/api\/auth\/oidc/);
   });
 });
 
@@ -70,6 +75,7 @@ test.describe("Dashboard — Mobile viewport", () => {
 
   test.beforeEach(async ({ page }) => {
     await loginAsTestUser(page, seed);
+    await page.goto("/dashboard");
   });
 
   test("compact stat pills visible on mobile", async ({ page }) => {

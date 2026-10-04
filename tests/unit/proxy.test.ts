@@ -11,7 +11,7 @@ function fakeJwt(payload: Record<string, unknown>): string {
 }
 
 function validJwt(): string {
-  return fakeJwt({ userId: "u1", type: "session", exp: Math.floor(Date.now() / 1000) + 3600 });
+  return fakeJwt({ userId: "u1", type: "session", authMethod: "sso", exp: Math.floor(Date.now() / 1000) + 3600 });
 }
 
 function req(path: string, session?: string): NextRequest {
@@ -75,7 +75,7 @@ describe("proxy — JWT validation", () => {
   it("redirects for random string", () => expect(proxy(req("/projects", "not-a-jwt")).status).toBe(307));
 
   it("redirects for expired JWT", () => {
-    const jwt = fakeJwt({ userId: "u1", type: "session", exp: Math.floor(Date.now() / 1000) - 3600 });
+    const jwt = fakeJwt({ userId: "u1", type: "session", authMethod: "sso", exp: Math.floor(Date.now() / 1000) - 3600 });
     expect(proxy(req("/projects", jwt)).status).toBe(307);
   });
 
@@ -85,7 +85,7 @@ describe("proxy — JWT validation", () => {
   });
 
   it("redirects for missing userId", () => {
-    const jwt = fakeJwt({ type: "session", exp: Math.floor(Date.now() / 1000) + 3600 });
+    const jwt = fakeJwt({ type: "session", authMethod: "sso", exp: Math.floor(Date.now() / 1000) + 3600 });
     expect(proxy(req("/projects", jwt)).status).toBe(307);
   });
 
@@ -95,9 +95,9 @@ describe("proxy — JWT validation", () => {
 
   it("allows a valid session JWT", () => expect(isPass(proxy(req("/projects", validJwt())))).toBe(true));
 
-  it("allows JWT without exp (non-number exp skips expiry check)", () => {
-    const jwt = fakeJwt({ userId: "u1", type: "session" });
-    expect(isPass(proxy(req("/projects", jwt)))).toBe(true);
+  it("rejects JWT without an expiry", () => {
+    const jwt = fakeJwt({ userId: "u1", type: "session", authMethod: "sso" });
+    expect(proxy(req("/projects", jwt)).status).toBe(307);
   });
 });
 

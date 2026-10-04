@@ -8,8 +8,6 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { FolderOpen, Lightbulb } from "lucide-react";
 import { ProfileForm } from "./profile-form";
-import { ChangePasswordForm } from "./change-password-form";
-import { ChangeEmailForm } from "./change-email-form";
 import { NotificationSettings } from "./notification-settings";
 import { useLocale } from "@/lib/use-locale";
 import { statusBadgeClass, statusLabel } from "@/lib/status-utils";
@@ -36,7 +34,6 @@ interface ProfileTabsProps {
     displayName: string;
     firstName: string;
     lastName: string;
-    hasPassword: boolean;
   };
   projects: ProfileProject[];
   proposals: ProfileProposal[];
@@ -108,7 +105,6 @@ export function ProfileTabs({ user, projects, proposals, notificationPrefs }: Pr
       <div className="relative">
         <TabsList className="w-full justify-start overflow-x-auto" style={{ scrollbarWidth: "none", WebkitOverflowScrolling: "touch" }}>
           <TabsTrigger value="account" className="shrink-0">{t("profile.tabAccount")}</TabsTrigger>
-          <TabsTrigger value="security" className="shrink-0">{t("profile.tabSecurity")}</TabsTrigger>
           <TabsTrigger value="notifications" className="shrink-0">{t("profile.tabNotifications")}</TabsTrigger>
           <TabsTrigger value="projects" className="shrink-0">{t("profile.tabProjects")}</TabsTrigger>
           <TabsTrigger value="proposals" className="shrink-0">{t("profile.tabProposals")}</TabsTrigger>
@@ -152,19 +148,7 @@ export function ProfileTabs({ user, projects, proposals, notificationPrefs }: Pr
         </Card>
 
         <ProfileForm firstName={user.firstName} lastName={user.lastName} />
-        <ChangeEmailForm currentEmail={user.email} />
-      </TabsContent>
-
-      <TabsContent value="security">
-        {user.hasPassword ? (
-          <ChangePasswordForm />
-        ) : (
-          <Card>
-            <CardContent className="py-8 text-center">
-              <p className="text-sm text-muted-foreground">{t("profile.noPasswordSet")}</p>
-            </CardContent>
-          </Card>
-        )}
+        <p className="text-sm text-muted-foreground">{t("profile.ssoIdentity")}</p>
       </TabsContent>
 
       <TabsContent value="notifications">

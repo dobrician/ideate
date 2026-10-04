@@ -1,6 +1,10 @@
 import { test, expect } from "@playwright/test";
 import { seedTestData, loginAsTestUser } from "./helpers";
 
+test.beforeEach(async ({ page }) => {
+  await page.route("**/api/auth/oidc?**", route => route.fulfill({ body: "SSO entry captured" }));
+});
+
 test.describe("Admin CRUD Operations", () => {
   test("admin can navigate to all admin sub-pages", async ({ page }) => {
     const seed = await seedTestData(page.request, { role: "admin" });
@@ -76,7 +80,7 @@ test.describe("Admin CRUD Operations", () => {
     const bodyText = (await page.textContent("body")) || "";
     const isBlocked =
       currentUrl.includes("/dashboard") ||
-      currentUrl.includes("/auth/login") ||
+      currentUrl.includes("/api/auth/oidc") ||
       /access denied|unauthorized|forbidden/i.test(bodyText);
     expect(isBlocked).toBeTruthy();
   });
@@ -86,6 +90,6 @@ test.describe("Admin CRUD Operations", () => {
     await page.waitForLoadState("domcontentloaded");
 
     // Should redirect to login page
-    await expect(page).toHaveURL(/auth\/login/);
+    await expect(page).toHaveURL(/api\/auth\/oidc/);
   });
 });

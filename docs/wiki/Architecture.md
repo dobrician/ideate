@@ -6,7 +6,7 @@
 | Framework | Next.js 16 (App Router) | Server Components, streaming, mature ecosystem |
 | Language | TypeScript 5.9 (strict mode) | Type safety, self-documenting code |
 | Database | SQLite + Drizzle ORM (+ PostgreSQL adapter) | Portable, dual-DB support |
-| Auth | Email magic link + password (JWT) | Dual auth, zero external dependency |
+| Auth | SurCod SSO (OIDC + PKCE), JWT session | One entry; provider owns authentication methods |
 | SSO | OIDC (OpenID Connect) | Enterprise single sign-on |
 | Styling | Tailwind CSS 4 + shadcn/ui | Utility-first, accessible components |
 | Testing | Playwright (E2E) + Vitest (unit) | 2520+ tests, full coverage |
@@ -67,12 +67,12 @@ src/lib/
 ```
 
 ## Auth Flow
-1. User enters email on login page
-2. **Magic link path:** Server generates JWT token, sends magic link via SMTP
-3. **Password path:** Server validates bcrypt hash, creates session
-4. **OIDC path:** Redirect to IdP, callback validates token
-5. Session: HTTP-only secure cookie with JWT (7-day expiry, auto-rotation)
-6. CSRF: sameSite=lax + Origin header validation
+1. Sign-in redirects directly to SurCod SSO, preserving a safe project destination.
+2. SSO offers its configured authentication methods; Ideate collects no credentials.
+3. Callback validates state, PKCE verifier and verified identity, then preserves existing account mappings and roles.
+4. Application session: HTTP-only secure JWT cookie (7-day expiry) explicitly marked as SSO-issued, with revocation and CSRF protection.
+5. Logout clears/revokes the application session and returns to the public home.
+6. Local registration, magic links, passwords, recovery and credential changes are retired. Optional notification SMTP is separate from authentication.
 
 ## Security Layers
 - JWT with JTI blocklist for token revocation

@@ -20,9 +20,10 @@ const STATE_COOKIE = "oidc_state";
  */
 export async function GET(request: NextRequest) {
   let callbackBase = request.url;
+  let destination = "/";
   const loginError = (msg: string) =>
     NextResponse.redirect(
-      new URL(`/auth/login?error=${encodeURIComponent(msg)}`, callbackBase)
+      new URL(`/auth/login?error=${encodeURIComponent(msg)}&redirect=${encodeURIComponent(destination)}`, callbackBase)
     );
 
   try {
@@ -30,25 +31,19 @@ export async function GET(request: NextRequest) {
     if (!config) return loginError("oidc_not_configured");
     callbackBase = config.redirectUri;
 
-    const { searchParams } = request.nextUrl;
-    const code = searchParams.get("code");
-    const state = searchParams.get("state");
-    const errorParam = searchParams.get("error");
-
-    if (errorParam) {
-      logger.warn({ error: errorParam }, "OIDC provider returned error");
-      return loginError("oidc_denied");
-    }
-
-    if (!code || !state) return loginError("oidc_missing_params");
-
     const cookieStore = await cookies();
     const storedState = cookieStore.get(STATE_COOKIE)?.value;
     const codeVerifier = cookieStore.get("oidc_verifier")?.value;
-    const destination = getSafeRedirect(cookieStore.get("oidc_redirect")?.value ?? null);
+    destination = getSafeRedirect(cookieStore.get("oidc_redirect")?.value ?? null);
     cookieStore.delete(STATE_COOKIE);
     cookieStore.delete("oidc_verifier");
     cookieStore.delete("oidc_redirect");
+
+    const { searchParams } = request.nextUrl;
+    const code = searchParams.get("code");
+    const state = searchParams.get("state");
+    if (searchParams.has("error")) return loginError("oidc_denied");
+    if (!code || !state) return loginError("oidc_missing_params");
 
     if (!storedState || storedState !== state) {
       return loginError("oidc_state_mismatch");

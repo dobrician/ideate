@@ -10,6 +10,8 @@
 
 ### Changed
 
+- Retire local registration, passwords, magic links, verification/recovery, authentication emails and local credential settings. Sign-in enters SurCod SSO directly with a preserved project destination; existing accounts/roles/data remain and old sessions require one fresh SSO login (#87). Isolated test fixtures cannot run on public origins.
+
 - Move the existing production runtime to `ideate.surcod.ro` with its image/database retained. Expose the independent synthetic preview at `test.ideate.surcod.ro`; legacy `idea.surmont.co` permanently redirects preserving path/query. Existing homelab and SurCod owners completed infrastructure and portfolio-link updates. Essential user-page changes remain confined to the test branch.
 
 - Applied the approved forest/sage and clay decision palette across chart fills, vote controls, proposal creation, duplicate review and own chat messages. Shared light/dark tokens replace scattered green/red overrides; primary action text now follows the theme foreground (#85). Project surfaces and neutral borders integrate with the palette; chart geometry and error colors are preserved.

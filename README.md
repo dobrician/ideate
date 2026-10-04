@@ -4,7 +4,7 @@ A platform for teams to create projects, submit proposals, vote (pro/contra), an
 
 🌐 **Production:** [ideate.surcod.ro](https://ideate.surcod.ro) · **Separate preview:** [test.ideate.surcod.ro](https://test.ideate.surcod.ro)
 
-Production retains the accepted decision-screen image/database. The essential user-page simplification runs only in the separate test worktree. Legacy `idea.surmont.co` redirects permanently, preserving path/query. See [runtime separation](ops/README.md).
+Production retains the accepted decision screen and database, with the authorized SSO-only authentication patch. The essential user-page simplification runs only in the separate test worktree. Legacy `idea.surmont.co` redirects permanently, preserving path/query. See [runtime separation](ops/README.md).
 
 Ideate uses the Convergence symbol with a lowercase wordmark and a floating navigation bar. Projects, search and account stay visible on desktop and mobile; the sun/moon theme control stays visible in the bar and language lives in the account menu. Below 360px only the brand symbol is shown, preserving 44px controls without overflow. The project-return link is in this shared navigation, and the duplicated mobile bottom bar is no longer mounted. Favicons and install icons use the same identity. The Docker dependency stage includes native SQLite compilation tools when prebuilt binaries cannot be downloaded. Background project updates continue without a visible Live Activity or connection-status panel.
 
@@ -20,7 +20,7 @@ Expanded project context replaces the AI summary, with participation and its dis
 
 - **Framework:** Next.js 16 (App Router), TypeScript strict
 - **Database:** SQLite + Drizzle ORM (WAL mode, FTS5 search)
-- **Auth:** SurCod SSO (OIDC + PKCE), email/password and magic-link fallback, JWT sessions
+- **Auth:** SurCod SSO exclusively (OIDC + PKCE), JWT application sessions
 - **UI:** Tailwind CSS 4 + shadcn/ui
 - **Testing:** Vitest (unit) + Playwright (E2E + smoke)
 - **AI:** Pluggable LLM (Gemini / OpenAI) for summarization
@@ -37,7 +37,7 @@ cd ideate
 
 # Configure
 cp .env.example .env.local
-# Edit .env.local with your SMTP, JWT_SECRET, and AI keys
+# Edit .env.local with your SSO configuration, JWT_SECRET, and optional SMTP/AI keys
 
 # Run with Docker (recommended)
 docker compose up staging -d
@@ -96,7 +96,7 @@ See [`.env.example`](.env.example) for all required variables.
 
 Key ones:
 - `JWT_SECRET` — Generate with `openssl rand -base64 32`
-- `SMTP_*` — Email provider for magic links
+- `SMTP_*` — Optional email provider for notifications; authentication sends no email
 - `GEMINI_API_KEY` / `OPENAI_API_KEY` — AI summarization
 - `APP_URL` — Public URL (e.g., `https://ideate.surcod.ro`)
 
@@ -106,9 +106,11 @@ Key ones:
 
 Configure `OIDC_ISSUER=https://sso.surcod.ro`, `OIDC_CLIENT_ID`, `OIDC_CLIENT_SECRET` and an exact `OIDC_REDIRECT_URI=<APP_URL>/api/auth/oidc/callback` for a confidential web client using `client_secret_post`. Ideate uses Authorization Code with PKCE S256 and requires a verified email before creating or linking an identity. Roles remain managed by Ideate.
 
-Set `NEXT_PUBLIC_OIDC_ENABLED=true` for development. For containers, compile the public login button with `NEXT_PUBLIC_OIDC_ENABLED=true docker compose build staging`, or `podman build --build-arg NEXT_PUBLIC_OIDC_ENABLED=true -t ideate-staging .`. Client secrets are supplied only at runtime. Production and development use separate OIDC applications and credentials in **1Password → Surmont → SurCod — Ideate Web / Ideate Development — ZITADEL OIDC**. The user login is saved as **Ideate — SurCod SSO**.
+SSO is the only sign-in path. `/auth/login` redirects directly to `/api/auth/oidc`, then to `https://sso.surcod.ro`; the provider offers its configured authentication methods. Ideate has no registration, magic-link, password recovery, credential forms or local email/password settings. A failed provider flow shows only a retry and preserves the safe return destination. No public build flag is needed. Supply the confidential OIDC credentials only at runtime, with the exact callback registered separately for production and test.
 
-The existing SurCod identity `dc@surcod.ro` is explicitly linked to the demo owner `ciprian.dobrea@gmail.com`; its existing Google identity can also authenticate through SSO. Other participants need an account available in SurCod SSO, or may use Ideate's existing email authentication. This integration does not change the SSO registration policy.
+Existing accounts, roles and explicit OAuth identity mappings are retained. Legacy credential/token columns are preserved as inactive data, without destructive migrations. On rollout, existing application cookies require one fresh SSO login; new sessions are explicitly marked as SSO-issued. Application logout clears/revokes the Ideate session and returns to its public home without logging the user out of other SSO applications.
+
+Automated application tests use isolated fixture sessions only when `E2E_TEST_ENABLED=true`, a secret is configured, and `APP_URL` is a loopback origin. Public production/test origins reject the fixture endpoint even if a secret is accidentally supplied. Provider authentication is verified separately through the real OIDC flow; tests never send authentication email.
 
 ## Project Structure
 

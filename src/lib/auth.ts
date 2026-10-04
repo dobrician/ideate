@@ -8,9 +8,7 @@ import { logger } from "@/lib/logger";
 
 const SESSION_COOKIE_NAME = "session";
 const CSRF_COOKIE_NAME = "csrf_token";
-const MAGIC_LINK_EXPIRY = "15m"; // 15 minutes
 const SESSION_EXPIRY = "7d"; // 7 days
-const SESSION_ROTATION_THRESHOLD = 60 * 60 * 24 * 3; // Rotate token if less than 3 days remain
 
 /** Read JWT_SECRET fresh from process.env on every call. */
 function getJwtSecret(): string {
@@ -29,85 +27,24 @@ function getAppUrl(): string {
   return process.env.APP_URL || "http://localhost:3000";
 }
 
-interface MagicLinkPayload {
-  email: string;
-  type: "magic-link";
-}
-
 interface SessionPayload {
   userId: string;
   email: string;
   type: "session";
+  authMethod: "sso";
   jti?: string; // JWT ID for token revocation
   iat?: number; // Issued at
   exp?: number; // Expiration
   nbf?: number; // Not before
 }
 
-export function generateMagicLinkToken(email: string): string {
-  const payload: MagicLinkPayload = {
-    email: email.toLowerCase().trim(),
-    type: "magic-link",
-  };
-
-  return jwt.sign(payload, getJwtSecret(), {
-    expiresIn: MAGIC_LINK_EXPIRY,
-    issuer: getAppUrl(),
-  });
-}
-
-export function verifyMagicLinkToken(token: string): string | null {
-  try {
-    const payload = jwt.verify(token, getJwtSecret(), {
-      issuer: getAppUrl(),
-    }) as MagicLinkPayload;
-
-    if (payload.type !== "magic-link") {
-      return null;
-    }
-
-    return payload.email;
-  } catch (error) {
-    logger.warn({ err: error }, "Magic link token verification failed");
-    return null;
-  }
-}
-
-export function generateMagicLink(email: string): string {
-  const token = generateMagicLinkToken(email);
-  return `${getAppUrl()}/auth/verify?token=${encodeURIComponent(token)}`;
-}
-
-export async function findOrCreateUser(email: string): Promise<string> {
-  const normalizedEmail = email.toLowerCase().trim();
-
-  // Try to find existing user
-  const existingUser = await db
-    .select()
-    .from(users)
-    .where(eq(users.email, normalizedEmail))
-    .limit(1);
-
-  if (existingUser.length > 0) {
-    return existingUser[0].id;
-  }
-
-  // Create new user
-  const userId = randomUUID();
-  await db.insert(users).values({
-    id: userId,
-    email: normalizedEmail,
-    role: "member",
-  });
-
-  return userId;
-}
-
+/** Issue an application session only after successful SSO authentication. */
 export function createSessionToken(userId: string, email: string): string {
   const payload: SessionPayload = {
     userId,
     email: email.toLowerCase().trim(),
     type: "session",
+    authMethod: "sso",
     jti: randomUUID(), // Unique token ID for revocation capability
   };
 
@@ -119,6 +56,7 @@ export function createSessionToken(userId: string, email: string): string {
   });
 }
 
+/** Verify an SSO session, rejecting all pre-migration local sessions. */
 export function verifySessionToken(
   token: string
 ): SessionPayload | null {
@@ -129,7 +67,10 @@ export function verifySessionToken(
       clockTolerance: 30, // Allow 30 seconds clock skew
     }) as SessionPayload;
 
-    if (payload.type !== "session") {
+    if (payload.type !== "session" || payload.authMethod !== "sso" ||
+      typeof payload.userId !== "string" || !payload.userId ||
+      typeof payload.email !== "string" || typeof payload.jti !== "string" ||
+      typeof payload.exp !== "number") {
       return null;
     }
 
@@ -150,7 +91,7 @@ export async function setSessionCookie(
 
   // Set session cookie — sameSite "lax" prevents CSRF on POST requests
   // while allowing the cookie to be sent on cross-site GET navigations
-  // (required for magic link flow: clicking link in email → our app).
+  // (required when returning from SurCod SSO).
   cookieStore.set(SESSION_COOKIE_NAME, token, {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",

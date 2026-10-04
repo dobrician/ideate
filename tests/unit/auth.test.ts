@@ -1,97 +1,11 @@
 import { describe, it, expect } from "vitest";
 import jwt from "jsonwebtoken";
 import {
-  generateMagicLinkToken,
-  verifyMagicLinkToken,
-  generateMagicLink,
   createSessionToken,
   verifySessionToken,
 } from "@/lib/auth";
 
 describe("Auth Library", () => {
-  describe("generateMagicLinkToken", () => {
-    it("should generate a valid JWT token for magic link", () => {
-      const email = "test@example.com";
-      const token = generateMagicLinkToken(email);
-
-      expect(token).toBeTruthy();
-      expect(typeof token).toBe("string");
-      expect(token.split(".").length).toBe(3); // JWT has 3 parts
-    });
-
-    it("should normalize email to lowercase and trim", () => {
-      const email = "  TEST@EXAMPLE.COM  ";
-      const token = generateMagicLinkToken(email);
-      const verified = verifyMagicLinkToken(token);
-
-      expect(verified).toBe("test@example.com");
-    });
-  });
-
-  describe("verifyMagicLinkToken", () => {
-    it("should verify a valid magic link token", () => {
-      const email = "test@example.com";
-      const token = generateMagicLinkToken(email);
-      const verified = verifyMagicLinkToken(token);
-
-      expect(verified).toBe(email);
-    });
-
-    it("should return null for invalid token", () => {
-      const verified = verifyMagicLinkToken("invalid-token");
-
-      expect(verified).toBeNull();
-    });
-
-    it("should return null for token with wrong type", () => {
-      const sessionToken = createSessionToken("user-123", "test@example.com");
-      const verified = verifyMagicLinkToken(sessionToken);
-
-      expect(verified).toBeNull();
-    });
-
-    it("should return null for expired token", () => {
-      const now = Math.floor(Date.now() / 1000);
-      const expiredToken = jwt.sign(
-        { email: "test@example.com", type: "magic-link" },
-        process.env.JWT_SECRET!,
-        {
-          expiresIn: 1, // 1 second
-          issuer: process.env.APP_URL,
-          notBefore: now - 100, // issued 100 seconds ago
-        }
-      );
-
-      // Wait for token to expire
-      return new Promise((resolve) => {
-        setTimeout(() => {
-          const verified = verifyMagicLinkToken(expiredToken);
-          expect(verified).toBeNull();
-          resolve(undefined);
-        }, 1100);
-      });
-    });
-  });
-
-  describe("generateMagicLink", () => {
-    it("should generate a complete magic link URL", () => {
-      const email = "test@example.com";
-      const link = generateMagicLink(email);
-
-      expect(link).toContain("http://localhost:3000/auth/verify?token=");
-      expect(link).toContain(encodeURIComponent(".")); // JWT contains dots
-    });
-
-    it("should URL-encode the token", () => {
-      const email = "test@example.com";
-      const link = generateMagicLink(email);
-      const url = new URL(link);
-      const token = url.searchParams.get("token");
-
-      expect(token).toBeTruthy();
-      expect(verifyMagicLinkToken(token!)).toBe(email);
-    });
-  });
 
   describe("createSessionToken", () => {
     it("should create a valid session JWT token", () => {
@@ -110,12 +24,13 @@ describe("Auth Library", () => {
       const token = createSessionToken(userId, email);
 
       // Decode without verification to inspect payload
-      const decoded = jwt.decode(token) as any;
+      const decoded = jwt.decode(token) as jwt.JwtPayload;
 
       expect(decoded).toBeTruthy();
       expect(decoded.userId).toBe(userId);
       expect(decoded.email).toBe(email);
       expect(decoded.type).toBe("session");
+      expect(decoded.authMethod).toBe("sso");
       expect(decoded.jti).toBeTruthy();
       expect(typeof decoded.jti).toBe("string");
     });
@@ -125,7 +40,7 @@ describe("Auth Library", () => {
       const email = "TEST@EXAMPLE.COM";
       const token = createSessionToken(userId, email);
 
-      const decoded = jwt.decode(token) as any;
+      const decoded = jwt.decode(token) as jwt.JwtPayload;
       expect(decoded.email).toBe("test@example.com");
     });
   });
@@ -143,6 +58,11 @@ describe("Auth Library", () => {
       expect(payload?.type).toBe("session");
     });
 
+    it("should reject sessions issued before SSO-only authentication", () => {
+      const token = jwt.sign({ userId: "user-123", email: "test@example.com", type: "session", jti: "legacy" }, process.env.JWT_SECRET!, { expiresIn: "7d", issuer: process.env.APP_URL, audience: process.env.APP_URL });
+      expect(verifySessionToken(token)).toBeNull();
+    });
+
     it("should return null for invalid token", () => {
       const payload = verifySessionToken("invalid-token");
 
@@ -150,7 +70,7 @@ describe("Auth Library", () => {
     });
 
     it("should return null for token with wrong type", () => {
-      const magicToken = generateMagicLinkToken("test@example.com");
+      const magicToken = jwt.sign({ email: "test@example.com", type: "magic-link" }, process.env.JWT_SECRET!, { issuer: process.env.APP_URL, audience: process.env.APP_URL });
       const payload = verifySessionToken(magicToken);
 
       expect(payload).toBeNull();
@@ -173,7 +93,7 @@ describe("Auth Library", () => {
 
     it("should return null for token with wrong audience", () => {
       const wrongAudienceToken = jwt.sign(
-        { userId: "user-123", email: "test@example.com", type: "session", jti: "test-jti" },
+        { userId: "user-123", email: "test@example.com", type: "session", authMethod: "sso", jti: "test-jti" },
         process.env.JWT_SECRET!,
         {
           expiresIn: "7d",
@@ -195,7 +115,7 @@ describe("Auth Library", () => {
       const email = "test@example.com";
       const token = createSessionToken(userId, email);
 
-      const decoded = jwt.decode(token) as any;
+      const decoded = jwt.decode(token) as jwt.JwtPayload;
 
       expect(decoded.exp).toBeTruthy();
       expect(typeof decoded.exp).toBe("number");
@@ -212,7 +132,7 @@ describe("Auth Library", () => {
       const email = "test@example.com";
       const token = createSessionToken(userId, email);
 
-      const decoded = jwt.decode(token) as any;
+      const decoded = jwt.decode(token) as jwt.JwtPayload;
 
       expect(decoded.iat).toBeTruthy();
       expect(typeof decoded.iat).toBe("number");
@@ -226,7 +146,7 @@ describe("Auth Library", () => {
       const email = "test@example.com";
       const token = createSessionToken(userId, email);
 
-      const decoded = jwt.decode(token) as any;
+      const decoded = jwt.decode(token) as jwt.JwtPayload;
 
       expect(decoded.nbf).toBeTruthy();
       expect(typeof decoded.nbf).toBe("number");
@@ -240,7 +160,7 @@ describe("Auth Library", () => {
       const email = "test@example.com";
       const token = createSessionToken(userId, email);
 
-      const decoded = jwt.decode(token) as any;
+      const decoded = jwt.decode(token) as jwt.JwtPayload;
 
       expect(decoded.iss).toBe(process.env.APP_URL);
       expect(decoded.aud).toBe(process.env.APP_URL);
@@ -253,8 +173,8 @@ describe("Auth Library", () => {
       delete process.env.APP_URL;
 
       try {
-        const link = generateMagicLink("test@example.com");
-        expect(link).toContain("http://localhost:3000/auth/verify?token=");
+        const payload = jwt.decode(createSessionToken("u", "test@example.com")) as jwt.JwtPayload;
+        expect(payload.iss).toBe("http://localhost:3000");
       } finally {
         if (originalAppUrl !== undefined) {
           process.env.APP_URL = originalAppUrl;

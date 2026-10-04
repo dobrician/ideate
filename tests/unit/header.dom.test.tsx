@@ -239,18 +239,4 @@ describe("AppShell", () => {
     expect(screen.queryByRole("banner")).not.toBeInTheDocument();
     expect(screen.getByText("Login form")).toBeInTheDocument();
   });
-
-  it("hides Header on /auth/register", async () => {
-    mockPathname = "/auth/register";
-    await renderAppShell(<p>Register</p>);
-
-    expect(screen.queryByRole("banner")).not.toBeInTheDocument();
-  });
-
-  it("hides Header on /auth/forgot-password", async () => {
-    mockPathname = "/auth/forgot-password";
-    await renderAppShell(<p>Forgot</p>);
-
-    expect(screen.queryByRole("banner")).not.toBeInTheDocument();
-  });
 });

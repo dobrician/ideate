@@ -260,6 +260,7 @@ export const ro: Record<string, string> = {
 
   // Profile
   "profile.title": "Profil",
+  "profile.ssoIdentity": "Identitatea și metodele de autentificare sunt gestionate de SurCod SSO.",
   "profile.account": "Cont",
   "profile.email": "Email",
   "profile.role": "Rol",

@@ -6,8 +6,9 @@ Legacy: idea.surmont.co → direct 301 preserving path/query to production.
 
 The existing homelab agent owns DNS, NPM 35/36, TLS certificate 42 and legacy
 proxy 23. Do not promote the experimental user interface to production as part
-of this migration. Production image bda634076936 and its SQLite volume remain
-unchanged; its only runtime overrides are APP_URL and OIDC_REDIRECT_URI.
+of this migration. The authorized SSO-only patch uses image a20e131fbea0; prior bda634076936 is
+retained for rollback. Its SQLite volume and frozen project interface are
+preserved; runtime origin overrides remain APP_URL and OIDC_REDIRECT_URI.
 `ideate-staging.container` records the rootless Podman Quadlet configuration.
 The old container name is retained to preserve operational references.
 
@@ -27,9 +28,9 @@ SQLite binding in the current dependency installation. Build to a new owned,
 registered directory before switching the service:
 
 ```bash
-NEXT_DIST_DIR=.next-essential-release NEXT_PUBLIC_OIDC_ENABLED=true SKIP_DB_INIT=1 npm run build
-cp -al .next-essential-release/static .next-essential-release/standalone/.next-essential-release/static
-cp -al public .next-essential-release/standalone/public
+NEXT_DIST_DIR=.next-sso-only SKIP_DB_INIT=1 npm run build
+cp -al .next-sso-only/static .next-sso-only/standalone/.next-sso-only/static
+cp -al public .next-sso-only/standalone/public
 ```
 
 Do not overwrite an active build. Update the service WorkingDirectory only

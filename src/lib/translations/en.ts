@@ -250,6 +250,7 @@ export const en: Record<string, string> = {
 
   // Profile
   "profile.title": "Profile",
+  "profile.ssoIdentity": "Your identity and sign-in methods are managed by SurCod SSO.",
   "profile.account": "Account",
   "profile.email": "Email",
   "profile.role": "Role",

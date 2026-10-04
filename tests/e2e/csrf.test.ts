@@ -43,19 +43,8 @@ test.describe("CSRF Protection", () => {
   test("form submission without CSRF cookie is rejected", async ({
     request,
   }) => {
-    // Try to call the password login endpoint (which works) to show
-    // API calls succeed, then test that form-based actions with
-    // invalid CSRF are rejected.
-
-    // The auth register endpoint works without CSRF (it's an API route)
-    const apiResponse = await request.post("/api/auth/login-password", {
-      data: {
-        email: "test@example.com",
-        password: "wrong",
-      },
-    });
-    // 401 means the API processed the request (no CSRF needed for APIs)
-    expect(apiResponse.status()).toBe(401);
+    const health = await request.get("/api/health");
+    expect(health.ok()).toBeTruthy();
 
     // Now simulate a server action call with empty CSRF token
     const formData = new URLSearchParams();

@@ -1,12 +1,20 @@
 # Ideate — canonical handover
 
+## SSO-only authentication — 4 October
+
+DC explicitly authorized removing Ideate's local authentication on production and test (#87), reopening only authentication dependencies of the frozen project screen. Sign-in goes directly to SurCod SSO with PKCE and a safe project return destination. All local registration/password/magic-link/verification/recovery routes, authentication mail templates, credential settings, invitation-to-local-registration UI/API and bcrypt dependency are retired. Failed SSO offers one retry; logout revokes the application session and returns to public home.
+
+Existing users, roles, provider mappings and databases are retained. Legacy credential/token columns are inactive and intentionally preserved; no destructive schema migration. Existing session cookies require one fresh SSO login because new sessions must explicitly identify the SSO authentication method. No unrelated essential-preview UX is promoted to production. The public test seed endpoint is disabled by explicit opt-in plus loopback-origin restrictions; fixtures use isolated session cookies rather than obsolete password login. Authentication checks send no email and make no AI calls.
+
+Validation/deployment complete:2729 units on each branch (207 canonical/209 preview files),585/567 distinct E2E cases verified including retained failures and passing rechecks, final45 auth/chat/comment fixture cases on each branch,22 live smoke checks per public origin, lint/typecheck/build, real local SSO and admin identity preserved on both hosts. Native browser confirms direct SSO entry and Google option; Google authentication itself remains unverified. Proof: `/home/dc/.local/state/surcod-demo/ideate-sso-only-proof.md`; fresh private capture states retain their existing0600 paths. Production image is `a20e131fbea0`; test uses protected `.next-sso-only/standalone`. No authentication mail or AI calls in this phase. #88 records the pre-existing missing/enforced proxy-IP attribution risk; frozen contribution policy is unchanged. #76 remains open for seed-reset isolation.
+
 ## Project code freeze and essential user experience preview
 
-DC explicitly freezes the accepted project management screen and all interactions. Protect `/projects/[id]`, its edit route and `/p/[token]`, including proposal creation, AI duplicate review, voting, discussion, attachments, lifecycle, theme and mobile behavior. Shared navigation/CSS/auth/action/data changes must not alter these flows indirectly; reopen affected frozen scope only on DC's explicit instruction. The source review and proposed next-phase sequence are in `docs/design/User-Experience-Review.md` (#71, with #74 for SSO). Recommendations consolidate Projects as the sole home, retire redundant Dashboard/profile content lists, simplify account and SSO entry, then search and global prompts. DC subsequently authorized implementation in a separate public test version; it is now live there only. Production retains the accepted release and database. The original review remains the design baseline; current runtime and verification details are in the final section below.
+DC explicitly freezes the accepted project management screen and all interactions. Protect `/projects/[id]`, its edit route and `/p/[token]`, including proposal creation, AI duplicate review, voting, discussion, attachments, lifecycle, theme and mobile behavior. Shared navigation/CSS/auth/action/data changes must not alter these flows indirectly; reopen affected frozen scope only on DC's explicit instruction. The source review and proposed next-phase sequence are in `docs/design/User-Experience-Review.md` (#71, with #74 for SSO). Recommendations consolidate Projects as the sole home, retire redundant Dashboard/profile content lists, simplify account and SSO entry, then search and global prompts. DC subsequently authorized implementation in a separate public test version; it is now live there only. Production retains the accepted project interface and database, with DC's subsequent SSO-only authentication change. The original review remains the design baseline; current runtime and verification details are in the final section below.
 
 ## Current owner and runtime
 
-The existing Ideate agent owns this project; SurCod coordinates capture read-only. Continue on `sprint/2026-10-03-decision-focused-project`, draft PR [#73](https://github.com/dobrician/ideate/pull/73). Public runtime: `https://ideate.surcod.ro`; legacy `idea.surmont.co` redirects permanently with path/query preserved; deployed application commit `878075b`, image `bda634076936`, healthy. Previous image `dc53ece7a0d8` remains available for rollback. Local development is on port 4101. Do not modify existing database files/backups in the worktree or run the global seed for a demo reset.
+The existing Ideate agent owns this project; SurCod coordinates capture read-only. Continue on `sprint/2026-10-03-decision-focused-project`, draft PR [#73](https://github.com/dobrician/ideate/pull/73). Public runtime: `https://ideate.surcod.ro`; legacy `idea.surmont.co` redirects permanently with path/query preserved; SSO-only image `a20e131fbea0` (#87), based on the accepted project release `878075b`. Prior image `bda634076936` remains available for rollback. Local development is on port 4101. Do not modify existing database files/backups in the worktree or run the global seed for a demo reset.
 
 ## SurCod family-holiday demonstration — ready
 
@@ -61,9 +69,8 @@ Final candidate image `bda634076936` includes this hover correction and the exis
 
 DC authorized a separate implementation preview at **https://test.ideate.surcod.ro**
 and production at **https://ideate.surcod.ro**. The previous review-only phase is
-superseded for the test branch, not production. Production retains image
-`bda634076936` / application commit `878075b`, its existing SQLite volume and the
-accepted project code freeze. Quadlet `ideate-staging.service` remains on :4100
+superseded for the test branch, not production. Production keeps its existing SQLite volume and accepted project interface
+from `878075b`; the authorized SSO-only patch uses image `a20e131fbea0`. Quadlet `ideate-staging.service` remains on :4100
 with only APP_URL/OIDC_REDIRECT_URI overrides for the new production origin.
 The legacy container name remains for continuity.
 
@@ -77,9 +84,10 @@ The live standalone build must remain protected while systemd uses it.
 
 Projects becomes the sole home in test; Dashboard redirects; account content
 lists, technical search controls, project-creation options and intrusive
-onboarding/install prompts leave ordinary user pages. Intentional fallback
+onboarding/install prompts leave ordinary user pages. Direct SSO
 login and role-restricted admin remain. No frozen project route, proposal
-component, shared palette/CSS, mutation, auth backend, schema or AI code changes.
+component, shared palette/CSS, mutation, schema or AI code changes. The subsequent
+SSO-only authentication change is explicitly authorized on both hosts.
 The detailed test-branch README and ops documentation describe build/rollback.
 Do not promote this preview to production without DC's review.
 

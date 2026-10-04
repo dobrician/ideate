@@ -1,5 +1,9 @@
 # Sprint Log
 
+## 4 October — SSO-only authentication (#87)
+
+DC authorized exclusive SurCod SSO on production and test. Local credential forms, APIs, registration/recovery, magic links and authentication emails are retired. Roles and identity mappings remain in Ideate, with no destructive database change. Existing application sessions need one SSO reconnection. The project screen remains frozen; unrelated essential preview UX stays on test. Application tests use loopback-only isolated fixtures; live provider verification is separate. Deployment/test evidence is recorded in the canonical HANDOVER and the private local operational proof, without credentials. Outcomes: exclusive SSO live on both public domains; account/role mappings preserved and real local OIDC verified;2729 units per branch,585/567 distinct browser cases with passing rechecks,45 final auth/chat/comment cases per branch and22 live smoke checks per host. Frozen project source remains unchanged. Existing proxy attribution risk tracked separately in #88; #76 remains open.
+
 Reverse chronological. Click each sprint for full details.
 
 ### Live isolated preview, awaiting DC review — Essential user experience and domains (2026-10-04)

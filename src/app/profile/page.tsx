@@ -68,7 +68,6 @@ export default async function ProfilePage() {
           displayName,
           firstName: user.firstName ?? "",
           lastName: user.lastName ?? "",
-          hasPassword: !!user.passwordHash,
         }}
         projects={userProjects}
         proposals={userProposals}

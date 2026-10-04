@@ -1,7 +1,7 @@
 import { test, expect } from "@playwright/test";
 
 // Use APP_URL from environment or default to staging
-const APP_URL = process.env.APP_URL || "https://idea.surmont.co";
+const APP_URL = process.env.APP_URL || "https://ideate.surcod.ro";
 
 test.describe("Smoke Tests - Core", () => {
   test("homepage loads with HTTP 200 and real HTML content", async ({ page }) => {
@@ -39,50 +39,23 @@ test.describe("Smoke Tests - Core", () => {
     expect(new Date(data.timestamp).getTime()).toBeGreaterThan(0);
   });
 
-  test("login page renders correctly", async ({ page }) => {
-    await page.goto(`${APP_URL}/auth/login`);
-
-    expect(page.url()).toContain("/auth/login");
-    await expect(page.locator('input[type="email"]')).toBeVisible();
-    // Login defaults to password mode with a magic link toggle
-    await expect(page.locator('input[type="password"]')).toBeVisible();
-    await expect(page.getByRole("button", { name: "Sign In with Password" })).toBeVisible();
-    await expect(page.getByRole("button", { name: /Magic Link/i })).toBeVisible();
-
-    const pageContent = await page.textContent("body");
-    expect(pageContent).toContain("Sign in");
+  test("SSO retry has no local credentials form", async ({ page }) => {
+    await page.goto(`${APP_URL}/auth/login?error=oidc_error`);
+    await expect(page.getByRole("link", { name: /SSO/ })).toBeVisible();
+    await expect(page.locator("form, input")).toHaveCount(0);
   });
 
   test("static assets load successfully", async ({ page }) => {
-    const responses: Array<{ url: string; status: number }> = [];
-
-    page.on("response", (response) => {
-      responses.push({ url: response.url(), status: response.status() });
-    });
-
     await page.goto(APP_URL);
-    await page.waitForLoadState("networkidle");
-
-    const cssAssets = responses.filter((r) => r.url.includes(".css"));
-    if (cssAssets.length > 0) {
-      cssAssets.forEach((asset) => {
-        expect(asset.status).toBe(200);
-      });
-    }
-
-    const jsAssets = responses.filter(
-      (r) => r.url.includes(".js") || r.url.includes("/_next/")
+    const assets = await page.locator('link[rel="stylesheet"], script[src]').evaluateAll(
+      elements => elements.map(element => element.getAttribute("href") || element.getAttribute("src")).filter(Boolean)
     );
-    if (jsAssets.length > 0) {
-      jsAssets.forEach((asset) => {
-        expect(asset.status).toBeLessThan(400);
-      });
+    expect(assets.some(url => url!.includes(".css"))).toBe(true);
+    expect(assets.some(url => url!.includes(".js"))).toBe(true);
+    for (const asset of assets) {
+      const response = await page.request.get(new URL(asset!, APP_URL).href);
+      expect(response.status()).toBe(200);
     }
-
-    const failedAssets = responses.filter(
-      (r) => r.status >= 400 && (r.url.includes(".css") || r.url.includes(".js"))
-    );
-    expect(failedAssets.length).toBe(0);
   });
 
   test("environment variables are loaded correctly", async ({ request }) => {
@@ -97,53 +70,15 @@ test.describe("Smoke Tests - Core", () => {
 });
 
 test.describe("Smoke Tests - Auth & Access Control", () => {
-  test("projects page requires authentication", async ({ page }) => {
-    const response = await page.goto(`${APP_URL}/projects`);
-    await page.waitForURL(/\/(auth\/login|projects)/, { timeout: 10000 });
-
-    const currentUrl = page.url();
-    const isOnLoginOrProjects =
-      currentUrl.includes("/auth/login") || currentUrl.includes("/projects");
-    expect(isOnLoginOrProjects).toBeTruthy();
-  });
-
-  test("API routes redirect unauthorized access", async ({ page }) => {
-    const response = await page.goto(`${APP_URL}/projects`);
-    const currentUrl = page.url();
-    if (currentUrl.includes("/auth/login")) {
-      await expect(page.locator('input[type="email"]')).toBeVisible();
-    } else {
-      expect(response?.status()).toBeLessThan(400);
-    }
-  });
-
-  test("app handles non-existent pages", async ({ page }) => {
-    const response = await page.goto(`${APP_URL}/this-page-does-not-exist`);
-
-    expect(response?.status()).toBeLessThan(500);
-
-    const bodyText = await page.textContent("body");
-    expect(bodyText).toBeTruthy();
-
-    const lowercaseBody = bodyText!.toLowerCase();
-    const currentUrl = page.url();
-    const isHandledGracefully =
-      lowercaseBody.includes("404") ||
-      lowercaseBody.includes("not found") ||
-      currentUrl.includes("/auth/login");
-    expect(isHandledGracefully).toBeTruthy();
-  });
-
-  test("admin panel requires authentication", async ({ page }) => {
-    await page.goto(`${APP_URL}/admin`);
-    await page.waitForURL(/\/(auth\/login|admin)/, { timeout: 10000 });
-
-    const currentUrl = page.url();
-    // Should redirect to login (no session) or load admin page (if authenticated as admin)
-    const isHandled =
-      currentUrl.includes("/auth/login") || currentUrl.includes("/admin");
-    expect(isHandled).toBeTruthy();
-  });
+  for (const path of ["/projects", "/admin"]) {
+    test(`${path} requires authentication`, async ({ request }) => {
+      const response = await request.get(`${APP_URL}${path}`, { maxRedirects: 0 });
+      expect(response.status()).toBe(307);
+      const destination = new URL(response.headers().location, APP_URL);
+      expect(destination.pathname).toBe("/auth/login");
+      expect(destination.searchParams.get("redirect")).toBe(path);
+    });
+  }
 });
 
 test.describe("Smoke Tests - Search API", () => {
@@ -214,7 +149,7 @@ test.describe("Smoke Tests - i18n Locale", () => {
   });
 
   test("login page renders with locale-aware content", async ({ page }) => {
-    await page.goto(`${APP_URL}/auth/login`);
+    await page.goto(`${APP_URL}/auth/login?error=oidc_error`);
 
     // Page content should be present (in either language)
     const bodyText = await page.textContent("body");

@@ -29,11 +29,6 @@ vi.mock("@/lib/csrf", () => ({
 const mockVerifyPassword = vi.fn();
 const mockHashPassword = vi.fn();
 const mockValidatePassword = vi.fn();
-vi.mock("@/lib/password", () => ({
-  verifyPassword: (...args: unknown[]) => mockVerifyPassword(...args),
-  hashPassword: (...args: unknown[]) => mockHashPassword(...args),
-  validatePassword: (...args: unknown[]) => mockValidatePassword(...args),
-}));
 
 const mockSendEmailChangeEmail = vi.fn();
 vi.mock("@/lib/mail", () => ({
@@ -90,7 +85,7 @@ function makeFormData(entries: Record<string, string>): FormData {
   return fd;
 }
 
-import { changePassword, updateNotificationPreferences, requestEmailChange } from "@/app/profile/actions";
+import { updateNotificationPreferences } from "@/app/profile/actions";
 
 beforeEach(() => {
   vi.clearAllMocks();
@@ -100,70 +95,6 @@ beforeEach(() => {
   mockHashPassword.mockResolvedValue("$2b$12$newhash");
   mockSelectFrom.mockResolvedValue([]);
   mockSendEmailChangeEmail.mockResolvedValue(undefined);
-});
-
-describe("changePassword", () => {
-  it("returns error when not authenticated", async () => {
-    mockRequireAuth.mockRejectedValue(new Error("Unauthorized"));
-    const result = await changePassword(makeFormData({
-      currentPassword: "old", newPassword: "newPass1!", confirmPassword: "newPass1!",
-    }));
-    expect(result).toEqual({ error: "error.mustBeLoggedIn" });
-  });
-
-  it("returns error on password mismatch", async () => {
-    const result = await changePassword(makeFormData({
-      currentPassword: "old", newPassword: "new1!", confirmPassword: "different!",
-    }));
-    expect(result).toEqual({ error: "passwordMismatch" });
-  });
-
-  it("returns error when password validation fails", async () => {
-    mockValidatePassword.mockReturnValue({ valid: false, error: "Too short" });
-    const result = await changePassword(makeFormData({
-      currentPassword: "old", newPassword: "x", confirmPassword: "x",
-    }));
-    expect(result).toEqual({ error: "Too short" });
-  });
-
-  it("returns error when user has no password set", async () => {
-    mockRequireAuth.mockResolvedValue(makeUser({ passwordHash: null }));
-    const result = await changePassword(makeFormData({
-      currentPassword: "old", newPassword: "newPass1!", confirmPassword: "newPass1!",
-    }));
-    expect(result).toEqual({ error: "noPasswordSet" });
-  });
-
-  it("returns error on incorrect current password", async () => {
-    mockVerifyPassword.mockResolvedValue(false);
-    const result = await changePassword(makeFormData({
-      currentPassword: "wrong", newPassword: "newPass1!", confirmPassword: "newPass1!",
-    }));
-    expect(result).toEqual({ error: "incorrectPassword" });
-  });
-
-  it("changes password successfully", async () => {
-    const result = await changePassword(makeFormData({
-      currentPassword: "old", newPassword: "newPass1!", confirmPassword: "newPass1!",
-    }));
-    expect(result).toEqual({ success: true });
-    expect(mockUpdateSet).toHaveBeenCalledWith(expect.objectContaining({ passwordHash: "$2b$12$newhash" }));
-  });
-
-  it("returns generic error on unexpected failure", async () => {
-    mockRequireAuth.mockRejectedValue(new Error("DB down"));
-    const result = await changePassword(makeFormData({
-      currentPassword: "old", newPassword: "newPass1!", confirmPassword: "newPass1!",
-    }));
-    expect(result).toEqual({ error: "error.unexpected" });
-  });
-
-  it("returns validation error for empty fields", async () => {
-    const result = await changePassword(makeFormData({
-      currentPassword: "", newPassword: "", confirmPassword: "",
-    }));
-    expect(result.error).toBeDefined();
-  });
 });
 
 describe("updateNotificationPreferences", () => {
@@ -192,72 +123,5 @@ describe("updateNotificationPreferences", () => {
       "csrf-tok",
     );
     expect(result).toEqual({ error: "error.unexpected" });
-  });
-});
-
-describe("requestEmailChange", () => {
-  it("sends verification email successfully", async () => {
-    const result = await requestEmailChange(makeFormData({ newEmail: "new@test.com" }));
-    expect(result).toEqual({ success: true });
-    expect(mockSendEmailChangeEmail).toHaveBeenCalled();
-  });
-
-  it("returns error for same email", async () => {
-    const result = await requestEmailChange(makeFormData({ newEmail: "alice@test.com" }));
-    expect(result).toEqual({ error: "sameEmail" });
-  });
-
-  it("returns error when email is already in use", async () => {
-    mockSelectFrom.mockResolvedValue([{ id: "other-user" }]);
-    const result = await requestEmailChange(makeFormData({ newEmail: "taken@test.com" }));
-    expect(result).toEqual({ error: "emailInUse" });
-  });
-
-  it("returns error for invalid email format", async () => {
-    const result = await requestEmailChange(makeFormData({ newEmail: "not-an-email" }));
-    expect(result).toEqual({ error: "Invalid email address" });
-  });
-
-  it("returns error when not authenticated", async () => {
-    mockRequireAuth.mockRejectedValue(new Error("Unauthorized"));
-    const result = await requestEmailChange(makeFormData({ newEmail: "new@test.com" }));
-    expect(result).toEqual({ error: "error.mustBeLoggedIn" });
-  });
-
-  it("returns generic error on unexpected failure", async () => {
-    mockRequireAuth.mockRejectedValue(new Error("DB down"));
-    const result = await requestEmailChange(makeFormData({ newEmail: "new@test.com" }));
-    expect(result).toEqual({ error: "error.unexpected" });
-  });
-
-  it("uses JWT_SECRET and APP_URL env vars when set", async () => {
-    const origSecret = process.env.JWT_SECRET;
-    const origUrl = process.env.APP_URL;
-    process.env.JWT_SECRET = "custom-secret-for-testing-32chars!!";
-    process.env.APP_URL = "https://ideate.example.com";
-
-    const result = await requestEmailChange(makeFormData({ newEmail: "new@test.com" }));
-    expect(result).toEqual({ success: true });
-    expect(mockSendEmailChangeEmail).toHaveBeenCalled();
-
-    process.env.JWT_SECRET = origSecret;
-    process.env.APP_URL = origUrl;
-  });
-
-  it("falls back to empty JWT_SECRET and localhost APP_URL when env vars are unset", async () => {
-    const origSecret = process.env.JWT_SECRET;
-    const origUrl = process.env.APP_URL;
-    delete process.env.JWT_SECRET;
-    delete process.env.APP_URL;
-
-    const result = await requestEmailChange(makeFormData({ newEmail: "new@test.com" }));
-    expect(result).toEqual({ success: true });
-    expect(mockSendEmailChangeEmail).toHaveBeenCalledWith(
-      "new@test.com",
-      expect.stringContaining("http://localhost:3000"),
-    );
-
-    process.env.JWT_SECRET = origSecret;
-    process.env.APP_URL = origUrl;
   });
 });

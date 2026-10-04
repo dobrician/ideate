@@ -4,45 +4,6 @@
  */
 
 export const adminPaths = {
-  "/api/admin/invite": {
-    get: {
-      tags: ["Admin"],
-      summary: "List pending invitations",
-      security: [{ cookieAuth: [] }],
-      responses: {
-        "200": { description: "List of invitations" },
-        "403": { description: "Admin access required" },
-      },
-    },
-    post: {
-      tags: ["Admin"],
-      summary: "Invite user by email",
-      security: [{ cookieAuth: [] }],
-      requestBody: {
-        required: true,
-        content: {
-          "application/json": {
-            schema: {
-              type: "object",
-              required: ["email"],
-              properties: {
-                email: { type: "string", format: "email" },
-                role: {
-                  type: "string",
-                  enum: ["admin", "manager", "member", "viewer"],
-                },
-              },
-            },
-          },
-        },
-      },
-      responses: {
-        "200": { description: "Invitation sent" },
-        "403": { description: "Admin access required" },
-        "409": { description: "User or invitation already exists" },
-      },
-    },
-  },
   "/api/admin/audit-export": {
     get: {
       tags: ["Admin"],
