@@ -7,7 +7,7 @@ import { logger } from "@/lib/logger";
 
 /**
  * POST /auth/logout
- * Clear session and redirect to login (clean page, no sidebar)
+ * Clear the application session and return to the public home.
  */
 export async function POST(request: NextRequest) {
   try {
@@ -29,7 +29,7 @@ export async function POST(request: NextRequest) {
     }
 
     const baseUrl = process.env.APP_URL || request.url;
-    const url = new URL("/auth/login", baseUrl);
+    const url = new URL("/", baseUrl);
     const response = NextResponse.redirect(url);
     // Ensure cookies are cleared in the redirect response as well
     response.cookies.delete("session");

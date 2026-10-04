@@ -10,6 +10,8 @@
 
 ### Changed
 
+- Retire local registration, passwords, magic links, verification/recovery, authentication emails and local credential settings. Sign-in enters SurCod SSO directly with a preserved project destination; existing accounts/roles/data remain and old sessions require one fresh SSO login (#87). Isolated test fixtures cannot run on public origins.
+
 - Implement the approved essential user experience only on the isolated test host: Projects replaces Dashboard, account preferences replace duplicate content lists, SurCod SSO leads login, search removes retrieval controls, and project creation asks only for decision/context/deadline. Retain deliberate fallback login, admin authorization and frozen project interactions (#71, #74).
 - Move production to `ideate.surcod.ro`, expose the separate synthetic test runtime at `test.ideate.surcod.ro`, and permanently redirect the legacy host preserving path/query. Existing production image and database are retained; SurCod portfolio links now target production directly.
 - Align structured data and sitemap origin with configured `APP_URL`; omit the retired dashboard from the test sitemap. Correct static-asset smoke to check CSS/JS responses directly instead of blocking on unrelated failed service-worker installation (#72).

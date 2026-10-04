@@ -47,7 +47,7 @@ export async function GET(request: NextRequest) {
   } catch (err) {
     logger.error({ err }, "OIDC initiation failed");
     return NextResponse.redirect(
-      new URL("/auth/login?error=oidc_error", request.url)
+      new URL(`/auth/login?error=oidc_error&redirect=${encodeURIComponent(getSafeRedirect(request.nextUrl.searchParams.get("redirect")))}`, request.url)
     );
   }
 }

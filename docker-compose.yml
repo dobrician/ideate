@@ -18,8 +18,6 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-      args:
-        NEXT_PUBLIC_OIDC_ENABLED: ${NEXT_PUBLIC_OIDC_ENABLED:-false}
     container_name: ideate-staging
     ports:
       - "4100:3000"

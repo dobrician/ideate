@@ -37,7 +37,8 @@ describe("API Documentation Routes", () => {
       expect(data.paths["/api/health"]).toBeDefined();
       expect(data.paths["/api/me"]).toBeDefined();
       expect(data.paths["/api/search"]).toBeDefined();
-      expect(data.paths["/api/auth/register"]).toBeDefined();
+      expect(data.paths["/api/auth/oidc"]).toBeDefined();
+      expect(data.paths["/api/auth/register"]).toBeUndefined();
       expect(data.paths["/api/admin/webhooks"]).toBeDefined();
     });
 

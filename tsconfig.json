@@ -38,10 +38,14 @@
     ".next-essential/types/**/*.ts",
     ".next-essential/dev/types/**/*.ts",
     ".next-essential-release/types/**/*.ts",
-    ".next-essential-release/dev/types/**/*.ts"
+    ".next-essential-release/dev/types/**/*.ts",
+    ".next-sso-only/types/**/*.ts",
+    ".next-sso-only/dev/types/**/*.ts"
   ],
   "exclude": [
     "node_modules",
-    "tests"
+    "tests",
+    ".next-essential-release",
+    ".next-essential"
   ]
 }

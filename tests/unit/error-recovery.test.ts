@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { verifySessionToken, verifyMagicLinkToken } from "@/lib/auth";
+import { verifySessionToken } from "@/lib/auth";
 import { escapeHtml } from "@/lib/sanitize";
 import { subscribeVotes, emitVoteChange } from "@/lib/vote-events";
 import { checkRateLimit, resetRateLimits } from "@/lib/rate-limit";
@@ -13,14 +13,6 @@ describe("Error Recovery", () => {
   });
 
   describe("SMTP send failure", () => {
-    it("should throw descriptive error when SMTP send fails", { timeout: 15000 }, async () => {
-      const { sendMagicLinkEmail } = await import("@/lib/mail");
-
-      // sendMagicLinkEmail should throw with a descriptive message
-      await expect(
-        sendMagicLinkEmail("test@example.com", "https://example.com/verify")
-      ).rejects.toThrow("Failed to send email");
-    });
 
     it("should handle SMTP verification failure gracefully", async () => {
       const { verifySmtpConnection } = await import("@/lib/mail");
@@ -98,28 +90,6 @@ describe("Error Recovery", () => {
 
     it("should return null for empty session token", () => {
       const result = verifySessionToken("");
-      expect(result).toBeNull();
-    });
-
-    it("should return null for malformed magic link token", () => {
-      const result = verifyMagicLinkToken("garbage-token");
-      expect(result).toBeNull();
-    });
-
-    it("should return null for expired magic link token", () => {
-      const expiredToken = jwt.sign(
-        {
-          sub: "test@example.com",
-          type: "magic-link",
-          aud: process.env.APP_URL || "http://localhost:3000",
-          iss: process.env.APP_URL || "http://localhost:3000",
-          jti: "test-id",
-        },
-        process.env.JWT_SECRET || "test-secret-that-is-at-least-32-chars-long!!",
-        { expiresIn: "-1h" }
-      );
-
-      const result = verifyMagicLinkToken(expiredToken);
       expect(result).toBeNull();
     });
 

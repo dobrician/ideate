@@ -14,8 +14,9 @@ test.describe("Single Projects home", () => {
     await expect(page.getByRole("menuitem", { name: /Dashboard/ })).toHaveCount(0);
   });
   test("unauthenticated bookmarks still lead to login", async ({ page }) => {
+    await page.route("**/api/auth/oidc?**", route => route.fulfill({ body: "SSO entry captured" }));
     await page.goto("/dashboard");
-    await expect(page).toHaveURL(/\/auth\/login/);
+    await expect(page).toHaveURL(/\/api\/auth\/oidc/);
   });
   test("account has no duplicate project or proposal tabs", async ({ page }) => {
     const seed = await seedTestData(page.request);

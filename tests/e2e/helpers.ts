@@ -4,7 +4,7 @@ const E2E_TEST_SECRET = process.env.E2E_TEST_SECRET || "e2e-test-secret";
 
 export interface SeedData {
   email: string;
-  password: string;
+  cookies: { name: string; value: string; domain: string; path: string; expires: number; httpOnly: boolean; secure: boolean; sameSite: "Lax" }[];
   userId: string;
   projectId: string;
   proposalId: string;
@@ -61,54 +61,17 @@ export async function seedTestData(
   throw lastError ?? new Error("Seed failed after retries");
 }
 
-/**
- * Login via the password auth API and store the session cookie.
- * Includes retry logic for transient auth failures (rate limits, cold starts).
- */
-export async function loginAsTestUser(
-  page: Page,
-  seed: SeedData
-): Promise<void> {
-  const maxRetries = 3;
-  let lastError: Error | null = null;
-
-  for (let attempt = 1; attempt <= maxRetries; attempt++) {
-    try {
-      const res = await page.request.post("/api/auth/login-password", {
-        data: { email: seed.email, password: seed.password },
-      });
-
-      if (res.status() === 429) {
-        // Rate limited — wait using retry-after header or back off
-        const retryAfter = parseInt(res.headers()["retry-after"] ?? "2", 10);
-        await page.waitForTimeout(retryAfter * 1000);
-        continue;
-      }
-
-      if (!res.ok()) {
-        const body = await res.text();
-        lastError = new Error(`Login failed: ${res.status()} ${body}`);
-        if (attempt < maxRetries) {
-          await page.waitForTimeout(1000 * attempt);
-          continue;
-        }
-        throw lastError;
-      }
-
-      // Navigate to trigger cookie setting in the browser context
-      await page.goto("/projects");
-      await page.waitForLoadState("domcontentloaded");
-      return;
-    } catch (err) {
-      lastError = err instanceof Error ? err : new Error(String(err));
-      if (attempt < maxRetries) {
-        await page.waitForTimeout(1000 * attempt);
-        continue;
-      }
-    }
-  }
-
-  throw lastError ?? new Error("Login failed after retries");
+/** Install an isolated SSO-shaped fixture session; never exercises local login. */
+export async function loginAsTestUser(page: Page, seed: SeedData): Promise<void> {
+  // Real SSO leaves the application document before replacing its session.
+  // Tear down pending router updates when switching fixture actors, too.
+  await page.goto("about:blank");
+  // Benchmark-network addresses isolate independent clients from shared IP limits.
+  const client = parseInt(seed.userId.slice(0, 4), 16);
+  await page.context().setExtraHTTPHeaders({ "x-forwarded-for": `198.18.${client >>> 8}.${client & 255}` });
+  await page.context().addCookies(seed.cookies);
+  await page.goto("/projects");
+  await page.waitForLoadState("domcontentloaded");
 }
 
 /**

@@ -14,25 +14,15 @@ test.describe("Visual Regression — Mobile (390px)", () => {
   test("login card fits within mobile viewport with proper padding (#64)", async ({
     page,
   }) => {
-    await page.goto("/auth/login");
-    const card = page.locator("[data-slot='card']");
+    await page.goto("/auth/login?error=oidc_error");
+    const card = page.locator("[data-sso-retry]");
     await expect(card).toBeVisible();
     const box = await card.boundingBox();
     const viewport = page.viewportSize()!;
     // Card must not overflow viewport
     expect(box!.width).toBeLessThanOrEqual(viewport.width);
     // Card should have some horizontal padding (not flush to edge)
-    expect(box!.x).toBeGreaterThan(0);
-  });
-
-  test("register card fits within mobile viewport (#64)", async ({ page }) => {
-    await page.goto("/auth/register");
-    const card = page.locator("[data-slot='card']");
-    await expect(card).toBeVisible();
-    const box = await card.boundingBox();
-    const viewport = page.viewportSize()!;
-    expect(box!.width).toBeLessThanOrEqual(viewport.width);
-    expect(box!.x).toBeGreaterThan(0);
+    expect(await card.evaluate(el => parseFloat(getComputedStyle(el).paddingLeft))).toBeGreaterThanOrEqual(16);
   });
 
   test("no horizontal overflow on homepage (#52/#67)", async ({ page }) => {
@@ -44,15 +34,7 @@ test.describe("Visual Regression — Mobile (390px)", () => {
   });
 
   test("no horizontal overflow on login page", async ({ page }) => {
-    await page.goto("/auth/login");
-    const body = page.locator("body");
-    const bodyBox = await body.boundingBox();
-    const viewport = page.viewportSize()!;
-    expect(bodyBox!.width).toBeLessThanOrEqual(viewport.width + 1);
-  });
-
-  test("no horizontal overflow on register page", async ({ page }) => {
-    await page.goto("/auth/register");
+    await page.goto("/auth/login?error=oidc_error");
     const body = page.locator("body");
     const bodyBox = await body.boundingBox();
     const viewport = page.viewportSize()!;
@@ -62,10 +44,8 @@ test.describe("Visual Regression — Mobile (390px)", () => {
   test("buttons have min 44px touch targets on auth pages (#68)", async ({
     page,
   }) => {
-    await page.goto("/auth/login");
-    const alternatives = page.getByRole("button", { name: "Other ways to sign in", exact: true });
-    if (await alternatives.count()) await alternatives.click();
-    const submitBtn = page.getByRole("button", { name: /Sign In with Password/i });
+    await page.goto("/auth/login?error=oidc_error");
+    const submitBtn = page.getByRole("link", { name: /Sign in with SSO/i });
     await expect(submitBtn).toBeVisible();
     const box = await submitBtn.boundingBox();
     expect(box!.height).toBeGreaterThanOrEqual(MIN_TAP);
@@ -87,21 +67,7 @@ test.describe("Visual Regression — 320px viewport", () => {
   });
 
   test("login page fits in 320px without overflow", async ({ page }) => {
-    await page.goto("/auth/login");
-    const body = page.locator("body");
-    const bodyBox = await body.boundingBox();
-    expect(bodyBox!.width).toBeLessThanOrEqual(321);
-  });
-
-  test("register page fits in 320px without overflow", async ({ page }) => {
-    await page.goto("/auth/register");
-    const body = page.locator("body");
-    const bodyBox = await body.boundingBox();
-    expect(bodyBox!.width).toBeLessThanOrEqual(321);
-  });
-
-  test("forgot-password page fits in 320px", async ({ page }) => {
-    await page.goto("/auth/forgot-password");
+    await page.goto("/auth/login?error=oidc_error");
     const body = page.locator("body");
     const bodyBox = await body.boundingBox();
     expect(bodyBox!.width).toBeLessThanOrEqual(321);
@@ -126,8 +92,8 @@ test.describe("Visual Regression — Desktop (1280px)", () => {
   });
 
   test("login page renders at 1280px", async ({ page }) => {
-    await page.goto("/auth/login");
-    const card = page.locator("[data-slot='card']");
+    await page.goto("/auth/login?error=oidc_error");
+    const card = page.locator("[data-sso-retry]");
     await expect(card).toBeVisible();
     const box = await card.boundingBox();
     // Card should be centered, not full-width
@@ -168,8 +134,8 @@ test.describe("Visual Regression — Dark Mode", () => {
   });
 
   test("login page loads in dark mode", async ({ page }) => {
-    await page.goto("/auth/login");
-    const card = page.locator("[data-slot='card']");
+    await page.goto("/auth/login?error=oidc_error");
+    const card = page.locator("[data-sso-retry]");
     await expect(card).toBeVisible();
   });
 });
@@ -187,8 +153,8 @@ test.describe("Visual Regression — Light Mode", () => {
   });
 
   test("login page loads in light mode", async ({ page }) => {
-    await page.goto("/auth/login");
-    const card = page.locator("[data-slot='card']");
+    await page.goto("/auth/login?error=oidc_error");
+    const card = page.locator("[data-sso-retry]");
     await expect(card).toBeVisible();
   });
 });
@@ -227,9 +193,9 @@ test.describe("Visual Regression — Romanian locale", () => {
         url: TEST_ORIGIN,
       },
     ]);
-    await page.goto("/auth/login");
+    await page.goto("/auth/login?error=oidc_error");
     // Should show Romanian text
-    await expect(page.getByText("Autentifică-te pe Ideate")).toBeVisible();
+    await expect(page.getByRole("link", { name: "Autentificare cu SSO", exact: true })).toBeVisible();
   });
 });
 
@@ -246,8 +212,8 @@ test.describe("Visual Regression — English locale", () => {
         url: TEST_ORIGIN,
       },
     ]);
-    await page.goto("/auth/login");
-    await expect(page.getByText("Sign in to Ideate")).toBeVisible();
+    await page.goto("/auth/login?error=oidc_error");
+    await expect(page.getByRole("link", { name: "Sign in with SSO", exact: true })).toBeVisible();
   });
 });
 
@@ -269,24 +235,7 @@ test.describe("Visual Regression — Romanian + Mobile", () => {
         url: TEST_ORIGIN,
       },
     ]);
-    await page.goto("/auth/login");
-    const body = page.locator("body");
-    const bodyBox = await body.boundingBox();
-    const viewport = page.viewportSize()!;
-    expect(bodyBox!.width).toBeLessThanOrEqual(viewport.width + 1);
-  });
-
-  test("register page in Romanian fits mobile viewport (#67)", async ({
-    page,
-  }) => {
-    await page.context().addCookies([
-      {
-        name: "locale",
-        value: "ro",
-        url: TEST_ORIGIN,
-      },
-    ]);
-    await page.goto("/auth/register");
+    await page.goto("/auth/login?error=oidc_error");
     const body = page.locator("body");
     const bodyBox = await body.boundingBox();
     const viewport = page.viewportSize()!;

@@ -59,59 +59,6 @@ describe("csrf.ts branch coverage", () => {
   });
 });
 
-// ── mail.ts lines 8,11,15-16: env var fallback branches ────────────────
-describe("mail.ts branch coverage", () => {
-  it("logMail uses /tmp fallback when MAIL_LOG_FILE empty in non-production", async () => {
-    const origLog = process.env.MAIL_LOG_FILE;
-    const origEnv = process.env.NODE_ENV;
-    process.env.MAIL_LOG_FILE = "";
-    process.env.NODE_ENV = "test";
-    vi.resetModules();
-
-    const mockSendMail = vi.fn().mockResolvedValue({ messageId: "t" });
-    vi.doMock("nodemailer", () => ({
-      default: {
-        createTransport: vi.fn(() => ({
-          sendMail: mockSendMail,
-          verify: vi.fn(),
-        })),
-      },
-    }));
-
-    const { sendMagicLinkEmail } = await import("@/lib/mail");
-    await sendMagicLinkEmail("test@test.com", "https://link.test");
-    expect(mockSendMail).toHaveBeenCalledTimes(1);
-
-    process.env.MAIL_LOG_FILE = origLog;
-    process.env.NODE_ENV = origEnv;
-  });
-
-  it("logMail skips when in production with empty MAIL_LOG_FILE", async () => {
-    const origLog = process.env.MAIL_LOG_FILE;
-    const origEnv = process.env.NODE_ENV;
-    process.env.MAIL_LOG_FILE = "";
-    process.env.NODE_ENV = "production";
-    vi.resetModules();
-
-    const mockSendMail = vi.fn().mockResolvedValue({ messageId: "t" });
-    vi.doMock("nodemailer", () => ({
-      default: {
-        createTransport: vi.fn(() => ({
-          sendMail: mockSendMail,
-          verify: vi.fn(),
-        })),
-      },
-    }));
-
-    const { sendMagicLinkEmail } = await import("@/lib/mail");
-    await sendMagicLinkEmail("test@test.com", "https://link.test");
-    expect(mockSendMail).toHaveBeenCalledTimes(1);
-
-    process.env.MAIL_LOG_FILE = origLog;
-    process.env.NODE_ENV = origEnv;
-  });
-});
-
 // ── auth.ts line 173: verifySessionToken with wrong type ───────────────
 describe("auth.ts branch coverage", () => {
   it("verifySessionToken returns null for token with type !== session", async () => {

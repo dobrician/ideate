@@ -22,7 +22,7 @@ type Viewport = keyof typeof VIEWPORTS;
 
 interface SeedData {
   email: string;
-  password: string;
+  cookies: import("../e2e/helpers").SeedData["cookies"];
   userId: string;
   projectId: string;
   proposalId: string;
@@ -41,12 +41,7 @@ async function seedTestData(page: Page): Promise<SeedData> {
 }
 
 async function loginAsTestUser(page: Page, seed: SeedData): Promise<void> {
-  const res = await page.request.post(`${BASE_URL}/api/auth/login-password`, {
-    data: { email: seed.email, password: seed.password },
-  });
-  if (!res.ok()) {
-    throw new Error(`Login failed: ${res.status()} ${await res.text()}`);
-  }
+  await page.context().addCookies(seed.cookies);
 }
 
 async function setLocale(context: BrowserContext, locale: Locale): Promise<void> {
@@ -150,13 +145,9 @@ test("capture all pages and dialogs", async ({ page }) => {
   // ══════════════════════════════════════════════════════════════
 
   console.log("📸 Capturing login page...");
-  await captureAllCombos(page, "login", { url: "/auth/login" });
+  await captureAllCombos(page, "login", { url: "/auth/login?error=oidc_error" });
 
-  console.log("📸 Capturing register page...");
-  await captureAllCombos(page, "register", { url: "/auth/register" });
 
-  console.log("📸 Capturing forgot-password page...");
-  await captureAllCombos(page, "forgot-password", { url: "/auth/forgot-password" });
 
   console.log("📸 Capturing 404 page...");
   await captureAllCombos(page, "404", { url: "/nonexistent-page" });

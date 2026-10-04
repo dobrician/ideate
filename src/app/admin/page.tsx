@@ -8,7 +8,6 @@ import { Button } from "@/components/ui/button";
 import { Users, FolderOpen, Lightbulb, ThumbsUp, ShieldX, BarChart3, Gauge, Activity, TrendingUp, GitBranch, Shield, Search, Zap, Brain, Bell } from "lucide-react";
 import { UserRoleManager } from "./user-role-manager";
 import { AuditLog } from "./audit-log";
-import { InvitationPanel } from "./invitation-panel";
 import { ProjectManager } from "./project-manager";
 import { TagManager } from "./tag-manager";
 import { WebhookManager } from "./webhook-manager";
@@ -38,7 +37,7 @@ export default async function AdminPage() {
     );
   }
 
-  const { allUsers, stats: s, recentAudit, pendingInvitations, allProjects, allTags, allWebhooks, allTemplates, allTeams, allRoles } = await getAdminData();
+  const { allUsers, stats: s, recentAudit, allProjects, allTags, allWebhooks, allTemplates, allTeams, allRoles } = await getAdminData();
 
   return (
     <div className="mx-auto max-w-6xl py-4 sm:py-8">
@@ -137,18 +136,6 @@ export default async function AdminPage() {
           <CardContent>
             <TemplateManager initialTemplates={allTemplates.map((tpl) => ({
               ...tpl, defaultTags: tpl.defaultTags ? JSON.parse(tpl.defaultTags) as string[] : [],
-            }))} />
-          </CardContent>
-        </Card>
-
-        <Card className="lg:col-span-2">
-          <CardHeader>
-            <CardTitle>{t("admin.invitations")}</CardTitle>
-            <CardDescription>{t("admin.invitationsDesc")}</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <InvitationPanel initialInvitations={pendingInvitations.map((inv) => ({
-              ...inv, expiresAt: inv.expiresAt?.toISOString() ?? null, createdAt: inv.createdAt?.toISOString() ?? null,
             }))} />
           </CardContent>
         </Card>

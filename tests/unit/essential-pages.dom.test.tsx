@@ -15,8 +15,6 @@ vi.mock("@/lib/i18n-server", () => ({ getTranslations: async () => ({ t }) }));
 vi.mock("@/lib/auth", () => ({ getCurrentUser: async () => state.user }));
 vi.mock("@/db", () => ({ db: { select: (fields?: unknown) => ({ from: () => ({ where: () => fields ? Promise.resolve(state.identities) : { limit: () => Promise.resolve([]) } }) }) } }));
 vi.mock("@/app/profile/profile-form", () => ({ ProfileForm: () => <div>Name preferences</div> }));
-vi.mock("@/app/profile/change-email-form", () => ({ ChangeEmailForm: () => <div>Change email</div> }));
-vi.mock("@/app/profile/change-password-form", () => ({ ChangePasswordForm: () => <div>Change password</div> }));
 vi.mock("@/app/profile/notification-settings", () => ({ NotificationSettings: () => <div>Email preferences</div> }));
 
 beforeEach(() => { state.status = ""; state.identities = []; state.user.passwordHash = null; });
@@ -36,12 +34,12 @@ describe("Essential user destinations", () => {
     render(<ProjectFilters />);
     expect(screen.getByRole("link", { name: "Archive" })).toHaveAttribute("aria-current", "page");
   });
-  it("should omit duplicate activity tabs while preserving legacy email access", async () => {
+  it("should omit activity tabs and local credential controls", async () => {
     const { default: ProfilePage } = await import("@/app/profile/page");
     render(await ProfilePage());
     expect(screen.getByRole("heading", { name: "Account" })).toBeInTheDocument();
     expect(screen.queryByRole("tab")).not.toBeInTheDocument();
-    expect(screen.getByText("Change email")).toBeInTheDocument();
+    expect(screen.queryByText("Change email")).not.toBeInTheDocument();
     expect(screen.queryByText("Change password")).not.toBeInTheDocument();
   });
   it("should recognize linked SSO identities rather than infer them from a missing password", async () => {
@@ -52,11 +50,11 @@ describe("Essential user destinations", () => {
     expect(screen.queryByText("Change email")).not.toBeInTheDocument();
     expect(screen.queryByText("Security")).not.toBeInTheDocument();
   });
-  it("should preserve password management for an SSO-linked account with legacy credentials", async () => {
+  it("should retire password management even when legacy credentials remain in data", async () => {
     state.identities = [{ provider: "surcod" }]; state.user.passwordHash = "existing";
     const { default: ProfilePage } = await import("@/app/profile/page");
     render(await ProfilePage());
-    expect(screen.getByText("Change password")).toBeInTheDocument();
+    expect(screen.queryByText("Change password")).not.toBeInTheDocument();
     expect(screen.queryByText("Change email")).not.toBeInTheDocument();
   });
   it("should redirect old dashboard bookmarks to Projects", async () => {

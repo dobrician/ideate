@@ -20,8 +20,9 @@ test.describe("Decision-focused workflow", () => {
       await expect(guest.getByText("Initial Test Proposal")).toBeVisible();
       await expect(guest.getByText("Test proposal for automated E2E tests")).toBeVisible();
       await expect(guest.getByRole("button", { name: /New Proposal/ })).toHaveCount(0);
+      await guest.route("**/api/auth/oidc?**", route => route.fulfill({ body: "SSO entry captured" }));
       await guest.getByRole("button", { name: /^Pro \(/ }).click();
-      await expect(guest).toHaveURL(/\/auth\/login/);
+      await expect(guest).toHaveURL(/\/api\/auth\/oidc/);
     } finally {
       await guestContext.close();
     }

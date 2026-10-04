@@ -1,38 +1,39 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
 import { users, projects, proposals, votes } from "@/db/schema";
-import { hashPassword } from "@/lib/password";
+import { createSessionToken } from "@/lib/auth";
+import { getE2EConfig } from "@/lib/e2e-config";
+import { logger } from "@/lib/logger";
+import { z } from "zod";
 import { resetRateLimits } from "@/lib/rate-limit";
 import { randomUUID } from "crypto";
 
-const E2E_TEST_SECRET = process.env.E2E_TEST_SECRET;
 
 /**
  * POST /api/test/seed
  * Creates a verified test user + project + proposal for E2E tests.
- * Gated by E2E_TEST_SECRET env var — returns 404 if not set.
+ * Requires explicit E2E opt-in, secret and loopback APP_URL; unavailable publicly.
  */
 export async function POST(request: NextRequest) {
-  if (!E2E_TEST_SECRET) {
+  const config = getE2EConfig();
+  if (!config) {
     return NextResponse.json({ error: "Not found" }, { status: 404 });
   }
 
-  const body = await request.json();
-  if (body.secret !== E2E_TEST_SECRET) {
+  try {
+  const parsed = z.object({ secret: z.string(), role: z.enum(["admin", "manager", "member", "viewer"]).default("admin") }).safeParse(await request.json());
+  if (!parsed.success || parsed.data.secret !== config.secret) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
-  const role = body.role || "admin";
+  const role = parsed.data.role;
   const uniqueId = randomUUID().slice(0, 8);
   const email = `e2e-${uniqueId}@ideate.local`;
-  const password = "TestPass123";
-  const passwordHash = await hashPassword(password);
 
   const userId = randomUUID();
   await db.insert(users).values({
     id: userId,
     email,
-    passwordHash,
     emailVerified: true,
     role,
     onboardingCompleted: true,
@@ -72,9 +73,16 @@ export async function POST(request: NextRequest) {
 
   return NextResponse.json({
     email,
-    password,
     userId,
     projectId,
     proposalId,
+    cookies: [
+      { name: "session", value: createSessionToken(userId, email), httpOnly: true },
+      { name: "csrf_token", value: randomUUID(), httpOnly: false },
+    ].map(cookie => ({ ...cookie, domain: config.origin.hostname, path: "/", secure: config.origin.protocol === "https:", sameSite: "Lax", expires: Math.floor(Date.now() / 1000) + 7 * 86400 })),
   });
+  } catch (error) {
+    logger.error({ err: error }, "Isolated test fixture failed");
+    return NextResponse.json({ error: "Test fixture failed" }, { status: 500 });
+  }
 }
