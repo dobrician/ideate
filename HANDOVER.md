@@ -1,5 +1,12 @@
 # Ideate — canonical handover
 
+## Opus 5.5 adversarial preview polish — 4 October (#90)
+
+Four actual Opus 5.5 OAuth reviews: findings, REQUEST_CHANGES, core PASS, scoped pagination PASS. The owner implements only validated preview corrections: keyboard logout/search, focused combobox semantics and guest return context, bounded project-card summaries, recoverable account forms and predictable creation cancel. Mobile closed-chart masks/hover slivers are corrected; Projects alone opts into compact mobile pagination. Production remains `a20e131fbea0`; frozen routes/actions/auth/AI/schema remain untouched. Active test becomes `.next-opus-polish/standalone`, with `.next-mobile-compact` retained for rollback. Review decisions and deferrals: `docs/design/Adversarial-Preview-Review.md` (#91). Final proof: `/home/dc/.local/state/surcod-demo/ideate-opus-review-proof.md`.
+
+
+Outcomes: four real Opus 5.5 reviews with final core and scoped pagination PASS; 2736 units/212 files, lint/typecheck/build, 87 relevant browser cases across three profiles and 22 live preview smoke checks pass. Native public-browser checks confirm compact opaque mobile charts and focus recovery. Intermediate failures and corrected genuine test-harness bugs are retained in evidence. Read-only demo state is identical before/after. Active test build `.next-opus-polish` is protected through 3 November; production image/database are unchanged. Logs and reviewer responses remain registered through 11 October.
+
 ## Mobile proposal compaction — 4 October (#89)
 
 DC reopened only mobile proposal layout after reviewing doubled headers on the test host. Titles and independent controls share one 60px header, with 44px touch targets; summaries stay collapsed below 640px and open with the title. Desktop preview/expanded interactions, vote palette and backend remain unchanged. Deploy this review to test only; production remains on its accepted SSO image. Active test build becomes `.next-mobile-compact/standalone`; `.next-sso-only` remains its rollback. Validation evidence and final status are in `/home/dc/.local/state/surcod-demo/ideate-mobile-layout-proof.md`. No AI, email, auth, schema, data or infrastructure changes.

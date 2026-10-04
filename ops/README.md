@@ -73,3 +73,5 @@ against the isolated test runtime with SMTP disabled, unless DC explicitly
 authorizes production email delivery. No coordination notifications are allowed.
 
 The mobile proposal review (#89) now uses `.next-mobile-compact/standalone` on test only; `.next-sso-only` is its retained rollback. Production remains on `a20e131fbea0`. The authorized change reopens only responsive proposal presentation, with descriptions opened deliberately on touch.
+
+The Opus-reviewed polish (#90) uses `.next-opus-polish/standalone` on test only; `.next-mobile-compact` is its retained rollback. Project-detail pagination defaults remain unchanged; only the Projects list opts into a compact mobile window. Production stays on `a20e131fbea0`. See the canonical handover and adversarial review for the real reviewer/validation scope.
