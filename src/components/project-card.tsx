@@ -22,7 +22,7 @@ export function ProjectCard({ project, proposalCount, voteCount, locale, t }: Pr
         <h2 className="min-w-0 break-words text-base font-semibold leading-snug">{project.title}</h2>
         <Badge className={statusBadgeClass(project.status)}>{statusLabel(project.status, t)}</Badge>
       </div>
-      {summary && <div className={`mt-3 text-sm leading-relaxed text-muted-foreground ${project.summary ? "" : "line-clamp-3"}`}><MarkdownRenderer content={summary} disableLinks /></div>}
+      {summary && <div className="mt-3 line-clamp-3 max-h-[4.875em] text-sm leading-relaxed text-muted-foreground [&>div]:overflow-visible [&>div]:leading-[inherit] [&_p]:my-0"><MarkdownRenderer content={summary} simple disableLinks /></div>}
       <div className="mt-auto flex flex-wrap gap-x-4 gap-y-1 pt-5 text-xs text-muted-foreground">
         <span><strong className="font-medium tabular-nums text-foreground">{proposalCount}</strong> {t("projects.proposals", { count: proposalCount })}</span>
         <span><strong className="font-medium tabular-nums text-foreground">{voteCount}</strong> {t("projects.votesCast", { count: voteCount })}</span>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useId } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { User, LogOut, Shield, Search, Globe, X } from "lucide-react";
@@ -18,13 +18,15 @@ interface HeaderUser {
 export function Header() {
   const pathname = usePathname();
   const { t, locale } = useLocale();
-  const [user, setUser] = useState<HeaderUser | null>(null);
+  const [user, setUser] = useState<HeaderUser | null | undefined>(undefined);
   const isLoggedIn = !!user;
   const isAdmin = user?.role === "admin";
   const name = [user?.firstName, user?.lastName].filter(Boolean).join(" ");
   const initials = name ? `${user?.firstName?.[0] ?? ""}${user?.lastName?.[0] ?? ""}`.toUpperCase()
     : user?.email?.slice(0, 2).toUpperCase();
   const [searchOpen, setSearchOpen] = useState(false);
+  const searchToggle = useRef<HTMLButtonElement>(null);
+  const logoutFormId = useId();
   const searchContainer = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -32,7 +34,7 @@ export function Header() {
     fetch("/api/me")
       .then(r => r.ok ? r.json() as Promise<HeaderUser> : null)
       .then(data => { if (active) setUser(data); })
-      .catch(() => {});
+      .catch(() => { if (active) setUser(null); });
     return () => { active = false; };
   }, []);
 
@@ -42,7 +44,10 @@ export function Header() {
         event.preventDefault();
         setSearchOpen(true);
       }
-      if (event.key === "Escape") setSearchOpen(false);
+      if (event.key === "Escape" && searchContainer.current?.contains(document.activeElement)) {
+        setSearchOpen(false);
+        searchToggle.current?.focus();
+      }
     }
     window.addEventListener("keydown", handleKey);
     return () => window.removeEventListener("keydown", handleKey);
@@ -69,7 +74,7 @@ export function Header() {
           </Link>
         </nav>
         <div className="ml-auto flex items-center gap-1 sm:gap-2">
-          <Button variant="ghost" size="icon" aria-label={t("search.placeholder")}
+          <Button ref={searchToggle} variant="ghost" size="icon" aria-label={t("search.placeholder")}
             aria-expanded={searchOpen} aria-controls="app-search" onClick={() => setSearchOpen(!searchOpen)}>
             {searchOpen ? <X className="size-4" /> : <Search className="size-4" />}
           </Button>
@@ -85,7 +90,12 @@ export function Header() {
                 <p className="truncate text-sm font-medium">{name || user.email}</p>
                 {name && <p className="truncate text-xs text-muted-foreground">{user.email}</p>}
               </div>}
-              <DropdownMenuItem asChild><Link href="/profile"><User className="size-4" />{t("nav.profile")}</Link></DropdownMenuItem>
+              {user === undefined ? <DropdownMenuItem disabled>{t("nav.profile")}</DropdownMenuItem> : isLoggedIn ?
+                <DropdownMenuItem asChild><Link href="/profile"><User className="size-4" />{t("nav.profile")}</Link></DropdownMenuItem> : !pathname.startsWith("/auth") &&
+                <DropdownMenuItem onSelect={() => {
+                  const destination = window.location.pathname + window.location.search;
+                  window.location.assign(`/auth/login?redirect=${encodeURIComponent(destination)}`);
+                }}><User className="size-4" />{t("project.share.signIn")}</DropdownMenuItem>}
               {isAdmin && <DropdownMenuItem asChild><Link href="/admin"><Shield className="size-4" />{t("nav.admin")}</Link></DropdownMenuItem>}
               <DropdownMenuSeparator />
               <DropdownMenuItem onSelect={event => {
@@ -95,11 +105,12 @@ export function Header() {
                 window.location.reload();
               }}><Globe className="size-4" />{t(locale === "ro" ? "locale.switchToEn" : "locale.switchToRo")}<span className="ml-auto text-xs text-muted-foreground">{locale.toUpperCase()}</span></DropdownMenuItem>
 
-              {isLoggedIn && <><DropdownMenuSeparator /><DropdownMenuItem asChild>
-                <form action="/auth/logout" method="POST"><button type="submit" className="flex w-full items-center gap-2"><LogOut className="size-4" />{t("nav.signOut")}</button></form>
+              {isLoggedIn && <><DropdownMenuSeparator /><DropdownMenuItem asChild onSelect={event => event.preventDefault()}>
+                <button type="submit" form={logoutFormId} className="flex w-full items-center gap-2"><LogOut className="size-4" />{t("nav.signOut")}</button>
               </DropdownMenuItem></>}
             </DropdownMenuContent>
           </DropdownMenu>
+          {isLoggedIn && <form id={logoutFormId} action="/auth/logout" method="POST" hidden />}
         </div>
       </div>
       {searchOpen && <div id="app-search" ref={searchContainer} className="mx-auto mt-2 max-w-3xl rounded-xl border bg-background p-3 shadow-sm"><SearchBar /></div>}

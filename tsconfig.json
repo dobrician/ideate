@@ -42,7 +42,9 @@
     ".next-sso-only/types/**/*.ts",
     ".next-sso-only/dev/types/**/*.ts",
     ".next-mobile-compact/types/**/*.ts",
-    ".next-mobile-compact/dev/types/**/*.ts"
+    ".next-mobile-compact/dev/types/**/*.ts",
+    ".next-opus-polish/types/**/*.ts",
+    ".next-opus-polish/dev/types/**/*.ts"
   ],
   "exclude": [
     "node_modules",

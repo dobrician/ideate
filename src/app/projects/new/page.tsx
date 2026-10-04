@@ -159,7 +159,7 @@ export default function NewProjectPage() {
               <Button
                 type="button"
                 variant="outline"
-                onClick={() => router.back()}
+                onClick={() => router.push("/projects")}
                 disabled={isLoading}
               >
                 {t("common.cancel")}

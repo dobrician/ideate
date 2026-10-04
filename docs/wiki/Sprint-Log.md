@@ -1,5 +1,11 @@
 # Sprint Log
 
+## 4 October — Adversarial Opus 5.5 preview polish (#90)
+
+DC requested a real review/fix/re-review cycle. Existing Claude Code OAuth Max supplied Opus 5.5 read-only reviews, confirmed in response metadata. Four rounds produced findings, REQUEST_CHANGES, core PASS and scoped pagination PASS. Accepted corrections improve keyboard logout/search, guest return context, bounded project summaries, account request recovery, creation cancel and mobile chart/pagination presentation. Changes are preview-only; production and frozen backend/routes/data remain unchanged. Review decisions, test distinctions and deferred #91 items are in `docs/design/Adversarial-Preview-Review.md`; final evidence is in HANDOVER and private local operational proof.
+
+Outcomes: four real Opus 5.5 reviews with final core and scoped pagination PASS; 2736 units/212 files, lint/typecheck/build, 87 relevant browser cases across three profiles and 22 live preview smoke checks pass. Native public-browser checks confirm compact opaque mobile charts and focus recovery. Intermediate failures and corrected genuine test-harness bugs are retained in evidence. Read-only demo state is identical before/after. Active test build `.next-opus-polish` is protected through 3 November; production image/database are unchanged. Logs and reviewer responses remain registered through 11 October.
+
 ## 4 October — Compact mobile proposals (#89)
 
 DC explicitly reopened mobile proposal layout after the test review: one header row for title and controls, 44px touch targets, stable consensus background, and touch descriptions opened deliberately. Desktop previews and independent voting/discussion/files remain. This change is deployed to the isolated preview for review; production and both project databases are preserved. Existing summary tests change only for the approved small-screen behavior. Validation outcomes are recorded in HANDOVER and the nonsecret mobile layout proof.

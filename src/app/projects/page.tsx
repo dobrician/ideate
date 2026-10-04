@@ -157,7 +157,7 @@ export default async function ProjectsPage({ searchParams }: ProjectsPageProps) 
                 })}
               </p>
             )}
-            <Pagination currentPage={page} totalPages={totalPages} />
+            <Pagination currentPage={page} totalPages={totalPages} compactOnMobile />
           </div>
         </>
       )}

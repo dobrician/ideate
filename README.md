@@ -18,6 +18,8 @@ Expanded project context replaces the AI summary, with participation and its dis
 
 On mobile, proposal titles and controls share one compact row with 44px touch targets. Descriptions open by tapping the title; the persistent summary preview remains on desktop. This responsive adjustment is reviewed on the isolated test host (#89).
 
+The isolated preview has completed an adversarial Opus 5.5 polish cycle: dependable keyboard/logout/search, three-line project summaries, recoverable account forms and compact Projects pagination. Production retains its accepted release. See [review decisions](docs/design/Adversarial-Preview-Review.md) for verification scope and deferred items.
+
 ## Tech Stack
 
 - **Framework:** Next.js 16 (App Router), TypeScript strict

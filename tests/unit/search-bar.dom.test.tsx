@@ -251,7 +251,7 @@ describe("SearchBar keyboard navigation", () => {
   it("has aria-keyshortcuts on the search input", async () => {
     const { SearchBar } = await import("@/components/search-bar");
     render(<SearchBar />);
-    const input = screen.getByRole("searchbox");
+    const input = screen.getByRole("combobox");
     expect(input).toHaveAttribute("aria-keyshortcuts", "Control+K Meta+K");
   });
 
@@ -266,5 +266,34 @@ describe("SearchBar keyboard navigation", () => {
     await waitFor(() => expect(screen.getByText("Project Alpha")).toBeInTheDocument());
     expect(screen.queryByText("95%")).not.toBeInTheDocument();
     expect(screen.queryByText("123ms")).not.toBeInTheDocument();
+  });
+});
+
+
+describe("SearchBar adversarial regressions", () => {
+  it("should clear stale options immediately when the query changes", async () => {
+    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
+    await renderSearchBar();
+    const input = screen.getByLabelText("Search...");
+    await user.type(input, "alpha");
+    await vi.advanceTimersByTimeAsync(350);
+    await waitFor(() => expect(screen.getByText("Project Alpha")).toBeVisible());
+    fetchHandler = () => new Promise<Response>(() => {});
+    await user.type(input, " beta");
+    expect(screen.queryByRole("option")).not.toBeInTheDocument();
+  });
+
+  it("should expose autocomplete and active selection on the focused input", async () => {
+    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
+    await renderSearchBar();
+    await user.type(screen.getByLabelText("Search..."), "alpha");
+    await vi.advanceTimersByTimeAsync(350);
+    await waitFor(() => expect(screen.getAllByRole("option")[0]).toBeVisible());
+    await user.keyboard("{ArrowDown}");
+    const combobox = screen.getByRole("combobox");
+    expect(combobox.tagName).toBe("INPUT");
+    expect(combobox).toHaveFocus();
+    expect(combobox).toHaveAttribute("aria-autocomplete", "list");
+    expect(combobox).toHaveAttribute("aria-activedescendant", screen.getAllByRole("option")[0].id);
   });
 });

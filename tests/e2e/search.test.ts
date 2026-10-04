@@ -11,12 +11,12 @@ test.describe("Search — Authenticated", () => {
   });
 
   test("search bar is visible on dashboard", async ({ page }) => {
-    const searchInput = page.getByRole("combobox").getByRole("searchbox");
+    const searchInput = page.getByRole("combobox");
     await expect(searchInput).toBeVisible();
   });
 
   test("search input has aria-keyshortcuts attribute", async ({ page }) => {
-    const searchInput = page.getByRole("combobox").getByRole("searchbox");
+    const searchInput = page.getByRole("combobox");
     await expect(searchInput).toHaveAttribute(
       "aria-keyshortcuts",
       "Control+K Meta+K"
@@ -26,7 +26,7 @@ test.describe("Search — Authenticated", () => {
   test("Ctrl+K focuses the search input", async ({ page }) => {
     await page.getByRole("heading", { name: /Projects/i }).click();
     await page.keyboard.press("Control+k");
-    const searchInput = page.getByRole("combobox").getByRole("searchbox");
+    const searchInput = page.getByRole("combobox");
     await expect(searchInput).toBeFocused();
   });
 
@@ -34,20 +34,21 @@ test.describe("Search — Authenticated", () => {
     const combobox = page.locator('[role="combobox"]');
     await expect(combobox).toBeVisible();
     await expect(combobox).toHaveAttribute("aria-haspopup", "listbox");
-    await expect(combobox).toHaveAttribute("aria-controls", /.+/);
+    await expect(combobox).toHaveAttribute("aria-autocomplete", "list");
+    await expect(combobox).toHaveAttribute("aria-expanded", "false");
   });
 
   test("search exposes one query without technical mode or entity selectors", async ({ page }) => {
     await expect(page.getByRole("radiogroup")).toHaveCount(0);
     await expect(page.locator('button[aria-pressed]')).toHaveCount(0);
     const request = page.waitForRequest(r => r.url().includes("/api/search?"));
-    await page.getByRole("combobox").getByRole("searchbox").fill("Test");
+    await page.getByRole("combobox").fill("Test");
     expect(new URL((await request).url()).searchParams.get("mode")).toBe("fts");
     await expect(page.getByRole("option").first()).toBeVisible();
   });
 
   test("search input shows no-results message for gibberish query", async ({ page }) => {
-    const searchInput = page.getByRole("combobox").getByRole("searchbox");
+    const searchInput = page.getByRole("combobox");
     await searchInput.fill("xyznonexistent999zzz");
     // Wait for debounced search
     await page.waitForTimeout(500);

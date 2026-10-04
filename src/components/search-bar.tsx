@@ -29,6 +29,11 @@ export function SearchBar() {
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    setResults([]);
+    setActiveIndex(-1);
+    setOpen(false);
+    setError(null);
+    setLoading(query.trim().length >= 2);
     if (query.trim().length < 2) {
       setResults([]);
       setError(null);
@@ -91,23 +96,32 @@ export function SearchBar() {
 
   const href = (result: SearchResult) => `/projects/${result.type === "project" ? result.id : result.projectId || result.id}`;
   return (
-    <div ref={containerRef} className="relative w-full" role="combobox" aria-expanded={open}
-      aria-controls={listId} aria-haspopup="listbox">
+    <div ref={containerRef} className="relative w-full">
       <Search className="pointer-events-none absolute left-3 top-3 size-4 text-muted-foreground" aria-hidden="true" />
-      <Input ref={inputRef} type="search" value={query} placeholder={t("search.placeholder")}
+      <Input ref={inputRef} type="search" role="combobox" aria-autocomplete="list"
+        aria-expanded={open} aria-controls={open ? listId : undefined} aria-haspopup="listbox" value={query} placeholder={t("search.placeholder")}
         aria-label={t("search.placeholder")} aria-keyshortcuts="Control+K Meta+K"
         aria-activedescendant={open && activeIndex >= 0 ? `${listId}-${activeIndex}` : undefined}
         className="pl-9" onChange={event => setQuery(event.target.value)}
         onFocus={() => { if (results.length || error) setOpen(true); }}
         onKeyDown={event => {
-          if (event.key === "Escape") { setOpen(false); setActiveIndex(-1); return; }
-          if (!open || !results.length) return;
+          if (event.key === "Escape") {
+            if (open) { event.preventDefault(); event.stopPropagation(); setOpen(false); setActiveIndex(-1); }
+            return;
+          }
+          if (!open) {
+            if (event.key === "ArrowDown" && (results.length || error)) {
+              event.preventDefault(); setOpen(true); setActiveIndex(results.length ? 0 : -1);
+            }
+            return;
+          }
+          if (!results.length) return;
           if (event.key === "ArrowDown" || event.key === "ArrowUp") {
             event.preventDefault();
             setActiveIndex(previous => event.key === "ArrowDown"
               ? (previous + 1) % results.length
               : previous <= 0 ? results.length - 1 : previous - 1);
-          } else if (event.key === "Enter" && activeIndex >= 0) {
+          } else if (event.key === "Enter" && activeIndex >= 0 && !loading) {
             event.preventDefault();
             window.location.href = href(results[activeIndex]);
           }
@@ -118,10 +132,10 @@ export function SearchBar() {
         {!error && !results.length && <p className="p-3 text-sm text-muted-foreground">{t("search.noResults")}</p>}
         <div id={listId} role="listbox" aria-label={t("search.ariaResults")}>
           {results.map((result, index) => <a key={`${result.type}-${result.id}`} id={`${listId}-${index}`}
-            role="option" aria-selected={index === activeIndex} href={href(result)}
+            role="option" tabIndex={-1} aria-selected={index === activeIndex} href={href(result)}
             className={`block border-b p-3 last:border-b-0 hover:bg-accent ${index === activeIndex ? "bg-accent" : ""}`}
             onMouseEnter={() => setActiveIndex(index)} onClick={() => setOpen(false)}>
-            <p className="text-sm font-medium">{result.title}</p>
+            <p className="break-words text-sm font-medium">{result.title}</p>
             <p className="text-xs text-muted-foreground">{t(`search.type${result.type === "project" ? "Project" : result.type === "proposal" ? "Proposal" : "Comment"}`)}</p>
             {result.snippet && <p className="mt-1 line-clamp-2 text-sm text-muted-foreground"
               dangerouslySetInnerHTML={{ __html: sanitizeSnippet(result.snippet) }} />}

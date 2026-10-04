@@ -124,11 +124,11 @@ export function ProposalItem({
       data-preview-active={isPreviewActive}
       onPointerMove={(event) => { if (event.pointerType === "mouse") onPreviewActivate?.(); }}
       onFocusCapture={() => onPreviewActivate?.()}
-      className="group/proposal relative rounded-lg border last:border-b bg-transparent transition-shadow duration-200 data-[state=open]:shadow-md after:pointer-events-none after:absolute after:-inset-x-px after:top-full after:h-1 after:rounded-b-lg after:border after:border-t-0 after:border-border after:bg-background after:opacity-0 after:-translate-y-1 after:transition-[transform,opacity] after:duration-300 after:ease-[cubic-bezier(.22,1.15,.36,1)] has-[[data-slot=accordion-trigger]:hover]:after:opacity-100 has-[[data-slot=accordion-trigger]:hover]:after:translate-y-0 has-[[data-slot=accordion-trigger]:hover]:after:delay-500 data-[state=open]:after:hidden motion-reduce:after:transition-none"
+      className="group/proposal relative rounded-lg border last:border-b bg-transparent transition-shadow duration-200 data-[state=open]:shadow-md after:pointer-events-none after:absolute after:-inset-x-px after:top-full after:h-1 after:rounded-b-lg after:border after:border-t-0 after:border-border after:bg-background after:opacity-0 after:-translate-y-1 after:transition-[transform,opacity] after:duration-300 after:ease-[cubic-bezier(.22,1.15,.36,1)] has-[[data-slot=accordion-trigger]:hover]:after:opacity-100 has-[[data-slot=accordion-trigger]:hover]:after:translate-y-0 has-[[data-slot=accordion-trigger]:hover]:after:delay-500 data-[state=open]:after:hidden motion-reduce:after:transition-none max-sm:after:hidden [@media(hover:none)]:after:hidden"
     >
       <div className="rounded-[inherit]">
         <div data-proposal-header className="relative isolate rounded-[inherit] px-2 py-2 sm:px-4">
-          <div data-vote-chart aria-hidden="true" className="pointer-events-none absolute inset-0 -z-10 overflow-hidden rounded-[inherit] group-data-[preview-active=true]/proposal:[mask-image:linear-gradient(to_bottom,black_calc(100%_-_16px),transparent)] group-data-[state=open]/proposal:[mask-image:linear-gradient(to_bottom,black_calc(100%_-_16px),transparent)]">
+          <div data-vote-chart aria-hidden="true" className="pointer-events-none absolute inset-0 -z-10 overflow-hidden rounded-[inherit] sm:group-data-[preview-active=true]/proposal:[mask-image:linear-gradient(to_bottom,black_calc(100%_-_16px),transparent)] group-data-[state=open]/proposal:[mask-image:linear-gradient(to_bottom,black_calc(100%_-_16px),transparent)]">
             {greenWidth > 0 && <div className="absolute inset-y-0 left-0 bg-vote-pro transition-[width] duration-300 motion-reduce:transition-none" style={{ width: `${greenWidth}%` }} />}
             {redWidth > 0 && <div className="absolute inset-y-0 right-0 bg-vote-contra transition-[width] duration-300 motion-reduce:transition-none" style={{ width: `${redWidth}%` }} />}
           </div>
@@ -154,7 +154,7 @@ export function ProposalItem({
         </div>
         <div data-proposal-author className="hidden px-4 pb-1 text-right text-xs text-muted-foreground group-data-[state=open]/proposal:block">{proposal.authorName}</div>
         {(proposal.summary || proposal.description) && (
-          <div className={`hidden sm:grid transition-[grid-template-rows,opacity] duration-300 ease-[cubic-bezier(.22,1.15,.36,1)] group-data-[state=open]/proposal:hidden motion-reduce:transition-none ${isPreviewActive ? "visible grid-rows-[1fr] opacity-100" : "invisible grid-rows-[0fr] opacity-0"}`}>
+          <div data-proposal-preview className={`hidden sm:grid transition-[grid-template-rows,opacity] duration-300 ease-[cubic-bezier(.22,1.15,.36,1)] group-data-[state=open]/proposal:hidden motion-reduce:transition-none ${isPreviewActive ? "visible grid-rows-[1fr] opacity-100" : "invisible grid-rows-[0fr] opacity-0"}`}>
             <div className="overflow-hidden px-4"><p className="flex min-h-12 items-center py-1.5 text-sm leading-relaxed text-muted-foreground">{proposal.summary || proposal.description}</p></div>
           </div>
         )}
