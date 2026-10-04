@@ -1,5 +1,11 @@
 # Ideate — canonical handover
 
+## Mobile proposal compaction — 4 October (#89)
+
+DC reopened only mobile proposal layout after reviewing doubled headers on the test host. Titles and independent controls share one 60px header, with 44px touch targets; summaries stay collapsed below 640px and open with the title. Desktop preview/expanded interactions, vote palette and backend remain unchanged. Deploy this review to test only; production remains on its accepted SSO image. Active test build becomes `.next-mobile-compact/standalone`; `.next-sso-only` remains its rollback. Validation evidence and final status are in `/home/dc/.local/state/surcod-demo/ideate-mobile-layout-proof.md`. No AI, email, auth, schema, data or infrastructure changes.
+
+Validation: 2729 unit tests per branch pass; lint/typecheck/build pass;45 targeted preview E2E cases pass across all three browser profiles,3 canonical geometry checks and22 live preview smoke checks pass. Native browser confirms60px headers at320/390px without overflow. Initial new-test failures were a summary-versus-description locator bug, corrected without weakening layout assertions; evidence retained. Demo state is identical before/after (two proposals,zero owner votes). Active build protected through3 November; logs through11 October.
+
 ## SSO-only authentication — 4 October
 
 DC explicitly authorized removing Ideate's local authentication on production and test (#87), reopening only authentication dependencies of the frozen project screen. Sign-in goes directly to SurCod SSO with PKCE and a safe project return destination. All local registration/password/magic-link/verification/recovery routes, authentication mail templates, credential settings, invitation-to-local-registration UI/API and bcrypt dependency are retired. Failed SSO offers one retry; logout revokes the application session and returns to public home.

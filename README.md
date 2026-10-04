@@ -16,6 +16,8 @@ Signed-in users start with projects. Each project card shows its AI summary, pro
 
 Expanded project context replaces the AI summary, with participation and its disclosure in one footer; creation and update dates are omitted. The project uses a solid background to distinguish it from transparent idea cards. The proposal toolbar is removed: sorting, filters, export, editing and AI tools are in the project actions menu, and the compact + button opens proposal creation. The account menu provides account preferences and role-restricted administration; global search opens from the search icon or Ctrl/Cmd+K. Project creation asks only for the decision, context and deadline; it creates an active project. Existing categories, status actions and backend tools remain available to their existing consumers. Shared links use the same compact decision view.
 
+On mobile, proposal titles and controls share one compact row with 44px touch targets. Descriptions open by tapping the title; the persistent summary preview remains on desktop. This responsive adjustment is reviewed on the isolated test host (#89).
+
 ## Tech Stack
 
 - **Framework:** Next.js 16 (App Router), TypeScript strict

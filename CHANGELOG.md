@@ -10,6 +10,8 @@
 
 ### Changed
 
+- Compact mobile proposal headers into one row, retaining 44px vote/discussion/file targets and fixed consensus-chart height. Touch descriptions open on demand; desktop persistent previews remain (#89). Existing summary browser expectations change only for the approved mobile requirement.
+
 - Retire local registration, passwords, magic links, verification/recovery, authentication emails and local credential settings. Sign-in enters SurCod SSO directly with a preserved project destination; existing accounts/roles/data remain and old sessions require one fresh SSO login (#87). Isolated test fixtures cannot run on public origins.
 
 - Implement the approved essential user experience only on the isolated test host: Projects replaces Dashboard, account preferences replace duplicate content lists, SurCod SSO leads login, search removes retrieval controls, and project creation asks only for decision/context/deadline. Retain deliberate fallback login, admin authorization and frozen project interactions (#71, #74).

@@ -13,7 +13,7 @@ export function ProposalAttachments({ proposal, canEdit }: { proposal: ProposalW
   return (
     <Sheet>
       <SheetTrigger asChild>
-        <Button variant="ghost" size="sm" className="min-h-11 min-w-11 text-muted-foreground" aria-label={t("attachments.title")}>
+        <Button variant="ghost" size="sm" className="min-h-11 min-w-11 gap-1 px-1 has-[>svg]:px-1 sm:gap-1.5 sm:px-3 sm:has-[>svg]:px-2.5 text-muted-foreground" aria-label={t("attachments.title")}>
           <Paperclip className="size-4" />
           {proposal.attachments.length > 0 && <span className="text-xs">{proposal.attachments.length}</span>}
         </Button>
