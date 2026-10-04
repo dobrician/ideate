@@ -2,7 +2,7 @@
 
 ## Current owner and runtime
 
-The existing Ideate agent owns this project; SurCod coordinates capture read-only. Continue on `sprint/2026-10-03-decision-focused-project`, draft PR [#73](https://github.com/dobrician/ideate/pull/73). Public runtime: `https://idea.surmont.co`; deployed application commit `d628070`, image `2d9fd9122af0`, healthy. Previous image `45b4f3b50a8f` remains available for rollback. Local development is on port 4101. Do not modify existing database files/backups in the worktree or run the global seed for a demo reset.
+The existing Ideate agent owns this project; SurCod coordinates capture read-only. Continue on `sprint/2026-10-03-decision-focused-project`, draft PR [#73](https://github.com/dobrician/ideate/pull/73). Public runtime: `https://idea.surmont.co`; deployed application commit `68a10c6`, image `dc53ece7a0d8`, healthy. Previous image `2d9fd9122af0` remains available for rollback. Local development is on port 4101. Do not modify existing database files/backups in the worktree or run the global seed for a demo reset.
 
 ## SurCod family-holiday demonstration — ready
 
@@ -44,4 +44,4 @@ A final guard observed a further live request for this demo and a new actor +1 a
 
 ## Manual theme control and palette review — 4 October
 
-Restore a discoverable sun/moon control directly in the floating navigation (#84); language remains in the account menu. At widths below 360px use only the brand symbol to preserve Projects and three 44px controls. Real component tests cover system-dark override, keyboard switching and persistence; the browser assertion checks reload and both directions. The color analysis and schematic comparison are in `docs/design/Color-Review.md` and `docs/design/palette-review.html` (#85). Proposed colors are not applied. Do not change holiday-demo data or reset it for this UI task. Production deployment verification is pending.
+Restore a discoverable sun/moon control directly in the floating navigation (#84); language remains in the account menu. At widths below 360px use only the brand symbol to preserve Projects and three 44px controls. Real component tests cover system-dark override, keyboard switching and persistence; the browser assertion checks reload and both directions. The color analysis and schematic comparison are in `docs/design/Color-Review.md` and `docs/design/palette-review.html` (#85). Proposed colors are not applied. Do not change holiday-demo data or reset it for this UI task. Production commit `68a10c6` / image `dc53ece7a0d8` is healthy, with all 636 browser cases and 32 public smoke checks passing. Live theme switching/persistence and 320px geometry are verified. Proposed colors remain pending review.
