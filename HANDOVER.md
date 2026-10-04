@@ -131,3 +131,9 @@ cover account/redirect/search/SSO. No underlying frozen application defect was
 hidden by changing its tests. Private live HTTP proof confirms healthy DBs,
 PKCE S256/exact callbacks, test noindex/no-store and direct HTTP/HTTPS301
 preserving encoded spaces and repeated query parameters.
+
+Preview implementation commit `97af9dc`, integrated with canonical migration
+handover at `769d309`; draft [PR #86](https://github.com/dobrician/ideate/pull/86)
+stacks on [PR #73](https://github.com/dobrician/ideate/pull/73). Both are registered
+with the existing Ideate thread. SSO issue #74 is closed with live proof; #71
+remains open for DC's preview review and subsequent approved reductions.
