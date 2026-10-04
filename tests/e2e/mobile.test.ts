@@ -10,6 +10,9 @@ test.describe("Mobile — Touch Targets & Overflow (Sprint 28)", () => {
   test("login page links meet 44px touch targets", async ({ page }) => {
     await page.goto("/auth/login");
 
+    const alternatives = page.getByRole("button", { name: "Other ways to sign in", exact: true });
+    if (await alternatives.count()) await alternatives.click();
+
     // Forgot password link
     const forgot = page.getByRole("link", { name: /Forgot/i });
     await expect(forgot).toBeVisible();

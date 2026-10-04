@@ -33,6 +33,7 @@ export default function LoginPage() {
   const verified = searchParams.get("verified") === "true";
   const errorParam = searchParams.get("error");
   const [verifiedBanner, setVerifiedBanner] = useState(verified);
+  const [fallbackOpen, setFallbackOpen] = useState(!oidcEnabled || verified);
 
   const form = useLoginForm(t, searchParams.get("redirect"));
 
@@ -58,7 +59,7 @@ export default function LoginPage() {
           <p className="text-3xl font-bold tracking-tight">Ideate</p>
           <h1 className="text-2xl font-bold leading-none">{t("auth.signIn")}</h1>
           <CardDescription>
-            {form.mode === "magic-link" ? t("auth.signInMagicDesc") : t("auth.signInDesc")}
+            {oidcEnabled ? t("auth.ssoSimpleDescription") : form.mode === "magic-link" ? t("auth.signInMagicDesc") : t("auth.signInDesc")}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -71,6 +72,20 @@ export default function LoginPage() {
             </div>
           )}
 
+          {oidcEnabled && <div className="mb-5 space-y-3">
+            <Button asChild className="w-full">
+              <a href={`/api/auth/oidc?redirect=${encodeURIComponent(getSafeRedirect(searchParams.get("redirect")))}`}>
+                {t("auth.signInWithOidc")}
+              </a>
+            </Button>
+            {errorParam && <p role="alert" className="text-sm text-destructive">{form.error}</p>}
+          </div>}
+          <div>
+            {oidcEnabled && <Button type="button" variant="ghost" className="w-full text-muted-foreground"
+              aria-expanded={fallbackOpen} aria-controls="legacy-sign-in" onClick={() => setFallbackOpen(!fallbackOpen)}>
+              {t("auth.otherSignInMethods")}
+            </Button>}
+            <div id="legacy-sign-in" className="pt-2" hidden={!fallbackOpen && !form.success}>
           {form.success ? (
             <div className="space-y-4 text-center">
               <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-green-100 dark:bg-green-900">
@@ -85,7 +100,7 @@ export default function LoginPage() {
             <form onSubmit={form.handlePasswordLogin} className="space-y-4" noValidate>
               <div className="space-y-2">
                 <Label htmlFor="email">{t("auth.email")}</Label>
-                <Input id="email" type="email" placeholder={t("auth.emailPlaceholder")} value={form.email} onChange={(e) => form.setEmail(e.target.value)} onBlur={() => form.handleBlur("email")} disabled={form.isLoading} autoComplete="email" autoFocus aria-invalid={form.touched.email && !!form.fieldErrors.email} aria-describedby={form.fieldErrors.email ? "login-email-error" : undefined} />
+                <Input id="email" type="email" placeholder={t("auth.emailPlaceholder")} value={form.email} onChange={(e) => form.setEmail(e.target.value)} onBlur={() => form.handleBlur("email")} disabled={form.isLoading} autoComplete="email" autoFocus={!oidcEnabled} aria-invalid={form.touched.email && !!form.fieldErrors.email} aria-describedby={form.fieldErrors.email ? "login-email-error" : undefined} />
                 {form.touched.email && form.fieldErrors.email && (
                   <p id="login-email-error" className="text-xs text-red-700 dark:text-red-400">{form.fieldErrors.email}</p>
                 )}
@@ -119,11 +134,6 @@ export default function LoginPage() {
                 {form.isLoading ? t("auth.signingIn") : t("auth.signInWithPassword")}
               </Button>
               <OrDivider label={t("auth.or")} />
-              {oidcEnabled && (
-                <Button type="button" variant="outline" className="w-full" onClick={() => { window.location.href = `/api/auth/oidc?redirect=${encodeURIComponent(getSafeRedirect(searchParams.get("redirect")))}`; }}>
-                  {t("auth.signInWithOidc")}
-                </Button>
-              )}
               <Button type="button" variant="outline" className="w-full" onClick={() => form.switchMode("magic-link")}>{t("auth.signInWithMagicLink")}</Button>
               <p className="text-center text-sm text-muted-foreground">
                 {t("auth.noAccount")}{" "}
@@ -135,7 +145,7 @@ export default function LoginPage() {
               <p className="text-sm text-muted-foreground">{t("auth.magicLinkExplainer")}</p>
               <div className="space-y-2">
                 <Label htmlFor="email-magic">{t("auth.email")}</Label>
-                <Input id="email-magic" type="email" placeholder={t("auth.emailPlaceholder")} value={form.email} onChange={(e) => form.setEmail(e.target.value)} onBlur={() => form.handleBlur("email")} disabled={form.isLoading} autoComplete="email" autoFocus aria-invalid={form.touched.email && !!form.fieldErrors.email} aria-describedby={form.fieldErrors.email ? "magic-email-error" : undefined} />
+                <Input id="email-magic" type="email" placeholder={t("auth.emailPlaceholder")} value={form.email} onChange={(e) => form.setEmail(e.target.value)} onBlur={() => form.handleBlur("email")} disabled={form.isLoading} autoComplete="email" autoFocus={!oidcEnabled} aria-invalid={form.touched.email && !!form.fieldErrors.email} aria-describedby={form.fieldErrors.email ? "magic-email-error" : undefined} />
                 {form.touched.email && form.fieldErrors.email && (
                   <p id="magic-email-error" className="text-xs text-red-700 dark:text-red-400">{form.fieldErrors.email}</p>
                 )}
@@ -157,6 +167,8 @@ export default function LoginPage() {
               </p>
             </form>
           )}
+            </div>
+          </div>
         </CardContent>
       </Card>
     </div>

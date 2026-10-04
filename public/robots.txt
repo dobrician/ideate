@@ -4,4 +4,4 @@ Disallow: /admin
 Disallow: /api/
 Disallow: /auth/
 
-Sitemap: https://idea.surmont.co/sitemap.xml
+Sitemap: https://ideate.surcod.ro/sitemap.xml

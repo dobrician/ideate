@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { User, LogOut, Shield, Search, Globe, LayoutDashboard, X } from "lucide-react";
+import { User, LogOut, Shield, Search, Globe, X } from "lucide-react";
 import { SearchBar } from "@/components/search-bar";
 import { DarkModeToggle } from "@/components/dark-mode-toggle";
 import { Button } from "@/components/ui/button";
@@ -86,7 +86,6 @@ export function Header() {
                 {name && <p className="truncate text-xs text-muted-foreground">{user.email}</p>}
               </div>}
               <DropdownMenuItem asChild><Link href="/profile"><User className="size-4" />{t("nav.profile")}</Link></DropdownMenuItem>
-              {isLoggedIn && <DropdownMenuItem asChild><Link href="/dashboard"><LayoutDashboard className="size-4" />{t("nav.dashboard")}</Link></DropdownMenuItem>}
               {isAdmin && <DropdownMenuItem asChild><Link href="/admin"><Shield className="size-4" />{t("nav.admin")}</Link></DropdownMenuItem>}
               <DropdownMenuSeparator />
               <DropdownMenuItem onSelect={event => {

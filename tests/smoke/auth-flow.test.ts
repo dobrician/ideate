@@ -2,7 +2,7 @@ import { test, expect } from "@playwright/test";
 import { execSync } from "child_process";
 import { readFileSync } from "fs";
 
-const APP_URL = process.env.APP_URL || "https://idea.surmont.co";
+const APP_URL = process.env.APP_URL || "https://ideate.surcod.ro";
 const MAIL_LOG_FILE = process.env.MAIL_LOG_FILE || "/tmp/ideate-logs/mail.log";
 const TEST_EMAIL = process.env.TEST_EMAIL || "smoketest@surcod.ro";
 

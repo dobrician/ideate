@@ -1,7 +1,7 @@
 import { test, expect } from "@playwright/test";
 
 // Use APP_URL from environment or default to staging
-const APP_URL = process.env.APP_URL || "https://idea.surmont.co";
+const APP_URL = process.env.APP_URL || "https://ideate.surcod.ro";
 
 test.describe("Smoke Tests - Core", () => {
   test("homepage loads with HTTP 200 and real HTML content", async ({ page }) => {
@@ -41,6 +41,8 @@ test.describe("Smoke Tests - Core", () => {
 
   test("login page renders correctly", async ({ page }) => {
     await page.goto(`${APP_URL}/auth/login`);
+    const alternatives = page.getByRole("button", { name: "Other ways to sign in", exact: true });
+    if (await alternatives.count()) await alternatives.click();
 
     expect(page.url()).toContain("/auth/login");
     await expect(page.locator('input[type="email"]')).toBeVisible();
@@ -61,7 +63,10 @@ test.describe("Smoke Tests - Core", () => {
     });
 
     await page.goto(APP_URL);
-    await page.waitForLoadState("networkidle");
+    // Service-worker installation can abort a precache request (#72). Global
+    // network idleness is unrelated to whether the page's assets loaded.
+    await expect.poll(() => responses.filter((r) => r.url.includes(".css")).length).toBeGreaterThan(0);
+    await expect.poll(() => responses.filter((r) => r.url.includes(".js")).length).toBeGreaterThan(0);
 
     const cssAssets = responses.filter((r) => r.url.includes(".css"));
     if (cssAssets.length > 0) {
@@ -111,7 +116,9 @@ test.describe("Smoke Tests - Auth & Access Control", () => {
     const response = await page.goto(`${APP_URL}/projects`);
     const currentUrl = page.url();
     if (currentUrl.includes("/auth/login")) {
-      await expect(page.locator('input[type="email"]')).toBeVisible();
+      const sso = page.getByRole("link", { name: "Sign in with SSO", exact: true });
+      if (await sso.count()) await expect(sso).toBeVisible();
+      else await expect(page.locator('input[type="email"]')).toBeVisible();
     } else {
       expect(response?.status()).toBeLessThan(400);
     }
@@ -215,6 +222,8 @@ test.describe("Smoke Tests - i18n Locale", () => {
 
   test("login page renders with locale-aware content", async ({ page }) => {
     await page.goto(`${APP_URL}/auth/login`);
+    const alternatives = page.getByRole("button", { name: "Other ways to sign in", exact: true });
+    if (await alternatives.count()) await alternatives.click();
 
     // Page content should be present (in either language)
     const bodyText = await page.textContent("body");

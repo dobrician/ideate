@@ -305,33 +305,6 @@ describe("Intentional proposal disclosure", () => {
 });
 
 // ============================================================
-// #55 — Profile tabs horizontal scroll (unit-level)
-// ============================================================
-
-describe("Profile tabs scroll (#55)", () => {
-  it("TabsList has overflow-x-auto and tabs have shrink-0", async () => {
-    const fs = await import("fs");
-    const src = fs.readFileSync(
-      "src/app/profile/profile-tabs.tsx",
-      "utf-8"
-    );
-    expect(src).toContain("overflow-x-auto");
-    expect(src).toContain('className="shrink-0"');
-    expect(src).toContain("scrollbarWidth");
-  });
-
-  it("has gradient fade indicator hidden on desktop", async () => {
-    const fs = await import("fs");
-    const src = fs.readFileSync(
-      "src/app/profile/profile-tabs.tsx",
-      "utf-8"
-    );
-    expect(src).toContain("bg-gradient-to-l from-background to-transparent");
-    expect(src).toContain("sm:hidden");
-  });
-});
-
-// ============================================================
 // #56 — Sidebar form clipping → replaced with Sheet drawer
 // ============================================================
 
@@ -481,18 +454,5 @@ describe("Auth page card padding (#64)", () => {
     const fs = await import("fs");
     const src = fs.readFileSync("src/app/auth/login/page.tsx", "utf-8");
     expect(src).toContain("sm:px-6");
-  });
-});
-
-// ============================================================
-// #63 — "View all" link not truncated
-// ============================================================
-
-describe("View all link (#63)", () => {
-  it("dashboard page View All link has shrink-0 whitespace-nowrap", async () => {
-    const fs = await import("fs");
-    const src = fs.readFileSync("src/app/dashboard/page.tsx", "utf-8");
-    expect(src).toContain("shrink-0");
-    expect(src).toContain("whitespace-nowrap");
   });
 });

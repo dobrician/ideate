@@ -63,6 +63,8 @@ test.describe("Visual Regression — Mobile (390px)", () => {
     page,
   }) => {
     await page.goto("/auth/login");
+    const alternatives = page.getByRole("button", { name: "Other ways to sign in", exact: true });
+    if (await alternatives.count()) await alternatives.click();
     const submitBtn = page.getByRole("button", { name: /Sign In with Password/i });
     await expect(submitBtn).toBeVisible();
     const box = await submitBtn.boundingBox();

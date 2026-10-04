@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { db } from "@/db";
-import { projects, proposals, votes, tags, projectTags } from "@/db/schema";
+import { projects, proposals, votes, projectTags } from "@/db/schema";
 import { getCurrentUser } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { Button } from "@/components/ui/button";
@@ -76,7 +76,7 @@ export default async function ProjectsPage({ searchParams }: ProjectsPageProps) 
     }
   })();
 
-  const [allProjects, totalResult, allTags] = await Promise.all([
+  const [allProjects, totalResult] = await Promise.all([
     db
       .select()
       .from(projects)
@@ -85,7 +85,6 @@ export default async function ProjectsPage({ searchParams }: ProjectsPageProps) 
       .limit(PAGE_SIZE)
       .offset(offset),
     db.select({ total: count() }).from(projects).where(where),
-    db.select({ id: tags.id, name: tags.name }).from(tags).orderBy(asc(tags.name)),
   ]);
   const projectIds = allProjects.map(project => project.id);
   const [proposalCounts, voteCounts] = await Promise.all([
@@ -107,9 +106,6 @@ export default async function ProjectsPage({ searchParams }: ProjectsPageProps) 
       <div className="mb-4 flex flex-col gap-3 sm:mb-6 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">{t("projects.title")}</h1>
-          <p className="text-muted-foreground">
-            {t("projects.total", { count: total })}
-          </p>
         </div>
         <Button asChild>
           <Link href="/projects/new">{t("projects.createProject")}</Link>
@@ -117,7 +113,7 @@ export default async function ProjectsPage({ searchParams }: ProjectsPageProps) 
       </div>
 
       <div className="mb-6">
-        <ProjectFilters tags={allTags} />
+        <ProjectFilters />
       </div>
 
       {allProjects.length === 0 && !hasFilters && page === 1 ? (

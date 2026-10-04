@@ -1,7 +1,7 @@
 import { test, expect } from "@playwright/test";
 import { readFileSync, existsSync } from "fs";
 
-const APP_URL = process.env.APP_URL || "https://idea.surmont.co";
+const APP_URL = process.env.APP_URL || "https://ideate.surcod.ro";
 const ORIGIN = new URL(APP_URL).origin;
 const MAIL_LOG_FILE =
   process.env.MAIL_LOG_FILE || "/tmp/ideate-mail.log";
@@ -71,6 +71,8 @@ test.describe("Smoke Tests - Password Auth Flow", () => {
     page,
   }) => {
     await page.goto(`${APP_URL}/auth/login`);
+    const alternatives = page.getByRole("button", { name: "Other ways to sign in", exact: true });
+    if (await alternatives.count()) await alternatives.click();
     await page.waitForLoadState("networkidle");
 
     // Default should be password mode

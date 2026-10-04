@@ -3,6 +3,8 @@ import { test, expect, devices } from "@playwright/test";
 test.describe("Authentication", () => {
   test("login page renders with password form (default)", async ({ page }) => {
     await page.goto("/auth/login");
+    const alternatives = page.getByRole("button", { name: "Other ways to sign in", exact: true });
+    if (await alternatives.count()) await alternatives.click();
     await expect(page.getByText("Sign in to Ideate")).toBeVisible();
     await expect(page.getByLabel("Email")).toBeVisible();
     await expect(page.getByLabel("Password", { exact: true })).toBeVisible();
@@ -13,6 +15,8 @@ test.describe("Authentication", () => {
 
   test("login page can switch to magic link mode", async ({ page }) => {
     await page.goto("/auth/login");
+    const alternatives = page.getByRole("button", { name: "Other ways to sign in", exact: true });
+    if (await alternatives.count()) await alternatives.click();
     await page
       .getByRole("button", { name: /Sign in with Magic Link/i })
       .click();
@@ -23,6 +27,8 @@ test.describe("Authentication", () => {
 
   test("login form validates email on password mode", async ({ page }) => {
     await page.goto("/auth/login");
+    const alternatives = page.getByRole("button", { name: "Other ways to sign in", exact: true });
+    if (await alternatives.count()) await alternatives.click();
     const emailInput = page.getByLabel("Email");
     await emailInput.fill("invalid");
     await page.getByLabel("Password", { exact: true }).fill("SomePass1");
@@ -70,6 +76,8 @@ test.describe("Authentication", () => {
 
   test("login page has link to register", async ({ page }) => {
     await page.goto("/auth/login");
+    const alternatives = page.getByRole("button", { name: "Other ways to sign in", exact: true });
+    if (await alternatives.count()) await alternatives.click();
     const regLink = page.getByRole("link", { name: /Create Account/i });
     await expect(regLink).toBeVisible();
     await expect(regLink).toHaveAttribute("href", "/auth/register");
@@ -77,6 +85,8 @@ test.describe("Authentication", () => {
 
   test("login page has link to forgot password", async ({ page }) => {
     await page.goto("/auth/login");
+    const alternatives = page.getByRole("button", { name: "Other ways to sign in", exact: true });
+    if (await alternatives.count()) await alternatives.click();
     const fpLink = page.getByRole("link", { name: /Forgot/i });
     await expect(fpLink).toBeVisible();
     await expect(fpLink).toHaveAttribute("href", "/auth/forgot-password");
@@ -89,6 +99,8 @@ test.describe("Authentication - Mobile Viewport", () => {
 
   test("login page renders correctly on mobile", async ({ page }) => {
     await page.goto("/auth/login");
+    const alternatives = page.getByRole("button", { name: "Other ways to sign in", exact: true });
+    if (await alternatives.count()) await alternatives.click();
     await expect(page.getByText("Sign in to Ideate")).toBeVisible();
     await expect(page.getByLabel("Email")).toBeVisible();
     await expect(page.getByLabel("Password", { exact: true })).toBeVisible();
@@ -128,6 +140,8 @@ test.describe("Authentication - Mobile Viewport", () => {
 
   test("mobile login can switch to magic link mode", async ({ page }) => {
     await page.goto("/auth/login");
+    const alternatives = page.getByRole("button", { name: "Other ways to sign in", exact: true });
+    if (await alternatives.count()) await alternatives.click();
     await page
       .getByRole("button", { name: /Sign in with Magic Link/i })
       .click();

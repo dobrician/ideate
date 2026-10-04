@@ -3,14 +3,12 @@ import { Inter } from "next/font/google";
 import { ThemeProvider } from "@/components/theme-provider";
 import { AppShell } from "@/components/app-shell";
 import { Toaster } from "@/components/ui/sonner";
-import { PwaInstall } from "@/components/pwa-install";
 import { ServiceWorkerRegistration } from "@/components/sw-register";
 import { OfflineIndicator } from "@/components/offline-indicator";
 import { SkipNav } from "@/components/skip-nav";
 import { AppUpdate } from "@/components/app-update";
 import { getRequestLocale } from "@/lib/i18n-server";
 import { LocaleProvider } from "@/lib/use-locale";
-import { OnboardingCheck } from "@/components/onboarding-check";
 import "./globals.css";
 
 const inter = Inter({ subsets: ["latin", "latin-ext"] });
@@ -75,10 +73,8 @@ export default async function RootLayout({
             <main id="main-content">
               {children}
             </main>
-            <OnboardingCheck />
           </AppShell>
           <Toaster richColors closeButton position="bottom-right" />
-          <PwaInstall />
           <OfflineIndicator />
           <AppUpdate />
           <ServiceWorkerRegistration />

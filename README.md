@@ -2,17 +2,19 @@
 
 A platform for teams to create projects, submit proposals, vote (pro/contra), and discuss through threaded comments. AI-powered summaries help surface consensus.
 
-🌐 **Staging:** [idea.surmont.co](https://idea.surmont.co)
+🌐 **Production:** [ideate.surcod.ro](https://ideate.surcod.ro) · **Isolated test:** [test.ideate.surcod.ro](https://test.ideate.surcod.ro)
+
+The legacy `idea.surmont.co` host permanently redirects to production with path and query preserved. This branch runs only on the test host; production retains the accepted decision-screen release and its database. See [runtime separation and rollback](ops/README.md).
 
 Ideate uses the Convergence symbol with a lowercase wordmark and a floating navigation bar. Projects, search and account stay visible on desktop and mobile; the sun/moon theme control stays visible in the bar and language lives in the account menu. Below 360px only the brand symbol is shown, preserving 44px controls without overflow. The project-return link is in this shared navigation, and the duplicated mobile bottom bar is no longer mounted. Favicons and install icons use the same identity. The Docker dependency stage includes native SQLite compilation tools when prebuilt binaries cannot be downloaded. Background project updates continue without a visible Live Activity or connection-status panel.
 
 ## Decision workflow
 
-The accepted project screen and its interactions are now in **code freeze**. The next phase reviews the remaining user experience; see [the review and freeze boundaries](docs/design/User-Experience-Review.md). Dashboard/account/search simplification is proposed, not yet implemented.
+The accepted project screen and its interactions remain in **code freeze**. This test branch implements the approved [user-experience simplification](docs/design/User-Experience-Review.md): Projects is the single home, `/dashboard` redirects there, and the project list offers current decisions and an archive. Account settings show identity and name, with security and email preferences available on demand. SurCod SSO is the primary login; password/magic-link fallback remains available deliberately. Search has one query and keyboard navigation without retrieval-mode controls. Intrusive onboarding and install prompts are no longer mounted; existing offline/update infrastructure is retained.
 
 Signed-in users start with projects. Each project card shows its AI summary, proposal count, votes and deadline. Inside a project, the decision summary and participation totals come first, followed by compact idea titles and pro/contra votes. Proportional green/red chart fills form each idea card background, clipped to its rounded corners; the chart keeps the compact header height during previews and expansion, with a smooth 16px gradient into the detail body. The first idea previews its vertically centered AI summary; mouse movement or keyboard focus transfers the preview to another idea, and leaving the list retains it. A hand cursor and delayed elastic 4px peek suggest details without arrows or list reflow; open it for the original description and categories. The author appears below the top-right controls when expanded. Discussion and attachments open independently from the card controls. The new-idea drawer keeps its submission footer visible while fields scroll, with a roomier context editor, quiet vote choices and optional categories. The approved forest/sage and clay palette uses shared semantic colors for Pro/Contra chart fills, selected votes, proposal creation and duplicate review, calibrated separately for light and dark. Primary actions use the matching theme foreground; own chat messages use quiet sage surfaces with contrasting text; received messages have a distinct neutral background and border. Inline Markdown inherits the bubble text color in both themes. Inactive or expired projects use reduced contrast and show vote totals without contribution controls; existing project discussion remains readable.
 
-Expanded project context replaces the AI summary, with participation and its disclosure in one footer; creation and update dates are omitted. The project uses a solid background to distinguish it from transparent idea cards. The proposal toolbar is removed: sorting, filters, export, editing and AI tools are in the project actions menu, and the compact + button opens proposal creation. The account menu provides access to the personal dashboard and administration; global search opens from the search icon or Ctrl/Cmd+K. Project creation starts with a title, context and deadline, with templates, status and categories under **More options**. Shared links use the same compact decision view.
+Expanded project context replaces the AI summary, with participation and its disclosure in one footer; creation and update dates are omitted. The project uses a solid background to distinguish it from transparent idea cards. The proposal toolbar is removed: sorting, filters, export, editing and AI tools are in the project actions menu, and the compact + button opens proposal creation. The account menu provides account preferences and role-restricted administration; global search opens from the search icon or Ctrl/Cmd+K. Project creation asks only for the decision, context and deadline; it creates an active project. Existing categories, status actions and backend tools remain available to their existing consumers. Shared links use the same compact decision view.
 
 ## Tech Stack
 
@@ -96,7 +98,7 @@ Key ones:
 - `JWT_SECRET` — Generate with `openssl rand -base64 32`
 - `SMTP_*` — Email provider for magic links
 - `GEMINI_API_KEY` / `OPENAI_API_KEY` — AI summarization
-- `APP_URL` — Public URL (e.g., `https://idea.surmont.co`)
+- `APP_URL` — Public URL (e.g., `https://ideate.surcod.ro`)
 
 ### SurCod SSO and shared projects
 

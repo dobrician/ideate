@@ -96,7 +96,7 @@ export async function loginAsTestUser(
       }
 
       // Navigate to trigger cookie setting in the browser context
-      await page.goto("/dashboard");
+      await page.goto("/projects");
       await page.waitForLoadState("domcontentloaded");
       return;
     } catch (err) {

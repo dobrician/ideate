@@ -115,7 +115,7 @@ describe("Header", () => {
   });
 
   describe("admin link", () => {
-    it("should keep dashboard and admin accessible through the account menu", async () => {
+    it("should keep admin accessible without a redundant dashboard entry", async () => {
       mockFetchResponse({ role: "admin" });
       await renderHeader();
       await waitFor(() => expect(global.fetch).toHaveBeenCalled());
@@ -123,7 +123,7 @@ describe("Header", () => {
       expect(mainNav.querySelector('a[href="/admin"]')).toBeNull();
       await userEvent.click(screen.getByTitle("Profile"));
       expect(await screen.findByRole("menuitem", { name: "Admin" })).toBeVisible();
-      expect(screen.getByRole("menuitem", { name: "Dashboard" })).toBeVisible();
+      expect(screen.queryByRole("menuitem", { name: "Dashboard" })).not.toBeInTheDocument();
     });
 
     it("does NOT show admin link for regular users", async () => {
