@@ -1,5 +1,9 @@
 # Ideate — canonical handover
 
+## Next phase: user experience simplification and project code freeze
+
+DC explicitly freezes the accepted project management screen and all interactions. Protect `/projects/[id]`, its edit route and `/p/[token]`, including proposal creation, AI duplicate review, voting, discussion, attachments, lifecycle, theme and mobile behavior. Shared navigation/CSS/auth/action/data changes must not alter these flows indirectly; reopen affected frozen scope only on DC's explicit instruction. The source review and proposed next-phase sequence are in `docs/design/User-Experience-Review.md` (#71, with #74 for SSO). Recommendations consolidate Projects as the sole home, retire redundant Dashboard/profile content lists, simplify account and SSO entry, then search and global prompts. They are not implemented. Review-only work does not change application source, deploy, alter access policies or touch demo data.
+
 ## Current owner and runtime
 
 The existing Ideate agent owns this project; SurCod coordinates capture read-only. Continue on `sprint/2026-10-03-decision-focused-project`, draft PR [#73](https://github.com/dobrician/ideate/pull/73). Public runtime: `https://idea.surmont.co`; deployed application commit `878075b`, image `bda634076936`, healthy. Previous image `dc53ece7a0d8` remains available for rollback. Local development is on port 4101. Do not modify existing database files/backups in the worktree or run the global seed for a demo reset.

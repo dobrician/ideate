@@ -4,6 +4,8 @@
 
 ### Documentation
 
+- Freeze the accepted project screen and its interactions; document a source review and phased simplification proposal for the remaining user experience, with shared-dependency boundaries and acceptance criteria (#71). No application changes or deployment.
+
 - Add the canonical handover for the isolated English family-holiday demo, including verified real AI duplicate detection, actor voting/reset evidence and private capture-access locations. No application code or deployment changes.
 
 ### Changed
