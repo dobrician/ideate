@@ -20,20 +20,25 @@ interface ProfileFormProps {
  */
 export function ProfileForm({ firstName, lastName }: ProfileFormProps) {
   const { t } = useLocale();
+  const [givenName, setGivenName] = useState(firstName);
+  const [familyName, setFamilyName] = useState(lastName);
   const [isLoading, setIsLoading] = useState(false);
 
   async function handleSubmit(formData: FormData) {
     setIsLoading(true);
 
-    const result = await updateProfile(formData);
-
-    if (result.success) {
-      toast.success(t("profile.updated"));
-    } else {
-      toast.error(t(result.error || "profile.updateFailed"));
+    try {
+      const result = await updateProfile(formData);
+      if (result.success) {
+        toast.success(t("profile.updated"));
+      } else {
+        toast.error(t(result.error || "profile.updateFailed"));
+      }
+    } catch {
+      toast.error(t("profile.updateFailed"));
+    } finally {
+      setIsLoading(false);
     }
-
-    setIsLoading(false);
   }
 
   return (
@@ -50,7 +55,8 @@ export function ProfileForm({ firstName, lastName }: ProfileFormProps) {
               <Input
                 id="firstName"
                 name="firstName"
-                defaultValue={firstName}
+                value={givenName}
+                onChange={event => setGivenName(event.target.value)}
                 placeholder={t("profile.firstName")}
                 maxLength={100}
                 disabled={isLoading}
@@ -61,7 +67,8 @@ export function ProfileForm({ firstName, lastName }: ProfileFormProps) {
               <Input
                 id="lastName"
                 name="lastName"
-                defaultValue={lastName}
+                value={familyName}
+                onChange={event => setFamilyName(event.target.value)}
                 placeholder={t("profile.lastName")}
                 maxLength={100}
                 disabled={isLoading}

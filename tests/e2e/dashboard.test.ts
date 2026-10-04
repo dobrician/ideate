@@ -1,97 +1,31 @@
-import { test, expect, devices } from "@playwright/test";
-import { seedTestData, loginAsTestUser, type SeedData } from "./helpers";
+import { test, expect } from "@playwright/test";
+import { seedTestData, loginAsTestUser } from "./helpers";
 
-test.beforeEach(async ({ page }) => {
-  await page.route("**/api/auth/oidc?**", route => route.fulfill({ body: "SSO entry captured" }));
-});
-
-let seed: SeedData;
-
-test.describe("Dashboard — Authenticated", () => {
-  test.beforeEach(async ({ page }) => {
-    seed = await seedTestData(page.request);
+test.describe("Single Projects home", () => {
+  test("old dashboard links redirect to useful projects on desktop and mobile", async ({ page }) => {
+    const seed = await seedTestData(page.request);
     await loginAsTestUser(page, seed);
     await page.goto("/dashboard");
-  });
-
-  test("dashboard loads with stat cards and content sections", async ({ page }) => {
-    await expect(page.getByRole("heading", { name: /Dashboard/i })).toBeVisible();
-    const statsRegion = page.getByRole("region", { name: /Your statistics/i }).first();
-    await expect(statsRegion).toBeVisible();
-    // Scope to visible desktop card titles (mobile pills use sm:hidden)
-    await expect(statsRegion.getByText(/My Projects/i).first()).toBeVisible();
-    await expect(statsRegion.getByText(/My Proposals/i).first()).toBeVisible();
-    await expect(page.getByText(/Recent Votes/i).first()).toBeVisible();
-    await expect(page.getByText(/Recent Activity/i).first()).toBeVisible();
-  });
-
-  test("quick actions buttons present and navigable", async ({ page }) => {
-    const newProject = page.getByRole("link", { name: /New Project/i });
-    await expect(newProject).toBeVisible();
-    await expect(newProject).toHaveAttribute("href", "/projects/new");
-
-    const browse = page.getByRole("link", { name: /Browse Projects/i });
-    await expect(browse).toBeVisible();
-    await expect(browse).toHaveAttribute("href", "/projects");
-  });
-
-  test("user projects section shows seeded project with deadline badge", async ({ page }) => {
-    // The seeded project has a 30-day deadline so it should show a green badge
-    const projectsCard = page.locator("text=My Projects").locator("..").locator("..").locator("..");
-    await expect(projectsCard.getByText(/E2E Test Project/i).first()).toBeVisible();
-    // Deadline badge should be present (30d left = green)
-    await expect(projectsCard.getByText(/d left/i).first()).toBeVisible();
-  });
-
-  test("recent votes section shows seeded vote", async ({ page }) => {
-    await expect(page.getByText(/Initial Test Proposal/i).first()).toBeVisible();
-  });
-
-  test("new project quick action navigates correctly", async ({ page }) => {
-    await page.getByRole("link", { name: /New Project/i }).click();
-    await expect(page).toHaveURL(/\/projects\/new/);
-  });
-
-  test("browse projects quick action navigates correctly", async ({ page }) => {
-    await page.getByRole("link", { name: /Browse Projects/i }).click();
     await expect(page).toHaveURL(/\/projects$/);
+    await expect(page.getByRole("heading", { name: "Projects", exact: true })).toBeVisible();
+    await expect(page.getByText("E2E Test Project").first()).toBeVisible();
+    await expect(page.getByRole("region", { name: /Your statistics/i })).toHaveCount(0);
+    await page.getByRole("button", { name: "Profile", exact: true }).click();
+    await expect(page.getByRole("menuitem", { name: /Dashboard/ })).toHaveCount(0);
   });
-});
-
-test.describe("Dashboard — Empty state", () => {
-  test("unauthenticated user is redirected to login", async ({ page }) => {
+  test("unauthenticated bookmarks still lead to login", async ({ page }) => {
+    await page.route("**/api/auth/oidc?**", route => route.fulfill({ body: "SSO entry captured" }));
     await page.goto("/dashboard");
     await expect(page).toHaveURL(/\/api\/auth\/oidc/);
   });
-});
-
-test.describe("Dashboard — Mobile viewport", () => {
-  const { defaultBrowserType: _, ...iPhone13 } = devices["iPhone 13"];
-  test.use({ ...iPhone13 });
-
-  test.beforeAll(async ({ request }) => {
-    seed = await seedTestData(request);
-  });
-
-  test.beforeEach(async ({ page }) => {
+  test("account has no duplicate project or proposal tabs", async ({ page }) => {
+    const seed = await seedTestData(page.request);
     await loginAsTestUser(page, seed);
-    await page.goto("/dashboard");
-  });
-
-  test("compact stat pills visible on mobile", async ({ page }) => {
-    // Mobile pills should be visible (sm:hidden means visible on mobile)
-    const statsRegion = page.getByRole("region", { name: /Your statistics/i }).first();
-    await expect(statsRegion).toBeVisible();
-    // Should show My Projects, My Proposals etc as pill text
-    await expect(statsRegion.getByText(/My Projects/i)).toBeVisible();
-    await expect(statsRegion.getByText(/My Votes/i)).toBeVisible();
-  });
-
-  test("mobile search button is accessible", async ({ page }) => {
-    const searchBtn = page.getByRole("button", { name: /Search/i });
-    await expect(searchBtn).toBeVisible();
-    await searchBtn.click();
-    // After clicking, the search bar overlay should appear
-    await expect(page.getByPlaceholder(/Search/i).last()).toBeVisible();
+    await page.goto("/profile");
+    await expect(page.getByRole("heading", { name: "Account", exact: true })).toBeVisible();
+    await expect(page.getByRole("tab")).toHaveCount(0);
+    await expect(page.getByLabel(/First Name/)).toBeVisible();
+    await page.locator("details > summary").filter({ hasText: "Email Notifications" }).click();
+    await expect(page.getByRole("checkbox").first()).toBeVisible();
   });
 });

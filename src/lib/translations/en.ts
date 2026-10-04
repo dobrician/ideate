@@ -1,4 +1,9 @@
 export const en: Record<string, string> = {
+  "projects.archive": "Archive",
+  "projects.current": "Current decisions",
+  'auth.otherSignInMethods': 'Other ways to sign in',
+  'auth.ssoSimpleDescription': 'Sign in once to vote and join the discussion.',
+  'profile.ssoIdentity': 'Your sign-in identity is managed by SurCod SSO.',
   // Navigation
   "nav.home": "Home",
   "nav.projects": "Projects",
@@ -110,7 +115,7 @@ export const en: Record<string, string> = {
     "Set up a new idea prioritization project for your team",
   "projectForm.editTitle": "Edit Project",
   "projectForm.editDesc": "Update your project details",
-  "projectForm.title": "Project Title",
+  "projectForm.title": "What do we want to decide?",
   "projectForm.titleRequired": "Project Title *",
   "projectForm.titleHint": "A clear, descriptive title for your project",
   "projectForm.description": "Description",
@@ -130,7 +135,7 @@ export const en: Record<string, string> = {
   "projectForm.loading": "Loading project...",
   "projectForm.goBack": "Go Back",
   "projectForm.projectUpdated": "Project updated!",
-  "projectForm.titlePlaceholder": "Q1 2026 Product Roadmap",
+  "projectForm.titlePlaceholder": "How should we improve customer onboarding?",
   "projectForm.loadError": "Failed to load project",
   "projectForm.titleMinLength": "Title must be at least 3 characters",
   "projectForm.titleRequiredError": "Project title is required",
@@ -250,7 +255,6 @@ export const en: Record<string, string> = {
 
   // Profile
   "profile.title": "Profile",
-  "profile.ssoIdentity": "Your identity and sign-in methods are managed by SurCod SSO.",
   "profile.account": "Account",
   "profile.email": "Email",
   "profile.role": "Role",

@@ -9,12 +9,14 @@ import { useLocale } from "@/lib/use-locale";
 interface PaginationProps {
   currentPage: number;
   totalPages: number;
+  /** Opt into a smaller page window on the Projects list only. */
+  compactOnMobile?: boolean;
 }
 
 /**
  * Pagination controls with page numbers and prev/next buttons
  */
-export function Pagination({ currentPage, totalPages }: PaginationProps) {
+export function Pagination({ currentPage, totalPages, compactOnMobile = false }: PaginationProps) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const { t } = useLocale();
@@ -61,7 +63,7 @@ export function Pagination({ currentPage, totalPages }: PaginationProps) {
           key={page}
           variant={page === currentPage ? "default" : "outline"}
           size="icon"
-          className="h-8 w-8 min-h-[44px] min-w-[44px]"
+          className={`h-8 w-8 min-h-[44px] min-w-[44px] ${compactOnMobile && Math.abs(page - currentPage) > 1 ? "hidden sm:inline-flex" : ""}`}
           asChild={page !== currentPage}
           aria-label={t("pagination.ariaPage", { page })}
           aria-current={page === currentPage ? "page" : undefined}

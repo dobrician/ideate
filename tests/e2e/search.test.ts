@@ -11,12 +11,12 @@ test.describe("Search — Authenticated", () => {
   });
 
   test("search bar is visible on dashboard", async ({ page }) => {
-    const searchInput = page.locator('input[type="search"]');
+    const searchInput = page.getByRole("combobox");
     await expect(searchInput).toBeVisible();
   });
 
   test("search input has aria-keyshortcuts attribute", async ({ page }) => {
-    const searchInput = page.locator('input[type="search"]');
+    const searchInput = page.getByRole("combobox");
     await expect(searchInput).toHaveAttribute(
       "aria-keyshortcuts",
       "Control+K Meta+K"
@@ -24,9 +24,9 @@ test.describe("Search — Authenticated", () => {
   });
 
   test("Ctrl+K focuses the search input", async ({ page }) => {
-    await page.getByRole("heading", { name: /Dashboard/i }).click();
+    await page.getByRole("heading", { name: /Projects/i }).click();
     await page.keyboard.press("Control+k");
-    const searchInput = page.locator('input[type="search"]');
+    const searchInput = page.getByRole("combobox");
     await expect(searchInput).toBeFocused();
   });
 
@@ -34,39 +34,26 @@ test.describe("Search — Authenticated", () => {
     const combobox = page.locator('[role="combobox"]');
     await expect(combobox).toBeVisible();
     await expect(combobox).toHaveAttribute("aria-haspopup", "listbox");
-    await expect(combobox).toHaveAttribute("aria-controls", "search-results-listbox");
+    await expect(combobox).toHaveAttribute("aria-autocomplete", "list");
+    await expect(combobox).toHaveAttribute("aria-expanded", "false");
   });
 
-  test("mode toggle shows Keyword, Semantic, Smart buttons", async ({ page }) => {
-    const radiogroup = page.locator('[role="radiogroup"]');
-    await expect(radiogroup).toBeVisible();
-    await expect(page.getByRole("radio", { name: /^Keyword/i })).toBeVisible();
-    await expect(page.getByRole("radio", { name: /^Semantic/i })).toBeVisible();
-    await expect(page.getByRole("radio", { name: /^Smart/i })).toBeVisible();
-  });
-
-  test("mode toggle buttons have title tooltips", async ({ page }) => {
-    const keyword = page.getByRole("radio", { name: /^Keyword/i });
-    await expect(keyword).toHaveAttribute("title");
-    const semantic = page.getByRole("radio", { name: /^Semantic/i });
-    await expect(semantic).toHaveAttribute("title");
-  });
-
-  test("filter button is visible and toggleable", async ({ page }) => {
-    const filterBtn = page.locator('button[aria-pressed]').first();
-    await expect(filterBtn).toBeVisible();
-    await filterBtn.click();
-    // After click, filter panel should appear with entity type buttons
-    await expect(page.locator('[role="group"]')).toBeVisible();
+  test("search exposes one query without technical mode or entity selectors", async ({ page }) => {
+    await expect(page.getByRole("radiogroup")).toHaveCount(0);
+    await expect(page.locator('button[aria-pressed]')).toHaveCount(0);
+    const request = page.waitForRequest(r => r.url().includes("/api/search?"));
+    await page.getByRole("combobox").fill("Test");
+    expect(new URL((await request).url()).searchParams.get("mode")).toBe("fts");
+    await expect(page.getByRole("option").first()).toBeVisible();
   });
 
   test("search input shows no-results message for gibberish query", async ({ page }) => {
-    const searchInput = page.locator('input[type="search"]');
+    const searchInput = page.getByRole("combobox");
     await searchInput.fill("xyznonexistent999zzz");
     // Wait for debounced search
     await page.waitForTimeout(500);
     // Either listbox appears with no-results, or status message
-    const listbox = page.locator('#search-results-listbox');
+    const listbox = page.getByText("No results found", { exact: true });
     await expect(listbox).toBeVisible({ timeout: 5000 });
   });
 });

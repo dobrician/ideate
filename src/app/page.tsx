@@ -12,7 +12,7 @@ const jsonLd = {
     "Enterprise-grade democratic idea prioritization platform for teams",
   applicationCategory: "BusinessApplication",
   operatingSystem: "Any",
-  url: "https://idea.surmont.co",
+  url: process.env.APP_URL || "https://ideate.surcod.ro",
 };
 
 /** Introduce the three-step decision workflow and send members to projects. */

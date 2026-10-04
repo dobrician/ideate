@@ -132,7 +132,8 @@ test("should transfer the preview intentionally and retain it outside the list",
   else await second.locator('[data-slot="accordion-trigger"]').hover();
   await expect(second).toHaveAttribute("data-preview-active", "true");
   await expect.poll(async () => (await chart.boundingBox())!.height).toBe(compactHeight);
-  await expect.poll(() => chart.evaluate(el => getComputedStyle(el).maskImage)).toContain("linear-gradient");
+  if (isMobile) await expect(chart).toHaveCSS("mask-image", "none");
+  else await expect.poll(() => chart.evaluate(el => getComputedStyle(el).maskImage)).toContain("linear-gradient");
   await expect(ideas.first()).toHaveAttribute("data-preview-active", "false");
   if (isMobile) await page.getByRole("button", { name: "More actions", exact: true }).focus();
   else await page.getByRole("heading", { level: 1 }).hover();

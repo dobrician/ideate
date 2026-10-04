@@ -17,6 +17,7 @@ interface NotificationSettingsProps {
   };
 }
 
+/** Save optional notifications with recoverable request errors. */
 export function NotificationSettings({ prefs }: NotificationSettingsProps) {
   const { t } = useLocale();
   const [emailNewProposal, setEmailNewProposal] = useState(prefs.emailNewProposal);
@@ -27,16 +28,17 @@ export function NotificationSettings({ prefs }: NotificationSettingsProps) {
 
   async function handleSave() {
     setLoading(true);
-    const result = await updateNotificationPreferences(
-      { emailNewProposal, emailVoteOnMine, emailCommentReply, emailWeeklyDigest },
-      getCsrfTokenClient()
-    );
-    setLoading(false);
-
-    if (result.error) {
-      toast.error(t(result.error));
-    } else {
-      toast.success(t("notifications.saved"));
+    try {
+      const result = await updateNotificationPreferences(
+        { emailNewProposal, emailVoteOnMine, emailCommentReply, emailWeeklyDigest },
+        getCsrfTokenClient()
+      );
+      if (result.error) toast.error(t(result.error));
+      else toast.success(t("notifications.saved"));
+    } catch {
+      toast.error(t("common.errorOccurred"));
+    } finally {
+      setLoading(false);
     }
   }
 

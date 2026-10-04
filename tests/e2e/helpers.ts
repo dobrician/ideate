@@ -70,7 +70,7 @@ export async function loginAsTestUser(page: Page, seed: SeedData): Promise<void>
   const client = parseInt(seed.userId.slice(0, 4), 16);
   await page.context().setExtraHTTPHeaders({ "x-forwarded-for": `198.18.${client >>> 8}.${client & 255}` });
   await page.context().addCookies(seed.cookies);
-  await page.goto("/dashboard");
+  await page.goto("/projects");
   await page.waitForLoadState("domcontentloaded");
 }
 

@@ -4,7 +4,7 @@ import { projects } from "@/db/schema";
 
 export const dynamic = "force-dynamic";
 
-const APP_URL = process.env.APP_URL || "https://idea.surmont.co";
+const APP_URL = process.env.APP_URL || "https://ideate.surcod.ro";
 
 /**
  * Dynamic sitemap listing all public pages and projects
@@ -33,12 +33,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       lastModified: new Date(),
       changeFrequency: "daily",
       priority: 0.9,
-    },
-    {
-      url: `${APP_URL}/dashboard`,
-      lastModified: new Date(),
-      changeFrequency: "daily",
-      priority: 0.6,
     },
     ...projectEntries,
   ];
