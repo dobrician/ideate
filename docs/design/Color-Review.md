@@ -39,3 +39,5 @@ Schimbarea manuală din meniul contului funcționează în producție, inclusiv 
 ## Verificarea implementării
 
 Perechile semantice sunt definite în `src/app/decision-palette.css`; acțiunile și suprafețele neutre rămân în `globals.css`. Testul de browser măsoară culorile efective pentru Pro/Contra selectat și drawer în ambele teme, cu prag de 4,5:1, și păstrează verificarea înălțimii chartului la expandare. Hoverul dark al butonului generic este suprascris explicit pentru a nu transforma umplerea votului în gri semitransparent. Verificarea chatului păstrează testele existente pentru text Markdown și separarea mesajelor primite. Rezultatele regresiei și ale publicării sunt în Sprint Log.
+
+Publicat și verificat pe `https://idea.surmont.co`, commit `878075b`, imagine `bda634076936`. Valorile reale din browser coincid cu paleta: acțiuni 6,03:1 / 7,17:1; Pro 5,32 / 7,46; Contra 4,63 / 6,72; chat propriu 10,38 / 9,46. Comutarea manuală și persistența temei sunt verificate la 320px. Toate cele 32 smoke checks au trecut cu calea de mail-log a serviciului; detaliile și reverificările sunt în Sprint Log.
