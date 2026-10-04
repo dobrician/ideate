@@ -18,8 +18,6 @@ Expanded project context replaces the AI summary, with participation and its dis
 
 On mobile, proposal titles and controls share one compact row with 44px touch targets. Descriptions open by tapping the title; the persistent summary preview remains on desktop. This responsive adjustment is reviewed on the isolated test host (#89).
 
-On mobile, proposal titles and controls share one compact row with 44px touch targets. Descriptions open by tapping the title; the persistent summary preview remains on desktop. This responsive adjustment is reviewed on the isolated test host (#89).
-
 ## Tech Stack
 
 - **Framework:** Next.js 16 (App Router), TypeScript strict
